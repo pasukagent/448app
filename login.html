@@ -286,8 +286,9 @@
       'auth/invalid-credential'    : 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       'auth/too-many-requests'     : 'พยายามเข้าสู่ระบบหลายครั้งเกินไป กรุณาลองใหม่ภายหลัง',
       'auth/network-request-failed': 'ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้',
+      'auth/unauthorized-domain'   : 'Domain นี้ยังไม่ได้รับอนุญาต — กรุณาเพิ่ม pasukagent.github.io ใน Firebase → Authentication → Settings → Authorized domains',
     };
-    return map[code] || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+    return map[code] || 'เกิดข้อผิดพลาด (code: ' + code + ') กรุณาลองใหม่อีกครั้ง';
   }
 
   /* ── Register ── */
