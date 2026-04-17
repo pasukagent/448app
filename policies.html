@@ -526,7 +526,7 @@
                 <option value="อื่นๆ">อื่นๆ</option>
               </select>
             </div>
-            <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿) *</label><input id="p-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+            <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿)</label><input id="p-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
             <div class="fg" id="p-life-cov-wrap" style="display:none;">
               <label>❤️ ทุนความคุ้มครองชีวิต (฿)</label>
               <input id="p-life-cov" type="number" placeholder="ทุนชีวิตที่รวมอยู่ในแผนสุขภาพ" min="0">
@@ -716,7 +716,7 @@
       <div class="detail-section">
         <div class="detail-section-title">ผลประโยชน์ด้านภาษี</div>
         <div class="detail-grid">
-          <div class="detail-item"><div class="d-lbl">ลดหย่อนภาษีได้ (ประมาณ)</div><div class="d-val" id="md-taxdeduct">—</div></div>
+          <div class="detail-item"><div class="d-lbl" id="md-taxdeduct-lbl">ลดหย่อนภาษีได้ (ประมาณ)</div><div class="d-val" id="md-taxdeduct">—</div></div>
           <div class="detail-item"><div class="d-lbl">ประหยัดภาษีได้ (อัตรา 20%)</div><div class="d-val" id="md-taxsave">—</div></div>
         </div>
       </div>
@@ -760,7 +760,7 @@
               <option value="อื่นๆ">อื่นๆ</option>
             </select>
           </div>
-          <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿) *</label><input id="ep-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+          <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿)</label><input id="ep-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
           <div class="fg" id="ep-life-cov-wrap" style="display:none;">
             <label>❤️ ทุนความคุ้มครองชีวิต (฿)</label>
             <input id="ep-life-cov" type="number" placeholder="ทุนชีวิตที่รวมอยู่ในแผนสุขภาพ" min="0">
@@ -1134,10 +1134,12 @@ function render() {
   const client = getCurrentClient();
   if (!client) { showList(); return; }
 
-  const policies      = client.policies || [];
-  const totalCoverage = policies.reduce((s,p) => s + (p.coverage||0), 0);
-  const totalPremium  = policies.reduce((s,p) => s + (p.premium||0),  0);
-  const taxDeduct     = Math.min(totalPremium, 100000);
+  const policies         = client.policies || [];
+  const totalCoverage    = policies.reduce((s,p) => s + (p.coverage||0), 0);
+  const totalPremium     = policies.reduce((s,p) => s + (p.premium||0),  0);
+  const annuityPremium   = policies.filter(p => p.type === 'บำนาญ').reduce((s,p) => s + (p.premium||0), 0);
+  const otherPremium     = policies.filter(p => p.type !== 'บำนาญ').reduce((s,p) => s + (p.premium||0), 0);
+  const taxDeduct        = Math.min(otherPremium, 100000) + Math.min(annuityPremium, 200000);
 
   const fullName = client.firstName + (client.lastName ? ' ' + client.lastName : '');
 
@@ -1453,10 +1455,12 @@ function renderGapAnalysis(policies) {
 
 // ─── COST SUMMARY ───
 function renderCostSummary(policies) {
-  const totalPremium = policies.reduce((s,p) => s + (p.premium||0), 0);
-  const taxDeduct    = Math.min(totalPremium, 100000);
-  const monthlyPrem  = totalPremium / 12;
-  const netCost      = totalPremium - taxDeduct * 0.20;
+  const totalPremium   = policies.reduce((s,p) => s + (p.premium||0), 0);
+  const annuityPrem    = policies.filter(p => p.type === 'บำนาญ').reduce((s,p) => s + (p.premium||0), 0);
+  const otherPrem      = policies.filter(p => p.type !== 'บำนาญ').reduce((s,p) => s + (p.premium||0), 0);
+  const taxDeduct      = Math.min(otherPrem, 100000) + Math.min(annuityPrem, 200000);
+  const monthlyPrem    = totalPremium / 12;
+  const netCost        = totalPremium - taxDeduct * 0.20;
 
   document.getElementById('cost-grid').innerHTML = `
     <div class="cost-box">
@@ -1560,7 +1564,6 @@ function saveEditedPolicy() {
   if (!name)       { errEl.textContent = 'กรุณากรอกชื่อกรมธรรม์';    errEl.style.display = 'block'; return; }
   if (!company)    { errEl.textContent = 'กรุณากรอกบริษัทประกัน';     errEl.style.display = 'block'; return; }
   if (!type)       { errEl.textContent = 'กรุณาเลือกประเภทประกัน';    errEl.style.display = 'block'; return; }
-  if (coverage<=0) { errEl.textContent = 'กรุณากรอกวงเงินคุ้มครอง';   errEl.style.display = 'block'; return; }
   if (premium<=0)  { errEl.textContent = 'กรุณากรอกเบี้ยประกันรายปี'; errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
 
@@ -1626,7 +1629,8 @@ function openDetail(i) {
   if (expired)       badges.push(`<span class="detail-badge red">⚠ หมดอายุแล้ว</span>`);
   else if (expiring) badges.push(`<span class="detail-badge yellow">⏰ ใกล้หมดอายุ</span>`);
   else if (endDt)    badges.push(`<span class="detail-badge green">✓ ยังมีผลบังคับ</span>`);
-  if (p.premium <= 100000) badges.push(`<span class="detail-badge gray">✂️ ลดหย่อนภาษีได้</span>`);
+  const taxCap = p.type === 'บำนาญ' ? 200000 : 100000;
+  if (p.premium <= taxCap) badges.push(`<span class="detail-badge gray">✂️ ลดหย่อนภาษีได้</span>`);
   document.getElementById('md-badges').innerHTML = badges.join('');
 
   document.getElementById('md-coverage').textContent = fmt(p.coverage);
@@ -1665,8 +1669,13 @@ function openDetail(i) {
     covSection.style.display = 'none';
   }
 
-  // Tax
-  const deduct = Math.min(p.premium||0, 100000);
+  // Tax — บำนาญ uses 200,000 cap; all others use 100,000
+  const isAnnuity  = p.type === 'บำนาญ';
+  const deductCap  = isAnnuity ? 200000 : 100000;
+  const deduct     = Math.min(p.premium||0, deductCap);
+  document.getElementById('md-taxdeduct-lbl').textContent = isAnnuity
+    ? 'ลดหย่อนบำนาญ (สูงสุด 200,000)'
+    : 'ลดหย่อนภาษีได้ (ประมาณ)';
   document.getElementById('md-taxdeduct').textContent = fmt(deduct);
   document.getElementById('md-taxsave').textContent   = fmt(Math.round(deduct * 0.20)) + ' (ประมาณ)';
 
@@ -1787,7 +1796,6 @@ function addPolicy() {
   if (!name)       { err.textContent='กรุณากรอกชื่อกรมธรรม์';    err.style.display='block'; return; }
   if (!company)    { err.textContent='กรุณากรอกบริษัทประกัน';     err.style.display='block'; return; }
   if (!type)       { err.textContent='กรุณาเลือกประเภทประกัน';    err.style.display='block'; return; }
-  if (coverage<=0) { err.textContent='กรุณากรอกวงเงินคุ้มครอง';   err.style.display='block'; return; }
   if (premium<=0)  { err.textContent='กรุณากรอกเบี้ยประกันรายปี'; err.style.display='block'; return; }
   err.style.display = 'none';
 

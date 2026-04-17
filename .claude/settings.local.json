@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start \"\" \"C:\\\\aia\\\\448app\\\\videoplayback \\(1\\).mp4\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(ffmpeg -i \"C:/aia/448app/videoplayback \\(1\\).mp4\" -vf \"fps=1/5\" -frames:v 3 \"C:/aia/448app/frame_%03d.jpg\" -y)",
+      "Bash(python3 -c ':*)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(python -c \"import cv2; print\\('cv2 ok'\\)\")",
+      "Bash(python -m pip install opencv-python)",
+      "Bash(py --version)",
+      "Read(//c/Users/LENOVO/AppData/Local/Programs/**)",
+      "Bash(ls /c/Python*)",
+      "Read(//c/Users/LENOVO/**)",
+      "Bash(powershell -Command ':*)",
+      "Bash(start \"\" \"C:\\\\aia\\\\448app\\\\videoplayback \\(2\\).mp4\")",
+      "Bash(start \"\" \"C:\\\\aia\\\\448app\\\\videoplayback \\(3\\).mp4\")",
+      "Bash(start \"\" \"C:\\\\aia\\\\448app\\\\videoplayback.1776333609412.publer.com.mp4\")",
+      "WebFetch(domain:videoplayback.1776333609412.publer.com)",
+      "Bash(powershell -command ':*)",
+      "Bash(powershell -command \"python -c \\\\\"import cv2; print\\('opencv ok'\\)\\\\\" 2>&1\")",
+      "Bash(start \"C:\\\\aia\\\\448app\\\\policies.html\")",
+      "Bash(powershell -File -)",
+      "Bash(gh auth *)",
+      "Bash(git --version)",
+      "Bash(git config *)"
+    ]
+  }
+}

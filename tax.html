@@ -327,8 +327,9 @@
     const expense = Math.min(income * 0.5, 100000);
 
     // Cap each deduction at legal max
-    const lifeIns   = Math.min(val('d-life-ins'),   100000);
-    const healthIns = Math.min(val('d-health-ins'),  25000);
+    // เบี้ยประกันชีวิต + เบี้ยประกันสุขภาพ รวมกันต้องไม่เกิน 100,000 บาท
+    const lifeIns   = Math.min(val('d-life-ins'), 100000);
+    const healthIns = Math.min(val('d-health-ins'), 25000, Math.max(100000 - lifeIns, 0));
     const parentIns = Math.min(val('d-parent-ins'),  15000);
     const annuity   = Math.min(val('d-annuity'),    200000);
     const pvd       = Math.min(val('d-pvd'), income * 0.15, 500000);
@@ -367,12 +368,16 @@
       </tr>`;
     }).join('');
 
-    // Tips
-    const remainLife = Math.max(100000 - val('d-life-ins'), 0);
-    const remainHealth = Math.max(25000 - val('d-health-ins'), 0);
+    // Tips — สุขภาพเหลือจาก cap รวม 100,000 หลังหักชีวิตแล้ว
+    const remainLife      = Math.max(100000 - lifeIns, 0);
+    const healthCap       = Math.min(25000, remainLife);          // เพดานสุขภาพที่แท้จริง
+    const remainHealth    = Math.max(healthCap - val('d-health-ins'), 0);
+    const remainAnnuity   = Math.max(200000 - val('d-annuity'), 0);
     const tips = [];
-    if (remainLife > 0)   tips.push(`เบี้ยประกันชีวิตยังลดหย่อนได้อีก ฿${remainLife.toLocaleString('th-TH')}`);
-    if (remainHealth > 0) tips.push(`เบี้ยประกันสุขภาพยังลดหย่อนได้อีก ฿${remainHealth.toLocaleString('th-TH')}`);
+    if (remainLife > 0)    tips.push(`เบี้ยประกันชีวิตยังลดหย่อนได้อีก ฿${remainLife.toLocaleString('th-TH')}`);
+    if (remainHealth > 0)  tips.push(`เบี้ยประกันสุขภาพยังลดหย่อนได้อีก ฿${remainHealth.toLocaleString('th-TH')} (รวมชีวิตไม่เกิน 100,000)`);
+    if (remainAnnuity > 0) tips.push(`ประกันบำนาญยังลดหย่อนได้อีก ฿${remainAnnuity.toLocaleString('th-TH')} (สูงสุด 200,000)`);
+
     const tipBox = document.getElementById('saving-tip');
     if (tips.length > 0 && income > 0) {
       document.getElementById('saving-tip-text').textContent = tips.join(' · ');
@@ -421,15 +426,14 @@
   const user = getCurrentUser();
   document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
   document.getElementById('nav-name').textContent   = user.firstName;
-  // Pre-fill insurance premiums from saved policies
-  const totalLifePremium = (user.data.policies||[])
-    .filter(p => p.type==='ชีวิต' || p.type==='โรคร้ายแรง')
-    .reduce((s,p)=>s+(p.premium||0),0);
-  const totalHealthPremium = (user.data.policies||[])
-    .filter(p => p.type==='สุขภาพ')
-    .reduce((s,p)=>s+(p.premium||0),0);
-  if (totalLifePremium > 0)   document.getElementById('d-life-ins').value   = Math.min(totalLifePremium, 100000);
-  if (totalHealthPremium > 0) document.getElementById('d-health-ins').value = Math.min(totalHealthPremium, 25000);
+  // Pre-fill insurance premiums from saved policies (multi-client structure)
+  const allPolicies = (user.data.clients||[]).flatMap(c => c.policies||[]);
+  const totalLifePremium    = allPolicies.filter(p => p.type==='ชีวิต' || p.type==='โรคร้ายแรง').reduce((s,p)=>s+(p.premium||0),0);
+  const totalHealthPremium  = allPolicies.filter(p => p.type==='สุขภาพ').reduce((s,p)=>s+(p.premium||0),0);
+  const totalAnnuityPremium = allPolicies.filter(p => p.type==='บำนาญ').reduce((s,p)=>s+(p.premium||0),0);
+  if (totalLifePremium > 0)    document.getElementById('d-life-ins').value    = Math.min(totalLifePremium, 100000);
+  if (totalHealthPremium > 0)  document.getElementById('d-health-ins').value  = Math.min(totalHealthPremium, 25000);
+  if (totalAnnuityPremium > 0) document.getElementById('d-annuity').value     = Math.min(totalAnnuityPremium, 200000);
   calculate();
   renderHistory();
 </script>

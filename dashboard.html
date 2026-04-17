@@ -711,9 +711,11 @@ function updateDashboard() {
     subEl.textContent    = '';
   }
 
-  const totalCoverage = policies.reduce((s, p) => s + (Number(p.coverage) || 0), 0);
-  const totalPremium  = policies.reduce((s, p) => s + (Number(p.premium)  || 0), 0);
-  const taxDeduct     = Math.min(totalPremium, 100000);
+  const totalCoverage  = policies.reduce((s, p) => s + (Number(p.coverage) || 0), 0);
+  const totalPremium   = policies.reduce((s, p) => s + (Number(p.premium)  || 0), 0);
+  const annuityPremium = policies.filter(p => p.type === 'บำนาญ').reduce((s,p) => s + (Number(p.premium)||0), 0);
+  const otherPremium   = policies.filter(p => p.type !== 'บำนาญ').reduce((s,p) => s + (Number(p.premium)||0), 0);
+  const taxDeduct      = Math.min(otherPremium, 100000) + Math.min(annuityPremium, 200000);
 
   coverageEl.textContent = '฿ ' + totalCoverage.toLocaleString('th-TH');
   polEl.textContent      = policies.length + ' ฉบับ';
@@ -722,7 +724,7 @@ function updateDashboard() {
 
   /* ── Stats row ── */
   const goalCount  = client ? (client.financialGoals || []).length : 0;
-  const taxSaved   = client ? Math.round(Math.min(totalPremium, 100000) * 0.20) : 0;
+  const taxSaved   = client ? Math.round(taxDeduct * 0.20) : 0;
   const apptCount  = user.data.appointments ? user.data.appointments.length : 0;
   const goodCount  = user.data.goodThings   || 0;
 
