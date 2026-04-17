@@ -1218,11 +1218,16 @@ function renderTable(policies) {
       dateHtml = '<div class="dcell-range" style="color:var(--gray-400);">—</div>';
     }
 
-    const covCols = COVERAGE_TYPES.map(t =>
-      t === p.type
-        ? `<td class="cov-amount">${fmtShort(p.coverage)}</td>`
-        : `<td><span class="cov-none">—</span></td>`
-    ).join('');
+    const covCols = COVERAGE_TYPES.map(t => {
+      if (t === p.type) return `<td class="cov-amount">${fmtShort(p.coverage)}</td>`;
+      // ทุนชีวิตที่รวมอยู่ในประกันสุขภาพ → แสดงในคอลัมน์ชีวิตด้วย
+      if (t === 'ชีวิต' && p.type === 'สุขภาพ' && p.lifeCoverage > 0)
+        return `<td class="cov-amount" title="ทุนชีวิตจากประกันสุขภาพ">
+                  ${fmtShort(p.lifeCoverage)}
+                  <div style="font-size:.65rem;color:var(--gray-400);font-weight:400;">ทุนชีวิต</div>
+                </td>`;
+      return `<td><span class="cov-none">—</span></td>`;
+    }).join('');
 
     return `
       <tr onclick="openDetail(${i})">
@@ -1248,7 +1253,11 @@ function renderTable(policies) {
   const totPremium = policies.reduce((s,p) => s + (p.premium||0), 0);
   const totByType  = {};
   COVERAGE_TYPES.forEach(t => totByType[t] = 0);
-  policies.forEach(p => { if (p.type && totByType[p.type] !== undefined) totByType[p.type] += (p.coverage||0); });
+  policies.forEach(p => {
+    if (p.type && totByType[p.type] !== undefined) totByType[p.type] += (p.coverage||0);
+    // รวมทุนชีวิตจากประกันสุขภาพเข้าคอลัมน์ชีวิต
+    if (p.type === 'สุขภาพ' && p.lifeCoverage > 0) totByType['ชีวิต'] += p.lifeCoverage;
+  });
 
   const totCovCols = COVERAGE_TYPES.map(t =>
     totByType[t] > 0 ? `<td>${fmtShort(totByType[t])}</td>` : `<td style="opacity:.4;">—</td>`
@@ -1271,9 +1280,14 @@ function renderSpiderChart(policies) {
     { type:'อุบัติเหตุ', label:'อุบัติเหตุ', icon:'🚑', recommend:500000   },
   ];
 
-  // Compute coverage by type
+  // Compute coverage by type (รวมทุนชีวิตจากประกันสุขภาพด้วย)
   const byType = {};
-  policies.forEach(p => { const t = p.type||'อื่นๆ'; byType[t] = (byType[t]||0) + (p.coverage||0); });
+  policies.forEach(p => {
+    const t = p.type || 'อื่นๆ';
+    byType[t] = (byType[t] || 0) + (p.coverage || 0);
+    if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
+      byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
+  });
 
   const pctValues = checks.map(c => {
     const have  = byType[c.type] || 0;
@@ -1399,7 +1413,12 @@ function renderGapAnalysis(policies) {
   ];
 
   const byType = {};
-  policies.forEach(p => { const t = p.type || 'อื่นๆ'; byType[t] = (byType[t]||0) + (p.coverage||0); });
+  policies.forEach(p => {
+    const t = p.type || 'อื่นๆ';
+    byType[t] = (byType[t] || 0) + (p.coverage || 0);
+    if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
+      byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
+  });
 
   document.getElementById('gap-list').innerHTML = checks.map(c => {
     const have  = byType[c.type] || 0;
