@@ -515,7 +515,7 @@
             <div class="fg"><label>บริษัทประกัน *</label><input id="p-company" type="text" placeholder="เช่น AIA Thailand"></div>
             <div class="fg">
               <label>ประเภทประกัน *</label>
-              <select id="p-type">
+              <select id="p-type" onchange="toggleHealthFields()">
                 <option value="">— เลือกประเภท —</option>
                 <option value="ชีวิต">ประกันชีวิต</option>
                 <option value="สุขภาพ">ประกันสุขภาพ</option>
@@ -525,7 +525,11 @@
                 <option value="อื่นๆ">อื่นๆ</option>
               </select>
             </div>
-            <div class="fg"><label>วงเงินคุ้มครอง (฿) *</label><input id="p-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+            <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿) *</label><input id="p-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+            <div class="fg" id="p-life-cov-wrap" style="display:none;">
+              <label>❤️ ทุนความคุ้มครองชีวิต (฿)</label>
+              <input id="p-life-cov" type="number" placeholder="ทุนชีวิตที่รวมอยู่ในแผนสุขภาพ" min="0">
+            </div>
             <div class="fg"><label>เบี้ยประกันรายปี (฿) *</label><input id="p-premium" type="number" placeholder="เช่น 20000" min="0"></div>
             <div class="fg"><label>เลขที่กรมธรรม์</label><input id="p-number" type="text" placeholder="ไม่บังคับ"></div>
             <div class="fg"><label>วันที่เริ่มสัญญา</label><input id="p-start" type="date"></div>
@@ -642,7 +646,8 @@
       <div class="detail-section">
         <div class="detail-section-title">ข้อมูลกรมธรรม์</div>
         <div class="detail-grid">
-          <div class="detail-item"><div class="d-lbl">วงเงินความคุ้มครอง</div><div class="d-val big" id="md-coverage">—</div></div>
+          <div class="detail-item"><div class="d-lbl" id="md-coverage-lbl">วงเงินความคุ้มครอง</div><div class="d-val big" id="md-coverage">—</div></div>
+          <div class="detail-item" id="md-life-cov-item" style="display:none;"><div class="d-lbl">❤️ ทุนความคุ้มครองชีวิต</div><div class="d-val big" id="md-life-cov">—</div></div>
           <div class="detail-item"><div class="d-lbl">เบี้ยประกันรายปี</div><div class="d-val big" id="md-premium">—</div></div>
           <div class="detail-item"><div class="d-lbl">เบี้ยเฉลี่ยต่อเดือน</div><div class="d-val" id="md-monthly">—</div></div>
           <div class="detail-item"><div class="d-lbl">เลขที่กรมธรรม์</div><div class="d-val" id="md-number">—</div></div>
@@ -742,7 +747,7 @@
           <div class="fg"><label>บริษัทประกัน *</label><input id="ep-company" type="text" placeholder="เช่น AIA Thailand"></div>
           <div class="fg">
             <label>ประเภทประกัน *</label>
-            <select id="ep-type">
+            <select id="ep-type" onchange="toggleHealthFieldsEdit()">
               <option value="">— เลือกประเภท —</option>
               <option value="ชีวิต">ประกันชีวิต</option>
               <option value="สุขภาพ">ประกันสุขภาพ</option>
@@ -752,7 +757,11 @@
               <option value="อื่นๆ">อื่นๆ</option>
             </select>
           </div>
-          <div class="fg"><label>วงเงินคุ้มครอง (฿) *</label><input id="ep-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+          <div class="fg"><label>วงเงินคุ้มครองสุขภาพ (฿) *</label><input id="ep-coverage" type="number" placeholder="เช่น 1000000" min="0"></div>
+          <div class="fg" id="ep-life-cov-wrap" style="display:none;">
+            <label>❤️ ทุนความคุ้มครองชีวิต (฿)</label>
+            <input id="ep-life-cov" type="number" placeholder="ทุนชีวิตที่รวมอยู่ในแผนสุขภาพ" min="0">
+          </div>
           <div class="fg"><label>เบี้ยประกันรายปี (฿) *</label><input id="ep-premium" type="number" placeholder="เช่น 20000" min="0"></div>
           <div class="fg"><label>เลขที่กรมธรรม์</label><input id="ep-number" type="text" placeholder="ไม่บังคับ"></div>
           <div class="fg"><label>วันที่เริ่มสัญญา</label><input id="ep-start" type="date"></div>
@@ -988,6 +997,17 @@ function fmtDate(d) {
   if (!d) return '';
   return new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
 }
+function toggleHealthFields() {
+  const isHealth = document.getElementById('p-type').value === 'สุขภาพ';
+  document.getElementById('p-life-cov-wrap').style.display = isHealth ? '' : 'none';
+  if (!isHealth) document.getElementById('p-life-cov').value = '';
+}
+function toggleHealthFieldsEdit() {
+  const isHealth = document.getElementById('ep-type').value === 'สุขภาพ';
+  document.getElementById('ep-life-cov-wrap').style.display = isHealth ? '' : 'none';
+  if (!isHealth) document.getElementById('ep-life-cov').value = '';
+}
+
 function doLogout() {
   fbAuth.signOut();
   localStorage.removeItem('aia_currentUser');
@@ -1476,7 +1496,9 @@ function openEditMode() {
   document.getElementById('ep-company').value    = p.company        || '';
   document.getElementById('ep-type').value       = p.type           || '';
   document.getElementById('ep-coverage').value   = p.coverage       || '';
+  document.getElementById('ep-life-cov').value   = p.lifeCoverage   || '';
   document.getElementById('ep-premium').value    = p.premium        || '';
+  toggleHealthFieldsEdit();
   document.getElementById('ep-number').value     = p.number         || '';
   document.getElementById('ep-start').value      = p.start          || '';
   document.getElementById('ep-end').value        = p.end            || '';
@@ -1520,10 +1542,11 @@ function saveEditedPolicy() {
   if (premium<=0)  { errEl.textContent = 'กรุณากรอกเบี้ยประกันรายปี'; errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
 
-  const payYearsMain    = parseInt(document.getElementById('ep-pay-main').value)   || 0;
-  const payYearsRider   = parseInt(document.getElementById('ep-pay-rider').value)  || 0;
-  const plannedPayYears = parseInt(document.getElementById('ep-plan-years').value) || 0;
-  const paidUpCoverage  = parseFloat(document.getElementById('ep-paid-up').value)  || 0;
+  const lifeCoverage    = parseFloat(document.getElementById('ep-life-cov').value)  || 0;
+  const payYearsMain    = parseInt(document.getElementById('ep-pay-main').value)    || 0;
+  const payYearsRider   = parseInt(document.getElementById('ep-pay-rider').value)   || 0;
+  const plannedPayYears = parseInt(document.getElementById('ep-plan-years').value)  || 0;
+  const paidUpCoverage  = parseFloat(document.getElementById('ep-paid-up').value)   || 0;
 
   const cid  = currentClientId;
   const pIdx = currentPolicyIdx;
@@ -1535,6 +1558,7 @@ function saveEditedPolicy() {
     pol.company         = company;
     pol.type            = type;
     pol.coverage        = coverage;
+    pol.lifeCoverage    = lifeCoverage;
     pol.premium         = premium;
     pol.number          = number;
     pol.start           = start;
@@ -1584,6 +1608,14 @@ function openDetail(i) {
   document.getElementById('md-badges').innerHTML = badges.join('');
 
   document.getElementById('md-coverage').textContent = fmt(p.coverage);
+  document.getElementById('md-coverage-lbl').textContent = p.type === 'สุขภาพ' ? 'วงเงินคุ้มครองสุขภาพ' : 'วงเงินความคุ้มครอง';
+  const lifeCovItem = document.getElementById('md-life-cov-item');
+  if (p.type === 'สุขภาพ' && p.lifeCoverage > 0) {
+    lifeCovItem.style.display = '';
+    document.getElementById('md-life-cov').textContent = fmt(p.lifeCoverage) + ' บาท';
+  } else {
+    lifeCovItem.style.display = 'none';
+  }
   document.getElementById('md-premium').textContent  = fmt(p.premium);
   document.getElementById('md-monthly').textContent  = fmt(Math.round((p.premium||0)/12)) + ' / เดือน';
   document.getElementById('md-number').textContent   = p.number || '—';
@@ -1737,17 +1769,18 @@ function addPolicy() {
   if (premium<=0)  { err.textContent='กรุณากรอกเบี้ยประกันรายปี'; err.style.display='block'; return; }
   err.style.display = 'none';
 
-  const payYearsMain    = parseInt(document.getElementById('p-pay-main').value)   || 0;
-  const payYearsRider   = parseInt(document.getElementById('p-pay-rider').value)  || 0;
-  const plannedPayYears = parseInt(document.getElementById('p-plan-years').value) || 0;
-  const paidUpCoverage  = parseFloat(document.getElementById('p-paid-up').value)  || 0;
+  const lifeCoverage    = parseFloat(document.getElementById('p-life-cov').value)  || 0;
+  const payYearsMain    = parseInt(document.getElementById('p-pay-main').value)    || 0;
+  const payYearsRider   = parseInt(document.getElementById('p-pay-rider').value)   || 0;
+  const plannedPayYears = parseInt(document.getElementById('p-plan-years').value)  || 0;
+  const paidUpCoverage  = parseFloat(document.getElementById('p-paid-up').value)   || 0;
 
   const cid = currentClientId;
   updateCurrentUser(u => {
     const client = u.data.clients.find(c => c.id === cid);
     if (!client) return;
     if (!client.policies) client.policies = [];
-    client.policies.push({ name, company, type, coverage, premium, number, start, end,
+    client.policies.push({ name, company, type, coverage, lifeCoverage, premium, number, start, end,
       payYearsMain, payYearsRider, plannedPayYears, paidUpCoverage,
       addedAt: new Date().toISOString() });
     if (u.data.activities) {
@@ -1770,11 +1803,12 @@ function deletePolicy(i) {
 
 function clearPolicyForm() {
   ['p-name','p-company','p-number','p-start','p-end',
-   'p-pay-main','p-pay-rider','p-plan-years','p-paid-up'].forEach(id => document.getElementById(id).value = '');
+   'p-pay-main','p-pay-rider','p-plan-years','p-paid-up','p-life-cov'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-type').value     = '';
   document.getElementById('p-coverage').value = '';
   document.getElementById('p-premium').value  = '';
   document.getElementById('p-error').style.display = 'none';
+  document.getElementById('p-life-cov-wrap').style.display = 'none';
 }
 
 // ─── ENDORSEMENTS ───
