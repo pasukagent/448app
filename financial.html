@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — วางแผนการเงิน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <style>
+    /* ── Page header hero ── */
+    .page-header-bar {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white;
+      padding: 20px 32px 28px;
+    }
+    .page-header-bar h2 { font-size: 1.55rem; margin-bottom: 4px; }
+
+    .breadcrumb-nav {
+      font-size: .82rem;
+      opacity: .7;
+      margin-bottom: 6px;
+    }
+    .breadcrumb-nav a {
+      color: white;
+      text-decoration: none;
+    }
+    .breadcrumb-nav a:hover { opacity: .9; text-decoration: underline; }
+
+    /* ── Hero pills ── */
+    .hero-pills {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .hero-pill {
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 50px;
+      padding: 6px 16px;
+      min-width: 110px;
+    }
+    .hero-pill .lbl { font-size: .72rem; opacity: .8; margin-bottom: 1px; }
+    .hero-pill strong { font-size: .95rem; font-weight: 700; display: block; }
+
+    /* ── Back button ── */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(255,255,255,.55);
+      background: rgba(255,255,255,.15);
+      color: white;
+      font-size: .85rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-back:hover {
+      background: rgba(255,255,255,.28);
+      border-color: rgba(255,255,255,.8);
+    }
+
+    /* ── Content area ── */
+    .content-area {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ── Search bar ── */
+    .search-bar-wrap {
+      background: white;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .search-bar-wrap svg { flex-shrink: 0; color: var(--gray-400); }
+    .search-bar-wrap input {
+      border: none;
+      outline: none;
+      font-size: .95rem;
+      font-family: var(--font);
+      width: 100%;
+      color: var(--gray-800);
+      background: transparent;
+    }
+    .search-bar-wrap input::placeholder { color: var(--gray-400); }
+
+    /* ── Client grid ── */
+    .client-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Client card ── */
+    .client-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      cursor: pointer;
+      transition: box-shadow .2s, transform .2s;
+      border: 1.5px solid transparent;
+    }
+    .client-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+      border-color: var(--red-soft);
+    }
+    .client-card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .client-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .client-card-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .client-card-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 50px;
+      font-size: .74rem;
+      font-weight: 600;
+    }
+    .badge-red { background: var(--red-soft); color: var(--red-primary); }
+    .badge-gray { background: var(--gray-200); color: var(--gray-600); }
+    .client-card-meta {
+      font-size: .8rem;
+      color: var(--gray-600);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 14px;
+    }
+    .client-card-divider { border: none; border-top: 1px solid var(--gray-200); margin-bottom: 14px; }
+    .client-card-stats {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .client-stat .csl { font-size: .72rem; color: var(--gray-400); margin-bottom: 2px; }
+    .client-stat .csv { font-size: .92rem; font-weight: 700; color: var(--gray-800); }
+    .client-stat .csv.red { color: var(--red-primary); }
+
+    /* ── Client info bar (view-main) ── */
+    .client-info-bar {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .cib-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cib-name { font-weight: 700; font-size: 1.05rem; }
+    .cib-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .82rem;
+      color: var(--gray-600);
+      margin-top: 4px;
+    }
+    .cib-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* ── Form card ── */
+    .form-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 28px;
+    }
+    .form-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg label { font-size: .85rem; font-weight: 600; color: var(--gray-800); }
+    .fg input, .fg select {
+      padding: 10px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: .92rem;
+      font-family: var(--font);
+      transition: border-color .2s, box-shadow .2s;
+      background: white;
+    }
+    .fg input:focus, .fg select:focus {
+      outline: none;
+      border-color: var(--red-primary);
+      box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .fg .hint { font-size: .75rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* ── Goals grid & cards ── */
+    /* ── Timeline Chart ── */
+    .timeline-card {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); margin-bottom: 20px; overflow: hidden;
+    }
+    .timeline-card-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .timeline-card-header h3 {
+      font-size: .95rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px; margin: 0;
+    }
+    .timeline-note {
+      font-size: .75rem; color: var(--gray-400);
+    }
+    .timeline-canvas-wrap {
+      padding: 16px 20px 20px; position: relative;
+    }
+    .timeline-no-deadline {
+      text-align: center; padding: 18px; font-size: .85rem;
+      color: var(--gray-400); background: var(--gray-100);
+      border-radius: var(--radius-sm); margin: 0 20px 20px;
+    }
+
+    .goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .goal-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      border-top: 4px solid var(--red-primary);
+      transition: box-shadow .2s;
+      position: relative;
+    }
+    .goal-card:hover { box-shadow: var(--shadow-md); }
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .goal-icon-name { display: flex; align-items: center; gap: 10px; }
+    .goal-ico { font-size: 1.6rem; }
+    .goal-name { font-weight: 700; font-size: 1rem; }
+    .goal-category { font-size: .78rem; color: var(--gray-400); }
+    .goal-del {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--gray-400);
+      transition: color .2s;
+      padding: 4px;
+      line-height: 1;
+    }
+    .goal-del:hover { color: #FF4D4D; }
+    .goal-amounts { margin-bottom: 12px; }
+    .goal-current { font-size: 1.4rem; font-weight: 800; color: var(--red-primary); }
+    .goal-target-lbl { font-size: .85rem; color: var(--gray-600); }
+    .goal-prog-bar {
+      height: 10px;
+      background: var(--gray-200);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .goal-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red-primary), var(--red-light));
+      border-radius: 5px;
+      transition: width .5s;
+    }
+    .goal-prog-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .8rem;
+      color: var(--gray-600);
+    }
+    .goal-prog-pct { font-weight: 700; color: var(--red-primary); }
+    .goal-footer {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-200);
+      font-size: .82rem;
+    }
+    .goal-footer .lbl { color: var(--gray-400); }
+    .goal-footer .val { font-weight: 700; color: var(--gray-800); }
+
+    /* ── Add saving button ── */
+    .add-saving-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--red-primary);
+      background: white;
+      color: var(--red-primary);
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: var(--font);
+      width: 100%;
+      margin-top: 14px;
+    }
+    .add-saving-btn:hover { background: var(--red-primary); color: white; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 360px;
+      max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal h4 { font-size: 1.1rem; margin-bottom: 6px; }
+    .modal-subtitle { color: var(--gray-600); font-size: .9rem; margin-bottom: 18px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+    /* ── Empty states ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray-400);
+      grid-column: 1 / -1;
+    }
+    .empty-state .es-icon { font-size: 3rem; margin-bottom: 14px; }
+    .empty-state h3 { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 8px; }
+    .empty-state p { font-size: .9rem; }
+    .empty-state a { color: var(--red-primary); font-weight: 600; }
+
+    /* ── Goals section header ── */
+    .goals-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .goals-section-header h3 { font-size: 1.05rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .page-header-bar { padding: 16px 18px 22px; }
+      .content-area { padding: 20px 16px 48px; }
+      .form-grid, .goals-grid { grid-template-columns: 1fr; }
+      .hero-pills { gap: 8px; }
+      .hero-pill { padding: 5px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <div class="navbar-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="flg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#D0021B"/>
+              <stop offset="100%" stop-color="#9B0013"/>
+            </linearGradient>
+          </defs>
+          <rect width="32" height="32" rx="8" fill="url(#flg)"/>
+          <text x="16" y="22" text-anchor="middle" font-family="Sarabun,sans-serif" font-weight="800" font-size="14" fill="white">448</text>
+        </svg>
+      </div>
+      <div>
+        <div class="navbar-name">448 Wealth <span>Management Plan</span></div>
+      </div>
+    </div>
+    <div class="navbar-actions">
+      <div id="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);">?</div>
+      <span id="nav-name" style="font-size:.9rem;font-weight:600;"></span>
+      <button onclick="doLogout()" class="btn btn-outline" style="padding:6px 14px;font-size:.82rem;">ออกจากระบบ</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════
+       VIEW 1: CLIENT SELECTION
+  ══════════════════════════════════════════ -->
+  <div id="view-select">
+    <div class="page-header-bar">
+      <div class="breadcrumb-nav">
+        <a href="dashboard.html">หน้าหลัก</a> › วางแผนการเงิน
+      </div>
+      <h2>💰 วางแผนการเงินลูกค้า</h2>
+      <p style="opacity:.8;font-size:.9rem;margin-top:4px;">เลือกลูกค้าเพื่อดูและจัดการแผนการเงิน</p>
+    </div>
+
+    <div class="content-area">
+      <!-- Search bar -->
+      <div class="search-bar-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="client-search" placeholder="ค้นหาชื่อลูกค้า โทรศัพท์ หรืออาชีพ..." oninput="renderClientSelect()">
+      </div>
+
+      <!-- Client cards grid -->
+      <div class="client-grid" id="client-grid"></div>
+
+      <!-- Empty state: no clients at all -->
+      <div class="empty-state" id="client-empty" style="display:none;">
+        <div class="es-icon">👤</div>
+        <h3>ยังไม่มีลูกค้า</h3>
+        <p>กรุณาเพิ่มลูกค้าในฟีเจอร์ <a href="policies.html">สรุปกรมธรรม์</a> ก่อน</p>
+      </div>
+
+      <!-- Empty state: no search results -->
+      <div class="empty-state" id="client-no-result" style="display:none;">
+        <div class="es-icon">🔍</div>
+        <h3>ไม่พบลูกค้า</h3>
+        <p>ลองค้นหาด้วยคำอื่น</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VIEW 2: FINANCIAL PLANNING (per client)
+  ══════════════════════════════════════════ -->
+  <div id="view-main" style="display:none;">
+    <!-- Hero -->
+    <div class="page-header-bar">
+      <div class="breadcrumb-nav">
+        <a href="dashboard.html">หน้าหลัก</a> ›
+        <a href="#" onclick="showClientSelect();return false;">วางแผนการเงิน</a> ›
+        <span id="main-client-name">ลูกค้า</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;margin-bottom:4px;">
+        <button class="btn-back" onclick="showClientSelect()">← รายชื่อลูกค้า</button>
+        <h2 id="main-hero-name" style="font-size:1.4rem;">—</h2>
+      </div>
+      <!-- Summary pills -->
+      <div class="hero-pills">
+        <div class="hero-pill">
+          <div class="lbl">เป้าหมาย</div>
+          <strong id="hs-goals">0</strong>
+        </div>
+        <div class="hero-pill">
+          <div class="lbl">เงินสะสมรวม</div>
+          <strong id="hs-saved">฿ 0</strong>
+        </div>
+        <div class="hero-pill">
+          <div class="lbl">เป้าหมายรวม</div>
+          <strong id="hs-target">฿ 0</strong>
+        </div>
+        <div class="hero-pill">
+          <div class="lbl">ความคืบหน้า</div>
+          <strong id="hs-avg">0%</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- Client info bar -->
+      <div class="client-info-bar">
+        <div class="cib-avatar" id="cib-avatar">?</div>
+        <div>
+          <div class="cib-name" id="cib-name">—</div>
+          <div class="cib-meta" id="cib-meta"></div>
+        </div>
+      </div>
+
+      <!-- Add goal form -->
+      <div class="form-card">
+        <h3>➕ เพิ่มเป้าหมายการเงิน</h3>
+        <div class="form-grid">
+          <div class="fg">
+            <label>ชื่อเป้าหมาย *</label>
+            <input id="g-name" type="text" placeholder="เช่น กองทุนฉุกเฉิน 3 เดือน">
+          </div>
+          <div class="fg">
+            <label>ประเภทเป้าหมาย</label>
+            <select id="g-category">
+              <option value="กองทุนฉุกเฉิน">🏦 กองทุนฉุกเฉิน</option>
+              <option value="เกษียณ">👴 แผนเกษียณ</option>
+              <option value="สุขภาพ">❤️ ค่ารักษาพยาบาล</option>
+              <option value="ท่องเที่ยว">✈️ ท่องเที่ยว</option>
+              <option value="บ้าน">🏠 ซื้อบ้าน</option>
+              <option value="การศึกษา">🎓 การศึกษา</option>
+              <option value="อื่นๆ">📌 อื่นๆ</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>เงินเป้าหมาย (บาท) *</label>
+            <input id="g-target" type="number" placeholder="เช่น 150000" min="1">
+          </div>
+          <div class="fg">
+            <label>เงินที่มีอยู่แล้ว (บาท)</label>
+            <input id="g-current" type="number" placeholder="0" min="0" value="0">
+            <span class="hint">ใส่ 0 ถ้าเพิ่งเริ่มต้น</span>
+          </div>
+          <div class="fg">
+            <label>เงินออมต่อเดือน (บาท)</label>
+            <input id="g-monthly" type="number" placeholder="เช่น 5000" min="0">
+          </div>
+          <div class="fg">
+            <label>วันที่ต้องการบรรลุเป้าหมาย</label>
+            <input id="g-deadline" type="date">
+          </div>
+        </div>
+        <div id="g-error" style="display:none;margin-top:12px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;"></div>
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="addGoal()">💾 บันทึกเป้าหมาย</button>
+          <button class="btn btn-outline" onclick="clearGoalForm()">ล้างข้อมูล</button>
+        </div>
+      </div>
+
+      <!-- Timeline Chart -->
+      <div class="timeline-card" id="timeline-card" style="display:none;">
+        <div class="timeline-card-header">
+          <h3>📅 ช่วงเวลาแผนการเงินทั้งหมด</h3>
+          <span class="timeline-note">เส้นแดง = วันนี้</span>
+        </div>
+        <div class="timeline-canvas-wrap">
+          <canvas id="timeline-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Goals list -->
+      <div class="goals-section-header">
+        <h3>เป้าหมายการเงิน</h3>
+      </div>
+      <div class="goals-grid" id="goals-list"></div>
+    </div>
+  </div>
+
+</div><!-- /.page -->
+
+<!-- ══════════════════════════════════════════
+     ADD SAVING MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="saving-modal">
+  <div class="modal">
+    <h4>💰 เพิ่มเงินออม</h4>
+    <p class="modal-subtitle" id="modal-goal-name"></p>
+    <div class="fg">
+      <label>จำนวนเงิน (บาท) *</label>
+      <input id="modal-amount" type="number" placeholder="ใส่จำนวนเงิน" min="1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="confirmAddSaving()">เพิ่มเงินออม</button>
+      <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   AUTH & DATA HELPERS
+═══════════════════════════════════════════════ */
+const uid = localStorage.getItem('aia_currentUser');
+if (!uid) window.location.href = 'login.html';
+
+function getUsers()   { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
+function saveUsers(u) { localStorage.setItem('aia_users', JSON.stringify(u)); }
+
+function getCurrentUser() {
+  const u = getUsers().find(u => u.id === uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+  return u;
+}
+
+function updateCurrentUser(fn) {
+  const all = getUsers();
+  const i   = all.findIndex(u => u.id === uid);
+  if (i === -1) return;
+  fn(all[i]);
+  saveUsers(all);
+}
+
+/* ═══════════════════════════════════════════════
+   MIGRATION: move user.data.financialGoals → clients[0].financialGoals
+═══════════════════════════════════════════════ */
+function ensureClientGoals(user) {
+  if (!user.data.clients) return;
+  if (
+    user.data.financialGoals &&
+    user.data.financialGoals.length > 0 &&
+    user.data.clients.length > 0
+  ) {
+    const first = user.data.clients[0];
+    if (!first.financialGoals || first.financialGoals.length === 0) {
+      first.financialGoals = user.data.financialGoals;
+    }
+    delete user.data.financialGoals;
+    const all = getUsers();
+    const i   = all.findIndex(u => u.id === uid);
+    if (i !== -1) { all[i] = user; saveUsers(all); }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   TWO-VIEW SPA STATE
+═══════════════════════════════════════════════ */
+let selectedClientId   = null;
+let timelineChartInst  = null;
+
+const GOAL_COLORS = [
+  '#D0021B','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
+];
+let activeGoalIdx    = -1;
+
+function showClientSelect() {
+  selectedClientId = null;
+  // Destroy timeline chart when leaving detail view
+  if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
+  document.getElementById('view-select').style.display = '';
+  document.getElementById('view-main').style.display   = 'none';
+  renderClientSelect();
+}
+
+function showClientMain(cid) {
+  selectedClientId = cid;
+  document.getElementById('view-select').style.display = 'none';
+  document.getElementById('view-main').style.display   = '';
+  renderMain();
+}
+
+/* ═══════════════════════════════════════════════
+   CLIENT HELPERS
+═══════════════════════════════════════════════ */
+function getSelectedClient() {
+  const user = getCurrentUser();
+  return (user.data.clients || []).find(c => c.id === selectedClientId) || null;
+}
+
+function updateSelectedClient(fn) {
+  const cid = selectedClientId;
+  updateCurrentUser(u => {
+    const cl = (u.data.clients || []).find(c => c.id === cid);
+    if (cl) fn(cl);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   FORMAT HELPERS
+═══════════════════════════════════════════════ */
+const catIcons = {
+  'กองทุนฉุกเฉิน': '🏦',
+  'เกษียณ':        '👴',
+  'สุขภาพ':        '❤️',
+  'ท่องเที่ยว':    '✈️',
+  'บ้าน':          '🏠',
+  'การศึกษา':      '🎓',
+  'อื่นๆ':         '📌'
+};
+
+function fmt(n) {
+  return '฿\u00A0' + (n || 0).toLocaleString('th-TH');
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function calculateAge(birthdate) {
+  if (!birthdate) return null;
+  const today = new Date();
+  const birth = new Date(birthdate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+/* ═══════════════════════════════════════════════
+   VIEW 1: RENDER CLIENT SELECTION
+═══════════════════════════════════════════════ */
+function renderClientSelect() {
+  const user    = getCurrentUser();
+  const clients = user.data.clients || [];
+  const query   = (document.getElementById('client-search').value || '').trim().toLowerCase();
+
+  const grid       = document.getElementById('client-grid');
+  const emptyAll   = document.getElementById('client-empty');
+  const emptyQuery = document.getElementById('client-no-result');
+
+  // Hide both empty states first
+  emptyAll.style.display   = 'none';
+  emptyQuery.style.display = 'none';
+
+  if (clients.length === 0) {
+    grid.innerHTML = '';
+    emptyAll.style.display = '';
+    return;
+  }
+
+  const filtered = query
+    ? clients.filter(c =>
+        (c.firstName + ' ' + c.lastName).toLowerCase().includes(query) ||
+        (c.phone       || '').toLowerCase().includes(query) ||
+        (c.occupation  || '').toLowerCase().includes(query)
+      )
+    : clients;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    emptyQuery.style.display = '';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(c => {
+    const goals       = c.financialGoals || [];
+    const totalTarget = goals.reduce((s, g) => s + (g.target || 0), 0);
+    const age         = c.age || calculateAge(c.birthdate);
+    const genderLabel = c.gender === 'male' ? 'ชาย' : c.gender === 'female' ? 'หญิง' : (c.gender || '');
+    const initial     = (c.firstName || '?').charAt(0).toUpperCase();
+
+    return `<div class="client-card" onclick="showClientMain('${c.id}')">
+      <div class="client-card-top">
+        <div class="client-avatar">${initial}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="client-card-name">${c.firstName} ${c.lastName}</div>
+          <div class="client-card-badges">
+            ${age != null ? `<span class="badge badge-gray">อายุ ${age} ปี</span>` : ''}
+            ${genderLabel ? `<span class="badge badge-red">${genderLabel}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="client-card-meta">
+        ${c.phone      ? `<span>📞 ${c.phone}</span>`      : ''}
+        ${c.occupation ? `<span>💼 ${c.occupation}</span>` : ''}
+      </div>
+      <hr class="client-card-divider">
+      <div class="client-card-stats">
+        <div class="client-stat">
+          <div class="csl">เป้าหมายการเงิน</div>
+          <div class="csv red">${goals.length} เป้าหมาย</div>
+        </div>
+        <div class="client-stat">
+          <div class="csl">เป้าหมายรวม</div>
+          <div class="csv">${totalTarget > 0 ? fmt(totalTarget) : '—'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   TIMELINE CHART
+═══════════════════════════════════════════════ */
+function renderTimelineChart(goals) {
+  const card = document.getElementById('timeline-card');
+  const withDL = goals.filter(g => g.deadline && g.createdAt);
+
+  if (withDL.length === 0) {
+    card.style.display = 'none';
+    if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
+    return;
+  }
+  card.style.display = 'block';
+
+  // Destroy old instance
+  if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
+
+  // Build datasets — one bar per goal (floating bar: [start, end])
+  const datasets = withDL.map((g, i) => {
+    const start = new Date(g.createdAt);
+    const end   = new Date(g.deadline);
+    const color = GOAL_COLORS[i % GOAL_COLORS.length];
+    const pct   = Math.min(Math.round(((g.current || 0) / (g.target || 1)) * 100), 100);
+    return {
+      label: g.name,
+      data: [{ x: [start, end], y: g.name }],
+      backgroundColor: color + 'CC',
+      borderColor: color,
+      borderWidth: 2,
+      borderRadius: 5,
+      borderSkipped: false,
+      pct,          // custom for tooltip
+      target: g.target,
+      current: g.current || 0,
+    };
+  });
+
+  // X-axis range with padding
+  const allStarts = withDL.map(g => new Date(g.createdAt).getTime());
+  const allEnds   = withDL.map(g => new Date(g.deadline).getTime());
+  const xMin = new Date(Math.min(...allStarts));
+  const xMax = new Date(Math.max(...allEnds));
+  xMin.setMonth(xMin.getMonth() - 1);
+  xMax.setMonth(xMax.getMonth() + 2);
+
+  // Dynamic canvas height
+  const canvasEl = document.getElementById('timeline-canvas');
+  canvasEl.style.height = Math.max(180, withDL.length * 54 + 70) + 'px';
+
+  // Today-line plugin
+  const todayLinePlugin = {
+    id: 'todayLine',
+    afterDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      const tx = scales.x.getPixelForValue(new Date());
+      if (tx < chartArea.left || tx > chartArea.right) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(tx, chartArea.top);
+      ctx.lineTo(tx, chartArea.bottom);
+      ctx.strokeStyle = '#D0021B';
+      ctx.lineWidth   = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.stroke();
+      ctx.fillStyle = '#D0021B';
+      ctx.font = 'bold 10px Sarabun, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('วันนี้', tx + 4, chartArea.top + 12);
+      ctx.restore();
+    }
+  };
+
+  const ctx = canvasEl.getContext('2d');
+  timelineChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: { datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            font: { family: 'Sarabun', size: 11 },
+            padding: 14,
+            usePointStyle: true,
+            pointStyleWidth: 10,
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: ctx => ctx[0].dataset.label,
+            label: ctx => {
+              const ds  = ctx.dataset;
+              const [s, e] = ctx.raw.x;
+              const fmtD = d => new Date(d).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'numeric' });
+              return [
+                `เริ่ม: ${fmtD(s)}`,
+                `สิ้นสุด: ${fmtD(e)}`,
+                `เป้าหมาย: ฿${(ds.target||0).toLocaleString('th-TH')}`,
+                `ออมแล้ว: ฿${(ds.current||0).toLocaleString('th-TH')} (${ds.pct}%)`,
+              ];
+            }
+          },
+          titleFont: { family: 'Sarabun', size: 12, weight: 'bold' },
+          bodyFont:  { family: 'Sarabun', size: 11 },
+          padding: 12,
+          boxPadding: 4,
+        }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          min: xMin,
+          max: xMax,
+          time: {
+            unit: 'month',
+            displayFormats: { month: 'MMM yy' },
+          },
+          ticks: {
+            font: { family: 'Sarabun', size: 10 },
+            color: '#9E9E9E',
+            maxRotation: 0,
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        y: {
+          ticks: {
+            font: { family: 'Sarabun', size: 11 },
+            color: '#424242',
+          },
+          grid: { display: false },
+        }
+      }
+    },
+    plugins: [todayLinePlugin],
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   VIEW 2: RENDER MAIN (financial planning for a client)
+═══════════════════════════════════════════════ */
+function renderMain() {
+  const client = getSelectedClient();
+  if (!client) { showClientSelect(); return; }
+
+  const goals       = client.financialGoals || [];
+  const totalSaved  = goals.reduce((s, g) => s + (g.current || 0), 0);
+  const totalTarget = goals.reduce((s, g) => s + (g.target  || 0), 0);
+  const avgPct      = goals.length
+    ? Math.round(goals.reduce((s, g) => s + Math.min(((g.current || 0) / (g.target || 1)) * 100, 100), 0) / goals.length)
+    : 0;
+
+  const fullName = `${client.firstName} ${client.lastName}`;
+  const initial  = (client.firstName || '?').charAt(0).toUpperCase();
+  const age      = client.age || calculateAge(client.birthdate);
+
+  // Breadcrumb & hero
+  document.getElementById('main-client-name').textContent = fullName;
+  document.getElementById('main-hero-name').textContent   = fullName;
+
+  // Summary pills
+  document.getElementById('hs-goals').textContent  = goals.length + ' รายการ';
+  document.getElementById('hs-saved').textContent  = fmt(totalSaved);
+  document.getElementById('hs-target').textContent = fmt(totalTarget);
+  document.getElementById('hs-avg').textContent    = avgPct + '%';
+
+  // Client info bar
+  document.getElementById('cib-avatar').textContent = initial;
+  document.getElementById('cib-name').textContent   = fullName;
+
+  const metaParts = [];
+  if (age != null)        metaParts.push(`<span>🎂 อายุ ${age} ปี</span>`);
+  if (client.phone)       metaParts.push(`<span>📞 ${client.phone}</span>`);
+  if (client.occupation)  metaParts.push(`<span>💼 ${client.occupation}</span>`);
+  if (client.income)      metaParts.push(`<span>💵 รายได้ ${Number(client.income).toLocaleString('th-TH')} บาท/เดือน</span>`);
+  document.getElementById('cib-meta').innerHTML = metaParts.join('');
+
+  // Timeline chart
+  renderTimelineChart(goals);
+
+  // Goals grid
+  const list = document.getElementById('goals-list');
+  if (goals.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="es-icon">📊</div>
+      <h3>ยังไม่มีเป้าหมาย</h3>
+      <p>เพิ่มเป้าหมายการเงินด้านบนเพื่อเริ่มต้นวางแผน</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = goals.map((g, i) => {
+    const current   = g.current || 0;
+    const target    = g.target  || 1;
+    const pct       = Math.min(Math.round((current / target) * 100), 100);
+    const remain    = Math.max(target - current, 0);
+    const monthly   = g.monthly || 0;
+    const monthsLeft = monthly > 0 ? Math.ceil(remain / monthly) : null;
+    const icon      = catIcons[g.category] || '📌';
+
+    return `<div class="goal-card">
+      <div class="goal-header">
+        <div class="goal-icon-name">
+          <span class="goal-ico">${icon}</span>
+          <div>
+            <div class="goal-name">${escHtml(g.name)}</div>
+            <div class="goal-category">${escHtml(g.category)}</div>
+          </div>
+        </div>
+        <button class="goal-del" onclick="deleteGoal(${i})" title="ลบเป้าหมาย">✕</button>
+      </div>
+      <div class="goal-amounts">
+        <div class="goal-current">${fmt(current)}</div>
+        <div class="goal-target-lbl">จากเป้า ${fmt(target)}</div>
+      </div>
+      <div class="goal-prog-bar">
+        <div class="goal-prog-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="goal-prog-row">
+        <span>ความคืบหน้า</span>
+        <span class="goal-prog-pct">${pct}%</span>
+      </div>
+      <div class="goal-footer">
+        <div>
+          <div class="lbl">ยังขาดอยู่</div>
+          <div class="val">${fmt(remain)}</div>
+        </div>
+        ${monthsLeft != null ? `<div>
+          <div class="lbl">อีกประมาณ</div>
+          <div class="val">${monthsLeft} เดือน</div>
+        </div>` : ''}
+        ${g.deadline ? `<div>
+          <div class="lbl">เป้าหมาย</div>
+          <div class="val">${fmtDate(g.deadline)}</div>
+        </div>` : ''}
+      </div>
+      <button class="add-saving-btn" onclick="openModal(${i})">+ เพิ่มเงินออม</button>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   ADD / DELETE GOALS
+═══════════════════════════════════════════════ */
+function addGoal() {
+  const name     = document.getElementById('g-name').value.trim();
+  const category = document.getElementById('g-category').value;
+  const target   = parseFloat(document.getElementById('g-target').value)  || 0;
+  const current  = parseFloat(document.getElementById('g-current').value) || 0;
+  const monthly  = parseFloat(document.getElementById('g-monthly').value) || 0;
+  const deadline = document.getElementById('g-deadline').value;
+  const err      = document.getElementById('g-error');
+
+  if (!name) {
+    err.textContent = 'กรุณากรอกชื่อเป้าหมาย';
+    err.style.display = 'block';
+    return;
+  }
+  if (target <= 0) {
+    err.textContent = 'กรุณากรอกเงินเป้าหมายให้มากกว่า 0';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  updateSelectedClient(cl => {
+    if (!cl.financialGoals) cl.financialGoals = [];
+    cl.financialGoals.push({ name, category, target, current, monthly, deadline, createdAt: new Date().toISOString() });
+  });
+
+  // Log activity on user
+  updateCurrentUser(u => {
+    if (!u.data.activities) u.data.activities = [];
+    const client = (u.data.clients || []).find(c => c.id === selectedClientId);
+    const who    = client ? `${client.firstName} ${client.lastName}` : 'ลูกค้า';
+    u.data.activities.unshift({
+      icon:  '📊',
+      title: `เพิ่มเป้าหมาย "${name}" ให้ ${who}`,
+      time:  'วันนี้ เวลา ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+    });
+    if (u.data.activities.length > 50) u.data.activities.length = 50;
+  });
+
+  clearGoalForm();
+  renderMain();
+}
+
+function deleteGoal(i) {
+  if (!confirm('ยืนยันลบเป้าหมายนี้?')) return;
+  updateSelectedClient(cl => {
+    if (cl.financialGoals) cl.financialGoals.splice(i, 1);
+  });
+  renderMain();
+}
+
+/* ═══════════════════════════════════════════════
+   ADD SAVING MODAL
+═══════════════════════════════════════════════ */
+function openModal(i) {
+  activeGoalIdx = i;
+  const client = getSelectedClient();
+  const goals  = client ? (client.financialGoals || []) : [];
+  const g      = goals[i];
+  document.getElementById('modal-goal-name').textContent = g ? `เป้าหมาย: ${g.name}` : '';
+  document.getElementById('modal-amount').value = '';
+  document.getElementById('saving-modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-amount').focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('saving-modal').classList.remove('open');
+  activeGoalIdx = -1;
+}
+
+function confirmAddSaving() {
+  const amount = parseFloat(document.getElementById('modal-amount').value) || 0;
+  if (amount <= 0) { alert('กรุณากรอกจำนวนเงินให้มากกว่า 0'); return; }
+
+  updateSelectedClient(cl => {
+    const g = (cl.financialGoals || [])[activeGoalIdx];
+    if (g) g.current = (g.current || 0) + amount;
+  });
+
+  updateCurrentUser(u => {
+    if (!u.data.activities) u.data.activities = [];
+    const client = (u.data.clients || []).find(c => c.id === selectedClientId);
+    const goals  = client ? (client.financialGoals || []) : [];
+    const g      = goals[activeGoalIdx];
+    const who    = client ? `${client.firstName} ${client.lastName}` : 'ลูกค้า';
+    u.data.activities.unshift({
+      icon:  '💰',
+      title: `ออมเงิน ${fmt(amount)}${g ? ' — ' + g.name : ''} (${who})`,
+      time:  'วันนี้ เวลา ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+    });
+    if (u.data.activities.length > 50) u.data.activities.length = 50;
+  });
+
+  closeModal();
+  renderMain();
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function clearGoalForm() {
+  ['g-name', 'g-target', 'g-monthly', 'g-deadline'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('g-current').value = '0';
+  document.getElementById('g-category').selectedIndex = 0;
+  document.getElementById('g-error').style.display = 'none';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function doLogout() {
+  localStorage.removeItem('aia_currentUser');
+  window.location.href = 'login.html';
+}
+
+// Close modal on backdrop click
+document.getElementById('saving-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+(function init() {
+  const user = getCurrentUser();
+
+  // Update navbar
+  document.getElementById('nav-avatar').textContent = (user.firstName || '?').charAt(0).toUpperCase();
+  document.getElementById('nav-name').textContent   = user.firstName || '';
+
+  // Run migration
+  ensureClientGoals(user);
+
+  // ถ้ามี ?client=CID จาก dashboard ให้ข้ามหน้าเลือกลูกค้าไปเลย
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselect = urlParams.get('client');
+  const clients   = user.data.clients || [];
+
+  if (preselect && clients.find(c => c.id === preselect)) {
+    showClientMain(preselect);
+  } else {
+    showClientSelect();
+  }
+})();
+</script>
+</body>
+</html>

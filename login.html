@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — เข้าสู่ระบบ / สมัครสมาชิก</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow: hidden; }
+
+    .login-page { padding-top: 0; height: 100vh; }
+
+    /* Left panel features */
+    .feature-list { display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 380px; }
+    .feat-item {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,.12); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: var(--radius-sm); padding: 14px 18px;
+    }
+    .feat-ico {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .feat-text .ft { font-weight: 700; font-size: .95rem; }
+    .feat-text .fs { font-size: .8rem; opacity: .75; }
+
+    /* Form panel */
+    .form-panel { display: none; width: 100%; }
+    .form-panel.active { display: block; }
+
+    /* OTP input */
+    .otp-row { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+    .otp-input {
+      width: 48px; height: 56px; border-radius: 10px; border: 2px solid var(--gray-200);
+      text-align: center; font-size: 1.4rem; font-weight: 700; font-family: var(--font);
+      transition: all .2s;
+    }
+    .otp-input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft); }
+
+    /* Social login */
+    .social-btn {
+      width: 100%; padding: 12px; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--gray-200); background: white; cursor: pointer;
+      font-size: .9rem; font-weight: 600; display: flex; align-items: center;
+      justify-content: center; gap: 10px; transition: all .2s; font-family: var(--font);
+      color: var(--gray-700); margin-bottom: 10px;
+    }
+    .social-btn:hover { border-color: var(--red-primary); background: var(--red-soft); }
+
+    /* Password strength */
+    .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
+    .strength-seg { flex: 1; height: 4px; border-radius: 2px; background: var(--gray-200); transition: background .3s; }
+    .strength-seg.weak { background: #FF4D4D; }
+    .strength-seg.medium { background: #FFA500; }
+    .strength-seg.strong { background: #28a745; }
+    .strength-label { font-size: .75rem; margin-top: 4px; }
+
+    /* Terms checkbox */
+    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; color: var(--gray-600); }
+    .checkbox-row input { margin-top: 3px; accent-color: var(--red-primary); }
+    .checkbox-row a { color: var(--red-primary); font-weight: 600; }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--gray-500); font-size: .88rem; margin-bottom: 20px; cursor: pointer;
+    }
+    .back-link:hover { color: var(--red-primary); }
+
+    @media(max-width:900px) {
+      body { overflow: auto; }
+      .login-page { height: auto; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-left">
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:40px;">
+      <div style="width:52px;height:52px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <defs>
+            <linearGradient id="llg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+              <stop stop-color="rgba(255,255,255,.35)"/><stop offset="1" stop-color="rgba(255,255,255,.08)"/>
+            </linearGradient>
+          </defs>
+          <rect width="42" height="42" rx="13" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>
+          <rect x="0" y="0" width="42" height="21" rx="13" fill="url(#llg)"/>
+          <rect x="8"  y="24" width="6" height="11" rx="1.8" fill="white" opacity=".55"/>
+          <rect x="18" y="17" width="6" height="18" rx="1.8" fill="white" opacity=".82"/>
+          <rect x="28" y="10" width="6" height="25" rx="1.8" fill="white"/>
+          <path d="M11 23 L21 16 L31 9" stroke="rgba(255,255,255,.45)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2.5 2"/>
+          <circle cx="31" cy="9" r="2.2" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:1.35rem;font-weight:800;letter-spacing:-.01em;line-height:1.1;">448 Wealth Management Plan</div>
+        <div style="font-size:.8rem;opacity:.65;letter-spacing:.06em;margin-top:2px;text-transform:uppercase;">Wealth Platform</div>
+      </div>
+    </div>
+
+    <h1 style="font-size:2.2rem;margin-bottom:12px;text-align:center;">วางแผนชีวิต<br>ให้ดีกว่าเดิม</h1>
+    <p style="max-width:340px;text-align:center;opacity:.8;margin-bottom:40px;line-height:1.7;">
+      แพลตฟอร์มวางแผนการเงินและประกันภัยครบวงจร<br>เริ่มต้นฟรี ไม่มีค่าใช้จ่ายซ่อนเร้น
+    </p>
+
+    <div class="feature-list">
+      <div class="feat-item">
+        <div class="feat-ico">📊</div>
+        <div class="feat-text">
+          <div class="ft">วางแผนการเงินอัจฉริยะ</div>
+          <div class="fs">วิเคราะห์และสร้างแผนส่วนตัวให้คุณ</div>
+        </div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-ico">🛡️</div>
+        <div class="feat-text">
+          <div class="ft">สรุปกรมธรรม์</div>
+          <div class="fs">วิเคราะห์และสรุปความคุ้มครองทุกฉบับในที่เดียว</div>
+        </div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-ico">🧮</div>
+        <div class="feat-text">
+          <div class="ft">คำนวณภาษีแม่นยำ</div>
+          <div class="fs">หาสิทธิ์ลดหย่อนภาษีที่คุณมีครบทุกประเภท</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;font-size:.82rem;opacity:.6;text-align:center;">
+      🔒 ข้อมูลของคุณปลอดภัย เข้ารหัส SSL 256-bit
+    </div>
+  </div>
+
+  <!-- ─── RIGHT PANEL ─── -->
+  <div class="login-right">
+
+    <!-- LOGIN FORM -->
+    <div class="form-panel active" id="panel-login">
+      <h2>ยินดีต้อนรับกลับ</h2>
+      <p class="sub">เข้าสู่ระบบเพื่อจัดการแผนการเงินของคุณ</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+        <button class="tab-btn" onclick="switchTab('register')">สมัครสมาชิก</button>
+      </div>
+
+      <button class="social-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.2 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2c-7.7 0-14.3 4.5-17.7 11.1z" opacity=".9"/><path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.9 14.4-5l-6.7-5.5C29.6 37 26.9 38 24 38c-5.1 0-9.5-3.1-11.5-7.6l-6.9 5.3C9.5 41.5 16.3 46 24 46z" opacity=".9"/><path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-1 2.7-2.8 5-5.1 6.6l6.7 5.5C40.9 36.9 44.5 30.9 44.5 24c0-1.3-.2-2.7-.5-4z" opacity=".9"/></svg>
+        เข้าสู่ระบบด้วย Google
+      </button>
+
+      <div class="divider">หรือใช้อีเมล</div>
+
+      <div class="form-group">
+        <label>อีเมล</label>
+        <input id="login-email" type="email" placeholder="example@email.com">
+      </div>
+      <div class="form-group">
+        <label>รหัสผ่าน</label>
+        <input id="login-password" type="password" placeholder="••••••••">
+      </div>
+      <div class="form-footer">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" style="accent-color:#D0021B;"> จดจำฉัน
+        </label>
+        <a href="#">ลืมรหัสผ่าน?</a>
+      </div>
+      <div id="login-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <button class="btn btn-primary login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <p style="text-align:center;margin-top:20px;font-size:.88rem;color:var(--gray-600);">
+        ยังไม่มีบัญชี? <a href="#" onclick="switchTab('register')" style="color:var(--red-primary);font-weight:700;">สมัครสมาชิกฟรี</a>
+      </p>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="form-panel" id="panel-register">
+      <h2>สร้างบัญชีใหม่</h2>
+      <p class="sub">สมัครฟรี เริ่มวางแผนชีวิตได้ทันที</p>
+
+      <div class="tabs">
+        <button class="tab-btn" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+        <button class="tab-btn active" onclick="switchTab('register')">สมัครสมาชิก</button>
+      </div>
+
+      <button class="social-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.2 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2c-7.7 0-14.3 4.5-17.7 11.1z" opacity=".9"/><path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.9 14.4-5l-6.7-5.5C29.6 37 26.9 38 24 38c-5.1 0-9.5-3.1-11.5-7.6l-6.9 5.3C9.5 41.5 16.3 46 24 46z" opacity=".9"/><path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-1 2.7-2.8 5-5.1 6.6l6.7 5.5C40.9 36.9 44.5 30.9 44.5 24c0-1.3-.2-2.7-.5-4z" opacity=".9"/></svg>
+        สมัครด้วย Google
+      </button>
+
+      <div class="divider">หรือใช้อีเมล</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="margin-bottom:0">
+          <label>ชื่อ</label>
+          <input id="reg-firstname" type="text" placeholder="ชื่อ">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>นามสกุล</label>
+          <input id="reg-lastname" type="text" placeholder="นามสกุล">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label>อีเมล</label>
+        <input id="reg-email" type="email" placeholder="example@email.com">
+      </div>
+      <div class="form-group">
+        <label>รหัสผ่าน</label>
+        <input id="reg-password" type="password" placeholder="อย่างน้อย 8 ตัวอักษร" oninput="checkStrength(this)">
+        <div class="strength-bar">
+          <div class="strength-seg" id="s1"></div>
+          <div class="strength-seg" id="s2"></div>
+          <div class="strength-seg" id="s3"></div>
+          <div class="strength-seg" id="s4"></div>
+        </div>
+        <div class="strength-label" id="s-label" style="color:var(--gray-400);">กรอกรหัสผ่าน</div>
+      </div>
+      <div class="checkbox-row" style="margin-bottom:18px;">
+        <input type="checkbox" id="terms">
+        <label for="terms">ฉันยอมรับ <a href="#">ข้อตกลงการใช้งาน</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a></label>
+      </div>
+      <div id="reg-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <button class="btn btn-primary login-btn" onclick="doRegister()">สมัครสมาชิกฟรี</button>
+      <p style="text-align:center;margin-top:16px;font-size:.88rem;color:var(--gray-600);">
+        มีบัญชีแล้ว? <a href="#" onclick="switchTab('login')" style="color:var(--red-primary);font-weight:700;">เข้าสู่ระบบ</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ── Helpers ── */
+  function getUsers() { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
+  function saveUsers(u) { localStorage.setItem('aia_users', JSON.stringify(u)); }
+  function setCurrentUser(id) { localStorage.setItem('aia_currentUser', id); }
+  function showError(elId, msg) {
+    const el = document.getElementById(elId);
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function hideError(elId) { document.getElementById(elId).style.display = 'none'; }
+
+  /* ── Register ── */
+  function doRegister() {
+    hideError('reg-error');
+    const firstName = document.getElementById('reg-firstname').value.trim();
+    const lastName  = document.getElementById('reg-lastname').value.trim();
+    const email     = document.getElementById('reg-email').value.trim().toLowerCase();
+    const password  = document.getElementById('reg-password').value;
+    const terms     = document.getElementById('terms').checked;
+
+    if (!firstName) return showError('reg-error', 'กรุณากรอกชื่อ');
+    if (!lastName)  return showError('reg-error', 'กรุณากรอกนามสกุล');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return showError('reg-error', 'กรุณากรอกอีเมลให้ถูกต้อง');
+    if (password.length < 8) return showError('reg-error', 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+    if (!terms) return showError('reg-error', 'กรุณายอมรับข้อตกลงการใช้งาน');
+
+    const users = getUsers();
+    if (users.find(u => u.email === email))
+      return showError('reg-error', 'อีเมลนี้มีบัญชีแล้ว กรุณาเข้าสู่ระบบ');
+
+    const newUser = {
+      id: 'u_' + Date.now(),
+      firstName, lastName, email, password,
+      createdAt: new Date().toISOString(),
+      data: {
+        policies: [],
+        financialPlans: 0,
+        taxSaved: 0,
+        appointments: [],
+        goodThings: 0,
+        activities: []
+      }
+    };
+    users.push(newUser);
+    saveUsers(users);
+    setCurrentUser(newUser.id);
+    window.location.href = 'dashboard.html';
+  }
+
+  /* ── Login ── */
+  function doLogin() {
+    hideError('login-error');
+    const email    = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+
+    if (!email)    return showError('login-error', 'กรุณากรอกอีเมล');
+    if (!password) return showError('login-error', 'กรุณากรอกรหัสผ่าน');
+
+    const users = getUsers();
+    const user  = users.find(u => u.email === email && u.password === password);
+    if (!user) return showError('login-error', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+
+    setCurrentUser(user.id);
+    window.location.href = 'dashboard.html';
+  }
+
+  /* ── Tab switch ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const idx = tab === 'login' ? 0 : 1;
+    document.querySelectorAll('#panel-login .tab-btn, #panel-register .tab-btn')
+      .forEach((b, i) => { if (i % 2 === idx) b.classList.add('active'); });
+  }
+
+  /* ── Password strength ── */
+  function checkStrength(input) {
+    const val = input.value;
+    const segs = [document.getElementById('s1'), document.getElementById('s2'),
+                  document.getElementById('s3'), document.getElementById('s4')];
+    const label = document.getElementById('s-label');
+    segs.forEach(s => { s.className = 'strength-seg'; });
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
+    const labels = { weak: 'รหัสผ่านอ่อนแอ', medium: 'รหัสผ่านปานกลาง', strong: 'รหัสผ่านแข็งแกร่ง' };
+    const colors = { weak: '#FF4D4D', medium: '#FFA500', strong: '#28a745' };
+    for (let i = 0; i < score; i++) segs[i].classList.add(cls);
+    label.textContent = val ? labels[cls] : 'กรอกรหัสผ่าน';
+    label.style.color = val ? colors[cls] : 'var(--gray-400)';
+  }
+
+  /* ── Enter key support ── */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('panel-login').classList.contains('active')) doLogin();
+    else doRegister();
+  });
+
+  /* ── If already logged in, go to dashboard ── */
+  if (localStorage.getItem('aia_currentUser')) window.location.href = 'dashboard.html';
+</script>
+</body>
+</html>

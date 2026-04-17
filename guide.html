@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — คู่มือการใช้งาน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .guide-nav-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .guide-tab {
+      padding: 8px 20px; border-radius: 50px; font-size: .88rem; font-weight: 600;
+      cursor: pointer; border: 2px solid var(--gray-200); background: white;
+      color: var(--gray-600); transition: all .2s;
+    }
+    .guide-tab:hover, .guide-tab.active {
+      border-color: var(--red-primary); background: var(--red-soft); color: var(--red-primary);
+    }
+
+    .video-section { margin-bottom: 36px; }
+    .video-section h3 { font-size: 1.1rem; margin-bottom: 16px; color: var(--gray-800); }
+
+    .video-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
+    .vid-card {
+      background: white; border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow-sm); transition: all .25s; cursor: pointer;
+    }
+    .vid-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .vid-thumb {
+      height: 160px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vid-thumb-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--red-soft) 0%, var(--red-mid) 100%);
+    }
+    .vid-thumb-icon {
+      position: relative; z-index: 1;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--red-primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; box-shadow: var(--shadow-md);
+      transition: transform .25s;
+    }
+    .vid-card:hover .vid-thumb-icon { transform: scale(1.12); }
+    .vid-duration {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(0,0,0,.6); color: white;
+      font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;
+    }
+    .vid-info { padding: 14px 16px; }
+    .vid-num { font-size: .72rem; font-weight: 700; color: var(--red-primary); margin-bottom: 4px; text-transform: uppercase; }
+    .vid-title { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+    .vid-desc { font-size: .82rem; color: var(--gray-600); }
+
+    /* FAQ accordion */
+    .faq-card {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 28px;
+    }
+    .faq-item { border-bottom: 1px solid var(--gray-200); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 22px; cursor: pointer; font-weight: 600; font-size: .95rem;
+      transition: background .2s;
+    }
+    .faq-q:hover { background: var(--red-soft); color: var(--red-primary); }
+    .faq-q.open { background: var(--red-soft); color: var(--red-primary); }
+    .faq-arrow { font-size: 1rem; transition: transform .3s; }
+    .faq-q.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a { display: none; padding: 0 22px 18px; color: var(--gray-600); font-size: .92rem; line-height: 1.7; }
+    .faq-a.open { display: block; }
+
+    /* Steps in guide */
+    .guide-steps { display: flex; flex-direction: column; gap: 16px; }
+    .guide-step {
+      display: flex; gap: 16px; background: white;
+      border-radius: var(--radius-sm); padding: 18px; box-shadow: var(--shadow-sm);
+      align-items: flex-start;
+    }
+    .g-num {
+      min-width: 40px; height: 40px; border-radius: 50%;
+      background: var(--red-primary); color: white; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .g-text h4 { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+    .g-text p { font-size: .88rem; color: var(--gray-600); }
+
+    /* Contact */
+    .contact-card {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; border-radius: var(--radius); padding: 32px; text-align: center;
+    }
+    .contact-card h3 { margin-bottom: 8px; }
+    .contact-card p { opacity: .85; margin-bottom: 24px; }
+    .contact-methods { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .contact-btn {
+      padding: 10px 22px; border-radius: 50px; background: rgba(255,255,255,.2);
+      color: white; border: 1px solid rgba(255,255,255,.4); font-weight: 600;
+      font-size: .9rem; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px;
+    }
+    .contact-btn:hover { background: rgba(255,255,255,.35); }
+
+    @media(max-width:600px) { .video-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <div class="navbar-logo">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="glg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F0021E"/><stop offset="1" stop-color="#7A000F"/>
+            </linearGradient>
+          </defs>
+          <rect width="42" height="42" rx="12" fill="url(#glg)"/>
+          <rect x="0" y="0" width="42" height="21" rx="12" fill="rgba(255,255,255,.07)"/>
+          <rect x="8"  y="24" width="6" height="11" rx="1.8" fill="white" opacity=".55"/>
+          <rect x="18" y="17" width="6" height="18" rx="1.8" fill="white" opacity=".82"/>
+          <rect x="28" y="10" width="6" height="25" rx="1.8" fill="white"/>
+          <path d="M11 23 L21 16 L31 9" stroke="rgba(255,255,255,.38)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2.5 2"/>
+          <circle cx="31" cy="9" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div><div class="navbar-name">448 Wealth <span>Management Plan</span></div></div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="index.html">หน้าหลัก</a></li>
+      <li><a href="dashboard.html">ฟีเจอร์</a></li>
+      <li><a href="guide.html" class="active">คู่มือการใช้งาน</a></li>
+      <li><a href="#">ติดต่อเรา</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-outline" style="padding:9px 22px;font-size:.9rem;">เข้าสู่ระบบ</a>
+      <a href="login.html" class="btn btn-primary" style="padding:9px 22px;font-size:.9rem;">สมัครฟรี</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="guide-layout">
+
+    <!-- Header banner -->
+    <div class="guide-top">
+      <div style="font-size:2.5rem;margin-bottom:12px;">📚</div>
+      <h2>คู่มือการใช้งาน 448 Wealth Management Plan</h2>
+      <p>เรียนรู้วิธีใช้งานแต่ละฟีเจอร์ผ่านวิดีโอและบทความแนะนำ</p>
+    </div>
+
+    <!-- Tab nav -->
+    <div class="guide-nav-tabs">
+      <div class="guide-tab active" onclick="showTab('all', this)">ทั้งหมด</div>
+      <div class="guide-tab" onclick="showTab('start', this)">เริ่มต้นใช้งาน</div>
+      <div class="guide-tab" onclick="showTab('finance', this)">วางแผนการเงิน</div>
+      <div class="guide-tab" onclick="showTab('policy', this)">กรมธรรม์</div>
+      <div class="guide-tab" onclick="showTab('tax', this)">ภาษี</div>
+    </div>
+
+    <!-- Step-by-step -->
+    <div class="video-section">
+      <h3>🚀 เริ่มต้นใช้งาน</h3>
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="g-num">1</div>
+          <div class="g-text">
+            <h4>สมัครสมาชิก</h4>
+            <p>กรอกชื่อ-นามสกุล เบอร์โทรศัพท์ และรหัสผ่าน จากนั้นยืนยัน OTP ทาง SMS</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="g-num">2</div>
+          <div class="g-text">
+            <h4>เข้าสู่หน้า Dashboard</h4>
+            <p>หลังจากล็อกอินสำเร็จ ระบบจะพาคุณมาที่หน้า Dashboard ซึ่งแสดงภาพรวมทั้งหมด</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="g-num">3</div>
+          <div class="g-text">
+            <h4>เพิ่มข้อมูลกรมธรรม์</h4>
+            <p>ไปที่เมนู "สรุปกรมธรรม์" แล้วกด "+ เพิ่มกรมธรรม์" เพื่อเพิ่มข้อมูลประกันและดูการวิเคราะห์ความคุ้มครองของคุณ</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="g-num">4</div>
+          <div class="g-text">
+            <h4>วางแผนการเงิน</h4>
+            <p>ไปที่เมนู "วางแผนการเงิน" เลือกเป้าหมาย และกรอกข้อมูลเพื่อรับแผนส่วนตัว</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video tutorials -->
+    <div class="video-section">
+      <h3>🎬 วิดีโอแนะนำการใช้งาน</h3>
+      <div class="video-grid">
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">2:15</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 1</div>
+            <div class="vid-title">การสมัครสมาชิกและเข้าสู่ระบบ</div>
+            <div class="vid-desc">เรียนรู้วิธีสมัครสมาชิกและตั้งค่าบัญชีครั้งแรก</div>
+          </div>
+        </div>
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg" style="background:linear-gradient(135deg,#fff5f5,#ffd6dc)"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">3:42</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 2</div>
+            <div class="vid-title">เก็บข้อมูลกรมธรรม์</div>
+            <div class="vid-desc">วิธีเพิ่มและจัดการข้อมูลกรมธรรม์ประกันทุกประเภท</div>
+          </div>
+        </div>
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg" style="background:linear-gradient(135deg,#fff0f2,#ffb3c1)"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">4:58</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 3</div>
+            <div class="vid-title">คำนวณภาษีและลดหย่อน</div>
+            <div class="vid-desc">ใช้เครื่องมือคำนวณภาษีและค้นหาสิทธิ์ลดหย่อนที่คุณมี</div>
+          </div>
+        </div>
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg" style="background:linear-gradient(135deg,#ffe0e5,#ff8fa3)"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">5:10</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 4</div>
+            <div class="vid-title">วางแผนค่ารักษาพยาบาลและโรคร้ายแรง</div>
+            <div class="vid-desc">วิธีวางแผนค่ารักษาและโรคร้ายแรงใน 5 นาที</div>
+          </div>
+        </div>
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg" style="background:linear-gradient(135deg,#ffe8ea,#fca5a5)"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">3:20</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 5</div>
+            <div class="vid-title">จำลองสถานการณ์การเงิน</div>
+            <div class="vid-desc">ทดลองจำลองสถานการณ์เพื่อวางแผนอนาคตได้แม่นยำ</div>
+          </div>
+        </div>
+
+        <div class="vid-card">
+          <div class="vid-thumb">
+            <div class="vid-thumb-bg" style="background:linear-gradient(135deg,#fff1f2,#fecdd3)"></div>
+            <div class="vid-thumb-icon">▶</div>
+            <div class="vid-duration">2:45</div>
+          </div>
+          <div class="vid-info">
+            <div class="vid-num">บทที่ 6</div>
+            <div class="vid-title">การใช้งานปฏิทินและการแจ้งเตือน</div>
+            <div class="vid-desc">ตั้งค่าการแจ้งเตือนและจัดการนัดหมายสำคัญ</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="video-section">
+      <h3>❓ คำถามที่พบบ่อย</h3>
+      <div class="faq-card">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>448 Wealth Management Plan ใช้งานได้ฟรีหรือเปล่า?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a open">
+            ใช้งานฟรีในแพ็กเกจพื้นฐานได้ไม่จำกัด สามารถอัปเกรดเป็น Premium เพื่อรับฟีเจอร์เพิ่มเติม เช่น การวิเคราะห์เชิงลึก และการส่งออกรายงาน PDF
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>ข้อมูลของฉันปลอดภัยไหม?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            ข้อมูลทั้งหมดถูกเข้ารหัสด้วยมาตรฐาน SSL 256-bit และจัดเก็บบนเซิร์ฟเวอร์ที่ได้รับการรับรองมาตรฐาน ISO 27001 คุณสามารถลบข้อมูลได้ทุกเมื่อ
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>สามารถใช้งานบนมือถือได้ไหม?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            ได้เลย! 448 Wealth Management Plan รองรับทุกอุปกรณ์ ทั้งคอมพิวเตอร์ แท็บเล็ต และสมาร์ทโฟน ผ่านเว็บเบราว์เซอร์ โดยไม่ต้องติดตั้งแอพพลิเคชันเพิ่มเติม
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>เพิ่มกรมธรรม์ได้กี่ฉบับ?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            แพ็กเกจฟรีสามารถเพิ่มได้ 5 ฉบับ แพ็กเกจ Premium เพิ่มได้ไม่จำกัด รวมถึงรองรับการเพิ่มกรมธรรม์ของสมาชิกในครอบครัวด้วย
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>หากมีปัญหาการใช้งานต้องติดต่อใคร?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            ติดต่อทีมสนับสนุนได้ผ่าน Line Official @aiaguide หรืออีเมล support@aiaguide.th ทุกวันจันทร์-ศุกร์ เวลา 9:00-18:00 น.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="contact-card">
+      <h3>ยังมีคำถามเพิ่มเติม?</h3>
+      <p>ทีมงานของเราพร้อมช่วยเหลือคุณตลอดเวลา</p>
+      <div class="contact-methods">
+        <div class="contact-btn">💬 Line Chat</div>
+        <div class="contact-btn">📧 ส่งอีเมล</div>
+        <div class="contact-btn">📞 โทรหาเรา</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2025 <span>448 Wealth Management Plan</span> — วางแผนชีวิตให้ดีกว่าเดิม · สงวนลิขสิทธิ์ทุกประการ</p>
+  </footer>
+</div>
+
+<script>
+  function toggleFaq(el) {
+    const body = el.nextElementSibling;
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    if (!isOpen) { el.classList.add('open'); body.classList.add('open'); }
+  }
+  function showTab(tab, el) {
+    document.querySelectorAll('.guide-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

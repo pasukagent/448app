@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ─── Feature card grid ─── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .dash-card {
+      background: white; border-radius: var(--radius); padding: 24px 16px;
+      text-align: center; cursor: pointer; box-shadow: var(--shadow-sm);
+      transition: all .28s; border: 2px solid transparent;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .dash-card:hover {
+      transform: translateY(-6px); box-shadow: var(--shadow-md);
+      border-color: var(--red-primary);
+    }
+    .dash-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--red-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; transition: all .28s;
+    }
+    .dash-card:hover .dash-icon { background: var(--red-primary); }
+    .dash-label { font-weight: 700; font-size: 1rem; color: var(--gray-800); }
+    .dash-sub   { font-size: 0.8rem; color: var(--gray-400); }
+    .dash-tag {
+      background: var(--red-soft); color: var(--red-primary);
+      font-size: 0.72rem; font-weight: 700; padding: 2px 10px;
+      border-radius: 50px;
+    }
+
+    /* ─── Recent Activity ─── */
+    .activity-list { display: flex; flex-direction: column; gap: 12px; }
+    .activity-item {
+      display: flex; align-items: center; gap: 14px;
+      background: white; border-radius: var(--radius-sm); padding: 14px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .act-icon {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--red-soft); display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .act-info { flex: 1; }
+    .act-title { font-weight: 600; font-size: 0.95rem; }
+    .act-time  { font-size: 0.78rem; color: var(--gray-400); }
+    .act-badge {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 12px;
+      border-radius: 50px; background: var(--red-soft); color: var(--red-primary);
+    }
+
+    /* Clickable stat card */
+    #stat-card-plans:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--red-primary) !important;
+    }
+    #stat-card-plans:hover .s-label { color: var(--red-primary); }
+    #stat-card-plans::after {
+      content: '→ ดูแผน';
+      display: block;
+      font-size: .7rem;
+      color: var(--red-primary);
+      font-weight: 700;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    #stat-card-plans:hover::after { opacity: 1; }
+
+    /* ─── Summary panel ─── */
+    .summary-panel {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      border-radius: var(--radius); padding: 24px; color: white; margin-bottom: 24px;
+    }
+    .summary-panel h3 { margin-bottom: 4px; font-size: 1rem; opacity: .85; }
+    .summary-panel .big { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; }
+    .summary-row { display: flex; gap: 24px; flex-wrap: wrap; }
+    .s-item .s-lbl { font-size: 0.78rem; opacity: .75; }
+    .s-item .s-val { font-weight: 700; font-size: 1.1rem; }
+
+    /* Summary client row */
+    .sum-client-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+      padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.2);
+    }
+    .sum-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,.25); color: white;
+      font-weight: 800; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sum-client-name { font-size: .95rem; font-weight: 800; }
+    .sum-client-sub  { font-size: .78rem; opacity: .75; margin-top: 1px; }
+
+    /* ─── Client selector strip ─── */
+    .client-strip-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+    .client-strip-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cs-title {
+      font-weight: 700; font-size: .95rem; color: var(--gray-800);
+    }
+    .cs-link {
+      font-size: .82rem; color: var(--red-primary); font-weight: 600;
+      text-decoration: none;
+    }
+    .cs-link:hover { text-decoration: underline; }
+
+    .client-strip {
+      display: flex; gap: 10px;
+      overflow-x: auto; padding-bottom: 4px;
+    }
+    .client-strip::-webkit-scrollbar { height: 4px; }
+    .client-strip::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 4px; }
+    .client-strip::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+    .client-strip::-webkit-scrollbar-thumb:hover { background: var(--red-primary); }
+
+    .client-pill {
+      min-width: 110px; max-width: 130px;
+      background: white; border: 2px solid var(--gray-100);
+      border-radius: 10px; box-shadow: var(--shadow-sm);
+      padding: 12px 14px; text-align: center; cursor: pointer;
+      transition: all .22s; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .client-pill:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(208,2,27,.15);
+      border-color: var(--red-primary);
+    }
+    .client-pill.active {
+      border-color: var(--red-primary);
+      background: var(--red-soft);
+    }
+    .cp-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--gray-200); color: var(--gray-600);
+      font-weight: 800; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .22s;
+    }
+    .client-pill.active .cp-avatar {
+      background: var(--red-primary); color: white;
+    }
+    .client-pill:hover:not(.active) .cp-avatar {
+      background: var(--red-soft); color: var(--red-primary);
+    }
+    .cp-name {
+      font-size: .82rem; font-weight: 700; color: var(--gray-800);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      width: 100%;
+    }
+    .client-pill.active .cp-name { color: var(--red-dark); }
+    .cp-count {
+      font-size: .74rem; color: var(--gray-400);
+    }
+    .client-pill.active .cp-count { color: var(--red-primary); }
+
+    .cs-empty {
+      font-size: .88rem; color: var(--gray-400); padding: 12px 4px;
+    }
+    .cs-empty a { color: var(--red-primary); font-weight: 600; text-decoration: none; }
+    .cs-empty a:hover { text-decoration: underline; }
+
+    /* ─── Two-col ─── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel {
+      background: white; border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow-sm);
+    }
+    .panel h4 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .panel h4 a { font-size: .82rem; color: var(--red-primary); font-weight: 600; text-decoration: none; }
+    .panel h4 a:hover { text-decoration: underline; }
+
+    /* ─── Progress / gap bars ─── */
+    .prog-item { margin-bottom: 14px; }
+    .prog-label {
+      display: flex; justify-content: space-between;
+      font-size: .88rem; margin-bottom: 5px;
+    }
+    .prog-bar { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+
+    /* ─── Calendar mini ─── */
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; text-align: center; }
+    .cal-day-name { font-size: .72rem; color: var(--gray-400); font-weight: 700; padding: 4px 0; }
+    .cal-day {
+      font-size: .82rem; padding: 6px 4px; border-radius: 6px; cursor: pointer;
+      color: var(--gray-600);
+    }
+    .cal-day:hover { background: var(--red-soft); color: var(--red-primary); }
+    .cal-day.today { background: var(--red-primary); color: white; font-weight: 700; }
+    .cal-day.has-event { position: relative; }
+    .cal-day.has-event::after {
+      content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--red-primary);
+    }
+    .cal-day.today.has-event::after { background: white; }
+    .cal-empty { /* placeholder cells */ }
+
+    @media(max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <div class="navbar-logo">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="dlg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F0021E"/><stop offset="1" stop-color="#7A000F"/>
+            </linearGradient>
+          </defs>
+          <rect width="42" height="42" rx="12" fill="url(#dlg)"/>
+          <rect x="0" y="0" width="42" height="21" rx="12" fill="rgba(255,255,255,.07)"/>
+          <rect x="8"  y="24" width="6" height="11" rx="1.8" fill="white" opacity=".55"/>
+          <rect x="18" y="17" width="6" height="18" rx="1.8" fill="white" opacity=".82"/>
+          <rect x="28" y="10" width="6" height="25" rx="1.8" fill="white"/>
+          <path d="M11 23 L21 16 L31 9" stroke="rgba(255,255,255,.38)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2.5 2"/>
+          <circle cx="31" cy="9" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div><div class="navbar-name">448 Wealth <span>Management Plan</span></div></div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="index.html">หน้าหลัก</a></li>
+      <li><a href="dashboard.html" class="active">ฟีเจอร์</a></li>
+      <li><a href="guide.html">คู่มือการใช้งาน</a></li>
+      <li><a href="#">ติดต่อเรา</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);cursor:pointer;">?</div>
+        <span id="nav-name" style="font-weight:600;font-size:.9rem;">...</span>
+        <button onclick="doLogout()" style="border:none;background:none;cursor:pointer;color:var(--gray-400);font-size:.82rem;padding:4px 8px;border-radius:6px;transition:all .2s;" onmouseover="this.style.background='var(--red-soft)';this.style.color='var(--red-primary)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">ออกจากระบบ</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="dashboard-page">
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">เมนูหลัก</div>
+        <div class="sidebar-item active" onclick="location.href='dashboard.html'"><span class="ico">🏠</span> หน้าแรก</div>
+        <div class="sidebar-item" onclick="location.href='financial.html'"><span class="ico">💰</span> วางแผนการเงิน</div>
+        <div class="sidebar-item" onclick="location.href='policies.html'"><span class="ico">📋</span> สรุปกรมธรรม์</div>
+        <div class="sidebar-item" onclick="location.href='tax.html'"><span class="ico">🧮</span> คำนวณภาษี</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">ดูแล</div>
+        <div class="sidebar-item" onclick="alert('ฟีเจอร์ดูแลตัวเองกำลังพัฒนา')"><span class="ico">❤️</span> ดูแลตัวเอง</div>
+        <div class="sidebar-item" onclick="alert('ฟีเจอร์ดูแลคนกำลังพัฒนา')"><span class="ico">👨‍👩‍👧</span> ดูแลคน</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">อื่น ๆ</div>
+        <div class="sidebar-item" onclick="alert('คลังสิ่งดีดีกำลังพัฒนา')"><span class="ico">⭐</span> คลังสิ่งดีดี</div>
+        <div class="sidebar-item" onclick="alert('ปฏิทินกำลังพัฒนา')"><span class="ico">📅</span> ปฏิทิน</div>
+        <div class="sidebar-item" onclick="location.href='guide.html'"><span class="ico">📚</span> คู่มือการใช้งาน</div>
+      </div>
+      <div style="padding:16px;margin-top:auto;">
+        <div style="background:var(--red-soft);border-radius:var(--radius-sm);padding:16px;text-align:center;">
+          <div style="font-size:1.3rem;margin-bottom:8px;">🎯</div>
+          <div style="font-size:.85rem;font-weight:700;color:var(--red-primary);margin-bottom:4px;">อัปเกรดแพ็กเกจ</div>
+          <div style="font-size:.75rem;color:var(--gray-600);margin-bottom:12px;">รับฟีเจอร์เพิ่มเติมและการวิเคราะห์เชิงลึก</div>
+          <a href="#" class="btn btn-primary" style="padding:8px 16px;font-size:.82rem;">ดูแผน Premium</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN CONTENT ─── -->
+    <main class="dashboard-content">
+
+      <!-- Greeting header -->
+      <div class="dashboard-header">
+        <h2 id="greeting">สวัสดี 👋</h2>
+        <p id="greeting-sub">กำลังโหลดข้อมูล...</p>
+      </div>
+
+      <!-- ─── CLIENT SELECTOR STRIP ─── -->
+      <div class="client-strip-wrap">
+        <div class="client-strip-header">
+          <span class="cs-title">👤 เลือกลูกค้า</span>
+          <a href="policies.html" class="cs-link">+ จัดการลูกค้า</a>
+        </div>
+        <div class="client-strip" id="client-strip">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- ─── SUMMARY PANEL ─── -->
+      <div class="summary-panel">
+        <div class="sum-client-row">
+          <div class="sum-avatar" id="sum-avatar">?</div>
+          <div>
+            <div class="sum-client-name" id="sum-client-name">ยังไม่ได้เลือกลูกค้า</div>
+            <div class="sum-client-sub" id="sum-client-sub"></div>
+          </div>
+        </div>
+        <h3>ความคุ้มครองทั้งหมด</h3>
+        <div class="big" id="stat-coverage">฿ 0</div>
+        <div class="summary-row">
+          <div class="s-item">
+            <div class="s-lbl">กรมธรรม์ที่มี</div>
+            <div class="s-val" id="stat-policies">0 ฉบับ</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">เบี้ยประกันรายปี</div>
+            <div class="s-val" id="stat-premium">฿ 0</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">ลดหย่อนภาษีได้</div>
+            <div class="s-val" id="stat-tax-deduct">฿ 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── STATS ROW ─── -->
+      <div class="stats-row" style="margin-bottom:28px;">
+        <div class="stat-card" id="stat-card-plans" onclick="goToFinancial()" style="cursor:pointer;transition:all .2s;">
+          <div class="s-label">วางแผนการเงิน</div>
+          <div class="s-value" id="stat-plans">0 แผน</div>
+          <div class="s-change" id="stat-plans-sub">เริ่มสร้างแผนได้เลย</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">ประหยัดภาษีปีนี้</div>
+          <div class="s-value" id="stat-tax">฿ 0</div>
+          <div class="s-change">คำนวณภาษีเพื่อดูผล</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">นัดหมายที่ใกล้มา</div>
+          <div class="s-value" id="stat-appts">0 รายการ</div>
+          <div class="s-change">📅 เพิ่มนัดหมาย</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">สิ่งดีดี</div>
+          <div class="s-value" id="stat-good">0 รายการ</div>
+          <div class="s-change">★ บันทึกสิ่งดีดี</div>
+        </div>
+      </div>
+
+      <!-- ─── FEATURE CARDS ─── -->
+      <h3 style="margin-bottom:16px;">เข้าใช้งานฟีเจอร์</h3>
+      <div class="dashboard-grid">
+        <div class="dash-card" onclick="goToFinancial()">
+          <div class="dash-icon">📊</div>
+          <div class="dash-label">วางแผนการเงิน</div>
+          <div class="dash-sub">Financial Planning</div>
+          <div class="dash-tag">ยอดนิยม</div>
+        </div>
+        <div class="dash-card" onclick="location.href='policies.html'">
+          <div class="dash-icon">📋</div>
+          <div class="dash-label">สรุปกรมธรรม์</div>
+          <div class="dash-sub">Policy Summary</div>
+        </div>
+        <div class="dash-card" onclick="location.href='tax.html'">
+          <div class="dash-icon">🧮</div>
+          <div class="dash-label">คำนวณภาษี</div>
+          <div class="dash-sub">Tax Calculator</div>
+        </div>
+        <div class="dash-card" onclick="alert('ดูแลตัวเอง')">
+          <div class="dash-icon">❤️</div>
+          <div class="dash-label">ดูแลตัวเอง</div>
+          <div class="dash-sub">Self Care</div>
+        </div>
+        <div class="dash-card" onclick="alert('ดูแลคน')">
+          <div class="dash-icon">👨‍👩‍👧</div>
+          <div class="dash-label">ดูแลคน</div>
+          <div class="dash-sub">Care for Others</div>
+        </div>
+        <div class="dash-card" onclick="alert('คลังสิ่งดีดี')">
+          <div class="dash-icon">⭐</div>
+          <div class="dash-label">คลังสิ่งดีดี</div>
+          <div class="dash-sub">Good Things Vault</div>
+        </div>
+        <div class="dash-card" onclick="alert('ปฏิทิน')">
+          <div class="dash-icon">📅</div>
+          <div class="dash-label">ปฏิทิน</div>
+          <div class="dash-sub">Calendar</div>
+        </div>
+      </div>
+
+      <!-- ─── TWO-COL: Gap Analysis + Calendar ─── -->
+      <div class="two-col">
+
+        <!-- Gap analysis (dynamic) -->
+        <div class="panel" id="gap-panel">
+          <h4>ช่องโหว่ความคุ้มครอง <a href="policies.html">ดูเพิ่มเติม</a></h4>
+          <div id="gap-bars"></div>
+        </div>
+
+        <!-- Calendar (dynamic for current month) -->
+        <div class="panel">
+          <h4 id="cal-title">ปฏิทิน <a href="#">ดูทั้งหมด</a></h4>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div id="cal-events" style="margin-top:16px;display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+      </div>
+
+      <!-- ─── RECENT ACTIVITY ─── -->
+      <div style="margin-top:24px;">
+        <h3 style="margin-bottom:16px;">กิจกรรมล่าสุด</h3>
+        <div class="activity-list" id="activity-list"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   Auth guard
+════════════════════════════════════════════════════ */
+const uid = localStorage.getItem('aia_currentUser');
+if (!uid) window.location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(u => u.id === uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+  return u;
+}
+
+/* ════════════════════════════════════════════════════
+   Client state
+════════════════════════════════════════════════════ */
+let selectedClientId = null;
+
+function getClients()        { return getUser().data.clients || []; }
+function getSelectedClient() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+/* ════════════════════════════════════════════════════
+   Constants
+════════════════════════════════════════════════════ */
+const RECOMMEND = {
+  'ชีวิต':       5000000,
+  'สุขภาพ':      1000000,
+  'โรคร้ายแรง': 2000000,
+  'อุบัติเหตุ':   500000
+};
+const TYPE_ICONS = {
+  'ชีวิต':       '🛡️',
+  'สุขภาพ':      '❤️',
+  'โรคร้ายแรง': '🏥',
+  'อุบัติเหตุ':   '🚑'
+};
+
+/* ════════════════════════════════════════════════════
+   Client selector strip
+════════════════════════════════════════════════════ */
+function renderClientStrip() {
+  const clients = getClients();
+  const strip   = document.getElementById('client-strip');
+  if (!strip) return;
+
+  if (clients.length === 0) {
+    strip.innerHTML = `<div class="cs-empty">
+      👤 ยังไม่มีลูกค้า — <a href="policies.html">เพิ่มลูกค้าในสรุปกรมธรรม์</a>
+    </div>`;
+    return;
+  }
+
+  strip.innerHTML = clients.map(c => {
+    const initial    = (c.firstName || '?').charAt(0);
+    const fullName   = (c.firstName || '') + ' ' + (c.lastName || '');
+    const pCount     = (c.policies || []).length;
+    const isActive   = c.id === selectedClientId;
+    const activeClass = isActive ? ' active' : '';
+    return `<div class="client-pill${activeClass}" onclick="selectClient('${c.id}')" title="${fullName.trim()}">
+      <div class="cp-avatar">${initial}</div>
+      <div class="cp-name">${c.firstName || '?'}</div>
+      <div class="cp-count">${pCount} กรมธรรม์</div>
+    </div>`;
+  }).join('');
+}
+
+function selectClient(cid) {
+  selectedClientId = cid;
+  renderClientStrip();
+  updateDashboard();
+}
+
+/* ════════════════════════════════════════════════════
+   Gap bars
+════════════════════════════════════════════════════ */
+function renderGapBars(policies) {
+  const byType = {};
+  policies.forEach(p => {
+    byType[p.type] = (byType[p.type] || 0) + (Number(p.coverage) || 0);
+  });
+
+  const GAP_LABELS = [
+    { type: 'ชีวิต',       label: 'ประกันชีวิต'       },
+    { type: 'สุขภาพ',      label: 'ประกันสุขภาพ'      },
+    { type: 'โรคร้ายแรง', label: 'โรคร้ายแรง (CI)'   },
+    { type: 'อุบัติเหตุ',   label: 'อุบัติเหตุ (PA)'   }
+  ];
+
+  const barsEl = document.getElementById('gap-bars');
+  if (!barsEl) return;
+
+  if (policies.length === 0) {
+    barsEl.innerHTML = `<div style="text-align:center;padding:28px 16px;color:var(--gray-400);font-size:.88rem;">
+      เลือกลูกค้าเพื่อดูช่องโหว่ความคุ้มครอง
+    </div>`;
+    return;
+  }
+
+  barsEl.innerHTML = GAP_LABELS.map(g => {
+    const have  = byType[g.type] || 0;
+    const rec   = RECOMMEND[g.type];
+    const pct   = Math.min(Math.round((have / rec) * 100), 100);
+    const color = pct >= 100 ? '#28a745' : pct >= 50 ? '#FFA500' : '#DC3545';
+    return `<div class="prog-item">
+      <div class="prog-label">
+        <span>${TYPE_ICONS[g.type]} ${g.label}</span>
+        <span style="color:${color};font-weight:700;">${pct}%</span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   Dashboard update (summary + stats + gap bars)
+════════════════════════════════════════════════════ */
+function updateDashboard() {
+  const user   = getUser();
+  const client = getSelectedClient();
+  const policies = client ? (client.policies || []) : [];
+
+  /* ── Summary panel ── */
+  const avatarEl   = document.getElementById('sum-avatar');
+  const nameEl     = document.getElementById('sum-client-name');
+  const subEl      = document.getElementById('sum-client-sub');
+  const coverageEl = document.getElementById('stat-coverage');
+  const polEl      = document.getElementById('stat-policies');
+  const premEl     = document.getElementById('stat-premium');
+  const taxDEl     = document.getElementById('stat-tax-deduct');
+
+  if (client) {
+    const initial = (client.firstName || '?').charAt(0);
+    avatarEl.textContent = initial;
+
+    nameEl.textContent = (client.firstName || '') + ' ' + (client.lastName || '');
+
+    const agePart = client.age ? client.age + ' ปี' : (client.birthdate ? calcAge(client.birthdate) + ' ปี' : '');
+    const occPart = client.occupation || '';
+    subEl.textContent = [agePart, occPart].filter(Boolean).join(' · ');
+  } else {
+    avatarEl.textContent = '?';
+    nameEl.textContent   = 'ยังไม่ได้เลือกลูกค้า';
+    subEl.textContent    = '';
+  }
+
+  const totalCoverage = policies.reduce((s, p) => s + (Number(p.coverage) || 0), 0);
+  const totalPremium  = policies.reduce((s, p) => s + (Number(p.premium)  || 0), 0);
+  const taxDeduct     = Math.min(totalPremium, 100000);
+
+  coverageEl.textContent = '฿ ' + totalCoverage.toLocaleString('th-TH');
+  polEl.textContent      = policies.length + ' ฉบับ';
+  premEl.textContent     = '฿ ' + totalPremium.toLocaleString('th-TH');
+  taxDEl.textContent     = '฿ ' + taxDeduct.toLocaleString('th-TH');
+
+  /* ── Stats row ── */
+  const goalCount  = client ? (client.financialGoals || []).length : 0;
+  const taxSaved   = client ? Math.round(Math.min(totalPremium, 100000) * 0.20) : 0;
+  const apptCount  = user.data.appointments ? user.data.appointments.length : 0;
+  const goodCount  = user.data.goodThings   || 0;
+
+  const plansEl = document.getElementById('stat-plans');
+  const planSubEl = document.getElementById('stat-plans-sub');
+  if (plansEl) {
+    plansEl.textContent   = goalCount + ' แผน';
+    planSubEl.textContent = goalCount > 0 ? '▲ อัปเดตล่าสุดวันนี้' : 'เริ่มสร้างแผนได้เลย';
+  }
+  const taxStatEl = document.getElementById('stat-tax');
+  if (taxStatEl) taxStatEl.textContent = '฿ ' + taxSaved.toLocaleString('th-TH');
+
+  const apptsEl = document.getElementById('stat-appts');
+  if (apptsEl) apptsEl.textContent = apptCount + ' รายการ';
+
+  const goodEl = document.getElementById('stat-good');
+  if (goodEl) goodEl.textContent = goodCount + ' รายการ';
+
+  /* ── Gap bars ── */
+  renderGapBars(policies);
+}
+
+/* ════════════════════════════════════════════════════
+   Activity list (user-level)
+════════════════════════════════════════════════════ */
+function renderActivity(user) {
+  const actEl = document.getElementById('activity-list');
+  if (!actEl) return;
+  const acts = (user.data && user.data.activities) ? user.data.activities : [];
+
+  if (acts.length === 0) {
+    actEl.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;color:var(--gray-400);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">📋</div>
+        <div style="font-weight:600;margin-bottom:6px;">ยังไม่มีกิจกรรม</div>
+        <div style="font-size:.88rem;">เริ่มใช้งานฟีเจอร์ต่าง ๆ เพื่อบันทึกกิจกรรมของคุณ</div>
+      </div>`;
+    return;
+  }
+  actEl.innerHTML = acts.slice(-5).reverse().map(a => `
+    <div class="activity-item">
+      <div class="act-icon">${a.icon || '📌'}</div>
+      <div class="act-info">
+        <div class="act-title">${a.title || ''}</div>
+        <div class="act-time">${a.time || ''}</div>
+      </div>
+      <div class="act-badge">เสร็จสิ้น</div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   Calendar (dynamic, current month)
+════════════════════════════════════════════════════ */
+function renderCalendar() {
+  const now     = new Date();
+  const year    = now.getFullYear();
+  const month   = now.getMonth();           // 0-based
+  const today   = now.getDate();
+
+  /* Thai month names */
+  const thMonths = [
+    'มกราคม','กุมภาพันธ์','มีนาคม','เมษายน',
+    'พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม',
+    'กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'
+  ];
+  const thYear    = year + 543;
+  const titleEl   = document.getElementById('cal-title');
+  if (titleEl) {
+    titleEl.innerHTML = `ปฏิทิน${thMonths[month]} ${thYear} <a href="#">ดูทั้งหมด</a>`;
+  }
+
+  const gridEl = document.getElementById('cal-grid');
+  if (!gridEl) return;
+
+  /* Day-name headers (อา จ อ พ พฤ ศ ส) */
+  const dayNames = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let html = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  /* First weekday of the month (0=Sun) */
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  /* Empty cells before day 1 */
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-day cal-empty"></div>`;
+  }
+
+  /* Day cells */
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today;
+    html += `<div class="cal-day${isToday ? ' today' : ''}">${d}</div>`;
+  }
+
+  gridEl.innerHTML = html;
+
+  /* Static upcoming events note */
+  const eventsEl = document.getElementById('cal-events');
+  if (eventsEl) {
+    eventsEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;font-size:.85rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--red-primary);flex-shrink:0;"></div>
+        <span style="color:var(--gray-600);">วันนี้ — ตรวจสอบข้อมูลลูกค้า</span>
+      </div>`;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   Helpers
+════════════════════════════════════════════════════ */
+function calcAge(birthdate) {
+  if (!birthdate) return '';
+  const birth = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function goToFinancial() {
+  const url = selectedClientId
+    ? 'financial.html?client=' + encodeURIComponent(selectedClientId)
+    : 'financial.html';
+  location.href = url;
+}
+
+function doLogout() {
+  localStorage.removeItem('aia_currentUser');
+  window.location.href = 'login.html';
+}
+
+function logActivity(icon, title) {
+  const allUsers = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = allUsers.findIndex(u => u.id === uid);
+  if (idx === -1) return;
+  const now  = new Date();
+  const time = 'วันนี้ เวลา ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  if (!allUsers[idx].data.activities) allUsers[idx].data.activities = [];
+  allUsers[idx].data.activities.push({ icon, title, time });
+  localStorage.setItem('aia_users', JSON.stringify(allUsers));
+}
+
+/* ════════════════════════════════════════════════════
+   Init
+════════════════════════════════════════════════════ */
+(function init() {
+  const user = getUser();
+
+  /* Navbar */
+  document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
+  document.getElementById('nav-name').textContent   = user.firstName + ' ' + user.lastName;
+
+  /* Greeting */
+  const hour       = new Date().getHours();
+  const greetWord  = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+  const thDate     = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('greeting').textContent     = greetWord + ', ' + user.firstName + ' 👋';
+  document.getElementById('greeting-sub').textContent = 'วันนี้ ' + thDate + ' — ภาพรวมแผนการเงินของคุณ';
+
+  /* User-level stats (appointment, goodThings) pre-populate */
+  const apptCount = user.data.appointments ? user.data.appointments.length : 0;
+  const goodCount = user.data.goodThings || 0;
+  const apptsEl   = document.getElementById('stat-appts');
+  const goodEl    = document.getElementById('stat-good');
+  if (apptsEl) apptsEl.textContent = apptCount + ' รายการ';
+  if (goodEl)  goodEl.textContent  = goodCount + ' รายการ';
+
+  /* Client strip — auto-select first client */
+  const clients = getClients();
+  if (clients.length > 0) {
+    selectedClientId = clients[0].id;
+  }
+  renderClientStrip();
+  updateDashboard();
+
+  /* Activity & calendar */
+  renderActivity(user);
+  renderCalendar();
+})();
+</script>
+</body>
+</html>

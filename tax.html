@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — คำนวณภาษี</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 32px 32px 40px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.6rem; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .8; font-size: .95rem; }
+    .content-area { max-width: 1000px; margin: 0 auto; padding: 32px 24px 60px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+    .calc-card {
+      background: white; border-radius: var(--radius); padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+    .calc-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 18px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; gap: 8px; }
+
+    .input-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .input-row label { font-size: .83rem; font-weight: 600; color: var(--gray-600); display:flex;justify-content:space-between; }
+    .input-row label span { font-weight: 400; color: var(--gray-400); font-size:.78rem; }
+    .input-row input {
+      padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+      font-size: .95rem; font-family: var(--font); transition: all .2s; text-align: right;
+    }
+    .input-row input:focus {
+      outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .section-label {
+      font-size: .72rem; font-weight: 800; color: var(--red-primary);
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: 10px 0 6px; border-top: 1px solid var(--gray-100); margin-top: 4px;
+    }
+
+    /* Result panel */
+    .result-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      position: sticky; top: 88px;
+    }
+    .result-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; border-radius: var(--radius) var(--radius) 0 0; padding: 20px 24px;
+    }
+    .result-header h3 { font-size: 1rem; margin-bottom: 4px; opacity: .85; }
+    .result-tax { font-size: 2.4rem; font-weight: 800; }
+    .result-body { padding: 20px 24px; }
+
+    .result-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: .88rem;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row .lbl { color: var(--gray-600); }
+    .result-row .val { font-weight: 700; color: var(--gray-800); }
+    .result-row .val.red { color: var(--red-primary); }
+    .result-row .val.green { color: #28a745; }
+
+    .rate-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 16px; }
+    .rate-table th { background: var(--red-soft); color: var(--red-primary); padding: 8px 12px; text-align: left; font-weight: 700; }
+    .rate-table td { padding: 8px 12px; border-bottom: 1px solid var(--gray-100); }
+    .rate-table tr.active-bracket { background: #FFF0F2; font-weight: 700; }
+    .rate-table tr.active-bracket td { color: var(--red-primary); }
+
+    .calc-btn { width: 100%; padding: 13px; font-size: 1rem; margin-top: 4px; }
+    .save-btn  { width: 100%; padding: 11px; font-size: .9rem; margin-top: 10px; }
+
+    .tip-box {
+      background: var(--red-soft); border-radius: var(--radius-sm);
+      padding: 14px; margin-top: 16px; font-size: .85rem; color: var(--red-dark); line-height: 1.6;
+    }
+    .tip-box strong { display: block; margin-bottom: 4px; }
+
+    .history-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--gray-100); border-radius: var(--radius-sm); padding: 12px 16px;
+    }
+    .history-item .h-year { font-weight: 700; font-size: .9rem; }
+    .history-item .h-tax  { font-size: 1rem; font-weight: 800; color: var(--red-primary); }
+    .history-item .h-save { font-size: .78rem; color: #28a745; }
+
+    @media(max-width:768px) { .two-col { grid-template-columns: 1fr; } .result-card { position: static; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;color:var(--gray-600);font-size:.9rem;">← กลับ</a>
+    </div>
+    <div style="font-weight:700;font-size:1.05rem;">🧮 คำนวณภาษีเงินได้</div>
+    <div class="navbar-actions">
+      <div id="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);">?</div>
+      <span id="nav-name" style="font-size:.9rem;font-weight:600;"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="feature-hero">
+    <h2>🧮 คำนวณภาษีเงินได้บุคคลธรรมดา</h2>
+    <p>คำนวณภาษีและค้นหาสิทธิ์ลดหย่อนที่คุณใช้ได้ครบทุกประเภท</p>
+  </div>
+  <div class="content-area">
+    <div class="two-col">
+
+      <!-- ── LEFT: Input ── -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+
+        <!-- Income -->
+        <div class="calc-card">
+          <h3>💵 รายได้ทั้งปี</h3>
+          <div class="input-row">
+            <label>เงินเดือนรวม (12 เดือน) <span>บาท/ปี</span></label>
+            <input id="i-salary" type="number" value="0" min="0" placeholder="0" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>โบนัส / ค่าตอบแทนพิเศษ <span>บาท</span></label>
+            <input id="i-bonus" type="number" value="0" min="0" placeholder="0" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>รายได้อื่นๆ <span>ดอกเบี้ย, เช่า, ฯลฯ</span></label>
+            <input id="i-other" type="number" value="0" min="0" placeholder="0" oninput="calculate()">
+          </div>
+        </div>
+
+        <!-- Deductions -->
+        <div class="calc-card">
+          <h3>✂️ ค่าลดหย่อน</h3>
+
+          <div class="section-label">ส่วนตัวและครอบครัว</div>
+          <div class="input-row">
+            <label>ค่าลดหย่อนส่วนตัว <span>ได้สูงสุด 60,000 บาท</span></label>
+            <input id="d-personal" type="number" value="60000" min="0" max="60000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>คู่สมรส (ไม่มีรายได้) <span>30,000 บาท/คน</span></label>
+            <input id="d-spouse" type="number" value="0" min="0" max="30000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>บุตร (จำนวนคน × 30,000) <span>บาท</span></label>
+            <input id="d-child" type="number" value="0" min="0" oninput="calculate()">
+          </div>
+
+          <div class="section-label">ประกัน</div>
+          <div class="input-row">
+            <label>เบี้ยประกันชีวิต <span>สูงสุด 100,000 บาท</span></label>
+            <input id="d-life-ins" type="number" value="0" min="0" max="100000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>เบี้ยประกันสุขภาพ (ตัวเอง) <span>สูงสุด 25,000 บาท</span></label>
+            <input id="d-health-ins" type="number" value="0" min="0" max="25000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>เบี้ยประกันสุขภาพ (บิดามารดา) <span>สูงสุด 15,000 บาท</span></label>
+            <input id="d-parent-ins" type="number" value="0" min="0" max="15000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>ประกันชีวิตแบบบำนาญ (RMF ผ่านประกัน) <span>สูงสุด 200,000 บาท</span></label>
+            <input id="d-annuity" type="number" value="0" min="0" max="200000" oninput="calculate()">
+          </div>
+
+          <div class="section-label">การออมและลงทุน</div>
+          <div class="input-row">
+            <label>กองทุนสำรองเลี้ยงชีพ (PVD) <span>ไม่เกิน 15% ของรายได้ สูงสุด 500,000</span></label>
+            <input id="d-pvd" type="number" value="0" min="0" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>กองทุน RMF <span>ไม่เกิน 30% ของรายได้ สูงสุด 500,000</span></label>
+            <input id="d-rmf" type="number" value="0" min="0" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>กองทุน SSF <span>ไม่เกิน 30% ของรายได้ สูงสุด 200,000</span></label>
+            <input id="d-ssf" type="number" value="0" min="0" oninput="calculate()">
+          </div>
+
+          <div class="section-label">อื่นๆ</div>
+          <div class="input-row">
+            <label>เงินประกันสังคม <span>สูงสุด 9,000 บาท</span></label>
+            <input id="d-sso" type="number" value="9000" min="0" max="9000" oninput="calculate()">
+          </div>
+          <div class="input-row">
+            <label>เงินบริจาค <span>ลดหย่อนได้ 2 เท่า สูงสุด 10% ของรายได้หลังหัก</span></label>
+            <input id="d-donate" type="number" value="0" min="0" oninput="calculate()">
+          </div>
+        </div>
+
+        <button class="btn btn-primary calc-btn" onclick="calculate()">🧮 คำนวณภาษี</button>
+      </div>
+
+      <!-- ── RIGHT: Result ── -->
+      <div>
+        <div class="result-card">
+          <div class="result-header">
+            <h3>ภาษีที่ต้องชำระ</h3>
+            <div class="result-tax" id="res-tax">฿ 0</div>
+          </div>
+          <div class="result-body">
+            <div class="result-row">
+              <span class="lbl">รายได้รวมทั้งปี</span>
+              <span class="val" id="res-income">฿ 0</span>
+            </div>
+            <div class="result-row">
+              <span class="lbl">ค่าใช้จ่าย (50%, ไม่เกิน 100,000)</span>
+              <span class="val" id="res-expense">- ฿ 0</span>
+            </div>
+            <div class="result-row">
+              <span class="lbl">ค่าลดหย่อนรวม</span>
+              <span class="val red" id="res-deduct">- ฿ 0</span>
+            </div>
+            <div class="result-row" style="font-weight:700;">
+              <span class="lbl">รายได้สุทธิที่ต้องเสียภาษี</span>
+              <span class="val" id="res-net">฿ 0</span>
+            </div>
+            <div class="result-row" style="font-size:1rem;">
+              <span class="lbl" style="font-weight:700;">💸 ภาษีที่ต้องชำระ</span>
+              <span class="val red" style="font-size:1.2rem;" id="res-tax2">฿ 0</span>
+            </div>
+            <div class="result-row">
+              <span class="lbl">อัตราภาษีที่แท้จริง</span>
+              <span class="val" id="res-eff-rate">0%</span>
+            </div>
+
+            <div id="saving-tip" style="display:none;" class="tip-box">
+              <strong>💡 เพิ่มสิทธิ์ลดหย่อนอีกได้!</strong>
+              <span id="saving-tip-text"></span>
+            </div>
+
+            <button class="btn btn-primary save-btn" onclick="saveResult()">💾 บันทึกผลการคำนวณ</button>
+            <div id="save-msg" style="display:none;text-align:center;margin-top:10px;font-size:.88rem;color:#28a745;font-weight:700;">✓ บันทึกผลสำเร็จแล้ว</div>
+
+            <!-- Tax bracket table -->
+            <div style="margin-top:20px;">
+              <div style="font-size:.82rem;font-weight:700;color:var(--gray-700);margin-bottom:8px;">ตารางอัตราภาษี</div>
+              <table class="rate-table" id="bracket-table">
+                <thead><tr><th>รายได้สุทธิ</th><th>อัตราภาษี</th><th>ภาษีในขั้น</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="calc-card" style="margin-top:18px;" id="history-card">
+          <h3>📅 ประวัติการคำนวณ</h3>
+          <div id="history-list"><p style="color:var(--gray-400);font-size:.88rem;">ยังไม่มีประวัติ</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const uid = localStorage.getItem('aia_currentUser');
+  if (!uid) window.location.href = 'login.html';
+
+  function getUsers()     { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
+  function saveUsers(arr) { localStorage.setItem('aia_users', JSON.stringify(arr)); }
+  function getCurrentUser() {
+    const u = getUsers().find(u => u.id === uid);
+    if (!u) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+    return u;
+  }
+  function updateCurrentUser(fn) {
+    const all = getUsers(); const idx = all.findIndex(u => u.id === uid);
+    if (idx === -1) return; fn(all[idx]); saveUsers(all);
+  }
+
+  // Thai personal income tax brackets 2024
+  const BRACKETS = [
+    { min:0,       max:150000,  rate:0   },
+    { min:150001,  max:300000,  rate:5   },
+    { min:300001,  max:500000,  rate:10  },
+    { min:500001,  max:750000,  rate:15  },
+    { min:750001,  max:1000000, rate:20  },
+    { min:1000001, max:2000000, rate:25  },
+    { min:2000001, max:5000000, rate:30  },
+    { min:5000001, max:Infinity,rate:35  },
+  ];
+
+  function calcTax(netIncome) {
+    let tax = 0;
+    const breakdown = [];
+    for (const b of BRACKETS) {
+      if (netIncome <= b.min - 1) { breakdown.push({...b, amount:0}); continue; }
+      const taxable = Math.min(netIncome, b.max) - b.min + 1;
+      const amount  = taxable * b.rate / 100;
+      tax += amount;
+      breakdown.push({...b, taxable, amount});
+    }
+    return { tax, breakdown };
+  }
+
+  function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  function fmt(n)  { return '฿ ' + Math.round(n).toLocaleString('th-TH'); }
+
+  function calculate() {
+    const income = val('i-salary') + val('i-bonus') + val('i-other');
+    const expense = Math.min(income * 0.5, 100000);
+
+    // Cap each deduction at legal max
+    const lifeIns   = Math.min(val('d-life-ins'),   100000);
+    const healthIns = Math.min(val('d-health-ins'),  25000);
+    const parentIns = Math.min(val('d-parent-ins'),  15000);
+    const annuity   = Math.min(val('d-annuity'),    200000);
+    const pvd       = Math.min(val('d-pvd'), income * 0.15, 500000);
+    const rmf       = Math.min(val('d-rmf'), income * 0.30, 500000);
+    const ssf       = Math.min(val('d-ssf'), income * 0.30, 200000);
+    const sso       = Math.min(val('d-sso'),           9000);
+    const personal  = Math.min(val('d-personal'),    60000);
+    const spouse    = Math.min(val('d-spouse'),      30000);
+    const child     = val('d-child');
+    const donate    = Math.min(val('d-donate') * 2, (income - expense) * 0.1);
+
+    const totalDeduct = personal + spouse + child + lifeIns + healthIns + parentIns + annuity + pvd + rmf + ssf + sso + donate;
+    const netIncome   = Math.max(income - expense - totalDeduct, 0);
+    const { tax, breakdown } = calcTax(netIncome);
+    const effRate = income > 0 ? (tax / income * 100).toFixed(2) : 0;
+
+    document.getElementById('res-income').textContent  = fmt(income);
+    document.getElementById('res-expense').textContent = '- ' + fmt(expense);
+    document.getElementById('res-deduct').textContent  = '- ' + fmt(totalDeduct);
+    document.getElementById('res-net').textContent     = fmt(netIncome);
+    document.getElementById('res-tax').textContent     = fmt(tax);
+    document.getElementById('res-tax2').textContent    = fmt(tax);
+    document.getElementById('res-eff-rate').textContent = effRate + '%';
+
+    // Bracket table
+    const tbody = document.querySelector('#bracket-table tbody');
+    tbody.innerHTML = breakdown.map((b, i) => {
+      const label = b.max === Infinity
+        ? (b.min/1e6).toFixed(2)+'ล้าน ขึ้นไป'
+        : (b.min/10000).toFixed(1)+'หมื่น–'+(b.max/10000).toFixed(1)+'หมื่น';
+      const isActive = (b.taxable||0) > 0;
+      return `<tr${isActive?' class="active-bracket"':''}>
+        <td>${label}</td>
+        <td>${b.rate}%</td>
+        <td>${isActive ? fmt(b.amount) : '-'}</td>
+      </tr>`;
+    }).join('');
+
+    // Tips
+    const remainLife = Math.max(100000 - val('d-life-ins'), 0);
+    const remainHealth = Math.max(25000 - val('d-health-ins'), 0);
+    const tips = [];
+    if (remainLife > 0)   tips.push(`เบี้ยประกันชีวิตยังลดหย่อนได้อีก ฿${remainLife.toLocaleString('th-TH')}`);
+    if (remainHealth > 0) tips.push(`เบี้ยประกันสุขภาพยังลดหย่อนได้อีก ฿${remainHealth.toLocaleString('th-TH')}`);
+    const tipBox = document.getElementById('saving-tip');
+    if (tips.length > 0 && income > 0) {
+      document.getElementById('saving-tip-text').textContent = tips.join(' · ');
+      tipBox.style.display = 'block';
+    } else { tipBox.style.display = 'none'; }
+
+    return { income, expense, totalDeduct, netIncome, tax, effRate };
+  }
+
+  function saveResult() {
+    const r = calculate();
+    const year = new Date().getFullYear() + 543;
+    updateCurrentUser(u => {
+      if (!u.data.taxHistory) u.data.taxHistory = [];
+      u.data.taxHistory.unshift({ year, income: r.income, deduct: r.totalDeduct, tax: r.tax, savedAt: new Date().toISOString() });
+      u.data.taxSaved = r.tax;
+      u.data.activities.push({ icon:'🧮', title:'คำนวณภาษีปี '+year+' ภาษี ฿'+Math.round(r.tax).toLocaleString('th-TH'), time:'วันนี้ เวลา '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+    });
+    const msg = document.getElementById('save-msg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const user    = getCurrentUser();
+    const history = (user.data.taxHistory || []).slice(0, 5);
+    document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
+    document.getElementById('nav-name').textContent   = user.firstName;
+    const el = document.getElementById('history-list');
+    if (history.length === 0) {
+      el.innerHTML = '<p style="color:var(--gray-400);font-size:.88rem;">ยังไม่มีประวัติ — คำนวณและกดบันทึกเพื่อเก็บผล</p>';
+      return;
+    }
+    el.innerHTML = '<div class="history-list">' + history.map(h => `
+      <div class="history-item">
+        <div>
+          <div class="h-year">ปีภาษี ${h.year}</div>
+          <div class="h-save">รายได้ ฿${(h.income||0).toLocaleString('th-TH')} · ลดหย่อน ฿${(h.deduct||0).toLocaleString('th-TH')}</div>
+        </div>
+        <div class="h-tax">฿ ${Math.round(h.tax||0).toLocaleString('th-TH')}</div>
+      </div>`).join('') + '</div>';
+  }
+
+  // Init
+  const user = getCurrentUser();
+  document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
+  document.getElementById('nav-name').textContent   = user.firstName;
+  // Pre-fill insurance premiums from saved policies
+  const totalLifePremium = (user.data.policies||[])
+    .filter(p => p.type==='ชีวิต' || p.type==='โรคร้ายแรง')
+    .reduce((s,p)=>s+(p.premium||0),0);
+  const totalHealthPremium = (user.data.policies||[])
+    .filter(p => p.type==='สุขภาพ')
+    .reduce((s,p)=>s+(p.premium||0),0);
+  if (totalLifePremium > 0)   document.getElementById('d-life-ins').value   = Math.min(totalLifePremium, 100000);
+  if (totalHealthPremium > 0) document.getElementById('d-health-ins').value = Math.min(totalHealthPremium, 25000);
+  calculate();
+  renderHistory();
+</script>
+</body>
+</html>

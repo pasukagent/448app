@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — วางแผนชีวิตให้ดีกว่าเดิม</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── HOW IT WORKS ── */
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .step { text-align: center; padding: 32px 20px; }
+    .step-num {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--red-primary); color: white;
+      font-size: 1.3rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+    }
+    .step h3 { margin-bottom: 8px; }
+    .step p { color: var(--gray-600); font-size: 0.93rem; }
+
+    /* ── TESTIMONIAL ── */
+    .testimonials { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .testimonial-card {
+      background: white; border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .testimonial-card .stars { color: #F5A623; font-size: 1.1rem; margin-bottom: 10px; }
+    .testimonial-card p { color: var(--gray-600); font-size: 0.92rem; line-height: 1.7; margin-bottom: 16px; }
+    .reviewer { display: flex; align-items: center; gap: 10px; }
+    .reviewer-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--red-mid); display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; color: var(--red-primary);
+    }
+    .reviewer-name { font-weight: 700; font-size: 0.9rem; }
+    .reviewer-role { font-size: 0.78rem; color: var(--gray-400); }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 80px 24px; text-align: center;
+    }
+    .cta-section h2 { font-size: 2rem; margin-bottom: 16px; }
+    .cta-section p { opacity: .85; margin-bottom: 32px; font-size: 1.1rem; }
+    .cta-actions { display: flex; justify-content: center; gap: 14px; }
+
+    @media(max-width:768px) {
+      .steps { grid-template-columns: 1fr; }
+      .testimonials { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <div class="navbar-logo">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ilg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F0021E"/><stop offset="1" stop-color="#7A000F"/>
+            </linearGradient>
+          </defs>
+          <rect width="42" height="42" rx="12" fill="url(#ilg)"/>
+          <rect x="0" y="0" width="42" height="21" rx="12" fill="rgba(255,255,255,.07)"/>
+          <rect x="8"  y="24" width="6" height="11" rx="1.8" fill="white" opacity=".55"/>
+          <rect x="18" y="17" width="6" height="18" rx="1.8" fill="white" opacity=".82"/>
+          <rect x="28" y="10" width="6" height="25" rx="1.8" fill="white"/>
+          <path d="M11 23 L21 16 L31 9" stroke="rgba(255,255,255,.38)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2.5 2"/>
+          <circle cx="31" cy="9" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div>
+        <div class="navbar-name">448 Wealth <span>Management Plan</span></div>
+      </div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="index.html" class="active">หน้าหลัก</a></li>
+      <li><a href="dashboard.html">ฟีเจอร์</a></li>
+      <li><a href="guide.html">คู่มือการใช้งาน</a></li>
+      <li><a href="#contact">ติดต่อเรา</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-outline" style="padding:9px 22px;font-size:.9rem;">เข้าสู่ระบบ</a>
+      <a href="login.html" class="btn btn-primary" style="padding:9px 22px;font-size:.9rem;">สมัครฟรี</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ─── HERO ─── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span>🛡️</span>
+          <span>แพลตฟอร์มวางแผนประกันอัจฉริยะ</span>
+        </div>
+        <h1>วางแผนชีวิต<br>ให้ดีกว่าเดิม<br>ใน <span style="color:#FFD6DC">5 นาที</span></h1>
+        <p>ครบทุกเครื่องมือวางแผนการเงิน ประกัน และสุขภาพ<br>ในที่เดียว ง่าย เร็ว และแม่นยำ</p>
+        <div class="hero-actions">
+          <a href="login.html" class="btn btn-white">🚀 เริ่มต้นฟรี</a>
+          <a href="guide.html" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:white;">ดูคู่มือ</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">50,000+</div><div class="lbl">ผู้ใช้งาน</div></div>
+          <div class="hero-stat"><div class="num">95%</div><div class="lbl">ความพึงพอใจ</div></div>
+          <div class="hero-stat"><div class="num">7</div><div class="lbl">ฟีเจอร์หลัก</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-float">
+          <div class="card-title">📊 วางแผนการเงินของฉัน</div>
+          <div style="font-size:.85rem;color:#666;margin-bottom:16px;">เป้าหมายปีนี้</div>
+          <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px;">
+            <span>กองทุนฉุกเฉิน</span><span style="color:#D0021B;font-weight:700;">80%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px;margin-top:12px;">
+            <span>ค่ารักษาพยาบาล</span><span style="color:#D0021B;font-weight:700;">60%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px;margin-top:12px;">
+            <span>แผนเกษียณ</span><span style="color:#D0021B;font-weight:700;">45%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.82rem;color:#666;">ประหยัดได้</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#D0021B;">฿ 128,500</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES ─── -->
+  <section class="section" style="background:white;">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="tag">ฟีเจอร์ทั้งหมด</div>
+        <h2>ครบทุกเครื่องมือที่คุณต้องการ</h2>
+        <p>7 ฟีเจอร์หลักที่ออกแบบมาเพื่อการวางแผนชีวิตอย่างครบวงจร</p>
+      </div>
+      <div class="features-grid">
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+          </div>
+          <div class="label">วางแผนการเงิน</div>
+          <div class="sublabel">Financial Planning</div>
+          <div class="badge">ยอดนิยม</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="label">สรุปกรมธรรม์</div>
+          <div class="sublabel">Policy Summary</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="label">คำนวณภาษี</div>
+          <div class="sublabel">Tax Calculator</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="label">ดูแลตัวเอง</div>
+          <div class="sublabel">Self Care</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="label">ดูแลคน</div>
+          <div class="sublabel">Care for Others</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          </div>
+          <div class="label">คลังสิ่งดีดี</div>
+          <div class="sublabel">Good Things Vault</div>
+        </a>
+        <a href="dashboard.html" class="feature-card">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D0021B" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="label">ปฏิทิน</div>
+          <div class="sublabel">Calendar</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ─── -->
+  <section class="section" style="background:var(--gray-100);">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="tag">วิธีการใช้งาน</div>
+        <h2>เริ่มต้นง่าย ๆ 3 ขั้นตอน</h2>
+        <p>สมัครสมาชิกและเริ่มวางแผนชีวิตได้ทันที ไม่ต้องมีความรู้ด้านการเงินก็ทำได้</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>สมัครสมาชิก</h3>
+          <p>กรอกข้อมูลเบื้องต้น ใช้เวลาไม่เกิน 2 นาที ไม่มีค่าใช้จ่าย</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>กรอกข้อมูลกรมธรรม์</h3>
+          <p>เพิ่มข้อมูลประกันที่คุณมีอยู่ ระบบจะวิเคราะห์ความคุ้มครองให้อัตโนมัติ</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>รับแผนวางแผนส่วนตัว</h3>
+          <p>ระบบจะสร้างแผนการเงินและคำแนะนำที่เหมาะกับคุณโดยเฉพาะ</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TESTIMONIALS ─── -->
+  <section class="section" style="background:white;">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="tag">รีวิวจากผู้ใช้จริง</div>
+        <h2>ลูกค้าพูดถึงเรา</h2>
+      </div>
+      <div class="testimonials">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"ก่อนหน้านี้ไม่รู้ว่าซื้อประกันถูกต้องไหม พอใช้ 448 Wealth Management Plan แล้วเข้าใจเลยว่าแต่ละกรมธรรม์ให้อะไรบ้าง"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">ส</div>
+            <div>
+              <div class="reviewer-name">สมหญิง ใจดี</div>
+              <div class="reviewer-role">พยาบาลวิชาชีพ · กรุงเทพฯ</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"คำนวณภาษีได้ถูกต้อง ช่วยประหยัดภาษีได้เยอะมาก แนะนำให้ทุกคนลองใช้ดู"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">ว</div>
+            <div>
+              <div class="reviewer-name">วิชัย มีทรัพย์</div>
+              <div class="reviewer-role">ผู้จัดการธุรกิจ · เชียงใหม่</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"แผนวางแผนค่ารักษาพยาบาลช่วยให้ครอบครัวผมมั่นใจขึ้นมาก UI ใช้ง่ายมาก ประทับใจ"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">ท</div>
+            <div>
+              <div class="reviewer-name">ทวี สุขสันต์</div>
+              <div class="reviewer-role">วิศวกร · ขอนแก่น</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ─── -->
+  <section class="cta-section" id="contact">
+    <div class="section-inner">
+      <h2>พร้อมเริ่มวางแผนชีวิตที่ดีกว่าเดิมแล้วหรือยัง?</h2>
+      <p>สมัครฟรีวันนี้ ไม่มีค่าใช้จ่าย เริ่มต้นได้ใน 2 นาที</p>
+      <div class="cta-actions">
+        <a href="login.html" class="btn btn-white">🚀 สมัครสมาชิกฟรี</a>
+        <a href="guide.html" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:white;">📚 ดูคู่มือการใช้งาน</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <p>© 2025 <span>448 Wealth Management Plan</span> — วางแผนชีวิตให้ดีกว่าเดิม · สงวนลิขสิทธิ์ทุกประการ</p>
+  </footer>
+
+</div>
+</body>
+</html>

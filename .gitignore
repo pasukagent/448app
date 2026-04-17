@@ -1,0 +1,12 @@
+# Media / screenshots (not part of the app)
+*.png
+*.mp4
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
