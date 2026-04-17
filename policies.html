@@ -521,6 +521,7 @@
                 <option value="สุขภาพ">ประกันสุขภาพ</option>
                 <option value="โรคร้ายแรง">ประกันโรคร้ายแรง</option>
                 <option value="อุบัติเหตุ">ประกันอุบัติเหตุ</option>
+                <option value="บำนาญ">ประกันบำนาญ</option>
                 <option value="รถยนต์">ประกันรถยนต์</option>
                 <option value="อื่นๆ">อื่นๆ</option>
               </select>
@@ -571,6 +572,7 @@
                 <th>สุขภาพ</th>
                 <th>โรคร้ายแรง</th>
                 <th>อุบัติเหตุ</th>
+                <th>บำนาญ</th>
                 <th>รถยนต์</th>
                 <th>อื่นๆ</th>
                 <th class="col-action"></th>
@@ -753,6 +755,7 @@
               <option value="สุขภาพ">ประกันสุขภาพ</option>
               <option value="โรคร้ายแรง">ประกันโรคร้ายแรง</option>
               <option value="อุบัติเหตุ">ประกันอุบัติเหตุ</option>
+              <option value="บำนาญ">ประกันบำนาญ</option>
               <option value="รถยนต์">ประกันรถยนต์</option>
               <option value="อื่นๆ">อื่นๆ</option>
             </select>
@@ -894,8 +897,8 @@ let currentPolicyIdx = null;
 let spiderChartInstance = null;
 
 // ─── CONSTANTS ───
-const TYPE_ICONS = { 'ชีวิต':'🛡️','สุขภาพ':'❤️','โรคร้ายแรง':'🏥','อุบัติเหตุ':'🚑','รถยนต์':'🚗','อื่นๆ':'📄' };
-const COVERAGE_TYPES = ['ชีวิต','สุขภาพ','โรคร้ายแรง','อุบัติเหตุ','รถยนต์','อื่นๆ'];
+const TYPE_ICONS = { 'ชีวิต':'🛡️','สุขภาพ':'❤️','โรคร้ายแรง':'🏥','อุบัติเหตุ':'🚑','บำนาญ':'🏦','รถยนต์':'🚗','อื่นๆ':'📄' };
+const COVERAGE_TYPES = ['ชีวิต','สุขภาพ','โรคร้ายแรง','อุบัติเหตุ','บำนาญ','รถยนต์','อื่นๆ'];
 const RECOMMEND = { 'ชีวิต':5000000,'สุขภาพ':1000000,'โรคร้ายแรง':2000000,'อุบัติเหตุ':500000 };
 const ENDORSE_ICONS = {
   'สัญญาเพิ่มเติม':'➕','ขยายความคุ้มครอง':'🔓',
