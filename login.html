@@ -6,6 +6,20 @@
   <title>448 Wealth Management Plan — เข้าสู่ระบบ / สมัครสมาชิก</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
   <style>
     body { overflow: hidden; }
 
@@ -171,7 +185,7 @@
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
           <input type="checkbox" style="accent-color:#D0021B;"> จดจำฉัน
         </label>
-        <a href="#">ลืมรหัสผ่าน?</a>
+        <a href="#" onclick="showForgot()">ลืมรหัสผ่าน?</a>
       </div>
       <div id="login-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
       <button class="btn btn-primary login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
@@ -233,6 +247,22 @@
       </p>
     </div>
 
+    <!-- FORGOT PASSWORD PANEL -->
+    <div class="form-panel" id="panel-forgot">
+      <div class="back-link" onclick="hideForgot()">← กลับหน้าเข้าสู่ระบบ</div>
+      <h2>รีเซ็ตรหัสผ่าน</h2>
+      <p class="sub">กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้ทันที</p>
+      <div class="form-group" style="margin-top:24px;">
+        <label>อีเมล</label>
+        <input id="forgot-email" type="email" placeholder="example@email.com">
+      </div>
+      <div id="forgot-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <div id="forgot-ok" style="display:none;background:#F0FFF4;border:1px solid #9AE6B4;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#276749;margin-bottom:12px;">
+        📧 ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว — กรุณาตรวจสอบกล่องจดหมายของคุณ
+      </div>
+      <button class="btn btn-primary login-btn" onclick="doForgotPassword()">ส่งอีเมลรีเซ็ต</button>
+    </div>
+
   </div>
 </div>
 
@@ -240,15 +270,28 @@
   /* ── Helpers ── */
   function getUsers() { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
   function saveUsers(u) { localStorage.setItem('aia_users', JSON.stringify(u)); }
-  function setCurrentUser(id) { localStorage.setItem('aia_currentUser', id); }
   function showError(elId, msg) {
     const el = document.getElementById(elId);
     el.textContent = msg; el.style.display = 'block';
   }
   function hideError(elId) { document.getElementById(elId).style.display = 'none'; }
 
+  function firebaseErrorMsg(code) {
+    const map = {
+      'auth/email-already-in-use'  : 'อีเมลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบ',
+      'auth/invalid-email'         : 'รูปแบบอีเมลไม่ถูกต้อง',
+      'auth/weak-password'         : 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+      'auth/user-not-found'        : 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบอีเมล',
+      'auth/wrong-password'        : 'รหัสผ่านไม่ถูกต้อง',
+      'auth/invalid-credential'    : 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+      'auth/too-many-requests'     : 'พยายามเข้าสู่ระบบหลายครั้งเกินไป กรุณาลองใหม่ภายหลัง',
+      'auth/network-request-failed': 'ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้',
+    };
+    return map[code] || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+  }
+
   /* ── Register ── */
-  function doRegister() {
+  async function doRegister() {
     hideError('reg-error');
     const firstName = document.getElementById('reg-firstname').value.trim();
     const lastName  = document.getElementById('reg-lastname').value.trim();
@@ -258,36 +301,37 @@
 
     if (!firstName) return showError('reg-error', 'กรุณากรอกชื่อ');
     if (!lastName)  return showError('reg-error', 'กรุณากรอกนามสกุล');
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      return showError('reg-error', 'กรุณากรอกอีเมลให้ถูกต้อง');
-    if (password.length < 8) return showError('reg-error', 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+    if (!email)     return showError('reg-error', 'กรุณากรอกอีเมล');
+    if (password.length < 6) return showError('reg-error', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
     if (!terms) return showError('reg-error', 'กรุณายอมรับข้อตกลงการใช้งาน');
 
-    const users = getUsers();
-    if (users.find(u => u.email === email))
-      return showError('reg-error', 'อีเมลนี้มีบัญชีแล้ว กรุณาเข้าสู่ระบบ');
+    const btn = document.querySelector('#panel-register .login-btn');
+    btn.textContent = 'กำลังสมัคร...'; btn.disabled = true;
 
-    const newUser = {
-      id: 'u_' + Date.now(),
-      firstName, lastName, email, password,
-      createdAt: new Date().toISOString(),
-      data: {
-        policies: [],
-        financialPlans: 0,
-        taxSaved: 0,
-        appointments: [],
-        goodThings: 0,
-        activities: []
+    try {
+      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      const fuid = cred.user.uid;
+
+      // บันทึกชื่อ + ข้อมูลเริ่มต้นใน localStorage (keyed by Firebase UID)
+      const users = getUsers();
+      if (!users.find(u => u.id === fuid)) {
+        users.push({
+          id: fuid, firstName, lastName, email,
+          createdAt: new Date().toISOString(),
+          data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
+        });
+        saveUsers(users);
       }
-    };
-    users.push(newUser);
-    saveUsers(users);
-    setCurrentUser(newUser.id);
-    window.location.href = 'dashboard.html';
+      localStorage.setItem('aia_currentUser', fuid);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      showError('reg-error', firebaseErrorMsg(err.code));
+      btn.textContent = 'สมัครสมาชิกฟรี'; btn.disabled = false;
+    }
   }
 
   /* ── Login ── */
-  function doLogin() {
+  async function doLogin() {
     hideError('login-error');
     const email    = document.getElementById('login-email').value.trim().toLowerCase();
     const password = document.getElementById('login-password').value;
@@ -295,15 +339,52 @@
     if (!email)    return showError('login-error', 'กรุณากรอกอีเมล');
     if (!password) return showError('login-error', 'กรุณากรอกรหัสผ่าน');
 
-    const users = getUsers();
-    const user  = users.find(u => u.email === email && u.password === password);
-    if (!user) return showError('login-error', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+    const btn = document.querySelector('#panel-login .login-btn');
+    btn.textContent = 'กำลังเข้าสู่ระบบ...'; btn.disabled = true;
 
-    setCurrentUser(user.id);
-    window.location.href = 'dashboard.html';
+    try {
+      const cred = await fbAuth.signInWithEmailAndPassword(email, password);
+      const fuid = cred.user.uid;
+
+      // ถ้าเปิดจากเครื่องใหม่ ยังไม่มีข้อมูลใน localStorage → สร้าง profile เปล่า
+      const users = getUsers();
+      if (!users.find(u => u.id === fuid)) {
+        users.push({
+          id: fuid,
+          firstName: email.split('@')[0],
+          lastName: '',
+          email,
+          createdAt: new Date().toISOString(),
+          data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
+        });
+        saveUsers(users);
+        localStorage.setItem('aia_newDevice', '1'); // แจ้งเตือนบน dashboard
+      }
+      localStorage.setItem('aia_currentUser', fuid);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      showError('login-error', firebaseErrorMsg(err.code));
+      btn.textContent = 'เข้าสู่ระบบ'; btn.disabled = false;
+    }
   }
 
-  /* ── Tab switch ── */
+  /* ── Forgot Password ── */
+  async function doForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const errEl = document.getElementById('forgot-error');
+    const okEl  = document.getElementById('forgot-ok');
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+    if (!email) { errEl.textContent = 'กรุณากรอกอีเมล'; errEl.style.display = 'block'; return; }
+    try {
+      await fbAuth.sendPasswordResetEmail(email);
+      okEl.style.display = 'block';
+    } catch (err) {
+      errEl.textContent = firebaseErrorMsg(err.code);
+      errEl.style.display = 'block';
+    }
+  }
+
+  /* ── Tab / panel switch ── */
   function switchTab(tab) {
     document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + tab).classList.add('active');
@@ -311,6 +392,14 @@
     const idx = tab === 'login' ? 0 : 1;
     document.querySelectorAll('#panel-login .tab-btn, #panel-register .tab-btn')
       .forEach((b, i) => { if (i % 2 === idx) b.classList.add('active'); });
+  }
+  function showForgot() {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-forgot').classList.add('active');
+  }
+  function hideForgot() {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-login').classList.add('active');
   }
 
   /* ── Password strength ── */
@@ -321,7 +410,7 @@
     const label = document.getElementById('s-label');
     segs.forEach(s => { s.className = 'strength-seg'; });
     let score = 0;
-    if (val.length >= 8) score++;
+    if (val.length >= 6) score++;
     if (/[A-Z]/.test(val)) score++;
     if (/[0-9]/.test(val)) score++;
     if (/[^A-Za-z0-9]/.test(val)) score++;
@@ -333,15 +422,21 @@
     label.style.color = val ? colors[cls] : 'var(--gray-400)';
   }
 
-  /* ── Enter key support ── */
+  /* ── Enter key ── */
   document.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
     if (document.getElementById('panel-login').classList.contains('active')) doLogin();
-    else doRegister();
+    else if (document.getElementById('panel-register').classList.contains('active')) doRegister();
+    else if (document.getElementById('panel-forgot').classList.contains('active')) doForgotPassword();
   });
 
-  /* ── If already logged in, go to dashboard ── */
-  if (localStorage.getItem('aia_currentUser')) window.location.href = 'dashboard.html';
+  /* ── ถ้า login อยู่แล้ว → ไป dashboard ── */
+  fbAuth.onAuthStateChanged(user => {
+    if (user) {
+      localStorage.setItem('aia_currentUser', user.uid);
+      window.location.href = 'dashboard.html';
+    }
+  });
 </script>
 </body>
 </html>

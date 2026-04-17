@@ -6,6 +6,20 @@
   <title>448 Wealth Management Plan — วางแผนการเงิน</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
@@ -619,6 +633,10 @@
 const uid = localStorage.getItem('aia_currentUser');
 if (!uid) window.location.href = 'login.html';
 
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+});
+
 function getUsers()   { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
 function saveUsers(u) { localStorage.setItem('aia_users', JSON.stringify(u)); }
 
@@ -1170,6 +1188,7 @@ function escHtml(str) {
 }
 
 function doLogout() {
+  fbAuth.signOut();
   localStorage.removeItem('aia_currentUser');
   window.location.href = 'login.html';
 }

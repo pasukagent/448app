@@ -6,6 +6,20 @@
   <title>448 Wealth Management Plan — คำนวณภาษี</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
   <style>
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
@@ -263,6 +277,10 @@
 <script>
   const uid = localStorage.getItem('aia_currentUser');
   if (!uid) window.location.href = 'login.html';
+
+  fbAuth.onAuthStateChanged(user => {
+    if (!user) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+  });
 
   function getUsers()     { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
   function saveUsers(arr) { localStorage.setItem('aia_users', JSON.stringify(arr)); }
