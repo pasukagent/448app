@@ -434,8 +434,8 @@
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
           <defs>
             <linearGradient id="flg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#B8963E"/>
-              <stop offset="100%" stop-color="#8B6D1F"/>
+              <stop offset="0%" stop-color="#D0021B"/>
+              <stop offset="100%" stop-color="#9B0013"/>
             </linearGradient>
           </defs>
           <rect width="32" height="32" rx="8" fill="url(#flg)"/>
@@ -682,7 +682,7 @@ let selectedClientId   = null;
 let timelineChartInst  = null;
 
 const GOAL_COLORS = [
-  '#B8963E','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
+  '#D0021B','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
 ];
 let activeGoalIdx    = -1;
 
@@ -883,11 +883,11 @@ function renderTimelineChart(goals) {
       ctx.beginPath();
       ctx.moveTo(tx, chartArea.top);
       ctx.lineTo(tx, chartArea.bottom);
-      ctx.strokeStyle = '#B8963E';
+      ctx.strokeStyle = '#D0021B';
       ctx.lineWidth   = 2;
       ctx.setLineDash([5, 3]);
       ctx.stroke();
-      ctx.fillStyle = '#B8963E';
+      ctx.fillStyle = '#D0021B';
       ctx.font = 'bold 10px Sarabun, sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText('วันนี้', tx + 4, chartArea.top + 12);
