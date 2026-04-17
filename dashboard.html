@@ -179,6 +179,82 @@
     .cs-empty a { color: var(--red-primary); font-weight: 600; text-decoration: none; }
     .cs-empty a:hover { text-decoration: underline; }
 
+    /* ─── Backup bar ─── */
+    .backup-bar {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 18px 22px;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      border-left: 4px solid var(--red-primary);
+    }
+    .backup-bar-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .backup-bar-info { flex: 1; min-width: 0; }
+    .backup-bar-title { font-weight: 700; font-size: .95rem; color: var(--gray-800); margin-bottom: 3px; }
+    .backup-bar-sub   { font-size: .8rem; color: var(--gray-400); }
+    .backup-bar-btns  { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    .btn-export {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--red-primary); color: white;
+      border: none; border-radius: var(--radius-sm);
+      padding: 9px 18px; font-size: .88rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: all .2s;
+    }
+    .btn-export:hover { background: var(--red-dark); transform: translateY(-1px); }
+    .btn-import {
+      display: flex; align-items: center; gap: 7px;
+      background: white; color: var(--gray-700);
+      border: 2px solid var(--gray-200); border-radius: var(--radius-sm);
+      padding: 9px 18px; font-size: .88rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: all .2s;
+    }
+    .btn-import:hover { border-color: var(--red-primary); color: var(--red-primary); transform: translateY(-1px); }
+
+    /* ─── Import confirm modal ─── */
+    .import-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 9999; display: none; align-items: center; justify-content: center;
+    }
+    .import-modal-overlay.open { display: flex; }
+    .import-modal {
+      background: white; border-radius: var(--radius); padding: 32px 28px;
+      max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .import-modal h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 10px; }
+    .import-modal p  { font-size: .9rem; color: var(--gray-600); margin-bottom: 20px; line-height: 1.6; }
+    .import-modal-file {
+      background: var(--gray-100); border-radius: var(--radius-sm);
+      padding: 12px 16px; font-size: .88rem; font-weight: 600;
+      color: var(--gray-700); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .import-modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel-import {
+      padding: 9px 20px; border-radius: var(--radius-sm);
+      border: 2px solid var(--gray-200); background: white;
+      font-family: var(--font); font-size: .88rem; font-weight: 700;
+      cursor: pointer; color: var(--gray-600);
+    }
+    .btn-cancel-import:hover { border-color: var(--gray-400); }
+    .btn-confirm-import {
+      padding: 9px 20px; border-radius: var(--radius-sm);
+      border: none; background: var(--red-primary); color: white;
+      font-family: var(--font); font-size: .88rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-confirm-import:hover { background: var(--red-dark); }
+
+    /* Toast notification */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1a1a2e; color: white; padding: 12px 24px;
+      border-radius: 50px; font-size: .88rem; font-weight: 600;
+      z-index: 99999; opacity: 0; transition: all .35s ease;
+      pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #28a745; }
+    .toast.error   { background: #DC3545; }
+
     /* ─── Two-col ─── */
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .panel {
@@ -430,7 +506,38 @@
         <div class="activity-list" id="activity-list"></div>
       </div>
 
+      <!-- ─── BACKUP BAR ─── -->
+      <div class="backup-bar" style="margin-top:28px;">
+        <div class="backup-bar-icon">💾</div>
+        <div class="backup-bar-info">
+          <div class="backup-bar-title">สำรองและกู้คืนข้อมูล</div>
+          <div class="backup-bar-sub" id="backup-last-label">Export เพื่อบันทึกข้อมูลลูกค้าทั้งหมด · Import เพื่อโหลดข้อมูลบนเครื่องใหม่</div>
+        </div>
+        <div class="backup-bar-btns">
+          <button class="btn-export" onclick="exportData()">📥 Export ข้อมูล</button>
+          <button class="btn-import" onclick="document.getElementById('import-file-input').click()">📤 Import ข้อมูล</button>
+        </div>
+      </div>
+      <!-- hidden file input -->
+      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(this)">
+
     </main>
+
+    <!-- ─── IMPORT CONFIRM MODAL ─── -->
+    <div class="import-modal-overlay" id="import-modal-overlay" onclick="closeImportModal(event)">
+      <div class="import-modal">
+        <h3>⚠️ ยืนยันการ Import ข้อมูล</h3>
+        <p>การ import จะ<strong>แทนที่ข้อมูลทั้งหมด</strong>ของบัญชีนี้ด้วยไฟล์ที่เลือก<br>ข้อมูลปัจจุบันจะหายไป — แนะนำให้ Export สำรองก่อน</p>
+        <div class="import-modal-file" id="import-modal-filename">📄 —</div>
+        <div class="import-modal-btns">
+          <button class="btn-cancel-import" onclick="closeImportModal()">ยกเลิก</button>
+          <button class="btn-confirm-import" onclick="confirmImport()">ยืนยัน Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TOAST ─── -->
+    <div class="toast" id="toast"></div>
   </div>
 </div>
 
@@ -734,6 +841,106 @@ function logActivity(icon, title) {
   if (!allUsers[idx].data.activities) allUsers[idx].data.activities = [];
   allUsers[idx].data.activities.push({ icon, title, time });
   localStorage.setItem('aia_users', JSON.stringify(allUsers));
+}
+
+/* ════════════════════════════════════════════════════
+   Toast helper
+════════════════════════════════════════════════════ */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ════════════════════════════════════════════════════
+   Export / Import
+════════════════════════════════════════════════════ */
+function exportData() {
+  const user = getUser();
+  const payload = {
+    exportedAt : new Date().toISOString(),
+    exportedBy : user.firstName + ' ' + user.lastName,
+    appVersion : '1.0',
+    data       : user.data   // clients, activities, financialGoals, etc.
+  };
+  const json     = JSON.stringify(payload, null, 2);
+  const blob     = new Blob([json], { type: 'application/json' });
+  const url      = URL.createObjectURL(blob);
+  const dateStr  = new Date().toISOString().slice(0, 10);
+  const filename = `backup_448_${dateStr}.json`;
+
+  const a = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Update label
+  const lbl = document.getElementById('backup-last-label');
+  if (lbl) lbl.textContent = '✅ Export ล่าสุด: ' + new Date().toLocaleString('th-TH', { dateStyle:'medium', timeStyle:'short' });
+
+  showToast('📥 Export สำเร็จ — ไฟล์ ' + filename + ' ถูกดาวน์โหลดแล้ว', 'success');
+  logActivity('💾', 'Export ข้อมูลสำรอง (' + (user.data.clients || []).length + ' ลูกค้า)');
+}
+
+// Step 1: user picks file → show confirm modal
+let _pendingImportData = null;
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = ''; // reset so same file can be picked again
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      // Validate basic structure
+      if (!payload.data || !Array.isArray(payload.data.clients)) {
+        showToast('❌ ไฟล์ไม่ถูกต้อง — กรุณาเลือกไฟล์ backup ของแอปนี้', 'error');
+        return;
+      }
+      _pendingImportData = payload;
+      // Show modal
+      document.getElementById('import-modal-filename').innerHTML =
+        '📄 ' + file.name + ' · ' + (payload.data.clients.length) + ' ลูกค้า · Export เมื่อ ' +
+        (payload.exportedAt ? new Date(payload.exportedAt).toLocaleDateString('th-TH') : 'ไม่ทราบ');
+      document.getElementById('import-modal-overlay').classList.add('open');
+    } catch {
+      showToast('❌ อ่านไฟล์ไม่ได้ — ตรวจสอบว่าเป็น JSON ที่ถูกต้อง', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Step 2: user confirms → replace data
+function confirmImport() {
+  if (!_pendingImportData) return;
+  const allUsers = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = allUsers.findIndex(u => u.id === uid);
+  if (idx === -1) { showToast('❌ ไม่พบบัญชีผู้ใช้', 'error'); return; }
+
+  allUsers[idx].data = _pendingImportData.data;
+  localStorage.setItem('aia_users', JSON.stringify(allUsers));
+  _pendingImportData = null;
+  closeImportModal();
+
+  showToast('✅ Import สำเร็จ! โหลดข้อมูลใหม่แล้ว', 'success');
+
+  // Re-init
+  const clients = (allUsers[idx].data.clients || []);
+  selectedClientId = clients.length > 0 ? clients[0].id : null;
+  renderClientStrip();
+  updateDashboard();
+  renderActivity(allUsers[idx]);
+}
+
+function closeImportModal(e) {
+  if (e && e.target !== document.getElementById('import-modal-overlay')) return;
+  document.getElementById('import-modal-overlay').classList.remove('open');
+  _pendingImportData = null;
 }
 
 /* ════════════════════════════════════════════════════
