@@ -343,12 +343,21 @@
     .endorse-amt  { font-size: .82rem; font-weight: 700; color: var(--red-primary); margin-top: 3px; }
     .endorse-del  { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--gray-200); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; transition: all .2s; }
     .endorse-del:hover { border-color: #FF4D4D; background: #FFF0F0; }
+    .endorse-edit { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--gray-200); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; transition: all .2s; }
+    .endorse-edit:hover { border-color: var(--red-primary); background: var(--red-soft); }
+    .endorse-actions { display: flex; gap: 5px; flex-shrink: 0; }
     .endorse-empty { color: var(--gray-400); font-size: .85rem; text-align: center; padding: 14px 0; }
+    /* Release doc date badge */
+    .release-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 50px; margin-top: 5px; }
+    .release-badge.overdue { background: #FFF0F0; color: #C0021B; border: 1px solid #FFB3B3; }
+    .release-badge.soon    { background: #FFF8E6; color: #B45309; border: 1px solid #FCD34D; }
+    .release-badge.ok      { background: #F0FFF4; color: #276749; border: 1px solid #9AE6B4; }
     .endorse-add-form { display: none; background: var(--gray-100); border-radius: var(--radius-sm); padding: 16px; margin-top: 10px; }
     .endorse-add-form.open { display: block; }
     .endorse-section-title-row { display: flex; align-items: center; justify-content: space-between; }
     .endorse-add-btn { font-size: .75rem; padding: 3px 12px; border-radius: 50px; border: 1.5px solid var(--red-primary); background: white; color: var(--red-primary); cursor: pointer; font-weight: 700; font-family: var(--font); transition: all .2s; }
     .endorse-add-btn:hover { background: var(--red-primary); color: white; }
+    .en-form-title { font-weight: 700; font-size: .88rem; color: var(--gray-700); margin-bottom: 10px; }
 
     /* ─── CLIENT MODAL ─── */
     .client-modal { background: white; border-radius: var(--radius); width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); animation: slideUp .25s ease; }
@@ -779,6 +788,7 @@
         </div>
         <div class="endorse-list" id="endorse-list"></div>
         <div class="endorse-add-form" id="endorse-add-form">
+          <div class="en-form-title" id="en-form-title">➕ เพิ่มสลักหลังใหม่</div>
           <div class="form-grid">
             <div class="fg"><label>ชื่อสลักหลัง / Rider *</label><input id="en-name" type="text" placeholder="เช่น สัญญาเพิ่มเติมอุบัติเหตุ"></div>
             <div class="fg">
@@ -795,11 +805,15 @@
             <div class="fg"><label>เบี้ยเพิ่มเติมรายปี (฿)</label><input id="en-premium" type="number" placeholder="0 = รวมอยู่ในหลัก" min="0"></div>
             <div class="fg"><label>วันที่มีผล</label><input id="en-start" type="date"></div>
             <div class="fg"><label>วันที่สิ้นสุด</label><input id="en-end" type="date"></div>
+            <div class="fg" style="grid-column:1/-1;">
+              <label>📅 วันส่งเอกสารปลดสลักหลัง</label>
+              <input id="en-release-doc" type="date" style="border-color:#F39C12;">
+            </div>
           </div>
           <div class="fg" style="margin-top:10px;"><label>หมายเหตุ / รายละเอียด</label><input id="en-note" type="text" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></div>
           <div id="en-error" style="display:none;margin-top:8px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:8px 12px;font-size:.82rem;color:#C0021B;"></div>
           <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn btn-primary" onclick="addEndorsement()" style="padding:8px 16px;font-size:.85rem;">💾 บันทึก</button>
+            <button class="btn btn-primary" id="en-save-btn" onclick="saveEndorsementForm()" style="padding:8px 16px;font-size:.85rem;">💾 บันทึก</button>
             <button class="btn btn-outline" onclick="toggleEndorseForm()" style="padding:8px 16px;font-size:.85rem;">ยกเลิก</button>
           </div>
         </div>
@@ -1777,6 +1791,8 @@ function renderEndorsements(pIdx) {
     return;
   }
 
+  const today = new Date(); today.setHours(0,0,0,0);
+
   el.innerHTML = endorsements.map((e, j) => {
     const ico      = ENDORSE_ICONS[e.type] || '📝';
     const cls      = ENDORSE_CLASS[e.type] || '';
@@ -1785,6 +1801,21 @@ function renderEndorsements(pIdx) {
     const amtParts = [];
     if (e.coverage) amtParts.push('คุ้มครอง ' + fmt(e.coverage));
     if (e.premium)  amtParts.push('เบี้ยเพิ่ม ' + fmt(e.premium) + '/ปี');
+
+    // Release doc date badge
+    let releaseBadge = '';
+    if (e.releaseDocDate) {
+      const rd      = new Date(e.releaseDocDate); rd.setHours(0,0,0,0);
+      const diff    = Math.round((rd - today) / 86400000);
+      if (diff < 0) {
+        releaseBadge = `<div class="release-badge overdue">📋 ส่งเอกสารปลดสลักหลัง: เลยกำหนดแล้ว ${Math.abs(diff)} วัน!</div>`;
+      } else if (diff <= 30) {
+        releaseBadge = `<div class="release-badge soon">📋 ส่งเอกสารปลดสลักหลัง: อีก ${diff} วัน (${fmtDate(e.releaseDocDate)})</div>`;
+      } else {
+        releaseBadge = `<div class="release-badge ok">📋 ส่งเอกสารปลดสลักหลัง: ${fmtDate(e.releaseDocDate)}</div>`;
+      }
+    }
+
     return `
       <div class="endorse-row ${cls}">
         <div class="endorse-ico">${ico}</div>
@@ -1792,55 +1823,119 @@ function renderEndorsements(pIdx) {
           <div class="endorse-name">${e.name}</div>
           ${meta ? `<div class="endorse-meta">${meta}</div>` : ''}
           ${amtParts.length ? `<div class="endorse-amt">${amtParts.join(' · ')}</div>` : ''}
+          ${releaseBadge}
         </div>
-        <button class="endorse-del" onclick="deleteEndorsement(${pIdx},${j})" title="ลบ">🗑️</button>
+        <div class="endorse-actions">
+          <button class="endorse-edit" onclick="editEndorsement(${pIdx},${j})" title="แก้ไข">✏️</button>
+          <button class="endorse-del"  onclick="deleteEndorsement(${pIdx},${j})" title="ลบ">🗑️</button>
+        </div>
       </div>`;
   }).join('');
 }
+
+let editingEndorseIdx = null; // null = add new, number = editing existing
 
 function toggleEndorseForm() {
   const f   = document.getElementById('endorse-add-form');
   const btn = document.getElementById('endorse-toggle-btn');
   const open = f.classList.toggle('open');
   btn.textContent = open ? '✕ ปิด' : '+ เพิ่ม';
-  if (!open) clearEndorseForm();
+  if (open) {
+    clearEndorseForm();
+  } else {
+    clearEndorseForm();
+  }
 }
 
 function clearEndorseForm() {
-  ['en-name','en-note','en-start','en-end'].forEach(id => document.getElementById(id).value = '');
+  ['en-name','en-note','en-start','en-end','en-release-doc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('en-type').value     = 'สัญญาเพิ่มเติม';
   document.getElementById('en-coverage').value = '';
   document.getElementById('en-premium').value  = '';
   document.getElementById('en-error').style.display = 'none';
+  editingEndorseIdx = null;
+  document.getElementById('en-form-title').textContent = '➕ เพิ่มสลักหลังใหม่';
+  document.getElementById('en-save-btn').textContent   = '💾 บันทึก';
 }
 
-function addEndorsement() {
-  const name      = document.getElementById('en-name').value.trim();
-  const type      = document.getElementById('en-type').value;
-  const coverage  = parseFloat(document.getElementById('en-coverage').value) || 0;
-  const premium   = parseFloat(document.getElementById('en-premium').value)  || 0;
-  const startDate = document.getElementById('en-start').value;
-  const endDate   = document.getElementById('en-end').value;
-  const note      = document.getElementById('en-note').value.trim();
-  const errEl     = document.getElementById('en-error');
+function editEndorsement(pIdx, j) {
+  const client = getCurrentClient();
+  if (!client) return;
+  const e = ((client.policies || [])[pIdx]?.endorsements || [])[j];
+  if (!e) return;
+
+  editingEndorseIdx = j;
+
+  // เปิด form และ populate
+  const f   = document.getElementById('endorse-add-form');
+  const btn = document.getElementById('endorse-toggle-btn');
+  f.classList.add('open');
+  btn.textContent = '✕ ปิด';
+
+  document.getElementById('en-name').value        = e.name        || '';
+  document.getElementById('en-type').value        = e.type        || 'สัญญาเพิ่มเติม';
+  document.getElementById('en-coverage').value    = e.coverage    || '';
+  document.getElementById('en-premium').value     = e.premium     || '';
+  document.getElementById('en-start').value       = e.startDate   || '';
+  document.getElementById('en-end').value         = e.endDate     || '';
+  document.getElementById('en-release-doc').value = e.releaseDocDate || '';
+  document.getElementById('en-note').value        = e.note        || '';
+  document.getElementById('en-error').style.display = 'none';
+
+  document.getElementById('en-form-title').textContent = '✏️ แก้ไขสลักหลัง';
+  document.getElementById('en-save-btn').textContent   = '💾 บันทึกการแก้ไข';
+
+  // Scroll form into view
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function saveEndorsementForm() {
+  const name           = document.getElementById('en-name').value.trim();
+  const type           = document.getElementById('en-type').value;
+  const coverage       = parseFloat(document.getElementById('en-coverage').value) || 0;
+  const premium        = parseFloat(document.getElementById('en-premium').value)  || 0;
+  const startDate      = document.getElementById('en-start').value;
+  const endDate        = document.getElementById('en-end').value;
+  const releaseDocDate = document.getElementById('en-release-doc').value;
+  const note           = document.getElementById('en-note').value.trim();
+  const errEl          = document.getElementById('en-error');
 
   if (!name) { errEl.textContent = 'กรุณากรอกชื่อสลักหลัง / Rider'; errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
 
   const cid  = currentClientId;
   const pIdx = currentPolicyIdx;
+  const isEdit = editingEndorseIdx !== null;
+
   updateCurrentUser(u => {
     const client = u.data.clients.find(c => c.id === cid);
     if (!client) return;
     const policy = (client.policies || [])[pIdx];
     if (!policy) return;
     if (!policy.endorsements) policy.endorsements = [];
-    policy.endorsements.push({ name, type, coverage, premium, startDate, endDate, note, addedAt: new Date().toISOString() });
+
+    const obj = { name, type, coverage, premium, startDate, endDate, releaseDocDate, note };
+    if (isEdit) {
+      obj.addedAt  = policy.endorsements[editingEndorseIdx]?.addedAt || new Date().toISOString();
+      obj.editedAt = new Date().toISOString();
+      policy.endorsements[editingEndorseIdx] = obj;
+    } else {
+      obj.addedAt = new Date().toISOString();
+      policy.endorsements.push(obj);
+    }
   });
 
-  toggleEndorseForm();
+  // ปิด form และ re-render
+  const f   = document.getElementById('endorse-add-form');
+  const btn = document.getElementById('endorse-toggle-btn');
+  f.classList.remove('open');
+  btn.textContent = '+ เพิ่ม';
+  clearEndorseForm();
   renderEndorsements(pIdx);
 }
+
+// เก็บไว้ backwards compat กรณีเรียกจากที่อื่น
+function addEndorsement() { saveEndorsementForm(); }
 
 function deleteEndorsement(pIdx, endIdx) {
   if (!confirm('ยืนยันลบสลักหลังนี้?')) return;
