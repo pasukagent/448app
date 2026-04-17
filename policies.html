@@ -298,7 +298,7 @@
     /* ─── DETAIL MODAL (policy) ─── */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.5); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.open { display: flex; }
-    .detail-modal { background: white; border-radius: var(--radius); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp .25s ease; }
+    .detail-modal { background: white; border-radius: var(--radius); width: 100%; max-width: 780px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp .25s ease; }
     @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
     .modal-header { background: linear-gradient(135deg, var(--red-primary), var(--red-dark)); color: white; padding: 22px 24px; border-radius: var(--radius) var(--radius) 0 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .modal-header-left { display: flex; align-items: center; gap: 14px; }
@@ -316,7 +316,7 @@
     .detail-badge.red    { background: #F8D7DA; color: #721C24; }
     .detail-section { margin-bottom: 20px; }
     .detail-section-title { font-size: .72rem; font-weight: 800; color: var(--red-primary); text-transform: uppercase; letter-spacing: .08em; padding-bottom: 8px; border-bottom: 1.5px solid var(--red-soft); margin-bottom: 12px; }
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
     .detail-item .d-lbl { font-size: .75rem; color: var(--gray-400); font-weight: 600; margin-bottom: 2px; }
     .detail-item .d-val { font-size: .95rem; font-weight: 700; color: var(--gray-800); }
     .detail-item .d-val.big { font-size: 1.3rem; color: var(--red-primary); }
