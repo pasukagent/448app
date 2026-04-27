@@ -297,12 +297,16 @@
   }
 
   /* ── Email notification ── */
-  function notifyAdminByEmail(userName, userEmail) {
-    emailjs.send('service_q8i3sop', 'template_st8zuou', {
-      user_name: userName,
-      user_email: userEmail,
-      register_time: new Date().toLocaleString('th-TH', { calendar: 'gregory' })
-    }).catch(err => console.error('EmailJS error:', err));
+  async function notifyAdminByEmail(userName, userEmail) {
+    try {
+      await emailjs.send('service_q8i3sop', 'template_st8zuou', {
+        user_name: userName,
+        user_email: userEmail,
+        register_time: new Date().toLocaleString('th-TH-u-ca-gregory')
+      });
+    } catch(err) {
+      console.error('EmailJS error:', err);
+    }
   }
 
   /* ── Register ── */
@@ -346,7 +350,7 @@
         saveUsers(users);
       }
 
-      notifyAdminByEmail(firstName + ' ' + lastName, email);
+      await notifyAdminByEmail(firstName + ' ' + lastName, email);
       await fbAuth.signOut();
       isRegistering = false;
 
