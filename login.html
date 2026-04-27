@@ -475,11 +475,32 @@
 
   /* ── ถ้า login อยู่แล้ว → ไป dashboard ── */
   let isRegistering = false;
-  fbAuth.onAuthStateChanged(user => {
-    if (user && !isRegistering) {
-      localStorage.setItem('aia_currentUser', user.uid);
-      window.location.href = 'dashboard.html';
-    }
+  fbAuth.onAuthStateChanged(async user => {
+    if (!user || isRegistering) return;
+    try {
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data().approved === false) {
+        await fbAuth.signOut();
+        showError('login-error', '⏳ บัญชีของคุณยังรอการอนุมัติจาก admin กรุณารอสักครู่');
+        return;
+      }
+      // sync profile ลง localStorage ถ้ายังไม่มี (กรณีเปิดจากเครื่องใหม่)
+      const users = getUsers();
+      if (!users.find(u => u.id === user.uid)) {
+        const d = userDoc.exists ? userDoc.data() : {};
+        users.push({
+          id: user.uid,
+          firstName: d.firstName || user.email.split('@')[0],
+          lastName: d.lastName || '',
+          email: user.email,
+          createdAt: new Date().toISOString(),
+          data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
+        });
+        saveUsers(users);
+      }
+    } catch (e) { /* Firestore error — allow through */ }
+    localStorage.setItem('aia_currentUser', user.uid);
+    window.location.href = 'dashboard.html';
   });
 </script>
 </body>
