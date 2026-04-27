@@ -297,11 +297,13 @@
   }
 
   /* ── Email notification ── */
-  async function notifyAdminByEmail(userName, userEmail) {
+  async function notifyAdminByEmail(userName, userEmail, userUid) {
     try {
       await emailjs.send('service_q8i3sop', 'template_st8zuou', {
         user_name: userName,
         user_email: userEmail,
+        user_uid: userUid,
+        approve_link: 'https://448app.github.io/448app/approve.html?uid=' + userUid,
         register_time: new Date().toLocaleString('th-TH-u-ca-gregory')
       });
     } catch(err) {
@@ -350,7 +352,7 @@
         saveUsers(users);
       }
 
-      await notifyAdminByEmail(firstName + ' ' + lastName, email);
+      await notifyAdminByEmail(firstName + ' ' + lastName, email, fuid);
       await fbAuth.signOut();
       isRegistering = false;
 

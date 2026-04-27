@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>อนุมัติสมาชิก — 448 Wealth Management Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+    const db = firebase.firestore();
+    const ADMIN_EMAIL = 'pasuk.agent@gmail.com';
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Sarabun', sans-serif; background: #f5f6fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .card { background: white; border-radius: 16px; padding: 40px 36px; max-width: 440px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,.1); text-align: center; }
+    .logo { font-size: 2.5rem; margin-bottom: 16px; }
+    h1 { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+    .sub { color: #666; font-size: .93rem; margin-bottom: 28px; }
+    .btn { display: inline-block; padding: 12px 32px; border-radius: 10px; font-family: 'Sarabun', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; width: 100%; }
+    .btn-primary { background: #D0021B; color: white; }
+    .btn-primary:hover { background: #a8001a; }
+    .msg { padding: 14px 18px; border-radius: 10px; font-size: .93rem; margin-bottom: 20px; }
+    .msg-success { background: #e6f4ea; color: #1a7f3c; border: 1px solid #1a7f3c; }
+    .msg-error   { background: #fff0f0; color: #c0021b; border: 1px solid #ffb3b3; }
+    .msg-info    { background: #e8f0fe; color: #1a56db; border: 1px solid #93c5fd; }
+    input { width: 100%; padding: 12px 14px; border: 1.5px solid #ddd; border-radius: 10px; font-family: 'Sarabun', sans-serif; font-size: 1rem; margin-bottom: 12px; }
+    input:focus { outline: none; border-color: #D0021B; }
+    .user-info { background: #f8f9fa; border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: left; font-size: .9rem; }
+    .user-info div { margin-bottom: 6px; }
+    .user-info span { font-weight: 700; color: #1a1a2e; }
+    #loading { color: #666; font-size: .93rem; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🛡️</div>
+  <h1>อนุมัติสมาชิกใหม่</h1>
+  <p class="sub">448 Wealth Management Plan</p>
+
+  <!-- Loading -->
+  <div id="section-loading">
+    <p id="loading">กำลังตรวจสอบ...</p>
+  </div>
+
+  <!-- Login form (shown if not logged in) -->
+  <div id="section-login" style="display:none;">
+    <div class="msg msg-info">กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อน</div>
+    <input type="email" id="adm-email" placeholder="อีเมล Admin">
+    <input type="password" id="adm-password" placeholder="รหัสผ่าน">
+    <div id="login-err" class="msg msg-error" style="display:none;"></div>
+    <button class="btn btn-primary" onclick="doAdminLogin()">เข้าสู่ระบบ</button>
+  </div>
+
+  <!-- Approve section -->
+  <div id="section-approve" style="display:none;">
+    <div id="approve-msg"></div>
+    <div class="user-info" id="user-info" style="display:none;"></div>
+    <button class="btn btn-primary" id="btn-approve" onclick="doApprove()" style="display:none;">✅ อนุมัติสมาชิกนี้</button>
+  </div>
+</div>
+
+<script>
+  const uid = new URLSearchParams(window.location.search).get('uid');
+
+  fbAuth.onAuthStateChanged(async user => {
+    document.getElementById('section-loading').style.display = 'none';
+    if (!user) {
+      document.getElementById('section-login').style.display = 'block';
+      return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      document.getElementById('section-approve').style.display = 'block';
+      showMsg('msg-error', '⛔ บัญชีนี้ไม่มีสิทธิ์อนุมัติสมาชิก');
+      return;
+    }
+    document.getElementById('section-approve').style.display = 'block';
+    await loadUserInfo();
+  });
+
+  async function loadUserInfo() {
+    if (!uid) { showMsg('msg-error', '❌ ไม่พบ UID ในลิงก์นี้'); return; }
+    try {
+      const doc = await db.collection('users').doc(uid).get();
+      if (!doc.exists) { showMsg('msg-error', '❌ ไม่พบข้อมูลสมาชิกนี้ใน Firestore'); return; }
+      const d = doc.data();
+      if (d.approved === true) {
+        showMsg('msg-success', '✅ สมาชิกนี้ได้รับการอนุมัติแล้ว');
+        return;
+      }
+      document.getElementById('user-info').style.display = 'block';
+      document.getElementById('user-info').innerHTML = `
+        <div>ชื่อ: <span>${d.firstName} ${d.lastName}</span></div>
+        <div>อีเมล: <span>${d.email}</span></div>
+        <div>สมัครเมื่อ: <span>${new Date(d.createdAt).toLocaleString('th-TH-u-ca-gregory')}</span></div>
+      `;
+      document.getElementById('btn-approve').style.display = 'block';
+    } catch(e) {
+      showMsg('msg-error', '❌ เกิดข้อผิดพลาด: ' + e.message);
+    }
+  }
+
+  async function doApprove() {
+    const btn = document.getElementById('btn-approve');
+    btn.textContent = 'กำลังอนุมัติ...'; btn.disabled = true;
+    try {
+      await db.collection('users').doc(uid).update({ approved: true });
+      document.getElementById('user-info').style.display = 'none';
+      btn.style.display = 'none';
+      showMsg('msg-success', '✅ อนุมัติสมาชิกเรียบร้อยแล้ว! สมาชิกสามารถเข้าใช้งานได้ทันที');
+    } catch(e) {
+      btn.textContent = '✅ อนุมัติสมาชิกนี้'; btn.disabled = false;
+      showMsg('msg-error', '❌ เกิดข้อผิดพลาด: ' + e.message);
+    }
+  }
+
+  async function doAdminLogin() {
+    const email = document.getElementById('adm-email').value.trim();
+    const pass  = document.getElementById('adm-password').value;
+    const err   = document.getElementById('login-err');
+    err.style.display = 'none';
+    if (email !== ADMIN_EMAIL) { err.textContent = 'อีเมลนี้ไม่ใช่บัญชี Admin'; err.style.display = 'block'; return; }
+    try {
+      await fbAuth.signInWithEmailAndPassword(email, pass);
+    } catch(e) {
+      err.textContent = 'รหัสผ่านไม่ถูกต้อง'; err.style.display = 'block';
+    }
+  }
+
+  function showMsg(cls, text) {
+    const el = document.getElementById('approve-msg');
+    el.className = 'msg ' + cls;
+    el.textContent = text;
+    el.style.display = 'block';
+  }
+</script>
+</body>
+</html>
