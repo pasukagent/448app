@@ -374,6 +374,7 @@
 
     const btn = document.querySelector('#panel-login .login-btn');
     btn.textContent = 'กำลังเข้าสู่ระบบ...'; btn.disabled = true;
+    isLoggingIn = true;
 
     try {
       const cred = await fbAuth.signInWithEmailAndPassword(email, password);
@@ -383,32 +384,36 @@
       const userDoc = await db.collection('users').doc(fuid).get();
       if (userDoc.exists && userDoc.data().approved === false) {
         await fbAuth.signOut();
+        isLoggingIn = false;
         showError('login-error', '⏳ บัญชีของคุณยังรอการอนุมัติจาก admin กรุณารอสักครู่');
         btn.textContent = 'เข้าสู่ระบบ'; btn.disabled = false;
         return;
       }
 
-      // ถ้าเปิดจากเครื่องใหม่ ยังไม่มีข้อมูลใน localStorage → สร้าง profile เปล่า
-      const users = getUsers();
-      if (!users.find(u => u.id === fuid)) {
-        const fsData = userDoc.exists ? userDoc.data() : {};
-        users.push({
-          id: fuid,
-          firstName: fsData.firstName || email.split('@')[0],
-          lastName: fsData.lastName || '',
-          email,
-          createdAt: new Date().toISOString(),
-          data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
-        });
-        saveUsers(users);
-        localStorage.setItem('aia_newDevice', '1');
-      }
+      // sync profile ลง localStorage ถ้ายังไม่มี
+      ensureLocalProfile(fuid, userDoc.exists ? userDoc.data() : null, email);
       localStorage.setItem('aia_currentUser', fuid);
+      isLoggingIn = false;
       window.location.href = 'dashboard.html';
     } catch (err) {
+      isLoggingIn = false;
       showError('login-error', firebaseErrorMsg(err.code));
       btn.textContent = 'เข้าสู่ระบบ'; btn.disabled = false;
     }
+  }
+
+  function ensureLocalProfile(uid, fsData, fallbackEmail) {
+    const users = getUsers();
+    if (users.find(u => u.id === uid)) return;
+    users.push({
+      id: uid,
+      firstName: (fsData && fsData.firstName) || (fallbackEmail || '').split('@')[0],
+      lastName:  (fsData && fsData.lastName)  || '',
+      email:     (fsData && fsData.email)     || fallbackEmail || '',
+      createdAt: new Date().toISOString(),
+      data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
+    });
+    saveUsers(users);
   }
 
   /* ── Forgot Password ── */
@@ -475,30 +480,11 @@
 
   /* ── ถ้า login อยู่แล้ว → ไป dashboard ── */
   let isRegistering = false;
-  fbAuth.onAuthStateChanged(async user => {
-    if (!user || isRegistering) return;
-    try {
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      if (userDoc.exists && userDoc.data().approved === false) {
-        await fbAuth.signOut();
-        showError('login-error', '⏳ บัญชีของคุณยังรอการอนุมัติจาก admin กรุณารอสักครู่');
-        return;
-      }
-      // sync profile ลง localStorage ถ้ายังไม่มี (กรณีเปิดจากเครื่องใหม่)
-      const users = getUsers();
-      if (!users.find(u => u.id === user.uid)) {
-        const d = userDoc.exists ? userDoc.data() : {};
-        users.push({
-          id: user.uid,
-          firstName: d.firstName || user.email.split('@')[0],
-          lastName: d.lastName || '',
-          email: user.email,
-          createdAt: new Date().toISOString(),
-          data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
-        });
-        saveUsers(users);
-      }
-    } catch (e) { /* Firestore error — allow through */ }
+  let isLoggingIn   = false;
+  fbAuth.onAuthStateChanged(user => {
+    if (!user || isRegistering || isLoggingIn) return;
+    // ผู้ใช้ที่มี session อยู่แล้ว = ผ่านการอนุมัติมาแล้ว (unapproved จะถูก signOut ตอน register/login)
+    ensureLocalProfile(user.uid, null, user.email);
     localStorage.setItem('aia_currentUser', user.uid);
     window.location.href = 'dashboard.html';
   });
