@@ -297,13 +297,13 @@
   }
 
   /* ── Email notification ── */
-  async function notifyAdminByEmail(userName, userEmail, userUid) {
+  async function notifyAdminByEmail(userName, userEmail, userUid, token) {
     try {
       await emailjs.send('service_q8i3sop', 'template_st8zuou', {
         user_name: userName,
         user_email: userEmail,
         user_uid: userUid,
-        approve_link: 'https://448app.github.io/448app/approve.html?uid=' + userUid,
+        approve_link: 'https://448app.github.io/448app/approve.html?uid=' + userUid + '&token=' + token,
         register_time: new Date().toLocaleString('th-TH-u-ca-gregory')
       });
     } catch(err) {
@@ -336,9 +336,11 @@
 
       // บันทึกสถานะใน Firestore (admin อนุมัติทันที)
       const isAdmin = email === 'pasuk.agent@gmail.com';
+      const approveToken = isAdmin ? null : Math.random().toString(36).slice(2) + Date.now().toString(36);
       await db.collection('users').doc(fuid).set({
         firstName, lastName, email,
         approved: isAdmin ? true : false,
+        approveToken: approveToken,
         createdAt: new Date().toISOString()
       });
 
@@ -362,7 +364,7 @@
         return;
       }
 
-      await notifyAdminByEmail(firstName + ' ' + lastName, email, fuid);
+      await notifyAdminByEmail(firstName + ' ' + lastName, email, fuid, approveToken);
       await fbAuth.signOut();
       isRegistering = false;
 
