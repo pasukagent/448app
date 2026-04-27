@@ -322,6 +322,7 @@
 
     const btn = document.querySelector('#panel-register .login-btn');
     btn.textContent = 'กำลังสมัคร...'; btn.disabled = true;
+    isRegistering = true;
 
     try {
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
@@ -347,6 +348,7 @@
 
       notifyAdminByEmail(firstName + ' ' + lastName, email);
       await fbAuth.signOut();
+      isRegistering = false;
 
       // แสดงข้อความรออนุมัติ แทนการ redirect
       btn.textContent = 'สมัครสมาชิกฟรี'; btn.disabled = false;
@@ -355,6 +357,7 @@
       document.getElementById('reg-error').style.background = '#e6f4ea';
       document.getElementById('reg-error').style.borderColor = '#1a7f3c';
     } catch (err) {
+      isRegistering = false;
       showError('reg-error', firebaseErrorMsg(err.code));
       btn.textContent = 'สมัครสมาชิกฟรี'; btn.disabled = false;
     }
@@ -471,8 +474,9 @@
   });
 
   /* ── ถ้า login อยู่แล้ว → ไป dashboard ── */
+  let isRegistering = false;
   fbAuth.onAuthStateChanged(user => {
-    if (user) {
+    if (user && !isRegistering) {
       localStorage.setItem('aia_currentUser', user.uid);
       window.location.href = 'dashboard.html';
     }
