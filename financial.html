@@ -462,7 +462,7 @@
   <div id="view-select">
     <div class="page-header-bar">
       <div class="breadcrumb-nav">
-        <a href="dashboard.html">หน้าหลัก</a> › วางแผนการเงิน
+        <a href="dashboard.html">หน้าแรก</a> › วางแผนการเงิน
       </div>
       <h2>💰 วางแผนการเงินลูกค้า</h2>
       <p style="opacity:.8;font-size:.9rem;margin-top:4px;">เลือกลูกค้าเพื่อดูและจัดการแผนการเงิน</p>
@@ -503,7 +503,7 @@
     <!-- Hero -->
     <div class="page-header-bar">
       <div class="breadcrumb-nav">
-        <a href="dashboard.html">หน้าหลัก</a> ›
+        <a href="dashboard.html">หน้าแรก</a> ›
         <a href="#" onclick="showClientSelect();return false;">วางแผนการเงิน</a> ›
         <span id="main-client-name">ลูกค้า</span>
       </div>
@@ -737,7 +737,7 @@ function fmt(n) {
 
 function fmtDate(d) {
   if (!d) return '';
-  return new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(d).toLocaleDateString('th-TH-u-ca-gregory', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function calculateAge(birthdate) {
@@ -920,7 +920,7 @@ function renderTimelineChart(goals) {
             label: ctx => {
               const ds  = ctx.dataset;
               const [s, e] = ctx.raw.x;
-              const fmtD = d => new Date(d).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'numeric' });
+              const fmtD = d => new Date(d).toLocaleDateString('th-TH-u-ca-gregory', { day:'numeric', month:'short', year:'numeric' });
               return [
                 `เริ่ม: ${fmtD(s)}`,
                 `สิ้นสุด: ${fmtD(e)}`,
@@ -1217,9 +1217,12 @@ document.addEventListener('keydown', e => {
   ensureClientGoals(user);
 
   // ถ้ามี ?client=CID จาก dashboard ให้ข้ามหน้าเลือกลูกค้าไปเลย
-  const urlParams = new URLSearchParams(window.location.search);
-  const preselect = urlParams.get('client');
-  const clients   = user.data.clients || [];
+  const urlParams    = new URLSearchParams(window.location.search);
+  const urlPreselect = urlParams.get('client');
+  const lsPreselect  = localStorage.getItem('aia_selectedClient');
+  localStorage.removeItem('aia_selectedClient');
+  const preselect    = urlPreselect || lsPreselect;
+  const clients      = user.data.clients || [];
 
   if (preselect && clients.find(c => c.id === preselect)) {
     showClientMain(preselect);
