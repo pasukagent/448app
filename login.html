@@ -9,6 +9,9 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('5RajlrhhZfmOm58uR');</script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -291,6 +294,15 @@
     return map[code] || 'เกิดข้อผิดพลาด (code: ' + code + ') กรุณาลองใหม่อีกครั้ง';
   }
 
+  /* ── Email notification ── */
+  function notifyAdminByEmail(userName, userEmail) {
+    emailjs.send('5RajlrhhZfmOm58uR', 'template_ce3tdsc', {
+      user_name: userName,
+      user_email: userEmail,
+      register_time: new Date().toLocaleString('th-TH', { calendar: 'gregory' })
+    }).catch(err => console.error('EmailJS error:', err));
+  }
+
   /* ── Register ── */
   async function doRegister() {
     hideError('reg-error');
@@ -324,6 +336,7 @@
         saveUsers(users);
       }
       localStorage.setItem('aia_currentUser', fuid);
+      notifyAdminByEmail(firstName + ' ' + lastName, email);
       window.location.href = 'dashboard.html';
     } catch (err) {
       showError('reg-error', firebaseErrorMsg(err.code));
