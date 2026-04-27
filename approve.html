@@ -134,7 +134,13 @@
     try {
       await fbAuth.signInWithEmailAndPassword(email, pass);
     } catch(e) {
-      err.textContent = 'รหัสผ่านไม่ถูกต้อง'; err.style.display = 'block';
+      const msgs = {
+        'auth/user-not-found'    : 'ยังไม่มีบัญชีนี้ — กรุณาสมัครที่หน้าหลักก่อน',
+        'auth/wrong-password'    : 'รหัสผ่านไม่ถูกต้อง',
+        'auth/invalid-credential': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+      };
+      err.textContent = msgs[e.code] || e.message;
+      err.style.display = 'block';
     }
   }
 

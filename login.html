@@ -334,10 +334,11 @@
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
       const fuid = cred.user.uid;
 
-      // บันทึกสถานะรออนุมัติใน Firestore
+      // บันทึกสถานะใน Firestore (admin อนุมัติทันที)
+      const isAdmin = email === 'pasuk.agent@gmail.com';
       await db.collection('users').doc(fuid).set({
         firstName, lastName, email,
-        approved: false,
+        approved: isAdmin ? true : false,
         createdAt: new Date().toISOString()
       });
 
@@ -350,6 +351,15 @@
           data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
         });
         saveUsers(users);
+      }
+
+      if (isAdmin) {
+        // admin → เข้า dashboard ได้ทันที
+        ensureLocalProfile(fuid, { firstName, lastName, email }, email);
+        localStorage.setItem('aia_currentUser', fuid);
+        isRegistering = false;
+        window.location.href = 'dashboard.html';
+        return;
       }
 
       await notifyAdminByEmail(firstName + ' ' + lastName, email, fuid);
