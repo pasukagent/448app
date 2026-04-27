@@ -6,9 +6,10 @@
   <title>448 Wealth Management Plan — เข้าสู่ระบบ / สมัครสมาชิก</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase Auth -->
+  <!-- Firebase Auth + Firestore -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>emailjs.init('5RajlrhhZfmOm58uR');</script>
@@ -22,6 +23,7 @@
       appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
     });
     const fbAuth = firebase.auth();
+    const db = firebase.firestore();
   </script>
   <style>
     body { overflow: hidden; }
@@ -325,7 +327,14 @@
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
       const fuid = cred.user.uid;
 
-      // บันทึกชื่อ + ข้อมูลเริ่มต้นใน localStorage (keyed by Firebase UID)
+      // บันทึกสถานะรออนุมัติใน Firestore
+      await db.collection('users').doc(fuid).set({
+        firstName, lastName, email,
+        approved: false,
+        createdAt: new Date().toISOString()
+      });
+
+      // บันทึกข้อมูลเริ่มต้นใน localStorage
       const users = getUsers();
       if (!users.find(u => u.id === fuid)) {
         users.push({
@@ -335,9 +344,16 @@
         });
         saveUsers(users);
       }
-      localStorage.setItem('aia_currentUser', fuid);
+
       notifyAdminByEmail(firstName + ' ' + lastName, email);
-      window.location.href = 'dashboard.html';
+      await fbAuth.signOut();
+
+      // แสดงข้อความรออนุมัติ แทนการ redirect
+      btn.textContent = 'สมัครสมาชิกฟรี'; btn.disabled = false;
+      showError('reg-error', '✅ สมัครสำเร็จ! กรุณารอการอนุมัติจาก admin ก่อนเข้าใช้งาน');
+      document.getElementById('reg-error').style.color = '#1a7f3c';
+      document.getElementById('reg-error').style.background = '#e6f4ea';
+      document.getElementById('reg-error').style.borderColor = '#1a7f3c';
     } catch (err) {
       showError('reg-error', firebaseErrorMsg(err.code));
       btn.textContent = 'สมัครสมาชิกฟรี'; btn.disabled = false;
@@ -360,19 +376,29 @@
       const cred = await fbAuth.signInWithEmailAndPassword(email, password);
       const fuid = cred.user.uid;
 
+      // เช็คสถานะอนุมัติใน Firestore
+      const userDoc = await db.collection('users').doc(fuid).get();
+      if (userDoc.exists && userDoc.data().approved === false) {
+        await fbAuth.signOut();
+        showError('login-error', '⏳ บัญชีของคุณยังรอการอนุมัติจาก admin กรุณารอสักครู่');
+        btn.textContent = 'เข้าสู่ระบบ'; btn.disabled = false;
+        return;
+      }
+
       // ถ้าเปิดจากเครื่องใหม่ ยังไม่มีข้อมูลใน localStorage → สร้าง profile เปล่า
       const users = getUsers();
       if (!users.find(u => u.id === fuid)) {
+        const fsData = userDoc.exists ? userDoc.data() : {};
         users.push({
           id: fuid,
-          firstName: email.split('@')[0],
-          lastName: '',
+          firstName: fsData.firstName || email.split('@')[0],
+          lastName: fsData.lastName || '',
           email,
           createdAt: new Date().toISOString(),
           data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
         });
         saveUsers(users);
-        localStorage.setItem('aia_newDevice', '1'); // แจ้งเตือนบน dashboard
+        localStorage.setItem('aia_newDevice', '1');
       }
       localStorage.setItem('aia_currentUser', fuid);
       window.location.href = 'dashboard.html';
