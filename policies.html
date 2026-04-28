@@ -441,6 +441,14 @@
       .page-header-bar { padding: 16px 16px 24px; }
       .cib-meta { flex-direction: column; gap: 4px; }
     }
+    /* ── Toast ── */
+    #save-toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1a7f3c; color: white; padding: 12px 26px; border-radius: 50px;
+      font-weight: 700; font-size: .93rem; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      z-index: 9999; transition: transform .3s ease, opacity .3s ease; opacity: 0; pointer-events: none;
+    }
+    #save-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
@@ -574,6 +582,7 @@
                 <option value="ทุนชีวิต">ทุนชีวิต</option>
                 <option value="สุขภาพ">สุขภาพ</option>
                 <option value="โรคร้ายแรง">โรคร้ายแรง</option>
+                <option value="บำนาญ">บำนาญ</option>
                 <option value="เกษียณ">เกษียณ</option>
                 <option value="ลดหย่อนภาษี">ลดหย่อนภาษี</option>
                 <option value="ลงทุน">ลงทุน</option>
@@ -787,6 +796,12 @@
         </div>
       </div>
 
+      <!-- Section 1.5b: สัญญาเพิ่มเติม (Riders) -->
+      <div class="detail-section" id="md-riders-section" style="display:none;">
+        <div class="detail-section-title">🔗 สัญญาเพิ่มเติม (Riders)</div>
+        <div id="md-riders-grid" class="detail-grid"></div>
+      </div>
+
       <!-- Section 1.5: การชำระเบี้ยและแผนลดทุน -->
       <div class="detail-section" id="md-payment-section" style="display:none;">
         <div class="detail-section-title">💳 การชำระเบี้ยและแผนลดทุน</div>
@@ -886,7 +901,9 @@
               <option value="ทุนชีวิต">ทุนชีวิต</option>
               <option value="สุขภาพ">สุขภาพ</option>
               <option value="โรคร้ายแรง">โรคร้ายแรง</option>
+              <option value="บำนาญ">บำนาญ</option>
               <option value="เกษียณ">เกษียณ</option>
+              <option value="ลดหย่อนภาษี">ลดหย่อนภาษี</option>
               <option value="ลงทุน">ลงทุน</option>
               <option value="การศึกษา">การศึกษา</option>
               <option value="ส่งมอบ">ส่งมอบ</option>
@@ -1100,7 +1117,10 @@ const TYPE_TO_COL = {
 };
 
 function primaryCovOf(p) {
-  return p.type === 'สุขภาพ' ? (p.coverage||0) : (p.lifeCoverage||0);
+  if (p.type === 'สุขภาพ')      return p.coverage      || p.lifeCoverage || 0;
+  if (p.type === 'โรคร้ายแรง') return p.riderCriticalCov || p.lifeCoverage || 0;
+  if (p.type === 'อุบัติเหตุ') return p.riderAccidentCov || p.lifeCoverage || 0;
+  return p.lifeCoverage || 0;
 }
 const RECOMMEND = { 'ทุนชีวิต':5000000,'ชีวิต':5000000,'สุขภาพ':1000000,'โรคร้ายแรง':2000000,'อุบัติเหตุ':500000 };
 const ENDORSE_ICONS = {
@@ -1453,12 +1473,20 @@ function renderTable(policies) {
     const pCol = TYPE_TO_COL[p.type] || p.type;
     const covCols = COVERAGE_TYPES.map(t => {
       if (t === pCol) return `<td class="cov-amount">${fmtShort(primaryCovOf(p))}</td>`;
-      // ทุนชีวิตที่รวมอยู่ในประกันสุขภาพ → แสดงในคอลัมน์ชีวิตด้วย
+      // ทุนชีวิตจากประกันสุขภาพ
       if (t === 'ชีวิต' && p.type === 'สุขภาพ' && p.lifeCoverage > 0)
         return `<td class="cov-amount" title="ทุนชีวิตจากประกันสุขภาพ">
                   ${fmtShort(p.lifeCoverage)}
                   <div style="font-size:.65rem;color:var(--gray-400);font-weight:400;">ทุนชีวิต</div>
                 </td>`;
+      // Rider coverages (เฉพาะกรมธรรม์ที่ไม่ใช่ type นั้นโดยตรง)
+      let riderAmt = 0;
+      if (t === 'สุขภาพ'      && p.type !== 'สุขภาพ')      riderAmt = p.coverage          || 0;
+      if (t === 'โรคร้ายแรง' && p.type !== 'โรคร้ายแรง') riderAmt = p.riderCriticalCov   || 0;
+      if (t === 'อุบัติเหตุ' && p.type !== 'อุบัติเหตุ') riderAmt = p.riderAccidentCov   || 0;
+      if (riderAmt > 0) return `<td class="cov-amount" style="opacity:.75;">
+        ${fmtShort(riderAmt)}<div style="font-size:.62rem;color:var(--gray-400);font-weight:400;line-height:1;">ไรเดอร์</div>
+      </td>`;
       return `<td><span class="cov-none">—</span></td>`;
     }).join('');
 
@@ -1489,8 +1517,12 @@ function renderTable(policies) {
   policies.forEach(p => {
     const pCol2 = TYPE_TO_COL[p.type] || p.type;
     if (pCol2 && totByType[pCol2] !== undefined) totByType[pCol2] += primaryCovOf(p);
-    // รวมทุนชีวิตจากประกันสุขภาพเข้าคอลัมน์ชีวิต
+    // ทุนชีวิตจากประกันสุขภาพ
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0) totByType['ชีวิต'] += p.lifeCoverage;
+    // Rider coverages จากกรมธรรม์ชีวิต/ประเภทอื่น
+    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) totByType['สุขภาพ']      = (totByType['สุขภาพ']      || 0) + p.coverage;
+    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) totByType['โรคร้ายแรง'] = (totByType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
+    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) totByType['อุบัติเหตุ'] = (totByType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
   });
 
   const totCovCols = COVERAGE_TYPES.map(t =>
@@ -1516,13 +1548,17 @@ function renderSpiderChart(policies) {
     { type:'ทุพพลภาพ',   label:'ทุพพลภาพ (฿/เดือน)', icon:'♿', recommend:30000 },
   ];
 
-  // Compute coverage by type (รวมทุนชีวิตจากประกันสุขภาพด้วย)
+  // Compute coverage by type (รวม rider ทุกประเภทด้วย)
   const byType = {};
   policies.forEach(p => {
     const pCol3 = TYPE_TO_COL[p.type] || p.type;
     byType[pCol3] = (byType[pCol3] || 0) + primaryCovOf(p);
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
       byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
+    // Rider coverages
+    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) byType['สุขภาพ']      = (byType['สุขภาพ']      || 0) + p.coverage;
+    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
+    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
     if (p.riderIncomeDaily)       byType['ค่าชดเชย']  = (byType['ค่าชดเชย']  || 0) + (p.riderIncomeDaily       || 0);
     if (p.riderDisabilityMonthly) byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + (p.riderDisabilityMonthly || 0);
   });
@@ -1658,6 +1694,10 @@ function renderGapAnalysis(policies) {
     byType[pCol4] = (byType[pCol4] || 0) + primaryCovOf(p);
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
       byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
+    // Rider coverages
+    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) byType['สุขภาพ']      = (byType['สุขภาพ']      || 0) + p.coverage;
+    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
+    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
     if (p.riderIncomeDaily)       byType['ค่าชดเชย']  = (byType['ค่าชดเชย']  || 0) + (p.riderIncomeDaily       || 0);
     if (p.riderDisabilityMonthly) byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + (p.riderDisabilityMonthly || 0);
   });
@@ -1839,16 +1879,16 @@ function saveEditedPolicy() {
   const riderAccidentPrem      = parseFloat(document.getElementById('ep-rider-accident-prem').value)    || 0;
   const riderDisabilityMonthly = parseFloat(document.getElementById('ep-rider-disability-monthly').value)|| 0;
   const riderDisabilityPrem    = parseFloat(document.getElementById('ep-rider-disability-prem').value)  || 0;
-  const riderHealthName        = document.getElementById('ep-rider-health-name').value.trim();
-  const riderHealthEnd         = document.getElementById('ep-rider-health-end').value;
-  const riderIncomeName        = document.getElementById('ep-rider-income-name').value.trim();
-  const riderIncomeEnd         = document.getElementById('ep-rider-income-end').value;
-  const riderCriticalName      = document.getElementById('ep-rider-critical-name').value.trim();
-  const riderCriticalEnd       = document.getElementById('ep-rider-critical-end').value;
-  const riderAccidentName      = document.getElementById('ep-rider-accident-name').value.trim();
-  const riderAccidentEnd       = document.getElementById('ep-rider-accident-end').value;
-  const riderDisabilityName    = document.getElementById('ep-rider-disability-name').value.trim();
-  const riderDisabilityEnd     = document.getElementById('ep-rider-disability-end').value;
+  const riderHealthName        = (document.getElementById('ep-rider-health-name')?.value     || '').trim();
+  const riderHealthEnd         =  document.getElementById('ep-rider-health-end')?.value      || '';
+  const riderIncomeName        = (document.getElementById('ep-rider-income-name')?.value     || '').trim();
+  const riderIncomeEnd         =  document.getElementById('ep-rider-income-end')?.value      || '';
+  const riderCriticalName      = (document.getElementById('ep-rider-critical-name')?.value   || '').trim();
+  const riderCriticalEnd       =  document.getElementById('ep-rider-critical-end')?.value    || '';
+  const riderAccidentName      = (document.getElementById('ep-rider-accident-name')?.value   || '').trim();
+  const riderAccidentEnd       =  document.getElementById('ep-rider-accident-end')?.value    || '';
+  const riderDisabilityName    = (document.getElementById('ep-rider-disability-name')?.value || '').trim();
+  const riderDisabilityEnd     =  document.getElementById('ep-rider-disability-end')?.value  || '';
 
   const cid  = currentClientId;
   const pIdx = currentPolicyIdx;
@@ -1894,6 +1934,7 @@ function saveEditedPolicy() {
   closeEditMode();
   openDetail(pIdx);  // re-render modal with new data
   render();          // refresh table + spider chart
+  showToast('✅ บันทึกการแก้ไขเรียบร้อยแล้ว');
 }
 
 // ─── POLICY DETAIL MODAL ───
@@ -1949,6 +1990,33 @@ function openDetail(i) {
   document.getElementById('md-end').textContent      = fmtDate(p.end)   || '—';
   document.getElementById('md-type').textContent     = (TYPE_ICONS[p.type]||'') + ' ' + p.type;
   document.getElementById('md-added').textContent    = fmtDate(p.addedAt?.split('T')[0]) || '—';
+
+  // ─── Riders section ───
+  const riderRows = [];
+  if ((p.coverage || 0) > 0 || p.riderHealthName)
+    riderRows.push({ lbl:'❤️ สุขภาพ' + (p.riderHealthName ? ` (${p.riderHealthName})` : ''), val: fmt(p.coverage||0), sub: p.riderHealthEnd ? fmtDate(p.riderHealthEnd) : '', prem: p.riderHealthPrem });
+  if ((p.riderCriticalCov || 0) > 0 || p.riderCriticalName)
+    riderRows.push({ lbl:'🏥 โรคร้ายแรง' + (p.riderCriticalName ? ` (${p.riderCriticalName})` : ''), val: fmt(p.riderCriticalCov||0), sub: p.riderCriticalEnd ? fmtDate(p.riderCriticalEnd) : '', prem: p.riderCriticalPrem });
+  if ((p.riderAccidentCov || 0) > 0 || p.riderAccidentName)
+    riderRows.push({ lbl:'🚑 อุบัติเหตุ' + (p.riderAccidentName ? ` (${p.riderAccidentName})` : ''), val: fmt(p.riderAccidentCov||0), sub: p.riderAccidentEnd ? fmtDate(p.riderAccidentEnd) : '', prem: p.riderAccidentPrem });
+  if ((p.riderIncomeDaily || 0) > 0 || p.riderIncomeName)
+    riderRows.push({ lbl:'💵 ค่าชดเชยรายวัน' + (p.riderIncomeName ? ` (${p.riderIncomeName})` : ''), val: fmt(p.riderIncomeDaily||0) + '/วัน', sub: p.riderIncomeEnd ? fmtDate(p.riderIncomeEnd) : '', prem: p.riderIncomePrem });
+  if ((p.riderDisabilityMonthly || 0) > 0 || p.riderDisabilityName)
+    riderRows.push({ lbl:'♿ ทุพพลภาพ' + (p.riderDisabilityName ? ` (${p.riderDisabilityName})` : ''), val: fmt(p.riderDisabilityMonthly||0) + '/เดือน', sub: p.riderDisabilityEnd ? fmtDate(p.riderDisabilityEnd) : '', prem: p.riderDisabilityPrem });
+
+  const ridersSection = document.getElementById('md-riders-section');
+  const ridersGrid    = document.getElementById('md-riders-grid');
+  if (riderRows.length > 0) {
+    ridersSection.style.display = '';
+    ridersGrid.innerHTML = riderRows.map(r => `
+      <div class="detail-item">
+        <div class="d-lbl">${r.lbl}</div>
+        <div class="d-val">${r.val}${r.prem ? ` <span style="font-size:.8rem;color:var(--gray-400);">/ เบี้ย ${fmt(r.prem)}</span>` : ''}</div>
+        ${r.sub ? `<div style="font-size:.78rem;color:var(--gray-400);">ถึง ${r.sub}</div>` : ''}
+      </div>`).join('');
+  } else {
+    ridersSection.style.display = 'none';
+  }
 
   // Coverage meter
   const rec = RECOMMEND[p.type];
@@ -2595,6 +2663,15 @@ document.addEventListener('keydown', e => {
     showList();
   }
 })();
+
+function showToast(msg) {
+  let t = document.getElementById('save-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'save-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
 </script>
+<div id="save-toast"></div>
 </body>
 </html>
