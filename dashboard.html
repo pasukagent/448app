@@ -444,7 +444,7 @@
           <div class="dash-sub">Financial Planning</div>
           <div class="dash-tag">ยอดนิยม</div>
         </div>
-        <div class="dash-card" onclick="location.href='clients.html?feature=policies'">
+        <div class="dash-card" onclick="goToPolicies()">
           <div class="dash-icon">📋</div>
           <div class="dash-label">สรุปกรมธรรม์ลูกค้า</div>
           <div class="dash-sub">Policy Summary</div>
@@ -456,7 +456,7 @@
 
         <!-- Gap analysis (dynamic) -->
         <div class="panel" id="gap-panel">
-          <h4>ช่องโหว่ความคุ้มครอง <a href="policies.html">ดูเพิ่มเติม</a></h4>
+          <h4>ช่องโหว่ความคุ้มครอง <a href="#" onclick="goToPolicies();return false;">ดูเพิ่มเติม</a></h4>
           <div id="gap-bars"></div>
         </div>
 
@@ -816,6 +816,11 @@ function goToFinancial() {
     ? 'financial.html?client=' + encodeURIComponent(selectedClientId)
     : 'financial.html';
   location.href = url;
+}
+
+function goToPolicies() {
+  if (selectedClientId) localStorage.setItem('aia_selectedClient', selectedClientId);
+  window.location.href = 'policies.html';
 }
 
 function doLogout() {
