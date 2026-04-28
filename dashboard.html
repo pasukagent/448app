@@ -555,6 +555,16 @@ const TYPE_ICONS = {
   'โรคร้ายแรง': '🏥',
   'อุบัติเหตุ':   '🚑'
 };
+// map ประเภทประกันทุกแบบ → หมวดหลักของ gap bar
+const TYPE_TO_GAP = {
+  'ชีวิต':'ชีวิต','ทุนชีวิต':'ชีวิต',
+  'สุขภาพ':'สุขภาพ',
+  'โรคร้ายแรง':'โรคร้ายแรง',
+  'อุบัติเหตุ':'อุบัติเหตุ'
+};
+function primaryCovOf(p) {
+  return p.type === 'สุขภาพ' ? (Number(p.coverage)||0) : (Number(p.lifeCoverage)||0);
+}
 
 /* ════════════════════════════════════════════════════
    Client selector strip
@@ -597,7 +607,8 @@ function selectClient(cid) {
 function renderGapBars(policies) {
   const byType = {};
   policies.forEach(p => {
-    byType[p.type] = (byType[p.type] || 0) + (Number(p.coverage) || 0);
+    const col = TYPE_TO_GAP[p.type];
+    if (col) byType[col] = (byType[col] || 0) + primaryCovOf(p);
   });
 
   const GAP_LABELS = [
@@ -666,10 +677,11 @@ function updateDashboard() {
     subEl.textContent    = '';
   }
 
-  const totalCoverage  = policies.reduce((s, p) => s + (Number(p.coverage) || 0), 0);
+  const totalCoverage  = policies.reduce((s, p) => s + primaryCovOf(p), 0);
   const totalPremium   = policies.reduce((s, p) => s + (Number(p.premium)  || 0), 0);
-  const annuityPremium = policies.filter(p => p.type === 'บำนาญ').reduce((s,p) => s + (Number(p.premium)||0), 0);
-  const otherPremium   = policies.filter(p => p.type !== 'บำนาญ').reduce((s,p) => s + (Number(p.premium)||0), 0);
+  const annuityTypes   = ['บำนาญ','เกษียณ','ลดหย่อนภาษี'];
+  const annuityPremium = policies.filter(p => annuityTypes.includes(p.type)).reduce((s,p) => s + (Number(p.premium)||0), 0);
+  const otherPremium   = policies.filter(p => !annuityTypes.includes(p.type)).reduce((s,p) => s + (Number(p.premium)||0), 0);
   const taxDeduct      = Math.min(otherPremium, 100000) + Math.min(annuityPremium, 200000);
 
   coverageEl.textContent = '฿ ' + totalCoverage.toLocaleString('th-TH');
