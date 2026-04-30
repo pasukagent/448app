@@ -25,7 +25,11 @@
       "Bash(powershell -File -)",
       "Bash(gh auth *)",
       "Bash(git --version)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(sed -i 's|<li><a href=\"index.html\" class=\"active\">หน้าแรก</a></li>|<li><a href=\"index.html\" class=\"active\">หน้าหลัก</a></li>|g' index.html)",
+      "Bash(sed -i 's|<li><a href=\"index.html\">หน้าแรก</a></li>|<li><a href=\"index.html\">หน้าหลัก</a></li>|g' guide.html)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
