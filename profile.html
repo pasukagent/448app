@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- QR Code generator (client-side, ~5KB) — แทน api.qrserver.com เพื่อทำงาน offline ได้ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -314,6 +316,8 @@
     </div>
     <div class="app-sb-section">
       <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
       <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
     </div>
     <div class="sb-bottom-area">
@@ -536,10 +540,17 @@ function handlePhotoUpload(input) {
   if (!file.type.startsWith('image/')) {
     showToast('❌ กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)', 'error'); return;
   }
+  /* จำกัดขนาดไฟล์ — กันไฟล์ใหญ่ (HEIC/RAW) ทำ browser freeze ตอน base64 encode */
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+  if (file.size > MAX_FILE_SIZE) {
+    showToast('❌ ไฟล์ใหญ่เกิน 5MB กรุณาย่อรูปก่อนอัปโหลด', 'error'); return;
+  }
 
   const reader = new FileReader();
+  reader.onerror = () => showToast('❌ อ่านไฟล์ไม่ได้', 'error');
   reader.onload = e => {
     const img = new Image();
+    img.onerror = () => showToast('❌ ไฟล์รูปเสีย หรือไม่รองรับ format นี้', 'error');
     img.onload = () => {
       /* Resize to max 300px, JPEG quality 0.82 → ประมาณ 20–50KB */
       const MAX = 300;
@@ -552,10 +563,14 @@ function handlePhotoUpload(input) {
       ctx.drawImage(img, 0, 0, w, h);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
-      /* Save */
-      updateUser(u => { if (!u.profile) u.profile = {}; u.profile.photo = dataUrl; });
-      applyPhoto(dataUrl);
-      showToast('✅ อัปโหลดรูปสำเร็จ');
+      /* Save — try/catch กัน QuotaExceededError */
+      try {
+        updateUser(u => { if (!u.profile) u.profile = {}; u.profile.photo = dataUrl; });
+        applyPhoto(dataUrl);
+        showToast('✅ อัปโหลดรูปสำเร็จ');
+      } catch (err) {
+        showToast('❌ บันทึกรูปไม่สำเร็จ — พื้นที่ localStorage เต็ม', 'error');
+      }
     };
     img.src = e.target.result;
   };
@@ -707,12 +722,12 @@ function renderLicenseDisplay(profile) {
 function renderLineDisplay(profile) {
   const lineId   = profile.lineId || '';
   const lineName = profile.lineName || '';
-  const qrUrl    = lineId ? `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent('https://line.me/ti/p/~' + lineId)}` : '';
+  const lineUrl  = lineId ? 'https://line.me/ti/p/~' + lineId : '';
 
   document.getElementById('display-line').innerHTML = `
-    <div class="qr-box" onclick="${lineId ? 'window.open(\'https://line.me/ti/p/~' + lineId + '\',\'_blank\')' : 'toggleEditSection(\'line\')'}">
-      ${qrUrl
-        ? `<img src="${qrUrl}" alt="QR LINE" style="width:120px;height:120px;border-radius:8px;">`
+    <div class="qr-box" onclick="${lineId ? `window.open('${lineUrl}','_blank')` : 'toggleEditSection(\'line\')'}">
+      ${lineId
+        ? `<div id="qr-canvas-line" style="width:120px;height:120px;border-radius:8px;overflow:hidden;"></div>`
         : `<div class="qr-ico">📱</div><div class="qr-hint">ใส่ LINE ID<br>เพื่อสร้าง QR</div>`
       }
     </div>
@@ -729,6 +744,26 @@ function renderLineDisplay(profile) {
         </div>
       </div>
     </div>`;
+
+  /* Render QR code ด้วย client-side library (qrcodejs) — ไม่พึ่ง external API */
+  if (lineId && typeof QRCode !== 'undefined') {
+    const qrEl = document.getElementById('qr-canvas-line');
+    if (qrEl) {
+      qrEl.innerHTML = ''; // clear ก่อน เผื่อ render ซ้ำ
+      try {
+        new QRCode(qrEl, {
+          text: lineUrl,
+          width: 120,
+          height: 120,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        qrEl.innerHTML = '<div class="qr-ico">⚠️</div><div class="qr-hint">QR error</div>';
+      }
+    }
+  }
 }
 
 /* ── Edit section toggle ── */
@@ -773,14 +808,23 @@ function toggleEditSection(section) {
 
 /* ── Save sections ── */
 function saveSection(section) {
+  /* Validation นอก updateUser callback — ถ้าไม่ผ่าน return ทั้งฟังก์ชัน
+     กัน toast แจ้ง "บันทึกสำเร็จ" ทั้งที่ฟิลด์อื่นไม่ถูกเซฟ (silent data loss) */
+  if (section === 'personal') {
+    const first = document.getElementById('pf-first').value.trim();
+    if (!first) {
+      document.getElementById('pf-first').focus();
+      showToast('⚠️ กรุณากรอกชื่อ', 'error');
+      return;
+    }
+  }
+
   updateUser(u => {
     if (!u.profile) u.profile = {};
     const p = u.profile;
 
     if (section === 'personal') {
-      const first = document.getElementById('pf-first').value.trim();
-      if (!first) { document.getElementById('pf-first').focus(); return; }
-      u.firstName  = first;
+      u.firstName  = document.getElementById('pf-first').value.trim();
       u.lastName   = document.getElementById('pf-last').value.trim();
       p.nickname   = document.getElementById('pf-nickname').value.trim();
       p.phone      = document.getElementById('pf-phone').value.trim();

@@ -350,6 +350,7 @@
         users.push({
           id: fuid, firstName, lastName, email,
           createdAt: new Date().toISOString(),
+          profile: {}, // init เพื่อ consistency — profile.html / dashboard.html มี lazy init แต่เซฟไว้ตั้งแต่ต้นชัดเจนกว่า
           data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
         });
         saveUsers(users);
@@ -429,6 +430,7 @@
       lastName:  (fsData && fsData.lastName)  || '',
       email:     (fsData && fsData.email)     || fallbackEmail || '',
       createdAt: new Date().toISOString(),
+      profile: {}, // init consistency กับ signup flow
       data: { clients: [], financialPlans: 0, taxSaved: 0, appointments: [], goodThings: 0, activities: [] }
     });
     saveUsers(users);

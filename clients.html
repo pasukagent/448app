@@ -993,6 +993,14 @@
     toggleAddForm();
     renderList();
     showProfile(newClient.id);
+    /* เปิดฟอร์มแก้ไขทันที — ให้กรอกฟิลด์ Phase 1 เพิ่ม (nickname/weight/height/position/workplace/workAddress)
+       โดยไม่ต้องคลิก "แก้ไข" อีกครั้ง */
+    setTimeout(() => {
+      const editForm = document.getElementById('edit-form');
+      if (editForm && !editForm.classList.contains('open')) {
+        toggleEditForm();
+      }
+    }, 100);
   }
 
   // ── Edit client ──
@@ -1029,6 +1037,14 @@
   function saveEditClient() {
     const first = document.getElementById('ef-first').value.trim();
     if (!first) { document.getElementById('ef-first').focus(); return; }
+    /* Validate idCard — 13 หลัก (ตัด dash ออก) ถ้าใส่มา */
+    const idCardRaw = document.getElementById('ef-idcard').value.trim();
+    const idCardDigits = idCardRaw.replace(/\D/g, '');
+    if (idCardRaw && idCardDigits.length !== 13) {
+      document.getElementById('ef-idcard').focus();
+      alert('⚠️ เลขบัตรประชาชนต้องมี 13 หลัก (ปัจจุบัน ' + idCardDigits.length + ' หลัก)\nหรือเว้นว่างไว้ถ้ายังไม่ระบุ');
+      return;
+    }
     const familyId = resolveFamilyId('ef');
     updateCurrentUser(u => {
       const c = (u.data.clients||[]).find(c => c.id === selectedClientId);
@@ -1036,7 +1052,7 @@
         c.firstName   = first;
         c.lastName    = document.getElementById('ef-last').value.trim();
         c.nickname    = document.getElementById('ef-nickname').value.trim();
-        c.idCard      = document.getElementById('ef-idcard').value.trim();
+        c.idCard      = idCardRaw;
         c.dob         = document.getElementById('ef-dob').value;
         c.gender      = document.getElementById('ef-gender').value;
         c.weight      = parseFloat(document.getElementById('ef-weight').value) || null;
