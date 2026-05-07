@@ -1132,7 +1132,15 @@ function exportData() {
   const payload = {
     exportedAt : new Date().toISOString(),
     exportedBy : user.firstName + ' ' + user.lastName,
-    appVersion : '2.0',
+    appVersion : '2.1',
+    // ─── ข้อมูลตัวแทนระดับบนสุด (firstName/lastName/email) ───
+    // email ใช้สำหรับเทียบ identity ตอน import (ไม่ใช่ overwrite firebase auth)
+    user       : {
+      firstName : user.firstName || '',
+      lastName  : user.lastName  || '',
+      email     : user.email     || '',
+      createdAt : user.createdAt || null,
+    },
     // ─── ข้อมูลตัวแทน (profile) ───
     profile    : user.profile || null,   // photo, license, AIA code, LINE ID, etc.
     // ─── ข้อมูลลูกค้าและงานทั้งหมด ───
@@ -1177,8 +1185,11 @@ function handleImportFile(input) {
       _pendingImportData = payload;
       // Show modal
       const hasProfile = payload.profile ? ' · 👤 รวมโปรไฟล์ตัวแทน' : '';
+      const hasUser    = (payload.user && (payload.user.firstName || payload.user.lastName))
+        ? ' · 🪪 ' + ((payload.user.firstName||'') + ' ' + (payload.user.lastName||'')).trim()
+        : '';
       document.getElementById('import-modal-filename').innerHTML =
-        '📄 ' + file.name + ' · ' + (payload.data.clients.length) + ' ลูกค้า' + hasProfile + ' · Export เมื่อ ' +
+        '📄 ' + file.name + ' · ' + (payload.data.clients.length) + ' ลูกค้า' + hasProfile + hasUser + ' · Export เมื่อ ' +
         (payload.exportedAt ? new Date(payload.exportedAt).toLocaleDateString('th-TH-u-ca-gregory') : 'ไม่ทราบ');
       document.getElementById('import-modal-overlay').classList.add('open');
     } catch {
@@ -1199,6 +1210,12 @@ function confirmImport() {
   // Restore profile if present in payload (Phase 2.0+ backups)
   if (_pendingImportData.profile) {
     allUsers[idx].profile = _pendingImportData.profile;
+  }
+  // Restore top-level user fields if present (Phase 2.1+ backups)
+  // ไม่แตะ id/email — ผูกกับ Firebase Auth ของบัญชีปลายทาง
+  if (_pendingImportData.user) {
+    if (_pendingImportData.user.firstName) allUsers[idx].firstName = _pendingImportData.user.firstName;
+    if (_pendingImportData.user.lastName)  allUsers[idx].lastName  = _pendingImportData.user.lastName;
   }
   localStorage.setItem('aia_users', JSON.stringify(allUsers));
   _pendingImportData = null;
