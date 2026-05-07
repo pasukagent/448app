@@ -851,9 +851,17 @@ function ensureClientGoals(user) {
   ) {
     const first = user.data.clients[0];
     if (!first.financialGoals || first.financialGoals.length === 0) {
+      /* client[0] ยังว่าง → ย้ายของเก่ามาแล้วลบ */
       first.financialGoals = user.data.financialGoals;
+      delete user.data.financialGoals;
+    } else {
+      /* client[0] มี goals อยู่แล้ว → merge แบบ avoid duplicate (ใช้ id ถ้ามี) ก่อนลบ
+         กัน silent data loss ของ legacy goals */
+      const existingIds = new Set(first.financialGoals.map(g => g.id).filter(Boolean));
+      const toAdd = user.data.financialGoals.filter(g => !g.id || !existingIds.has(g.id));
+      if (toAdd.length > 0) first.financialGoals.push(...toAdd);
+      delete user.data.financialGoals;
     }
-    delete user.data.financialGoals;
     const all = getUsers();
     const i   = all.findIndex(u => u.id === uid);
     if (i !== -1) { all[i] = user; saveUsers(all); }
@@ -1406,11 +1414,19 @@ function loadCashflow() {
   const c = getCurrentClient();
   if (!c) return;
   const cf = c.cashflow || {};
-  document.getElementById('cf-income').value      = cf.income      || '';
-  document.getElementById('cf-expFixed').value    = cf.expFixed    || '';
-  document.getElementById('cf-expVariable').value = cf.expVariable || '';
-  document.getElementById('cf-expDebt').value     = cf.expDebt     || '';
-  document.getElementById('cf-expSavings').value  = cf.expSavings  || '';
+  /* ไม่เขียนทับ input ที่ user กำลัง focus อยู่ (กันค่าที่กำลังพิมพ์ค้างหาย) */
+  const focused = document.activeElement;
+  const setIfNotFocused = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el === focused) return; // skip — user กำลังพิมพ์
+    el.value = val || '';
+  };
+  setIfNotFocused('cf-income',      cf.income);
+  setIfNotFocused('cf-expFixed',    cf.expFixed);
+  setIfNotFocused('cf-expVariable', cf.expVariable);
+  setIfNotFocused('cf-expDebt',     cf.expDebt);
+  setIfNotFocused('cf-expSavings',  cf.expSavings);
   updateCashflow();
 }
 
@@ -1594,6 +1610,17 @@ if (typeof showToast !== 'function') {
   } else {
     showClientSelect();
   }
+
+  /* Cross-tab sync: re-render เมื่อ aia_users เปลี่ยนใน tab อื่น
+     แต่ skip ถ้ามี input focus อยู่ (กันค่าที่ user กำลังพิมพ์ค้างหาย) */
+  window.addEventListener('storage', (e) => {
+    if (e.key !== 'aia_users') return;
+    const focused = document.activeElement;
+    const isEditingInput = focused && (focused.tagName === 'INPUT' || focused.tagName === 'TEXTAREA');
+    if (isEditingInput) return; // skip — รอให้ user หยุดพิมพ์ก่อน
+    if (selectedClientId) renderMain();
+    else renderClientSelect();
+  });
 })();
 
 </script>

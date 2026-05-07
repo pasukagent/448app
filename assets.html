@@ -283,6 +283,7 @@
         <div class="form-row">
           <label>ประเภทสินทรัพย์ *</label>
           <select id="f-type" onchange="onTypeChange()">
+            <option value="cash">💵 เงินสด</option>
             <option value="deposit">💰 เงินฝาก</option>
             <option value="bond">📜 ตราสารหนี้</option>
             <option value="pvd">🏢 PVD (กองทุนสำรองเลี้ยงชีพ)</option>
@@ -319,14 +320,23 @@
       </div>
 
       <div class="form-row">
-        <label>เงินสมทบรายปี (บาท) <span class="opt">— ถ้าใส่เพิ่มทุกปี</span></label>
-        <input id="f-contribution" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateFV()">
+        <label>เงินสมทบ (บาท)
+          <span class="opt">— ถ้าใส่เพิ่มสม่ำเสมอ</span>
+        </label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="f-contribution" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateFV()" style="flex:1;">
+          <select id="f-contrib-freq" onchange="updateFV()" style="padding:9px 10px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font);font-size:.9rem;background:white;flex-shrink:0;">
+            <option value="annual">ต่อปี</option>
+            <option value="monthly">ต่อเดือน</option>
+          </select>
+        </div>
+        <div id="f-contrib-hint" style="font-size:.78rem;color:var(--gray-500);margin-top:4px;"></div>
       </div>
 
       <div class="fv-display">
         <div class="fv-lbl">📈 มูลค่าอนาคต (FV) — คำนวณอัตโนมัติ</div>
         <div class="fv-val" id="fv-result">฿ 0</div>
-        <div class="fv-detail" id="fv-detail">FV = PV(1+r)ⁿ + PMT × [(1+r)ⁿ − 1] / r</div>
+        <div class="fv-detail" id="fv-detail">FV = PV(1+r)ⁿ + PMT × [(1+r)ⁿ − 1] / r × (1+r) <small>(annuity-due)</small></div>
       </div>
 
       <div class="form-row" style="margin-top:14px;">
@@ -377,6 +387,7 @@ function getAssets() {
    ASSET TYPES
 ═══════════════════════════════════════════ */
 const ASSET_TYPES = {
+  cash:       { icon:'💵', label:'เงินสด',           color:'#16A085', group:'liquid'    },
   deposit:    { icon:'💰', label:'เงินฝาก',         color:'#0E76A8', group:'liquid'    },
   bond:       { icon:'📜', label:'ตราสารหนี้',       color:'#5DADE2', group:'liquid'    },
   pvd:        { icon:'🏢', label:'PVD',              color:'#28a745', group:'investment'},
@@ -404,17 +415,28 @@ let editingId = null;
 let currentFilter = 'all';
 
 /* ════════════════════════════════════════════
-   FV CALCULATION
+   FV CALCULATION (annuity-due — เงินสมทบเข้าตอนต้นงวด)
+   freq: 'annual' หรือ 'monthly' (default annual เพื่อ backward-compat)
 ═══════════════════════════════════════════ */
-function calcFV(pv, rate, years, pmt) {
+function calcFV(pv, rate, years, pmt, freq) {
   pv = Number(pv) || 0;
   rate = (Number(rate) || 0) / 100;
   years = Number(years) || 0;
   pmt = Number(pmt) || 0;
   if (years <= 0) return pv;
+  /* ถ้าเป็นรายเดือน → ใช้ rate รายเดือน + n เป็นเดือน */
+  if (freq === 'monthly' && pmt > 0) {
+    const r_m = rate / 12;
+    const n_m = years * 12;
+    const factor_m = Math.pow(1 + r_m, n_m);
+    if (r_m === 0) return pv + pmt * n_m;
+    /* annuity-due: × (1+r) สมมติว่าจ่ายต้นงวด */
+    return pv * Math.pow(1 + rate, years) + pmt * (factor_m - 1) / r_m * (1 + r_m);
+  }
+  /* รายปี (default) — annuity-due */
   const factor = Math.pow(1 + rate, years);
   if (rate === 0) return pv + pmt * years;
-  return pv * factor + pmt * (factor - 1) / rate;
+  return pv * factor + pmt * (factor - 1) / rate * (1 + rate);
 }
 
 function fmt(n) {
@@ -465,9 +487,16 @@ function render() {
 
   const assets = getAssets();
   const totalCurrent = assets.reduce((s,a) => s + Number(a.currentValue||0), 0);
-  const totalFV      = assets.reduce((s,a) => s + calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution), 0);
-  const avgReturn    = totalCurrent > 0
-    ? assets.reduce((s,a) => s + Number(a.currentValue||0) * Number(a.expectedReturn||0), 0) / totalCurrent
+  const totalFV      = assets.reduce((s,a) => s + calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq), 0);
+  /* Average return: คำนวณเฉพาะสินทรัพย์ liquid + investment (ไม่รวม personal/อสังหาฯ ที่มักไม่ได้ระบุ yield)
+     ป้องกันค่าเฉลี่ยถูกเจือจาง */
+  const yieldAssets = assets.filter(a => {
+    const g = (ASSET_TYPES[a.type] || {}).group;
+    return g === 'liquid' || g === 'investment';
+  });
+  const yieldTotal = yieldAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const avgReturn  = yieldTotal > 0
+    ? yieldAssets.reduce((s,a) => s + Number(a.currentValue||0) * Number(a.expectedReturn||0), 0) / yieldTotal
     : 0;
 
   wrap.innerHTML = `
@@ -481,7 +510,7 @@ function render() {
       <div class="sum-card lc-green">
         <div class="sum-lbl">ผลตอบแทนเฉลี่ย</div>
         <div class="sum-val">${avgReturn.toFixed(2)}%</div>
-        <div class="sum-sub">ถ่วงน้ำหนักด้วยมูลค่า</div>
+        <div class="sum-sub">เฉพาะสินทรัพย์ทางการเงิน · ถ่วงน้ำหนักด้วยมูลค่า</div>
       </div>
       <div class="sum-card lc-orange">
         <div class="sum-lbl">มูลค่าอนาคต (FV)</div>
@@ -555,7 +584,7 @@ function renderTable(assets) {
   ['liquid','investment','personal'].forEach(g => {
     if (!grouped[g]) return;
     const groupTotal = grouped[g].reduce((s,a) => s + Number(a.currentValue||0), 0);
-    const groupFV    = grouped[g].reduce((s,a) => s + calcFV(a.currentValue,a.expectedReturn,a.term,a.contribution), 0);
+    const groupFV    = grouped[g].reduce((s,a) => s + calcFV(a.currentValue,a.expectedReturn,a.term,a.contribution,a.contribFreq), 0);
     html += `<tr class="group-row"><td colspan="7">
       ${GROUP_LABELS[g]}
       <span class="grp-total">${fmt(groupTotal)} → ${fmt(groupFV)}</span>
@@ -563,7 +592,7 @@ function renderTable(assets) {
 
     grouped[g].forEach(a => {
       const t = ASSET_TYPES[a.type] || ASSET_TYPES.other;
-      const fv = calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution);
+      const fv = calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq);
       html += `<tr>
         <td><span class="a-type-pill" style="background:${t.color}22;color:${t.color}">${t.icon} ${t.label}</span></td>
         <td>
@@ -609,6 +638,8 @@ function openModal(id) {
       document.getElementById('f-return').value       = a.expectedReturn || '';
       document.getElementById('f-term').value         = a.term || '';
       document.getElementById('f-contribution').value = a.contribution || '';
+      const freqEl = document.getElementById('f-contrib-freq');
+      if (freqEl) freqEl.value = a.contribFreq || 'annual';
       document.getElementById('f-note').value         = a.note || '';
     }
   } else {
@@ -618,6 +649,8 @@ function openModal(id) {
     document.getElementById('f-return').value       = '';
     document.getElementById('f-term').value         = '';
     document.getElementById('f-contribution').value = '';
+    const freqEl = document.getElementById('f-contrib-freq');
+    if (freqEl) freqEl.value = 'annual';
     document.getElementById('f-note').value         = '';
   }
   onTypeChange();
@@ -649,11 +682,27 @@ function updateFV() {
   const r  = Number(document.getElementById('f-return').value || 0);
   const n  = Number(document.getElementById('f-term').value || 0);
   const pmt= parseMoney(document.getElementById('f-contribution'));
-  const fv = calcFV(pv, r, n, pmt);
+  const freqEl = document.getElementById('f-contrib-freq');
+  const freq   = freqEl ? freqEl.value : 'annual';
+  const fv = calcFV(pv, r, n, pmt, freq);
   document.getElementById('fv-result').textContent = fmt(fv);
+  /* Hint: แสดง equivalent ของอีกหน่วย */
+  const hintEl = document.getElementById('f-contrib-hint');
+  if (hintEl) {
+    if (pmt > 0) {
+      hintEl.textContent = freq === 'monthly'
+        ? `≈ ฿${(pmt * 12).toLocaleString('th-TH')} ต่อปี`
+        : `≈ ฿${Math.round(pmt / 12).toLocaleString('th-TH')} ต่อเดือน`;
+    } else {
+      hintEl.textContent = '';
+    }
+  }
   if (n > 0) {
+    const pmtLabel = pmt > 0
+      ? (freq === 'monthly' ? `+ ${fmt(pmt)}/เดือน` : `+ ${fmt(pmt)}/ปี`)
+      : '';
     document.getElementById('fv-detail').textContent =
-      `${fmt(pv)} × (1+${r}%)^${n} ${pmt > 0 ? '+ '+fmt(pmt)+'/ปี' : ''} = ${fmt(fv)}`;
+      `${fmt(pv)} × (1+${r}%)^${n} ${pmtLabel} = ${fmt(fv)}`;
   } else {
     document.getElementById('fv-detail').textContent = 'ระบุระยะเวลาเพื่อคำนวณ FV';
   }
@@ -665,6 +714,7 @@ function saveAsset() {
   if (!name) { showToast('⚠️ กรุณาใส่ชื่อ'); return; }
   if (cv <= 0) { showToast('⚠️ กรุณาใส่มูลค่าปัจจุบัน'); return; }
 
+  const freqEl = document.getElementById('f-contrib-freq');
   const a = {
     id:             editingId || ('a' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
     type:           document.getElementById('f-type').value,
@@ -673,6 +723,7 @@ function saveAsset() {
     expectedReturn: Number(document.getElementById('f-return').value || 0),
     term:           Number(document.getElementById('f-term').value || 0),
     contribution:   parseMoney(document.getElementById('f-contribution')),
+    contribFreq:    freqEl ? freqEl.value : 'annual',
     note:           document.getElementById('f-note').value.trim(),
     createdAt:      editingId ? undefined : new Date().toISOString(),
   };
@@ -745,6 +796,13 @@ fbAuth.onAuthStateChanged(user => {
   initSidebar();
   initClientSelect();
   render();
+  /* Cross-tab sync: ถ้า user แก้ใน tab อื่น (เช่น networth.html ลบหนี้) → re-render */
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') {
+      initClientSelect();
+      render();
+    }
+  });
 })();
 
 document.getElementById('asset-modal').addEventListener('click', function(e) {

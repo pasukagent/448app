@@ -359,6 +359,7 @@ function getClients() { return (getUser().data && getUser().data.clients) || [];
 function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
 
 const ASSET_TYPES = {
+  cash:{icon:'💵',label:'เงินสด',group:'liquid'},
   deposit:{icon:'💰',label:'เงินฝาก',group:'liquid'},
   bond:{icon:'📜',label:'ตราสารหนี้',group:'liquid'},
   pvd:{icon:'🏢',label:'PVD',group:'investment'},
@@ -451,7 +452,10 @@ function render() {
   const sumLong   = lg.long.reduce((s,l)=>s+Number(l.principal||0),0);
   const sumLiabs  = sumShort + sumLong;
   const netWorth  = sumAssets - sumLiabs;
-  const debtRatio = sumAssets > 0 ? (sumLiabs / sumAssets * 100) : 0;
+  /* debtRatioLabel: ถ้า assets=0 และมี liabs → แสดงข้อความเตือน ไม่ใช่ 0% */
+  const debtRatioLabel = sumAssets > 0
+    ? `หนี้สิน ${(sumLiabs / sumAssets * 100).toFixed(1)}% ของสินทรัพย์`
+    : (sumLiabs > 0 ? '⚠️ หนี้เกินสินทรัพย์ (ยังไม่มีสินทรัพย์)' : 'ยังไม่มีข้อมูล');
 
   wrap.innerHTML = `
     <!-- Net Worth Hero -->
@@ -464,7 +468,7 @@ function render() {
       <div class="nw-eq">
         <div class="nw-eq-lbl">ความมั่งคั่งสุทธิ</div>
         <div class="nw-eq-val" style="color:${netWorth >= 0 ? 'var(--red-primary)' : '#DC3545'}">${fmt(netWorth)}</div>
-        <div class="nw-eq-pct">หนี้สิน ${debtRatio.toFixed(1)}% ของสินทรัพย์</div>
+        <div class="nw-eq-pct">${debtRatioLabel}</div>
       </div>
       <div class="nw-side">
         <div class="nw-side-lbl">💸 หนี้สินรวม</div>
@@ -697,6 +701,10 @@ fbAuth.onAuthStateChanged(user => {
   initSidebar();
   initClientSelect();
   render();
+  /* Cross-tab sync */
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
 })();
 
 document.getElementById('liab-modal').addEventListener('click', function(e) {

@@ -241,7 +241,7 @@ function getClients() { return (getUser().data && getUser().data.clients) || [];
 function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
 
 const ASSET_TYPES = {
-  deposit:{group:'liquid'}, bond:{group:'liquid'},
+  cash:{group:'liquid'}, deposit:{group:'liquid'}, bond:{group:'liquid'},
   pvd:{group:'investment'}, rmf:{group:'investment'}, ltf:{group:'investment'},
   ssf:{group:'investment'}, thaiesg:{group:'investment'}, mutual:{group:'investment'},
   unitlinked:{group:'investment'}, stock:{group:'investment'},
@@ -304,14 +304,20 @@ function computeData() {
   const income       = Number(cf.income       || 0);
   const expFixed     = Number(cf.expFixed     || 0);
   const expVariable  = Number(cf.expVariable  || 0);
-  const expDebt      = Number(cf.expDebt      || monthlyDebtPayment); // fallback
+  /* expDebt: ใช้ค่าจาก cashflow ถ้ามี (รวม 0 ที่กรอกตั้งใจ) — fallback เฉพาะตอน null/empty */
+  const hasCfDebt    = cf.expDebt != null && cf.expDebt !== '';
+  const expDebt      = hasCfDebt ? Number(cf.expDebt) : monthlyDebtPayment;
   const expSavings   = Number(cf.expSavings   || 0);
-  const totalExpense = expFixed + expVariable + expDebt + expSavings;
+  /* Liquidity Ratio ใช้ non-discretionary expenses (ไม่รวมเงินออม)
+     เพราะถ้าเกิดเหตุฉุกเฉิน ผู้ใช้สามารถหยุดออมชั่วคราวได้ */
+  const liquidityDenom = expFixed + expVariable + expDebt;
+  const totalExpense   = liquidityDenom + expSavings;
 
   return {
     liquidAssets, investAssets, personalAssets, totalAssets,
     shortDebt, longDebt, totalDebt, monthlyDebtPayment,
-    netWorth, income, expFixed, expVariable, expDebt, expSavings, totalExpense,
+    netWorth, income, expFixed, expVariable, expDebt, expSavings,
+    liquidityDenom, totalExpense,
     hasCashflow: income > 0 || totalExpense > 0,
     hasAssets: assets.length > 0,
     hasLiabs: liabs.length > 0,
@@ -322,11 +328,12 @@ function computeData() {
    5 FINANCIAL RATIOS
 ═══════════════════════════════════════════ */
 
-// 1. Liquidity Ratio = Liquid Assets / Monthly Expenses
+// 1. Liquidity Ratio = Liquid Assets / Non-discretionary Monthly Expenses
 //    มาตรฐาน: 3-6 เดือน (≥3 ผ่าน, ≥6 ดีเยี่ยม)
+//    ใช้ liquidityDenom (ไม่รวมเงินออม) ตามมาตรฐาน CFP
 function ratioLiquidity(d) {
-  if (d.totalExpense <= 0) return { value: null, status: 'no-data' };
-  const v = d.liquidAssets / d.totalExpense;
+  if (d.liquidityDenom <= 0) return { value: null, status: 'no-data' };
+  const v = d.liquidAssets / d.liquidityDenom;
   const status = v >= 6 ? 'good' : v >= 3 ? 'medium' : 'bad';
   return { value: v, status };
 }
@@ -453,7 +460,7 @@ function render() {
       target: '≥ 3 เดือน',
       targetDetail: 'ดี ≥ 6 · พอใช้ 3-6 · ต่ำ < 3',
       ranges: [0, 3, 6, 12],
-      detail: `สินทรัพย์สภาพคล่อง <b>${fmt(d.liquidAssets)}</b> ÷ รายจ่าย/เดือน <b>${fmt(d.totalExpense)}</b>`,
+      detail: `สินทรัพย์สภาพคล่อง <b>${fmt(d.liquidAssets)}</b> ÷ รายจ่ายจำเป็น/เดือน <b>${fmt(d.liquidityDenom)}</b><br><small style="color:#888;font-size:.78rem;">(ไม่รวมเงินออม — ฉุกเฉินสามารถหยุดออมชั่วคราวได้)</small>`,
       tip: getTipLiquidity(r1),
     })}
 
@@ -636,6 +643,10 @@ fbAuth.onAuthStateChanged(user => {
   initSidebar();
   initClientSelect();
   render();
+  /* Cross-tab sync */
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
 })();
 
 </script>
