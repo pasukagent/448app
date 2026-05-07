@@ -338,11 +338,12 @@ function saveLifeInputs(modify) {
 }
 
 // Get total life insurance coverage from existing policies
+// แก้: ตัด PA/อุบัติเหตุ/โรคร้ายแรง ออก — ไม่ใช่ "ทุนชีวิต" ตามมาตรฐานสากล (ป้องกัน over-counting → gap น้อยกว่าจริง)
 function getCurrentLifeCoverage() {
   const c = getCurrent();
   if (!c || !c.policies) return 0;
-  // Sum lifeCoverage from policies of types that provide life insurance
-  const lifeTypes = ['ทุนชีวิต','ตลอดชีพ','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา','โรคร้ายแรง','PA','อุบัติเหตุ'];
+  /* เฉพาะกรมธรรม์ที่จ่ายทุนชีวิตจริง (ไม่นับ CI/PA/อุบัติเหตุ ที่จ่ายเฉพาะกรณี) */
+  const lifeTypes = ['ทุนชีวิต','ตลอดชีพ','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา'];
   return c.policies.reduce((s,p) => {
     if (lifeTypes.includes(p.type)) {
       return s + Number(p.lifeCoverage || p.coverage || 0);
@@ -355,9 +356,39 @@ function getCurrentLiquidAssets() {
   // Auto-pull from client.assets where group is 'liquid'
   const c = getCurrent();
   if (!c || !c.assets) return 0;
-  const liquidTypes = ['deposit','bond'];
+  const liquidTypes = ['cash','deposit','bond'];
   return c.assets.filter(a => liquidTypes.includes(a.type))
                  .reduce((s,a) => s + Number(a.currentValue||0), 0);
+}
+
+/* DIME method: Debt + Income × years to retirement + Mortgage + Education
+   ดึง education gap จากหน้า education.html (ถ้ามี children) */
+function getDIMENeed() {
+  const c = getCurrent();
+  if (!c) return { debt: 0, income: 0, education: 0, total: 0 };
+  /* D: หนี้สินรวม จาก client.liabilities */
+  const debt = (c.liabilities || []).reduce((s,l) => s + Number(l.principal || l.balance || 0), 0);
+  /* I: รายได้/ปี × (60 - อายุปัจจุบัน) — ใช้ retirement age 60 เป็น default */
+  const annualIncome = Number(c.income) ||
+    (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
+  let yearsToRetire = 25; // default ถ้าไม่มี dob
+  if (c.dob) {
+    const age = (new Date() - new Date(c.dob)) / (365.25 * 24 * 3600 * 1000);
+    yearsToRetire = Math.max(60 - age, 1);
+  }
+  const income = annualIncome * yearsToRetire;
+  /* E: education gap (ถ้ามี children) — รวม totalFuture - eduSavings */
+  let education = 0;
+  if (c.children && c.children.length > 0) {
+    education = c.children.reduce((s, ch) => {
+      const lvIdx = { economy: 0, medium: 1, premium: 2 }[ch.level || 'medium'] || 1;
+      const eduSav = Number(ch.eduSavings || 0);
+      /* คำนวณคร่าว ๆ — ใช้ค่าเฉลี่ยตาม level (ไม่ต้อง replicate stage logic) */
+      const avgCost = [800000, 1500000, 3000000][lvIdx] || 1500000;
+      return s + Math.max(avgCost - eduSav, 0);
+    }, 0);
+  }
+  return { debt, income, education, total: debt + income + education };
 }
 
 /* ════════════════════════════════════════════
@@ -399,10 +430,18 @@ function render() {
   const li = getLifeInputs();
   const totalDebt = li.debts.reduce((s,d) => s + Number(d.amount||0), 0);
   const totalResp = li.responsibilities.reduce((s,r) => s + Number(r.amount||0), 0);
-  const totalNeed = totalDebt + totalResp;
+
+  /* method: 'simple' = หนี้สิน+ความรับผิดชอบ (เดิม)
+              'dime'   = Debt+Income+Mortgage+Education (มาตรฐาน DIME) */
+  const method = li.method || 'simple';
+  const dime = getDIMENeed();
+  const totalNeed = method === 'dime' ? dime.total : (totalDebt + totalResp);
 
   const currentLifeCov = getCurrentLifeCoverage();
-  const currentLiquid  = li.liquidAssets > 0 ? Number(li.liquidAssets) : getCurrentLiquidAssets();
+  /* ใช้ != null check — ให้ผู้ใช้ override เป็น 0 ได้ */
+  const currentLiquid  = (li.liquidAssets != null && li.liquidAssets !== '')
+    ? Number(li.liquidAssets)
+    : getCurrentLiquidAssets();
   const totalHave = currentLifeCov + currentLiquid;
   const gap = totalNeed - totalHave;
   const pct = totalNeed > 0 ? Math.min(Math.round(totalHave / totalNeed * 100), 100) : 0;
@@ -412,6 +451,18 @@ function render() {
   const policies = (c && c.policies) || [];
 
   wrap.innerHTML = `
+    <!-- Method toggle -->
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <span style="font-weight:700;color:var(--gray-700);">วิธีคำนวณ:</span>
+      <button onclick="setMethod('simple')" style="padding:6px 14px;border:1.5px solid ${method==='simple'?'var(--red-primary)':'var(--gray-300)'};background:${method==='simple'?'var(--red-soft)':'white'};color:${method==='simple'?'var(--red-primary)':'var(--gray-600)'};border-radius:6px;font-weight:700;font-family:var(--font);font-size:.85rem;cursor:pointer;">📋 หนี้สิน + ความรับผิดชอบ</button>
+      <button onclick="setMethod('dime')" style="padding:6px 14px;border:1.5px solid ${method==='dime'?'var(--red-primary)':'var(--gray-300)'};background:${method==='dime'?'var(--red-soft)':'white'};color:${method==='dime'?'var(--red-primary)':'var(--gray-600)'};border-radius:6px;font-weight:700;font-family:var(--font);font-size:.85rem;cursor:pointer;">🎯 DIME (มาตรฐานสากล)</button>
+    </div>
+    ${method === 'dime' ? `
+      <div style="background:#FFF8E1;border-left:4px solid #F39C12;padding:12px 16px;border-radius:6px;margin-bottom:14px;font-size:.88rem;">
+        <b>🎯 DIME Method</b> — ทุนประกันที่ควรมี = หนี้สิน + (รายได้/ปี × ปีถึงเกษียณ) + การศึกษาบุตร<br>
+        <span style="color:#666;font-size:.82rem;">D: ${fmtBaht(dime.debt)} · I: ${fmtBaht(dime.income)} · E: ${fmtBaht(dime.education)} · <b>รวม ${fmtBaht(dime.total)}</b></span>
+      </div>` : ''}
+
     <!-- Section 1 & 2: Debt + Responsibility -->
     <div class="li-grid">
 
@@ -420,6 +471,7 @@ function render() {
         <div class="li-card-title">
           <div class="li-ico">💸</div>
           <span>หนี้สิน</span>
+          <button onclick="importLiabilities()" style="margin-left:auto;padding:4px 10px;border:1px solid var(--gray-300);background:white;border-radius:5px;font-size:.78rem;cursor:pointer;font-family:var(--font);" title="ดึงจาก client.liabilities">📥 ดึงจากงบการเงิน</button>
         </div>
         <div id="debt-list">
           ${li.debts.map(d => renderRow(d, 'debt')).join('')}
@@ -558,6 +610,38 @@ function addRow(kind) {
     });
   });
   render();
+}
+
+/* สลับวิธีคำนวณ — บันทึกลง lifeInputs.method */
+function setMethod(m) {
+  saveLifeInputs(li => { li.method = m; });
+  render();
+}
+
+/* ดึงหนี้สินจาก client.liabilities มาใส่ในส่วน "หนี้สิน" ของหน้านี้
+   หลีกเลี่ยง duplicate โดยเช็คชื่อ */
+function importLiabilities() {
+  const c = getCurrent();
+  if (!c || !c.liabilities || c.liabilities.length === 0) {
+    showToast('⚠️ ยังไม่มีหนี้สินใน "งบการเงิน"');
+    return;
+  }
+  if (!confirm(`ดึง ${c.liabilities.length} รายการจากงบการเงินมาใส่ที่นี่?`)) return;
+  saveLifeInputs(li => {
+    if (!li.debts) li.debts = [];
+    const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
+    c.liabilities.forEach(l => {
+      const name = (l.name || l.type || 'หนี้สิน').trim();
+      if (existingNames.has(name.toLowerCase())) return;
+      li.debts.push({
+        id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        name,
+        amount: Number(l.principal || l.balance || 0),
+      });
+    });
+  });
+  render();
+  showToast('✅ ดึงหนี้สินเข้ามาแล้ว');
 }
 
 function deleteRow(kind, id) {

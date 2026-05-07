@@ -774,24 +774,24 @@
     if (idx === -1) return; fn(all[idx]); saveUsers(all);
   }
 
-  // Thai personal income tax brackets 2024
+  // Thai personal income tax brackets 2024 — continuous boundaries (ไม่ +1)
   const BRACKETS = [
     { min:0,       max:150000,  rate:0   },
-    { min:150001,  max:300000,  rate:5   },
-    { min:300001,  max:500000,  rate:10  },
-    { min:500001,  max:750000,  rate:15  },
-    { min:750001,  max:1000000, rate:20  },
-    { min:1000001, max:2000000, rate:25  },
-    { min:2000001, max:5000000, rate:30  },
-    { min:5000001, max:Infinity,rate:35  },
+    { min:150000,  max:300000,  rate:5   },
+    { min:300000,  max:500000,  rate:10  },
+    { min:500000,  max:750000,  rate:15  },
+    { min:750000,  max:1000000, rate:20  },
+    { min:1000000, max:2000000, rate:25  },
+    { min:2000000, max:5000000, rate:30  },
+    { min:5000000, max:Infinity,rate:35  },
   ];
 
   function calcTax(netIncome) {
     let tax = 0;
     const breakdown = [];
     for (const b of BRACKETS) {
-      if (netIncome <= b.min - 1) { breakdown.push({...b, amount:0}); continue; }
-      const taxable = Math.min(netIncome, b.max) - b.min + 1;
+      if (netIncome <= b.min) { breakdown.push({...b, amount:0, taxable:0}); continue; }
+      const taxable = Math.min(netIncome, b.max) - b.min;
       const amount  = taxable * b.rate / 100;
       tax += amount;
       breakdown.push({...b, taxable, amount});
@@ -853,9 +853,10 @@
     const income = incSalaryGroup + inc4 + inc5 + inc6 + inc7 + inc8 + incOther;
 
     // Cap each deduction at legal max
-    // เบี้ยประกันชีวิต + เบี้ยประกันสุขภาพ รวมกันต้องไม่เกิน 100,000 บาท
-    const lifeIns   = Math.min(val('d-life-ins'), 100000);
-    const healthIns = Math.min(val('d-health-ins'), 25000, Math.max(100000 - lifeIns, 0));
+    // เบี้ยประกันชีวิต: ใช้ healthIns ที่ capped แล้วเพื่อให้สรุป "100K ร่วมกัน" ถูกต้อง
+    const healthInsRaw = val('d-health-ins');
+    const healthIns = Math.min(healthInsRaw, 25000);
+    const lifeIns   = Math.min(val('d-life-ins'), Math.max(100000 - healthIns, 0));
     const parentIns = Math.min(val('d-parent-ins'),  15000);
     const annuity   = Math.min(val('d-annuity'),    200000);
     const pvd       = Math.min(val('d-pvd'), income * 0.15, 500000);
@@ -865,9 +866,14 @@
     const personal  = Math.min(val('d-personal'),    60000);
     const spouse    = Math.min(val('d-spouse'),      30000);
     const child     = val('d-child');
-    const donate    = Math.min(val('d-donate') * 2, (income - expense) * 0.1);
 
-    const totalDeduct = personal + spouse + child + lifeIns + healthIns + parentIns + annuity + pvd + rmf + ssf + sso + donate;
+    /* บริจาค: cap = 10% ของรายได้สุทธิ "หลังหักลดหย่อนอื่น"
+       ตามกฎสรรพากร — ต่างจากสูตรเดิมที่ใช้ (income - expense) × 10% */
+    const otherDeductsBeforeDonate = personal + spouse + child + lifeIns + healthIns + parentIns + annuity + pvd + rmf + ssf + sso;
+    const donateCap = Math.max((income - expense - otherDeductsBeforeDonate) * 0.1, 0);
+    const donate    = Math.min(val('d-donate') * 2, donateCap);
+
+    const totalDeduct = otherDeductsBeforeDonate + donate;
     const netIncome   = Math.max(income - expense - totalDeduct, 0);
     const { tax, breakdown } = calcTax(netIncome);
     const effRate = income > 0 ? (tax / income * 100).toFixed(2) : 0;
@@ -1021,15 +1027,17 @@
       newRmfAdj     = newRmf * r;
       newAnnuityAdj = newAnnuity * r;
     }
-    // บริจาค ลดหย่อน 2 เท่า เพดาน 10% รายได้สุทธิ
-    const newDonate = Math.min(newDonateRaw * 2, Math.max((income - current.expense) * 0.1, 0));
-
-    // คำนวณ totalDeduct ใหม่
+    // คำนวณ deduct ก่อนบริจาคเพื่อใช้ในเพดานบริจาค (10% ของรายได้สุทธิหลังหักลดหย่อนอื่น)
     const baseDeductWithoutEditable = current.totalDeduct
       - current.lifeIns - current.healthIns - current.annuity
       - current.pvd - current.rmf - current.ssf - (current.donate || 0);
-    const newTotalDeduct = baseDeductWithoutEditable
-      + newLife + newHealth + newAnnuityAdj + newPvdAdj + newRmfAdj + newSsf + newDonate;
+    const otherDeductsBeforeDonate = baseDeductWithoutEditable
+      + newLife + newHealth + newAnnuityAdj + newPvdAdj + newRmfAdj + newSsf;
+    const newDonateCap = Math.max((income - current.expense - otherDeductsBeforeDonate) * 0.1, 0);
+    const newDonate = Math.min(newDonateRaw * 2, newDonateCap);
+
+    // คำนวณ totalDeduct ใหม่
+    const newTotalDeduct = otherDeductsBeforeDonate + newDonate;
     const newNetIncome = Math.max(income - current.expense - newTotalDeduct, 0);
     const { tax: newTax } = calcTax(newNetIncome);
     const newEffRate = income > 0 ? (newTax / income * 100).toFixed(2) : 0;
@@ -1101,9 +1109,12 @@
       }
     }
 
-    // 4) บริจาค (cap ลดหย่อนหลัง × 2 ≤ 10% รายได้สุทธิ → raw cap ≈ 5%) — Bug 3
+    // 4) บริจาค (cap ลดหย่อนหลัง × 2 ≤ 10% รายได้สุทธิหลังหักลดหย่อนอื่น)
+    //    raw cap = (10% ของ net) ÷ 2 (เพราะนับเป็น 2 เท่า)
     if (income > 0) {
-      const donateCapRaw = Math.max((income - current.expense) * 0.05, 0);
+      /* ใช้ otherDeductsBeforeDonate ที่คำนวณไว้แล้วด้านบน */
+      const donateCapDeduct = Math.max((income - current.expense - otherDeductsBeforeDonate) * 0.1, 0);
+      const donateCapRaw = donateCapDeduct / 2;
       const remainDonate = Math.max(donateCapRaw - newDonateRaw, 0);
       if (remainDonate > 1000)
         suggestions.push(`บริจาค (แบบลดหย่อน × 2) ยังเพิ่มได้อีก ~฿${Math.round(remainDonate).toLocaleString('th-TH')} (จะลดหย่อนได้ ${Math.round(remainDonate * 2).toLocaleString('th-TH')})`);
@@ -1276,6 +1287,10 @@
       alert('⚠️ กรุณาเลือกลูกค้าก่อนบันทึก');
       return;
     }
+    /* ตรวจ income > 0 — กันบันทึก history ที่ยังไม่ได้กรอกข้อมูล */
+    if (!r || !r.income || r.income <= 0) {
+      if (!confirm('⚠️ ยังไม่ได้กรอกรายได้ — บันทึกประวัติที่ภาษี = 0?')) return;
+    }
 
     // Build taxInputs from current form
     const taxInputs = buildTaxInputsObject();
@@ -1369,7 +1384,11 @@
     if (!selectedClientId) return;
     const client = getCurrentClient();
     const fullName = ((client.firstName||'')+' '+(client.lastName||'')).trim();
-    if (!confirm(`ลบประวัติการคำนวณภาษีทั้งหมดของ "${fullName}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+    const count = (client.taxHistory || []).length;
+    if (count === 0) { showToast('ℹ️ ยังไม่มีประวัติให้ลบ'); return; }
+    /* Double confirm — destructive action */
+    if (!confirm(`⚠️ ลบประวัติการคำนวณภาษีทั้ง ${count} รายการของ "${fullName}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+    if (!confirm(`ยืนยันอีกครั้ง: ลบประวัติทั้ง ${count} รายการ?`)) return;
     updateCurrentUser(u => {
       const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
       if (c) c.taxHistory = [];

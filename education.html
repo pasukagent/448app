@@ -436,14 +436,26 @@ function ageNow(birthdate) {
   const bd = new Date(birthdate);
   const today = new Date();
   const diff = today - bd;
-  return diff / (365.25 * 24 * 3600 * 1000);
+  const age = diff / (365.25 * 24 * 3600 * 1000);
+  /* กัน dob ในอนาคต — clamp เป็น 0 (เกิดใหม่) ไม่ให้คำนวณ inflation ปีลบ */
+  return age < 0 ? 0 : age;
+}
+
+/* helper — รองรับทั้ง field `dob` (schema กลาง) และ `birthdate` (legacy ของหน้านี้) */
+function getChildDob(c) { return c && (c.dob || c.birthdate) || null; }
+
+/* simple HTML escape — กัน XSS ในชื่อบุตร/หมายเหตุ */
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /* ════════════════════════════════════════════
    COST CALCULATION
 ═══════════════════════════════════════════ */
 function computeChildPlan(child) {
-  const age = ageNow(child.birthdate);
+  const age = ageNow(getChildDob(child));
   if (age == null) return null;
   const level = child.level || 'medium';
   const lvIdx = LEVEL_INDEX[level];
@@ -504,18 +516,32 @@ function computeChildPlan(child) {
 
   const totalFuture = stages.reduce((s, x) => s + x.futureCost, 0);
   const eduSavings = Number(child.eduSavings || 0);
-  const eduSavingsContribution = Number(child.eduMonthly || 0) * 12; // annual
+  const eduMonthly = Number(child.eduMonthly || 0); // ออม/เดือน ที่กำลังจ่าย
   const yearsToFinish = Math.max(...stages.filter(s => s.status !== 'passed').map(s => s.startAge + s.years - age), 0);
 
-  // FV of savings if invested at 4% return
+  // FV ของก้อนปัจจุบัน + ออม/เดือน (annuity-due, return 4%/yr)
   const SAVINGS_RETURN = 0.04;
-  const fvOfCurrentSavings = eduSavings * Math.pow(1 + SAVINGS_RETURN, yearsToFinish);
+  const r_m = SAVINGS_RETURN / 12;
+  const n_m = yearsToFinish * 12;
+  const fvLump   = eduSavings * Math.pow(1 + SAVINGS_RETURN, yearsToFinish);
+  const fvAnnuity = (eduMonthly > 0 && n_m > 0)
+    ? eduMonthly * (Math.pow(1 + r_m, n_m) - 1) / r_m * (1 + r_m)
+    : 0;
+  const fvOfCurrentSavings = fvLump + fvAnnuity;
 
   const gap = Math.max(totalFuture - fvOfCurrentSavings, 0);
-  // Required monthly to close gap by averaging across years
-  const reqMonthly = yearsToFinish > 0
-    ? gap / (yearsToFinish * 12)
-    : 0;
+  /* Required monthly: ต้องออมเพิ่มเดือนละเท่าไหร่ (รวมที่ออมอยู่แล้ว) เพื่อปิด gap
+     สูตร PMT ของ FV annuity-due:
+       PMT = FV / [((1+r)^n - 1)/r × (1+r)]
+     ใช้ rate รายเดือน 4%/12 — กลับด้านสูตรเพื่อให้สมเหตุสมผลกว่าหารตรงๆ */
+  let reqMonthly = 0;
+  if (yearsToFinish > 0 && gap > 0) {
+    if (r_m === 0) {
+      reqMonthly = gap / n_m;
+    } else {
+      reqMonthly = gap / ((Math.pow(1 + r_m, n_m) - 1) / r_m * (1 + r_m));
+    }
+  }
 
   return {
     age,
@@ -659,10 +685,10 @@ function renderChildCard(child, plan) {
     <div class="child-head">
       <div class="child-avatar">${initial}</div>
       <div class="child-info">
-        <div class="child-name">${genderIcon} ${child.name}</div>
+        <div class="child-name">${genderIcon} ${escapeHtml(child.name)}</div>
         <div class="child-meta">
           <span>🎂 ${ageStr}</span>
-          <span>เกิด ${child.birthdate ? new Date(child.birthdate).toLocaleDateString('th-TH-u-ca-gregory',{year:'numeric',month:'long',day:'numeric'}) : '—'}</span>
+          <span>เกิด ${getChildDob(child) ? new Date(getChildDob(child)).toLocaleDateString('th-TH-u-ca-gregory',{year:'numeric',month:'long',day:'numeric'}) : '—'}</span>
         </div>
       </div>
       <div class="child-actions">
@@ -762,7 +788,7 @@ function openChildModal(id) {
     if (c) {
       document.getElementById('cf-name').value = c.name || '';
       document.getElementById('cf-gender').value = c.gender || 'ชาย';
-      document.getElementById('cf-birthdate').value = c.birthdate || '';
+      document.getElementById('cf-birthdate').value = getChildDob(c) || '';
       document.getElementById('cf-savings').value = c.eduSavings || '';
     }
   } else {
@@ -789,6 +815,8 @@ function saveChild() {
     id: editingChildId || ('ch' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
     name,
     gender: document.getElementById('cf-gender').value,
+    /* เขียนทั้ง 2 fields เพื่อ sync กับ schema กลาง (dob) ขณะคงไว้ backward-compat (birthdate) */
+    dob: birthdate,
     birthdate,
     eduSavings: parseMoney(document.getElementById('cf-savings')),
   };

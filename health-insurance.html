@@ -489,6 +489,29 @@ function getHospitalTier(hospitalRate) {
   return 'international';                          // International
 }
 
+/* รวม coverage จาก medical riders ใน policies → ใช้เป็น default ของ "เตรียมไว้แล้ว"
+   Heuristic: rider.sumAssured คืออะไร? ปกติคือ ค่าห้องต่อวัน (perVisit) หรือยอดรวมต่อปี
+   ตอนนี้ใช้แบบ pragmatic — ใส่ใน perVisit (ค่าห้อง) เพราะนี่คือ rider value ที่ผู้ใช้กรอก */
+function computeMedicalCoverageFromPolicies(client) {
+  if (!client || !client.policies) return {};
+  const out = {};
+  let totalRoom = 0;
+  client.policies.forEach(p => {
+    const riders = Array.isArray(p.riders) ? p.riders : [];
+    riders.forEach(r => {
+      if (r.type === 'medical') {
+        totalRoom += Number(r.sumAssured || r.cov || 0);
+      }
+    });
+    /* legacy field — riderHealthCov */
+    if ((!riders.length || !riders.some(r => r.type === 'medical')) && Number(p.riderHealthCov || p.coverage || 0)) {
+      totalRoom += Number(p.riderHealthCov || p.coverage || 0);
+    }
+  });
+  if (totalRoom > 0) out.perVisit = totalRoom; // ค่าห้องต่อวัน (เป็น default ที่ใช้ได้)
+  return out;
+}
+
 function getClientAge(client) {
   const dob = client && (client.dob || client.birthdate);
   if (!dob) return null;
@@ -535,17 +558,18 @@ function computeRecommendations(client, hospital, tier) {
   const incomeFallback = monthlyIncome > 0 ? null : 30000;
   const baseMonthly    = monthlyIncome || incomeFallback;
 
+  /* ใช้ floor เพื่อกันค่าต่ำหายเป็น 0 + ใช้ Math.max กับ minimum sensible value */
   return {
     roomMeal:          hospitalRate || 3000,
     nursingService:    'เหมาจ่าย',
-    perVisit:          Math.round((hospitalRate || 3000) * m.perVisitMult * ageMult / 100000) * 100000, // round to 100k
-    opdPerVisit:       Math.round((hospitalRate || 3000) * m.opdRatio / 100) * 100,                     // round to 100
-    opdPerYear:        Math.round((hospitalRate || 3000) * m.opdRatio * 20 / 1000) * 1000,              // round to 1k
+    perVisit:          Math.max(Math.round((hospitalRate || 3000) * m.perVisitMult * ageMult / 100000) * 100000, 100000),
+    opdPerVisit:       Math.max(Math.round((hospitalRate || 3000) * m.opdRatio / 100) * 100, 500),
+    opdPerYear:        Math.max(Math.round((hospitalRate || 3000) * m.opdRatio * 20 / 1000) * 1000, 5000),
     incomeReplace:     Math.max(Math.round(dailyIncome * 0.7 / 500) * 500, 1500),
     ciEarly:           Math.max(Math.round(annualIncome * 2 / 100000) * 100000, 500000),
     ciSevere:          Math.max(Math.round(annualIncome * 5 / 100000) * 100000, 2000000),
     accidentWeekly:    Math.max(Math.round(dailyIncome * 7 / 1000) * 1000, 5000),
-    accidentTreatment: Math.round(m.accidentTreat * ageMult / 10000) * 10000,
+    accidentTreatment: Math.max(Math.round(m.accidentTreat * ageMult / 10000) * 10000, 50000),
     disability:        Math.max(Math.round(baseMonthly * 24 * ageMult / 100000) * 100000, 1000000),
   };
 }
@@ -630,12 +654,19 @@ function render() {
     finalRec[k] = customRec[k] != null ? customRec[k] : autoRec[k];
   });
 
+  /* Auto-prepared จาก medical riders ใน policies (ผลรวม)
+     ใช้เป็น default ถ้า user ยังไม่ override ใน hi.prepared */
+  const autoPreparedFromPolicies = computeMedicalCoverageFromPolicies(client);
+
   // Compute coverage status
   let okCount = 0;
   COVERAGE_ROWS.forEach(r => {
     if (r.selectOptions) return;
     const recommend = Number(finalRec[r.key] || 0);
-    const prepared = Number(hi.prepared[r.key] || 0);
+    /* ใช้ค่าจาก policies ถ้า user ยังไม่กรอก (hi.prepared[k] == null) */
+    const prepared = (hi.prepared[r.key] != null && hi.prepared[r.key] !== '')
+      ? Number(hi.prepared[r.key])
+      : Number(autoPreparedFromPolicies[r.key] || 0);
     if (prepared >= recommend && recommend > 0) okCount++;
   });
   const targetCount = COVERAGE_ROWS.filter(r => !r.selectOptions).length;
@@ -826,8 +857,9 @@ function closeHospitalModal() {
 
 function setRegion(r) {
   currentRegion = r;
+  /* ใช้ data-region attr แทน textContent — กัน emoji/whitespace ใน label ทำเปรียบเทียบพัง */
   document.querySelectorAll('.modal-tab').forEach(t => {
-    t.classList.toggle('active', t.textContent === r);
+    t.classList.toggle('active', (t.dataset.region || t.textContent.trim()) === r);
   });
   renderHospitalList();
 }
@@ -901,6 +933,18 @@ function saveCustomHospital() {
   const region = document.getElementById('ah-region').value;
   const std = parseMoney(document.getElementById('ah-std'));
   const vip = parseMoney(document.getElementById('ah-vip'));
+
+  /* ตรวจชื่อซ้ำ — case-insensitive, รวม database โรงพยาบาลและ custom ที่เพิ่มก่อนหน้า */
+  const u = getCurrentUser();
+  const allHospitals = [...(u.data.customHospitals || [])];
+  if (typeof HOSPITAL_DB !== 'undefined' && Array.isArray(HOSPITAL_DB)) {
+    allHospitals.push(...HOSPITAL_DB);
+  }
+  const dup = allHospitals.find(h => (h.name || '').trim().toLowerCase() === name.toLowerCase());
+  if (dup) {
+    showToast('⚠️ มี รพ. ชื่อนี้อยู่แล้ว');
+    return;
+  }
 
   updateUser(u => {
     if (!u.data.customHospitals) u.data.customHospitals = [];

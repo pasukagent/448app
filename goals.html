@@ -370,6 +370,11 @@
         <input id="gf-deadline" type="date" oninput="updatePreview()">
       </div>
 
+      <div class="form-row">
+        <label>เงินเฟ้อต่อปี (%) <span class="opt">— ปรับเป้าหมายในอนาคต</span></label>
+        <input id="gf-inflation" type="number" step="0.1" min="0" placeholder="0.0" value="0" oninput="updatePreview()">
+      </div>
+
       <div class="form-row" style="margin-bottom:0">
         <label>หมายเหตุ <span class="opt">— optional</span></label>
         <input id="gf-note" type="text" placeholder="ข้อมูลเพิ่มเติม...">
@@ -479,6 +484,28 @@ function yearsTo(deadline) {
   return Math.max((dl - now) / (365.25 * 24 * 3600 * 1000), 0);
 }
 
+/* helper: รองรับ schema ทั้ง currentSaved (กลาง) และ currentAmount (legacy) */
+function getGoalCurrent(g) {
+  if (!g) return 0;
+  return Number(g.currentSaved != null ? g.currentSaved : (g.currentAmount || 0));
+}
+
+/* simple HTML escape — กัน XSS ในชื่อ/หมายเหตุ */
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* คำนวณ targetAmount หลังปรับ inflation (ถ้า goal มี inflationRate) */
+function inflatedTarget(g) {
+  const target = Number(g.targetAmount || 0);
+  const infl   = Number(g.inflationRate || 0) / 100;
+  if (infl <= 0) return target;
+  const years = yearsTo(g.deadline);
+  return target * Math.pow(1 + infl, years);
+}
+
 /* ════════════════════════════════════════════
    CLIENT SELECTOR
 ═══════════════════════════════════════════ */
@@ -521,13 +548,13 @@ function render() {
   }
 
   const goals = getGoals();
-  const totalTarget   = goals.reduce((s,g) => s + Number(g.targetAmount||0), 0);
-  const totalCurrent  = goals.reduce((s,g) => s + Number(g.currentAmount||0), 0);
+  const totalTarget   = goals.reduce((s,g) => s + inflatedTarget(g), 0);
+  const totalCurrent  = goals.reduce((s,g) => s + getGoalCurrent(g), 0);
   const totalMonthly  = goals.reduce((s,g) => s + Number(g.monthlyContribution||0), 0);
   const achievedCount = goals.filter(g => {
     const years = yearsTo(g.deadline);
-    const fv = calcFV(g.currentAmount, g.expectedReturn, years, g.monthlyContribution);
-    return fv >= Number(g.targetAmount||0);
+    const fv = calcFV(getGoalCurrent(g), g.expectedReturn, years, g.monthlyContribution);
+    return fv >= inflatedTarget(g);
   }).length;
 
   const filteredGoals = currentFilter === 'all'
@@ -579,6 +606,11 @@ function render() {
       <button class="fchip ${currentFilter==='risk'?'active':''}" onclick="setFilter('risk')">⚠️ ยังไม่พอ</button>
       <button class="fchip ${currentFilter==='home'?'active':''}" onclick="setFilter('home')">🏠 บ้าน</button>
       <button class="fchip ${currentFilter==='car'?'active':''}" onclick="setFilter('car')">🚗 รถ</button>
+      <button class="fchip ${currentFilter==='travel'?'active':''}" onclick="setFilter('travel')">✈️ ท่องเที่ยว</button>
+      <button class="fchip ${currentFilter==='shop'?'active':''}" onclick="setFilter('shop')">🛍️ ช้อป</button>
+      <button class="fchip ${currentFilter==='business'?'active':''}" onclick="setFilter('business')">💼 ธุรกิจ</button>
+      <button class="fchip ${currentFilter==='portfolio'?'active':''}" onclick="setFilter('portfolio')">📈 พอร์ต</button>
+      <button class="fchip ${currentFilter==='emergency'?'active':''}" onclick="setFilter('emergency')">🆘 ฉุกเฉิน</button>
       <button class="fchip ${currentFilter==='retire'?'active':''}" onclick="setFilter('retire')">👴 เกษียณ</button>
       <div class="toolbar-spacer"></div>
       <button class="btn-add-goal" onclick="openGoalModal()">+ เพิ่มเป้าหมาย</button>
@@ -600,8 +632,8 @@ function render() {
 
 function renderGoalCard(g) {
   const t = GOAL_TYPES[g.type] || GOAL_TYPES.other;
-  const target = Number(g.targetAmount || 0);
-  const current = Number(g.currentAmount || 0);
+  const target = inflatedTarget(g);  /* ปรับ inflation ถ้ามี */
+  const current = getGoalCurrent(g);
   const monthly = Number(g.monthlyContribution || 0);
   const ret = Number(g.expectedReturn || 0);
   const years = yearsTo(g.deadline);
@@ -704,9 +736,12 @@ function openGoalModal(id) {
       selectGoalTypeByKey(g.type || 'other');
       document.getElementById('gf-name').value     = g.name || '';
       document.getElementById('gf-target').value   = g.targetAmount || '';
-      document.getElementById('gf-current').value  = g.currentAmount || '';
+      document.getElementById('gf-current').value  = getGoalCurrent(g) || '';
       document.getElementById('gf-monthly').value  = g.monthlyContribution || '';
-      document.getElementById('gf-return').value   = g.expectedReturn || 3;
+      /* expectedReturn ใช้ != null check — รองรับค่า 0 ที่ user ตั้งใจกรอก */
+      document.getElementById('gf-return').value   = g.expectedReturn != null ? g.expectedReturn : 3;
+      const inflEl = document.getElementById('gf-inflation');
+      if (inflEl) inflEl.value = g.inflationRate != null ? g.inflationRate : 0;
       document.getElementById('gf-deadline').value = g.deadline || '';
       document.getElementById('gf-note').value     = g.note || '';
     }
@@ -717,6 +752,8 @@ function openGoalModal(id) {
     document.getElementById('gf-current').value = '';
     document.getElementById('gf-monthly').value = '';
     document.getElementById('gf-return').value = 3;
+    const inflEl = document.getElementById('gf-inflation');
+    if (inflEl) inflEl.value = 0;
     // Default deadline: 5 years from now
     const d = new Date();
     d.setFullYear(d.getFullYear() + 5);
@@ -746,31 +783,40 @@ function selectGoalTypeByKey(key) {
 }
 
 function updatePreview() {
-  const target = parseMoney(document.getElementById('gf-target'));
+  const targetRaw = parseMoney(document.getElementById('gf-target'));
   const current = parseMoney(document.getElementById('gf-current'));
   const monthly = parseMoney(document.getElementById('gf-monthly'));
   const ret = Number(document.getElementById('gf-return').value || 0);
+  const inflEl = document.getElementById('gf-inflation');
+  const inflRate = inflEl ? Number(inflEl.value || 0) : 0;
   const deadline = document.getElementById('gf-deadline').value;
 
   const previewEl = document.getElementById('calc-preview');
-  if (!target || !deadline) { previewEl.style.display = 'none'; return; }
+  if (!targetRaw || !deadline) { previewEl.style.display = 'none'; return; }
 
   const years = yearsTo(deadline);
+  /* ปรับ inflation ถ้ามี — แสดงเป้าหมายในอนาคตตามมูลค่าจริง */
+  const target = inflRate > 0 ? targetRaw * Math.pow(1 + inflRate/100, years) : targetRaw;
   const fv = calcFV(current, ret, years, monthly);
   const reqMonthly = calcRequiredPMT(target, current, ret, years);
   const surplus = fv - target;
   const achieved = surplus >= 0;
 
+  /* ถ้า deadline ผ่านไปแล้ว → แสดง info ชัดเจน ไม่บอกว่า "ออม/เดือน" */
+  const overdue = years <= 0;
   document.getElementById('calc-preview-body').innerHTML = `
-    <div class="calc-row"><span>เวลาเหลือ:</span><span>${years.toFixed(1)} ปี</span></div>
+    <div class="calc-row"><span>เวลาเหลือ:</span><span>${overdue ? '⏰ เลยกำหนดแล้ว' : years.toFixed(1) + ' ปี'}</span></div>
     <div class="calc-row"><span>FV ตามแผน:</span><span>${fmt(fv)}</span></div>
-    <div class="calc-row"><span>เป้าหมาย:</span><span>${fmt(target)}</span></div>
+    <div class="calc-row"><span>เป้าหมาย${inflRate > 0 ? ' (ปรับเงินเฟ้อ)' : ''}:</span><span>${fmt(target)}</span></div>
     <div class="calc-row total">
       <span>${achieved ? '✅ ส่วนเกิน' : '⚠️ ขาดอีก'}:</span>
       <span style="color:${achieved ? '#28a745' : '#DC3545'}">${fmt(Math.abs(surplus))}</span>
     </div>
     ${!achieved && years > 0 ? `<div class="calc-row" style="margin-top:6px;color:var(--red-primary);font-weight:700;">
       <span>💡 ควรออม/เดือน:</span><span>${fmt(reqMonthly)}</span>
+    </div>` : ''}
+    ${overdue && !achieved ? `<div class="calc-row" style="margin-top:6px;color:#DC3545;font-weight:700;">
+      <span>⛔ ยอดที่ขาด:</span><span>${fmt(Math.abs(surplus))}</span>
     </div>` : ''}
   `;
   previewEl.style.display = 'block';
@@ -782,14 +828,20 @@ function saveGoal() {
   if (!name) { showToast('⚠️ กรุณาใส่ชื่อเป้าหมาย'); return; }
   if (target <= 0) { showToast('⚠️ กรุณาใส่เงินเป้าหมาย'); return; }
 
+  const cur = parseMoney(document.getElementById('gf-current'));
+  const inflEl = document.getElementById('gf-inflation');
+  const inflRate = inflEl ? Number(inflEl.value || 0) : 0;
   const g = {
     id:                  editingGoalId || ('g' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
     type:                modalGoalType,
     name,
     targetAmount:        target,
-    currentAmount:       parseMoney(document.getElementById('gf-current')),
+    /* เขียนทั้ง 2 fields เพื่อ sync กับ schema กลาง (currentSaved) */
+    currentSaved:        cur,
+    currentAmount:       cur,
     monthlyContribution: parseMoney(document.getElementById('gf-monthly')),
     expectedReturn:      Number(document.getElementById('gf-return').value || 0),
+    inflationRate:       inflRate,
     deadline:            document.getElementById('gf-deadline').value,
     note:                document.getElementById('gf-note').value.trim(),
     createdAt:           editingGoalId ? undefined : new Date().toISOString(),

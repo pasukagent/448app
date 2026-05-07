@@ -2299,16 +2299,41 @@ function getClientMarginalTax(client) {
    SHARED — คำนวณภาษีของกรมธรรม์ + per-policy
 ═══════════════════════════════════════════ */
 function computePolicyTaxBreakdown(policies, client) {
-  // ─── 1. แยกเบี้ยตามหมวด ───
+  // ─── 1. แยกเบี้ยตามหมวด — รวม riders premium ตามประเภท rider ───
   const annuityTypes = ['บำนาญ','เกษียณ','ลดหย่อนภาษี'];
   const healthTypes  = ['สุขภาพ'];
 
-  const annuityPrem = policies.filter(p => annuityTypes.includes(p.type))
-                              .reduce((s,p) => s + (p.premium||0), 0);
-  const healthPrem  = policies.filter(p => healthTypes.includes(p.type))
-                              .reduce((s,p) => s + (p.premium||0), 0);
-  const lifePrem    = policies.filter(p => !annuityTypes.includes(p.type) && !healthTypes.includes(p.type))
-                              .reduce((s,p) => s + (p.premium||0), 0);
+  /* helper: แยก premium ของ riders ตามประเภท
+     - medical/income/disability riders → health
+     - critical illness rider → ใช้ slot life ตามกฎ RD (ไม่ใช่ health)
+     - accident rider → life slot */
+  const policyPremDist = (p) => {
+    const mainPrem = Number(p.premium || 0);
+    let life = 0, health = 0, annuity = 0;
+    if (annuityTypes.includes(p.type)) annuity += mainPrem;
+    else if (healthTypes.includes(p.type)) health += mainPrem;
+    else life += mainPrem;
+    /* บวกเบี้ย rider เข้าหมวดที่เหมาะสม */
+    const riders = Array.isArray(p.riders) ? p.riders : [];
+    riders.forEach(r => {
+      const rPrem = Number(r.premium || 0);
+      if (rPrem <= 0) return;
+      if (r.type === 'medical' || r.type === 'income' || r.type === 'disability') health += rPrem;
+      else life += rPrem; // critical, accident → life slot
+    });
+    /* legacy fields (สำหรับกรมธรรม์เก่าที่ไม่มี riders[]) */
+    if (!riders.length) {
+      health += Number(p.riderHealthPrem || 0) + Number(p.riderIncomePrem || 0) + Number(p.riderDisabilityPrem || 0);
+      life   += Number(p.riderCriticalPrem || 0) + Number(p.riderAccidentPrem || 0);
+    }
+    return { life, health, annuity };
+  };
+
+  let annuityPrem = 0, healthPrem = 0, lifePrem = 0;
+  policies.forEach(p => {
+    const d = policyPremDist(p);
+    annuityPrem += d.annuity; healthPrem += d.health; lifePrem += d.life;
+  });
   const totalPremium = annuityPrem + healthPrem + lifePrem;
 
   // ─── 2. เพดานเบี้ยประกัน ───
@@ -2349,18 +2374,15 @@ function computePolicyTaxBreakdown(policies, client) {
   const totalDeduct     = insuranceDeduct + assetDeduct;
 
   // ─── 4. Per-policy effective deduction (allocate proportionally within category) ───
+  // ใช้ total premium ของกรมธรรม์ (main + riders) แยกตามหมวด
   const policyDeducts = new Map();
   policies.forEach((p, i) => {
-    const prem = Number(p.premium || 0);
-    let deduct = 0;
-    if (annuityTypes.includes(p.type)) {
-      deduct = annuityPrem > 0 ? (prem / annuityPrem) * annuityDeduct : 0;
-    } else if (healthTypes.includes(p.type)) {
-      deduct = healthPrem  > 0 ? (prem / healthPrem)  * healthDeduct  : 0;
-    } else {
-      deduct = lifePrem    > 0 ? (prem / lifePrem)    * lifeDeduct    : 0;
-    }
-    policyDeducts.set(i, deduct);
+    const d = policyPremDist(p);
+    /* deduct = สัดส่วนของกรมธรรม์ × cap ของแต่ละหมวด แล้วรวม */
+    const lifeDed    = lifePrem    > 0 ? (d.life    / lifePrem)    * lifeDeduct    : 0;
+    const healthDed  = healthPrem  > 0 ? (d.health  / healthPrem)  * healthDeduct  : 0;
+    const annuityDed = annuityPrem > 0 ? (d.annuity / annuityPrem) * annuityDeduct : 0;
+    policyDeducts.set(i, lifeDed + healthDed + annuityDed);
   });
 
   // ─── 5. Marginal Tax Rate ───
@@ -2563,11 +2585,22 @@ function saveEditedPolicy() {
   const riderDisabilityEnd     =  document.getElementById('ep-rider-disability-end')?.value  || '';
 
   const cid  = currentClientId;
-  const pIdx = currentPolicyIdx;
+  /* ใช้ policy ID แทน index — กัน race condition ถ้าเปิดหลาย tab */
+  const cur  = (getCurrentUser().data.clients || []).find(c => c.id === cid);
+  const targetPolicy = cur && cur.policies && cur.policies[currentPolicyIdx];
+  const targetPolicyId = targetPolicy && targetPolicy.id;
+  if (!targetPolicy) {
+    showToast('❌ กรมธรรม์หายไป — กรุณารีเฟรชหน้า', 'error');
+    return;
+  }
   updateCurrentUser(u => {
     const cl = (u.data.clients || []).find(c => c.id === cid);
-    if (!cl || !cl.policies[pIdx]) return;
-    const pol = cl.policies[pIdx];
+    if (!cl || !cl.policies) return;
+    /* หาด้วย ID ก่อน fallback ไป index */
+    let pol = targetPolicyId ? cl.policies.find(p => p.id === targetPolicyId) : null;
+    if (!pol) pol = cl.policies[currentPolicyIdx];
+    if (!pol) return;
+
     pol.name                 = name;
     pol.company              = company;
     pol.type                 = type;
@@ -2601,10 +2634,18 @@ function saveEditedPolicy() {
     pol.riderDisabilityName  = riderDisabilityName;
     pol.riderDisabilityEnd   = riderDisabilityEnd;
     pol.editedAt             = new Date().toISOString();
+    /* ── Phase 3.3 sync: อัปเดต riders[] จาก legacy fields หลัง save
+       กัน data inconsistency (modern code อ่านจาก riders[]) ── */
+    if (typeof legacyRidersToArray === 'function') {
+      try {
+        const newRiders = legacyRidersToArray(pol);
+        if (Array.isArray(newRiders)) pol.riders = newRiders;
+      } catch (e) { /* ignore sync error — legacy fields ยังถูกต้อง */ }
+    }
   });
 
   closeEditMode();
-  openDetail(pIdx);  // re-render modal with new data
+  openDetail(currentPolicyIdx);  // re-render modal with new data
   render();          // refresh table + spider chart
   showToast('✅ บันทึกการแก้ไขเรียบร้อยแล้ว');
 }
@@ -3759,9 +3800,18 @@ function addPolicy() {
 function deletePolicy(i) {
   if (!confirm('ยืนยันลบกรมธรรม์นี้?')) return;
   const cid = currentClientId;
+  /* ใช้ ID แทน index — กัน race ถ้าเปิด 2 tab แล้วลบใน tab 1 ก่อน */
+  const cur = (getCurrentUser().data.clients || []).find(c => c.id === cid);
+  const targetId = cur && cur.policies && cur.policies[i] && cur.policies[i].id;
   updateCurrentUser(u => {
     const client = u.data.clients.find(c => c.id === cid);
-    if (client && client.policies) client.policies.splice(i, 1);
+    if (!client || !client.policies) return;
+    if (targetId) {
+      client.policies = client.policies.filter(p => p.id !== targetId);
+    } else {
+      /* fallback: ถ้าไม่มี id (legacy data) → ลบโดย index */
+      client.policies.splice(i, 1);
+    }
   });
   render();
 }
