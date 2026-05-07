@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup B — Bold Minimal</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:#fff;color:#1a1a1a;}
+.layout{display:flex;min-height:100vh;}
+/* Sidebar — dark red */
+.sidebar{width:64px;background:#D0021B;display:flex;flex-direction:column;align-items:center;padding:0;position:fixed;top:0;left:0;height:100vh;z-index:10;}
+.sb-logo{padding:20px 0;border-bottom:1px solid rgba(255,255,255,.15);width:100%;text-align:center;}
+.sb-logo-mark{font-size:1.1rem;font-weight:800;color:#fff;}
+.sb-nav{padding:16px 0;flex:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.sb-item{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;transition:background .15s;color:rgba(255,255,255,.7);}
+.sb-item:hover,.sb-item.active{background:rgba(255,255,255,.2);color:#fff;}
+.sb-bottom{padding:16px 0;border-top:1px solid rgba(255,255,255,.15);width:100%;text-align:center;}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;margin:0 auto;}
+/* Main */
+.main{margin-left:64px;flex:1;padding:0;}
+/* Header */
+.header{background:#D0021B;padding:28px 40px 56px;position:relative;overflow:hidden;}
+.header::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.06);}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.header-greeting{color:rgba(255,255,255,.8);font-size:.85rem;}
+.header-name{color:#fff;font-size:1.5rem;font-weight:800;margin-top:2px;}
+.btn-white{padding:9px 20px;border-radius:8px;background:#fff;color:#D0021B;font-family:'Sarabun',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:none;}
+/* Client bar — floats over header */
+.client-bar{background:#fff;border-radius:14px;margin:0 32px;margin-top:-28px;padding:16px 22px;box-shadow:0 4px 24px rgba(0,0,0,.1);display:flex;align-items:center;gap:14px;position:relative;z-index:2;}
+.client-dot{width:10px;height:10px;border-radius:50%;background:#D0021B;flex-shrink:0;}
+.client-label{font-size:.78rem;color:#aaa;font-weight:600;}
+.client-name{font-size:1rem;font-weight:800;color:#1a1a1a;flex:1;}
+.client-tag{background:#FFF0F0;color:#D0021B;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;}
+/* Content */
+.content{padding:28px 32px;}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat{border-bottom:3px solid #F5F5F5;padding:16px 0;}
+.stat.red{border-color:#D0021B;}
+.stat-n{font-size:.75rem;color:#bbb;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.stat-v{font-size:1.8rem;font-weight:800;color:#1a1a1a;line-height:1;}
+.stat-v span{font-size:.9rem;font-weight:600;color:#aaa;margin-left:3px;}
+/* Gap */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-hdr h2{font-size:.92rem;font-weight:800;color:#1a1a1a;}
+.section-hdr a{font-size:.78rem;color:#D0021B;font-weight:600;text-decoration:none;}
+.gap-list{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;}
+.gap-item{display:flex;align-items:center;gap:14px;}
+.gap-ico{font-size:.95rem;width:24px;text-align:center;}
+.gap-lbl{font-size:.82rem;font-weight:700;color:#444;width:100px;flex-shrink:0;}
+.gap-track{flex:1;height:5px;background:#F0F0F0;border-radius:10px;}
+.gap-fill{height:100%;border-radius:10px;transition:width .4s;}
+.c-red{background:#D0021B;} .c-or{background:#F39C12;} .c-gr{background:#27AE60;}
+.gap-n{font-size:.78rem;font-weight:700;width:32px;text-align:right;}
+.gap-n.red{color:#D0021B;} .gap-n.or{color:#F39C12;} .gap-n.gr{color:#27AE60;}
+/* Features */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.feat{padding:18px;border:1.5px solid #F0F0F0;border-radius:12px;cursor:pointer;transition:border-color .15s,transform .15s;}
+.feat:hover{border-color:#D0021B;transform:translateY(-2px);}
+.feat-ico{font-size:1.4rem;margin-bottom:8px;}
+.feat-t{font-size:.85rem;font-weight:800;color:#1a1a1a;}
+.feat-d{font-size:.75rem;color:#bbb;margin-top:2px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-logo"><div class="sb-logo-mark">4</div></div>
+    <nav class="sb-nav">
+      <div class="sb-item active" title="หน้าแรก">🏠</div>
+      <div class="sb-item" title="ลูกค้า">👥</div>
+      <div class="sb-item" title="กรมธรรม์">📊</div>
+      <div class="sb-item" title="การเงิน">💰</div>
+      <div class="sb-item" title="ภาษี">🧾</div>
+      <div class="sb-item" title="คู่มือ">📖</div>
+    </nav>
+    <div class="sb-bottom"><div class="sb-avatar">P</div></div>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="header-greeting">สวัสดีตอนเช้า 👋</div>
+          <div class="header-name">Pasuk Agent</div>
+        </div>
+        <button class="btn-white">+ เพิ่มลูกค้า</button>
+      </div>
+    </div>
+
+    <div class="client-bar">
+      <div class="client-dot"></div>
+      <div style="flex:1;">
+        <div class="client-label">ลูกค้าที่กำลังดู</div>
+        <div class="client-name">สมชาย ใจดี · อายุ 38 ปี</div>
+      </div>
+      <div class="client-tag">3 กรมธรรม์</div>
+    </div>
+
+    <div class="content">
+      <div class="stats">
+        <div class="stat red">
+          <div class="stat-n">ลูกค้า</div>
+          <div class="stat-v">24<span>ราย</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-n">กรมธรรม์</div>
+          <div class="stat-v">67<span>ฉบับ</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-n">เบี้ยรายปี</div>
+          <div class="stat-v">284K<span>฿</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-n">ลดหย่อนภาษี</div>
+          <div class="stat-v">100K<span>฿</span></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="section-hdr">
+            <h2>ช่องโหว่ความคุ้มครอง</h2>
+            <a href="#">ดูทั้งหมด →</a>
+          </div>
+          <div class="gap-list">
+            <div class="gap-item"><span class="gap-ico">🛡️</span><span class="gap-lbl">ชีวิต</span><div class="gap-track"><div class="gap-fill c-gr" style="width:85%"></div></div><span class="gap-n gr">85%</span></div>
+            <div class="gap-item"><span class="gap-ico">❤️</span><span class="gap-lbl">สุขภาพ</span><div class="gap-track"><div class="gap-fill c-or" style="width:60%"></div></div><span class="gap-n or">60%</span></div>
+            <div class="gap-item"><span class="gap-ico">🏥</span><span class="gap-lbl">โรคร้ายแรง</span><div class="gap-track"><div class="gap-fill c-red" style="width:25%"></div></div><span class="gap-n red">25%</span></div>
+            <div class="gap-item"><span class="gap-ico">🚑</span><span class="gap-lbl">อุบัติเหตุ</span><div class="gap-track"><div class="gap-fill c-red" style="width:0%"></div></div><span class="gap-n red">0%</span></div>
+            <div class="gap-item"><span class="gap-ico">🏦</span><span class="gap-lbl">บำนาญ</span><div class="gap-track"><div class="gap-fill c-or" style="width:45%"></div></div><span class="gap-n or">45%</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-hdr"><h2>เครื่องมือ</h2></div>
+          <div class="feat-grid">
+            <div class="feat"><div class="feat-ico">📊</div><div class="feat-t">สรุปกรมธรรม์</div><div class="feat-d">ภาพรวม</div></div>
+            <div class="feat"><div class="feat-ico">💰</div><div class="feat-t">วางแผนการเงิน</div><div class="feat-d">TVM</div></div>
+            <div class="feat"><div class="feat-ico">🧾</div><div class="feat-t">ภาษี</div><div class="feat-d">ลดหย่อน</div></div>
+            <div class="feat"><div class="feat-ico">👥</div><div class="feat-t">ลูกค้า</div><div class="feat-d">จัดการ</div></div>
+            <div class="feat"><div class="feat-ico">📅</div><div class="feat-t">นัดหมาย</div><div class="feat-d">ปฏิทิน</div></div>
+            <div class="feat"><div class="feat-ico">📖</div><div class="feat-t">คู่มือ</div><div class="feat-d">วิธีใช้</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

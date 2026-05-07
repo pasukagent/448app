@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — งบการเงิน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Net Worth Hero Card */
+    .nw-hero {
+      background: white; border-radius: var(--radius); padding: 30px 32px;
+      box-shadow: var(--shadow-sm); margin-bottom: 22px;
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center;
+    }
+    .nw-side { text-align: center; }
+    .nw-side-lbl {
+      font-size: .82rem; font-weight: 700; color: var(--gray-500);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    .nw-side-val { font-size: 1.8rem; font-weight: 800; }
+    .nw-asset-val { color: #28a745; }
+    .nw-debt-val  { color: #DC3545; }
+    .nw-side-sub  { font-size: .8rem; color: var(--gray-400); margin-top: 2px; }
+    .nw-eq {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 18px; border-left: 1.5px dashed var(--gray-200); border-right: 1.5px dashed var(--gray-200);
+    }
+    .nw-eq-lbl {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 4px 12px; border-radius: 16px;
+      font-size: .73rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .nw-eq-val { font-size: 2.4rem; font-weight: 800; color: var(--red-primary); white-space: nowrap; }
+    .nw-eq-pct { font-size: .82rem; color: var(--gray-500); margin-top: 4px; }
+
+    /* Stacked bar */
+    .nw-bar-wrap { background: white; border-radius: var(--radius); padding: 18px 22px; box-shadow: var(--shadow-sm); margin-bottom: 22px; }
+    .nw-bar-title { font-weight: 700; font-size: .92rem; margin-bottom: 12px; color: var(--gray-700); }
+    .nw-bar { display: flex; height: 32px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,.04); }
+    .nw-bar-seg { display: flex; align-items: center; justify-content: center;
+      color: white; font-size: .73rem; font-weight: 700; transition: flex .4s; min-width: 0; }
+    .nw-bar-seg.s-liquid     { background: #0E76A8; }
+    .nw-bar-seg.s-investment { background: #28a745; }
+    .nw-bar-seg.s-personal   { background: #E67E22; }
+    .nw-bar-seg.s-short      { background: #DC3545; }
+    .nw-bar-seg.s-long       { background: #C0392B; }
+    .nw-bar-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: .78rem; color: var(--gray-600); }
+    .nw-bar-legend .lg { display: flex; align-items: center; gap: 5px; }
+    .nw-bar-legend .lg-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* Two-col */
+    .nw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .col-card {
+      background: white; border-radius: var(--radius); padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .col-card h3 {
+      font-size: 1rem; font-weight: 800; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .col-card .col-sub { font-size: .82rem; color: var(--gray-400); margin-bottom: 14px; }
+
+    /* Sub-section */
+    .sub-section { margin-bottom: 16px; }
+    .sub-hd {
+      font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+      padding: 8px 0; border-top: 1px solid var(--gray-100);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sub-hd .sh-amt { color: var(--gray-700); font-size: .85rem; }
+    .sub-hd.l-asset { color: #28a745; }
+    .sub-hd.l-debt  { color: #DC3545; }
+
+    .row-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+    .row-line {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; background: var(--gray-100); border-radius: 8px;
+      font-size: .85rem; transition: background .15s;
+    }
+    .row-line:hover { background: var(--red-soft); }
+    .row-ico { font-size: .95rem; }
+    .row-name { flex: 1; color: var(--gray-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-val  { font-weight: 700; color: var(--gray-800); white-space: nowrap; }
+    .row-actions { display: flex; gap: 4px; }
+    .row-btn {
+      background: none; border: none; cursor: pointer; padding: 2px 6px;
+      color: var(--gray-400); font-size: .85rem; font-family: var(--font);
+    }
+    .row-btn:hover { color: var(--red-primary); }
+    .row-btn.del:hover { color: #c00; }
+    .row-empty { color: var(--gray-400); font-size: .82rem; padding: 8px 4px; font-style: italic; }
+
+    .add-mini-btn {
+      width: 100%; background: var(--red-soft); color: var(--red-primary);
+      border: none; padding: 10px; border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .85rem;
+      margin-top: 8px; transition: all .15s;
+    }
+    .add-mini-btn:hover { background: var(--red-primary); color: white; }
+
+    /* Auto-import notice */
+    .auto-import {
+      background: #FFF8E1; border-left: 3px solid #FFB347;
+      padding: 12px 16px; border-radius: 8px; font-size: .82rem;
+      color: #8B6F00; margin-bottom: 14px;
+    }
+    .auto-import a { color: var(--red-primary); font-weight: 700; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: var(--radius); width: 520px; max-width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: var(--radius) var(--radius) 0 0; position: sticky; top: 0; z-index: 5;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+    .modal-body { padding: 22px; }
+    .modal-footer {
+      padding: 14px 22px; background: var(--gray-100);
+      border-radius: 0 0 var(--radius) var(--radius);
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label {
+      display: block; font-size: .82rem; font-weight: 600;
+      color: var(--gray-600); margin-bottom: 5px;
+    }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .92rem; font-family: var(--font); box-sizing: border-box;
+    }
+    .form-row input:focus, .form-row select:focus { outline: none; border-color: var(--red-primary); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .calc-info {
+      background: var(--red-soft); border-radius: 8px; padding: 10px 14px;
+      font-size: .82rem; color: var(--red-dark); margin-top: 6px;
+    }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width: 900px) {
+      .nw-grid { grid-template-columns: 1fr; }
+      .nw-hero { grid-template-columns: 1fr; gap: 16px; }
+      .nw-eq { border: none; padding: 16px 0; border-top: 1px dashed var(--gray-200); border-bottom: 1px dashed var(--gray-200); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item active" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>⚖️ งบการเงิน (Net Worth Statement)</h2>
+          <p>สรุปสินทรัพย์-หนี้สิน-ความมั่งคั่งสุทธิของลูกค้า</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Add/Edit Liability -->
+<div class="modal-overlay" id="liab-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="liab-modal-title">เพิ่มหนี้สิน</h3>
+      <button class="modal-close" onclick="closeLiabModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>ระยะเวลา *</label>
+          <select id="lf-term">
+            <option value="short">⏱️ ระยะสั้น (≤1 ปี)</option>
+            <option value="long">📅 ระยะยาว (>1 ปี)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>ประเภท</label>
+          <select id="lf-type">
+            <option value="creditcard">💳 บัตรเครดิต</option>
+            <option value="personal">💸 สินเชื่อบุคคล</option>
+            <option value="car">🚗 สินเชื่อรถ</option>
+            <option value="home">🏠 สินเชื่อบ้าน</option>
+            <option value="education">🎓 สินเชื่อการศึกษา</option>
+            <option value="business">💼 สินเชื่อธุรกิจ</option>
+            <option value="other">📌 อื่นๆ</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>ชื่อ / รายละเอียด *</label>
+        <input id="lf-name" type="text" placeholder="เช่น สินเชื่อบ้าน ธ.ออมสิน">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>ยอดหนี้คงเหลือ (บาท) *</label>
+          <input id="lf-principal" class="money-fmt" inputmode="decimal" min="0" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label>ดอกเบี้ย/ปี (%)</label>
+          <input id="lf-rate" type="number" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>ผ่อนต่อเดือน (บาท)</label>
+          <input id="lf-monthly" class="money-fmt" inputmode="decimal" min="0" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label>เหลืออีก (เดือน)</label>
+          <input id="lf-months" type="number" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>หมายเหตุ</label>
+        <input id="lf-note" type="text" placeholder="ข้อมูลเพิ่มเติม...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLiabModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveLiab()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+const ASSET_TYPES = {
+  deposit:{icon:'💰',label:'เงินฝาก',group:'liquid'},
+  bond:{icon:'📜',label:'ตราสารหนี้',group:'liquid'},
+  pvd:{icon:'🏢',label:'PVD',group:'investment'},
+  rmf:{icon:'🌱',label:'RMF',group:'investment'},
+  ltf:{icon:'📈',label:'LTF',group:'investment'},
+  ssf:{icon:'🌿',label:'SSF',group:'investment'},
+  thaiesg:{icon:'🌍',label:'ThaiESG',group:'investment'},
+  mutual:{icon:'🏦',label:'กองทุนรวม',group:'investment'},
+  unitlinked:{icon:'🔗',label:'Unit Linked',group:'investment'},
+  realestate:{icon:'🏠',label:'อสังหาฯ',group:'personal'},
+  stock:{icon:'📊',label:'หุ้น',group:'investment'},
+  other:{icon:'📦',label:'อื่นๆ',group:'personal'},
+};
+const LIAB_TYPES = {
+  creditcard:{icon:'💳',label:'บัตรเครดิต'},
+  personal:  {icon:'💸',label:'สินเชื่อบุคคล'},
+  car:       {icon:'🚗',label:'สินเชื่อรถ'},
+  home:      {icon:'🏠',label:'สินเชื่อบ้าน'},
+  education: {icon:'🎓',label:'สินเชื่อการศึกษา'},
+  business:  {icon:'💼',label:'สินเชื่อธุรกิจ'},
+  other:     {icon:'📌',label:'อื่นๆ'},
+};
+
+let selectedClientId = null;
+let editingLiabId = null;
+
+function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtShort(n) {
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function groupAssets() {
+  const c = getCurrent();
+  if (!c || !c.assets) return { liquid:[], investment:[], personal:[] };
+  const out = { liquid:[], investment:[], personal:[] };
+  c.assets.forEach(a => {
+    const g = (ASSET_TYPES[a.type]||ASSET_TYPES.other).group;
+    out[g].push(a);
+  });
+  return out;
+}
+
+function groupLiabs() {
+  const c = getCurrent();
+  if (!c || !c.liabilities) return { short:[], long:[] };
+  const out = { short:[], long:[] };
+  c.liabilities.forEach(l => {
+    const t = (l.term === 'short') ? 'short' : 'long';
+    out[t].push(l);
+  });
+  return out;
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const ag = groupAssets();
+  const lg = groupLiabs();
+  const sumLiquid = ag.liquid.reduce((s,a)=>s+Number(a.currentValue||0),0);
+  const sumInvest = ag.investment.reduce((s,a)=>s+Number(a.currentValue||0),0);
+  const sumPerson = ag.personal.reduce((s,a)=>s+Number(a.currentValue||0),0);
+  const sumAssets = sumLiquid + sumInvest + sumPerson;
+  const sumShort  = lg.short.reduce((s,l)=>s+Number(l.principal||0),0);
+  const sumLong   = lg.long.reduce((s,l)=>s+Number(l.principal||0),0);
+  const sumLiabs  = sumShort + sumLong;
+  const netWorth  = sumAssets - sumLiabs;
+  const debtRatio = sumAssets > 0 ? (sumLiabs / sumAssets * 100) : 0;
+
+  wrap.innerHTML = `
+    <!-- Net Worth Hero -->
+    <div class="nw-hero">
+      <div class="nw-side">
+        <div class="nw-side-lbl">📦 สินทรัพย์รวม</div>
+        <div class="nw-side-val nw-asset-val">${fmt(sumAssets)}</div>
+        <div class="nw-side-sub">${(ag.liquid.length+ag.investment.length+ag.personal.length)} รายการ</div>
+      </div>
+      <div class="nw-eq">
+        <div class="nw-eq-lbl">ความมั่งคั่งสุทธิ</div>
+        <div class="nw-eq-val" style="color:${netWorth >= 0 ? 'var(--red-primary)' : '#DC3545'}">${fmt(netWorth)}</div>
+        <div class="nw-eq-pct">หนี้สิน ${debtRatio.toFixed(1)}% ของสินทรัพย์</div>
+      </div>
+      <div class="nw-side">
+        <div class="nw-side-lbl">💸 หนี้สินรวม</div>
+        <div class="nw-side-val nw-debt-val">${fmt(sumLiabs)}</div>
+        <div class="nw-side-sub">${lg.short.length+lg.long.length} รายการ</div>
+      </div>
+    </div>
+
+    <!-- Asset stacked bar -->
+    ${sumAssets > 0 ? `<div class="nw-bar-wrap">
+      <div class="nw-bar-title">💎 สัดส่วนสินทรัพย์</div>
+      <div class="nw-bar">
+        ${sumLiquid > 0 ? `<div class="nw-bar-seg s-liquid" style="flex:${sumLiquid}" title="${fmt(sumLiquid)}">${(sumLiquid/sumAssets*100).toFixed(0)}%</div>`:''}
+        ${sumInvest > 0 ? `<div class="nw-bar-seg s-investment" style="flex:${sumInvest}" title="${fmt(sumInvest)}">${(sumInvest/sumAssets*100).toFixed(0)}%</div>`:''}
+        ${sumPerson > 0 ? `<div class="nw-bar-seg s-personal" style="flex:${sumPerson}" title="${fmt(sumPerson)}">${(sumPerson/sumAssets*100).toFixed(0)}%</div>`:''}
+      </div>
+      <div class="nw-bar-legend">
+        <div class="lg"><span class="lg-dot" style="background:#0E76A8"></span> สภาพคล่อง ${fmt(sumLiquid)}</div>
+        <div class="lg"><span class="lg-dot" style="background:#28a745"></span> ลงทุน ${fmt(sumInvest)}</div>
+        <div class="lg"><span class="lg-dot" style="background:#E67E22"></span> ใช้ส่วนตัว ${fmt(sumPerson)}</div>
+      </div>
+    </div>` : ''}
+
+    ${sumLiabs > 0 ? `<div class="nw-bar-wrap">
+      <div class="nw-bar-title">💸 สัดส่วนหนี้สิน</div>
+      <div class="nw-bar">
+        ${sumShort > 0 ? `<div class="nw-bar-seg s-short" style="flex:${sumShort}">${(sumShort/sumLiabs*100).toFixed(0)}%</div>`:''}
+        ${sumLong > 0 ? `<div class="nw-bar-seg s-long" style="flex:${sumLong}">${(sumLong/sumLiabs*100).toFixed(0)}%</div>`:''}
+      </div>
+      <div class="nw-bar-legend">
+        <div class="lg"><span class="lg-dot" style="background:#DC3545"></span> ระยะสั้น ${fmt(sumShort)}</div>
+        <div class="lg"><span class="lg-dot" style="background:#C0392B"></span> ระยะยาว ${fmt(sumLong)}</div>
+      </div>
+    </div>` : ''}
+
+    <!-- Two columns -->
+    <div class="nw-grid">
+
+      <!-- Assets column -->
+      <div class="col-card">
+        <h3>📦 สินทรัพย์</h3>
+        <div class="col-sub">รายการแยกตามประเภท · จัดการได้ที่หน้า <a href="assets.html" style="color:var(--red-primary);font-weight:600;">💎 สินทรัพย์</a></div>
+
+        ${(ag.liquid.length + ag.investment.length + ag.personal.length === 0) ?
+          `<div class="auto-import">💡 ยังไม่มีรายการสินทรัพย์ — <a href="assets.html">เพิ่มในหน้าสินทรัพย์</a></div>` : ''
+        }
+
+        ${renderAssetSection('liquid','💧 สภาพคล่อง', ag.liquid, sumLiquid)}
+        ${renderAssetSection('investment','📈 เพื่อการลงทุน', ag.investment, sumInvest)}
+        ${renderAssetSection('personal','🏠 ใช้ส่วนตัว', ag.personal, sumPerson)}
+
+        <button class="add-mini-btn" onclick="location.href='assets.html'">+ เพิ่ม/แก้ไขสินทรัพย์</button>
+      </div>
+
+      <!-- Liabilities column -->
+      <div class="col-card">
+        <h3>💸 หนี้สิน</h3>
+        <div class="col-sub">รายการแยกตามระยะเวลาผ่อน</div>
+
+        ${renderLiabSection('short','⏱️ ระยะสั้น (≤1 ปี)', lg.short, sumShort)}
+        ${renderLiabSection('long','📅 ระยะยาว (>1 ปี)', lg.long, sumLong)}
+
+        <button class="add-mini-btn" onclick="openLiabModal()">+ เพิ่มหนี้สิน</button>
+      </div>
+
+    </div>
+  `;
+}
+
+function renderAssetSection(group, label, items, total) {
+  return `<div class="sub-section">
+    <div class="sub-hd l-asset">
+      <span>${label}</span>
+      <span class="sh-amt">${fmt(total)} (${items.length} รายการ)</span>
+    </div>
+    <div class="row-list">
+      ${items.length === 0
+        ? `<div class="row-empty">— ไม่มีรายการ —</div>`
+        : items.map(a => {
+            const t = ASSET_TYPES[a.type] || ASSET_TYPES.other;
+            return `<div class="row-line">
+              <span class="row-ico">${t.icon}</span>
+              <span class="row-name">${(a.name||t.label).replace(/</g,'&lt;')}</span>
+              <span class="row-val">${fmt(a.currentValue||0)}</span>
+            </div>`;
+          }).join('')
+      }
+    </div>
+  </div>`;
+}
+
+function renderLiabSection(termKey, label, items, total) {
+  return `<div class="sub-section">
+    <div class="sub-hd l-debt">
+      <span>${label}</span>
+      <span class="sh-amt">${fmt(total)} (${items.length} รายการ)</span>
+    </div>
+    <div class="row-list">
+      ${items.length === 0
+        ? `<div class="row-empty">— ไม่มีรายการ —</div>`
+        : items.map(l => {
+            const t = LIAB_TYPES[l.type] || LIAB_TYPES.other;
+            return `<div class="row-line">
+              <span class="row-ico">${t.icon}</span>
+              <span class="row-name">${(l.name||t.label).replace(/</g,'&lt;')}${l.interestRate ? ` <span style="color:var(--gray-400);font-size:.78rem;">· ${l.interestRate}%</span>` : ''}</span>
+              <span class="row-val">${fmt(l.principal||0)}</span>
+              <span class="row-actions">
+                <button class="row-btn" onclick="openLiabModal('${l.id}')" title="แก้">✏️</button>
+                <button class="row-btn del" onclick="deleteLiab('${l.id}')" title="ลบ">×</button>
+              </span>
+            </div>`;
+          }).join('')
+      }
+    </div>
+  </div>`;
+}
+
+function openLiabModal(id) {
+  editingLiabId = id || null;
+  document.getElementById('liab-modal-title').textContent = id ? 'แก้ไขหนี้สิน' : 'เพิ่มหนี้สิน';
+  if (id) {
+    const c = getCurrent();
+    const l = c && c.liabilities ? c.liabilities.find(x => x.id === id) : null;
+    if (l) {
+      document.getElementById('lf-term').value      = l.term || 'short';
+      document.getElementById('lf-type').value      = l.type || 'other';
+      document.getElementById('lf-name').value      = l.name || '';
+      document.getElementById('lf-principal').value = l.principal || '';
+      document.getElementById('lf-rate').value      = l.interestRate || '';
+      document.getElementById('lf-monthly').value   = l.monthlyPayment || '';
+      document.getElementById('lf-months').value    = l.remainingMonths || '';
+      document.getElementById('lf-note').value      = l.note || '';
+    }
+  } else {
+    document.getElementById('lf-term').value = 'short';
+    document.getElementById('lf-type').value = 'creditcard';
+    document.getElementById('lf-name').value = '';
+    document.getElementById('lf-principal').value = '';
+    document.getElementById('lf-rate').value = '';
+    document.getElementById('lf-monthly').value = '';
+    document.getElementById('lf-months').value = '';
+    document.getElementById('lf-note').value = '';
+  }
+  document.getElementById('liab-modal').classList.add('open');
+}
+
+function closeLiabModal() {
+  document.getElementById('liab-modal').classList.remove('open');
+  editingLiabId = null;
+}
+
+function saveLiab() {
+  const name = document.getElementById('lf-name').value.trim();
+  const p    = parseMoney(document.getElementById('lf-principal'));
+  if (!name) { showToast('⚠️ กรุณาใส่ชื่อ'); return; }
+  if (p <= 0) { showToast('⚠️ กรุณาใส่ยอดหนี้'); return; }
+
+  const l = {
+    id:              editingLiabId || ('l' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
+    term:            document.getElementById('lf-term').value,
+    type:            document.getElementById('lf-type').value,
+    name,
+    principal:       p,
+    interestRate:    Number(document.getElementById('lf-rate').value || 0),
+    monthlyPayment:  parseMoney(document.getElementById('lf-monthly')),
+    remainingMonths: Number(document.getElementById('lf-months').value || 0),
+    note:            document.getElementById('lf-note').value.trim(),
+    createdAt:       editingLiabId ? undefined : new Date().toISOString(),
+  };
+
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.liabilities) c.liabilities = [];
+    if (editingLiabId) {
+      const idx = c.liabilities.findIndex(x => x.id === editingLiabId);
+      if (idx >= 0) { l.createdAt = c.liabilities[idx].createdAt; c.liabilities[idx] = l; }
+    } else {
+      c.liabilities.push(l);
+    }
+  });
+
+  closeLiabModal();
+  render();
+  showToast(editingLiabId ? '✅ อัปเดตแล้ว' : '✅ เพิ่มหนี้สินแล้ว');
+}
+
+function deleteLiab(id) {
+  if (!confirm('ลบหนี้สินนี้?')) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c && c.liabilities) c.liabilities = c.liabilities.filter(l => l.id !== id);
+  });
+  render();
+  showToast('🗑️ ลบแล้ว');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+})();
+
+document.getElementById('liab-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLiabModal();
+});
+
+</script>
+</body>
+</html>

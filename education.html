@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — แผนการศึกษาบุตร</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; color: white; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Summary */
+    .summary-card {
+      background: white; border-radius: var(--radius); padding: 24px 28px;
+      box-shadow: var(--shadow-sm); margin-bottom: 22px;
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 18px;
+    }
+    .sc-item { text-align: center; padding: 0 12px; border-right: 1px dashed var(--gray-200); }
+    .sc-item:last-child { border-right: none; }
+    .sc-lbl { font-size: .77rem; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+    .sc-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-800); }
+    .sc-val.cost { color: var(--red-primary); }
+    .sc-val.green { color: #28a745; }
+    .sc-val.gap-pos { color: #DC3545; }
+    .sc-sub { font-size: .73rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* Child card */
+    .children-grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 22px; }
+    .child-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .child-head {
+      background: linear-gradient(135deg, #FFF5F5, #FFEDF1);
+      padding: 18px 22px; display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--red-soft);
+    }
+    .child-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; font-weight: 800; font-size: 1.2rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .child-info { flex: 1; min-width: 0; }
+    .child-name { font-weight: 800; font-size: 1.05rem; color: var(--gray-800); }
+    .child-meta { font-size: .82rem; color: var(--gray-600); margin-top: 2px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .child-actions { display: flex; gap: 6px; }
+    .ca-btn {
+      background: white; border: 1.5px solid var(--gray-200); border-radius: 8px;
+      padding: 6px 12px; font-size: .8rem; font-weight: 600; cursor: pointer;
+      font-family: var(--font); transition: all .15s; color: var(--gray-700);
+    }
+    .ca-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+    .ca-btn.del:hover { border-color: #c00; color: #c00; }
+
+    /* Child body */
+    .child-body { padding: 18px 22px; }
+    .level-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .level-chip {
+      flex: 1; min-width: 140px; padding: 12px 14px;
+      border: 2px solid var(--gray-200); border-radius: 10px;
+      background: white; cursor: pointer; transition: all .18s; text-align: center;
+      font-family: var(--font);
+    }
+    .level-chip:hover { border-color: var(--red-primary); }
+    .level-chip.selected { border-color: var(--red-primary); background: var(--red-soft); }
+    .level-chip .lc-icon { font-size: 1.4rem; }
+    .level-chip .lc-name { font-size: .9rem; font-weight: 800; color: var(--gray-800); margin-top: 4px; }
+    .level-chip.selected .lc-name { color: var(--red-primary); }
+    .level-chip .lc-desc { font-size: .73rem; color: var(--gray-500); margin-top: 2px; }
+
+    /* Education stages table */
+    .stages-table {
+      width: 100%; border-collapse: collapse; margin-bottom: 14px;
+    }
+    .stages-table th {
+      background: var(--gray-100); padding: 8px 12px; text-align: left;
+      font-size: .73rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .stages-table td {
+      padding: 10px 12px; font-size: .85rem; border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    .stages-table .col-num { text-align: right; white-space: nowrap; }
+    .stages-table tr.passed td { opacity: .45; }
+    .stages-table tr.current td { background: #FFF8E1; font-weight: 700; }
+    .stages-table tr.current .col-name::before { content: '🎯 '; }
+    .stage-badge {
+      display: inline-block; padding: 1px 7px; border-radius: 12px;
+      font-size: .68rem; font-weight: 700;
+    }
+    .stage-badge.passed  { background: var(--gray-100); color: var(--gray-500); }
+    .stage-badge.current { background: #FFF3E0; color: #E67E22; }
+    .stage-badge.future  { background: #E8F4FB; color: #0E76A8; }
+    /* Money input — formatted with commas */
+    .money-fmt { text-align: right; font-variant-numeric: tabular-nums; }
+    .cost-input { transition: all .15s; }
+    .cost-input:focus { outline: none; border-color: var(--red-primary) !important; box-shadow: 0 0 0 2px var(--red-soft); }
+    .cost-input.custom { font-weight: 700; color: var(--red-primary); }
+    .cost-hint {
+      font-size: .73rem; color: var(--gray-500); padding: 6px 0; margin-bottom: -6px;
+    }
+    .cost-hint b { color: var(--red-primary); }
+    .stages-foot {
+      background: var(--red-soft); padding: 12px 14px; border-radius: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .9rem; flex-wrap: wrap; gap: 12px;
+    }
+    .stages-foot strong { color: var(--red-dark); font-size: 1rem; }
+
+    /* Savings & Gap */
+    .savings-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+      margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--gray-200);
+    }
+    .sv-cell {
+      background: var(--gray-100); border-radius: 8px; padding: 10px 12px;
+    }
+    .sv-cell.have { background: #E8F5E9; }
+    .sv-cell.gap  { background: #FEE2E2; }
+    .sv-cell.gap.zero { background: #E8F5E9; }
+    .sv-lbl { font-size: .74rem; color: var(--gray-600); font-weight: 600; }
+    .sv-val { font-size: 1.05rem; font-weight: 800; color: var(--gray-800); margin-top: 2px; }
+    .sv-cell.have .sv-val { color: #28a745; }
+    .sv-cell.gap .sv-val  { color: #DC3545; }
+    .sv-cell.gap.zero .sv-val { color: #28a745; }
+    .sv-extra {
+      font-size: .76rem; color: var(--gray-500); margin-top: 4px;
+    }
+
+    .extra-options {
+      display: flex; gap: 14px; margin-top: 14px; align-items: center; flex-wrap: wrap;
+      font-size: .85rem;
+    }
+    .extra-options label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .extra-options input[type="number"] {
+      width: 110px; padding: 6px 10px; border: 1.5px solid var(--gray-200);
+      border-radius: 6px; font-family: var(--font); font-size: .85rem; text-align: right;
+    }
+
+    /* Add button */
+    .btn-add-child {
+      background: var(--red-primary); color: white; border: none;
+      border-radius: 10px; padding: 10px 20px; font-size: .9rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font); display: inline-flex; align-items: center; gap: 6px;
+      transition: background .2s; flex-shrink: 0;
+    }
+    .btn-add-child:hover { background: var(--red-dark); }
+
+    /* Top toolbar */
+    .edu-toolbar {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 14px 20px; margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .edu-toolbar-title {
+      font-weight: 700; font-size: 1rem; color: var(--gray-800);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .edu-count-pill {
+      background: var(--red-soft); color: var(--red-primary);
+      font-size: .78rem; font-weight: 700;
+      padding: 2px 10px; border-radius: 12px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: var(--radius); width: 480px; max-width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+    .modal-body { padding: 22px; }
+    .modal-footer {
+      padding: 14px 22px; background: var(--gray-100);
+      border-radius: 0 0 var(--radius) var(--radius);
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label {
+      display: block; font-size: .82rem; font-weight: 600;
+      color: var(--gray-600); margin-bottom: 5px;
+    }
+    .form-row input, .form-row select {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .92rem; font-family: var(--font); box-sizing: border-box;
+    }
+    .form-row input:focus, .form-row select:focus { outline: none; border-color: var(--red-primary); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .no-client, .empty-children {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon, .empty-children .ec-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width:900px) {
+      .summary-card { grid-template-columns: repeat(2,1fr); }
+      .sc-item { border-right: none; }
+    }
+    @media(max-width:600px) {
+      .summary-card { grid-template-columns: 1fr; }
+      .savings-row  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item active" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>🎓 แผนการศึกษาบุตร</h2>
+        <p>วางแผนค่าใช้จ่ายการศึกษาตามอายุและระดับการเรียน — ปรับ inflation ได้ตามต้องการ</p>
+      </div>
+      <div class="client-pick">
+        <label>👤</label>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Add/Edit Child -->
+<div class="modal-overlay" id="child-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="child-modal-title">เพิ่มข้อมูลบุตร</h3>
+      <button class="modal-close" onclick="closeChildModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>ชื่อ-นามสกุล *</label>
+          <input id="cf-name" type="text" placeholder="เช่น น้องเอ">
+        </div>
+        <div class="form-row">
+          <label>เพศ</label>
+          <select id="cf-gender">
+            <option value="ชาย">👦 ชาย</option>
+            <option value="หญิง">👧 หญิง</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>วันเกิด *</label>
+        <input id="cf-birthdate" type="date">
+      </div>
+      <div class="form-row">
+        <label>เงินที่ออมไว้แล้ว (บาท)</label>
+        <input id="cf-savings" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeChildModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveChild()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+function getChildren() {
+  const c = getCurrent();
+  return (c && c.children) ? c.children : [];
+}
+
+/* ════════════════════════════════════════════
+   EDUCATION COST DATA (Thailand, baseline 2024)
+═══════════════════════════════════════════ */
+// Annual cost per stage × 3 levels (THB)
+const EDUCATION_STAGES = [
+  { key:'kinder',   label:'อนุบาล',         icon:'🧸', startAge:3,  years:3 },
+  { key:'primary',  label:'ประถม (ป.1-6)',  icon:'📚', startAge:6,  years:6 },
+  { key:'mid',      label:'มัธยมต้น',       icon:'🎒', startAge:12, years:3 },
+  { key:'high',     label:'มัธยมปลาย',     icon:'🏫', startAge:15, years:3 },
+  { key:'bachelor', label:'ปริญญาตรี',     icon:'🎓', startAge:18, years:4 },
+  { key:'master',   label:'ปริญญาโท',      icon:'📜', startAge:22, years:2, optional:'master' },
+  { key:'phd',      label:'ปริญญาเอก',     icon:'👨‍🎓', startAge:24, years:4, optional:'phd' },
+];
+
+const COST_TABLE = {
+  // [economy, medium, premium] in THB/year (baseline 2024)
+  kinder:   [ 30000,  80000, 250000],
+  primary:  [ 25000, 100000, 350000],
+  mid:      [ 30000, 120000, 400000],
+  high:     [ 35000, 150000, 450000],
+  bachelor: [ 60000, 200000, 800000],
+  master:   [120000, 300000,1500000],
+  phd:      [200000, 500000,2500000],
+};
+
+const LEVELS = [
+  { key:'economy', icon:'🏫', name:'เริ่มต้น', desc:'รัฐบาล/ทั่วไป' },
+  { key:'medium',  icon:'🏛️', name:'กลาง',    desc:'เอกชน/2-ภาษา' },
+  { key:'premium', icon:'🌐', name:'จัดเต็ม', desc:'อินเตอร์/นอก' },
+];
+const LEVEL_INDEX = { economy:0, medium:1, premium:2 };
+
+const DEFAULT_INFLATION = 5; // % per year for education (default)
+
+/* ════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let selectedClientId = null;
+let editingChildId = null;
+
+function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtShort(n) {
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+function ageNow(birthdate) {
+  if (!birthdate) return null;
+  const bd = new Date(birthdate);
+  const today = new Date();
+  const diff = today - bd;
+  return diff / (365.25 * 24 * 3600 * 1000);
+}
+
+/* ════════════════════════════════════════════
+   COST CALCULATION
+═══════════════════════════════════════════ */
+function computeChildPlan(child) {
+  const age = ageNow(child.birthdate);
+  if (age == null) return null;
+  const level = child.level || 'medium';
+  const lvIdx = LEVEL_INDEX[level];
+  const includeMaster = !!child.includeMaster;
+  const includePhd    = !!child.includePhd;
+  const customCosts   = child.customCosts || {};
+  // Per-child inflation rate (% per year) — default 5%
+  const inflationPct  = child.inflationRate != null ? Number(child.inflationRate) : DEFAULT_INFLATION;
+  const INFLATION     = inflationPct / 100;
+
+  const stages = EDUCATION_STAGES
+    .filter(s => !s.optional
+      || (s.optional === 'master' && includeMaster)
+      || (s.optional === 'phd'    && includePhd))
+    .map(s => {
+      // Custom cost override (per stage, per level)
+      const custKey = `${s.key}_${level}`;
+      const baseAnnualCost = customCosts[custKey] != null
+        ? Number(customCosts[custKey])
+        : COST_TABLE[s.key][lvIdx];
+      const startAge = s.startAge;
+      const endAge = s.startAge + s.years;
+
+      let yearsLeft = 0;
+      if (age >= endAge) {
+        // Stage already passed
+        yearsLeft = 0;
+      } else if (age < startAge) {
+        yearsLeft = s.years;
+      } else {
+        yearsLeft = endAge - age;
+      }
+      yearsLeft = Math.max(yearsLeft, 0);
+
+      // Compute future cost with inflation
+      // Year-by-year, average year of payment ≈ start of stage relative to now
+      let futureCost = 0;
+      if (yearsLeft > 0) {
+        const yearOfStart = Math.max(startAge - age, 0);
+        for (let i = 0; i < Math.ceil(yearsLeft); i++) {
+          const yearFromNow = yearOfStart + i;
+          const partialYear = Math.min(1, yearsLeft - i);
+          futureCost += baseAnnualCost * Math.pow(1 + INFLATION, yearFromNow) * partialYear;
+        }
+      }
+
+      const status = age >= endAge ? 'passed'
+                   : (age >= startAge ? 'current' : 'future');
+
+      return {
+        ...s,
+        baseAnnualCost,
+        yearsLeft: Math.round(yearsLeft * 10) / 10,
+        futureCost,
+        status,
+      };
+    });
+
+  const totalFuture = stages.reduce((s, x) => s + x.futureCost, 0);
+  const eduSavings = Number(child.eduSavings || 0);
+  const eduSavingsContribution = Number(child.eduMonthly || 0) * 12; // annual
+  const yearsToFinish = Math.max(...stages.filter(s => s.status !== 'passed').map(s => s.startAge + s.years - age), 0);
+
+  // FV of savings if invested at 4% return
+  const SAVINGS_RETURN = 0.04;
+  const fvOfCurrentSavings = eduSavings * Math.pow(1 + SAVINGS_RETURN, yearsToFinish);
+
+  const gap = Math.max(totalFuture - fvOfCurrentSavings, 0);
+  // Required monthly to close gap by averaging across years
+  const reqMonthly = yearsToFinish > 0
+    ? gap / (yearsToFinish * 12)
+    : 0;
+
+  return {
+    age,
+    level,
+    stages,
+    totalFuture,
+    eduSavings,
+    fvOfCurrentSavings,
+    gap,
+    reqMonthly,
+    yearsToFinish,
+    inflationPct,
+  };
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อนเริ่มวางแผน</p>
+    </div>`;
+    return;
+  }
+
+  const children = getChildren();
+  const plans = children.map(c => ({ child: c, plan: computeChildPlan(c) }))
+                        .filter(p => p.plan != null);
+
+  const totalCost     = plans.reduce((s,p) => s + p.plan.totalFuture, 0);
+  const totalSavings  = plans.reduce((s,p) => s + p.plan.eduSavings, 0);
+  const totalGap      = plans.reduce((s,p) => s + p.plan.gap, 0);
+  const totalMonthly  = plans.reduce((s,p) => s + p.plan.reqMonthly, 0);
+
+  let html = `
+    <!-- Top toolbar -->
+    <div class="edu-toolbar">
+      <div class="edu-toolbar-title">👨‍👩‍👧‍👦 บุตรในแผน <span class="edu-count-pill">${children.length} คน</span></div>
+      <button class="btn-add-child" onclick="openChildModal()">➕ เพิ่มบุตร</button>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-card">
+      <div class="sc-item">
+        <div class="sc-lbl">👶 จำนวนบุตร</div>
+        <div class="sc-val">${children.length} คน</div>
+        <div class="sc-sub">ในแผน</div>
+      </div>
+      <div class="sc-item">
+        <div class="sc-lbl">💸 ค่าใช้จ่ายรวม (FV)</div>
+        <div class="sc-val cost">${fmtShort(totalCost)}</div>
+        <div class="sc-sub">รวม inflation/ปี ตามที่ตั้ง</div>
+      </div>
+      <div class="sc-item">
+        <div class="sc-lbl">💰 ออมไว้แล้ว (FV)</div>
+        <div class="sc-val green">${fmtShort(plans.reduce((s,p) => s + p.plan.fvOfCurrentSavings, 0))}</div>
+        <div class="sc-sub">โต @ 4%/ปี</div>
+      </div>
+      <div class="sc-item">
+        <div class="sc-lbl">⚠️ ขาดอีก</div>
+        <div class="sc-val ${totalGap > 0 ? 'gap-pos' : 'green'}">${fmtShort(totalGap)}</div>
+        <div class="sc-sub">${totalGap > 0 ? `~${fmt(totalMonthly)}/เดือน` : 'พร้อมแล้ว ✓'}</div>
+      </div>
+    </div>
+
+    <div class="children-grid" id="children-grid">
+      ${children.length === 0
+        ? `<div class="empty-children">
+            <div class="ec-icon">👨‍👩‍👧‍👦</div>
+            <h3 style="font-size:1rem;color:var(--gray-700);margin-bottom:6px;">ยังไม่มีข้อมูลบุตร</h3>
+            <p style="font-size:.9rem;">กดปุ่ม "+ เพิ่มบุตร" ด้านบนเพื่อเริ่มต้นวางแผนการศึกษา</p>
+          </div>`
+        : plans.map(p => renderChildCard(p.child, p.plan)).join('')
+      }
+    </div>
+  `;
+
+  wrap.innerHTML = html;
+}
+
+function renderChildCard(child, plan) {
+  const initial = (child.name || '?').charAt(0).toUpperCase();
+  const ageStr = plan.age >= 1 ? `${Math.floor(plan.age)} ปี ${Math.floor((plan.age - Math.floor(plan.age))*12)} เดือน`
+                                : `${Math.floor(plan.age * 12)} เดือน`;
+  const genderIcon = child.gender === 'หญิง' ? '👧' : '👦';
+
+  // Stages table — cost is editable per stage
+  const lvl = plan.level;
+  const stagesHtml = plan.stages.map(s => {
+    const custKey = `${s.key}_${lvl}`;
+    const defaultCost = COST_TABLE[s.key][LEVEL_INDEX[lvl]];
+    const isCustom = (child.customCosts || {})[custKey] != null;
+    return `
+    <tr class="${s.status}">
+      <td class="col-name">${s.icon} ${s.label}</td>
+      <td><span class="stage-badge ${s.status}">${s.status === 'passed' ? 'ผ่านมาแล้ว' : s.status === 'current' ? 'กำลังเรียน' : 'ในอนาคต'}</span></td>
+      <td class="col-num">${s.startAge}-${s.startAge + s.years} ปี</td>
+      <td class="col-num">
+        <input inputmode="decimal" value="${s.baseAnnualCost.toLocaleString('th-TH')}" class="cost-input money-fmt ${isCustom ? 'custom' : ''}"
+          onchange="updateChildCost('${child.id}','${custKey}',parseMoney(this))"
+          title="${isCustom ? 'แก้ไขเอง — คลิกขวาเพื่อรีเซ็ต' : 'ค่าเริ่มต้น'}"
+          oncontextmenu="event.preventDefault();resetChildCost('${child.id}','${custKey}')"
+          style="width:130px;padding:5px 8px;border:1.5px solid ${isCustom ? 'var(--red-primary)' : 'var(--gray-200)'};border-radius:6px;font-family:var(--font);font-size:.85rem;text-align:right;background:${isCustom ? '#FFF8F8' : 'white'};">
+        <span style="font-size:.72rem;color:var(--gray-400);">/ปี</span>
+      </td>
+      <td class="col-num">${s.yearsLeft > 0 ? s.yearsLeft + ' ปี' : '—'}</td>
+      <td class="col-num"><b>${s.futureCost > 0 ? fmt(s.futureCost) : '—'}</b></td>
+    </tr>
+  `;
+  }).join('');
+
+  const isGapZero = plan.gap <= 0;
+
+  return `<div class="child-card">
+    <div class="child-head">
+      <div class="child-avatar">${initial}</div>
+      <div class="child-info">
+        <div class="child-name">${genderIcon} ${child.name}</div>
+        <div class="child-meta">
+          <span>🎂 ${ageStr}</span>
+          <span>เกิด ${child.birthdate ? new Date(child.birthdate).toLocaleDateString('th-TH-u-ca-gregory',{year:'numeric',month:'long',day:'numeric'}) : '—'}</span>
+        </div>
+      </div>
+      <div class="child-actions">
+        <button class="ca-btn" onclick="openChildModal('${child.id}')" title="แก้ไข">✏️ แก้ไข</button>
+        <button class="ca-btn del" onclick="deleteChild('${child.id}')" title="ลบ">🗑️</button>
+      </div>
+    </div>
+    <div class="child-body">
+      <!-- Level selector -->
+      <div class="level-row">
+        ${LEVELS.map(lv => `
+          <div class="level-chip ${plan.level === lv.key ? 'selected':''}" onclick="updateChildLevel('${child.id}','${lv.key}')">
+            <div class="lc-icon">${lv.icon}</div>
+            <div class="lc-name">${lv.name}</div>
+            <div class="lc-desc">${lv.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Extras -->
+      <div class="extra-options">
+        <label>
+          <input type="checkbox" ${child.includeMaster ? 'checked':''} onchange="updateChildField('${child.id}','includeMaster',this.checked)">
+          📜 รวมปริญญาโท
+        </label>
+        <label>
+          <input type="checkbox" ${child.includePhd ? 'checked':''} onchange="updateChildField('${child.id}','includePhd',this.checked)">
+          👨‍🎓 รวมปริญญาเอก
+        </label>
+        <label>
+          💰 ออมไว้แล้ว:
+          <input inputmode="decimal" class="money-fmt" value="${(child.eduSavings||0).toLocaleString('th-TH')}" onchange="updateChildField('${child.id}','eduSavings',parseMoney(this))">
+        </label>
+        <label>
+          📅 ออมเดือนละ:
+          <input inputmode="decimal" class="money-fmt" value="${(child.eduMonthly||0).toLocaleString('th-TH')}" onchange="updateChildField('${child.id}','eduMonthly',parseMoney(this))">
+        </label>
+        <label title="อัตราเงินเฟ้อค่าเทอม/ปี">
+          📈 เงินเฟ้อ:
+          <input type="number" min="0" max="20" step="0.1" value="${plan.inflationPct}" onchange="updateChildField('${child.id}','inflationRate',Number(this.value))" style="width:70px;">
+          <span style="color:var(--gray-500);font-size:.78rem;">%/ปี</span>
+        </label>
+      </div>
+
+      <!-- Stages table -->
+      <div class="cost-hint">💡 <b>คลิกที่ค่าเทอม</b>เพื่อแก้ไขเอง · <b>คลิกขวา</b>เพื่อรีเซ็ตเป็นค่าเริ่มต้น</div>
+      <table class="stages-table">
+        <thead>
+          <tr>
+            <th>ระดับ</th>
+            <th>สถานะ</th>
+            <th class="col-num">ช่วงอายุ</th>
+            <th class="col-num">ค่าเทอม/ปี (ฐาน)</th>
+            <th class="col-num">เหลืออีก</th>
+            <th class="col-num">รวม (FV)</th>
+          </tr>
+        </thead>
+        <tbody>${stagesHtml}</tbody>
+      </table>
+
+      <!-- Summary footer -->
+      <div class="stages-foot">
+        <div>📊 ค่าใช้จ่ายรวม FV ระดับ <b>${LEVELS.find(l => l.key === plan.level).name}</b></div>
+        <strong>${fmt(plan.totalFuture)}</strong>
+      </div>
+
+      <!-- Savings + Gap -->
+      <div class="savings-row">
+        <div class="sv-cell have">
+          <div class="sv-lbl">💰 มีอยู่ + ออมต่อ (FV)</div>
+          <div class="sv-val">${fmt(plan.fvOfCurrentSavings)}</div>
+          <div class="sv-extra">@ 4% return ${plan.yearsToFinish.toFixed(1)} ปี</div>
+        </div>
+        <div class="sv-cell">
+          <div class="sv-lbl">💸 ที่ต้องการ (FV)</div>
+          <div class="sv-val">${fmt(plan.totalFuture)}</div>
+          <div class="sv-extra">รวม inflation ${plan.inflationPct}%/ปี</div>
+        </div>
+        <div class="sv-cell gap ${isGapZero ? 'zero' : ''}">
+          <div class="sv-lbl">${isGapZero ? '✅ ยอด' : '⚠️ ขาดอีก'}</div>
+          <div class="sv-val">${isGapZero ? 'พร้อมแล้ว' : fmt(plan.gap)}</div>
+          <div class="sv-extra">${isGapZero ? 'แผนการเงินเพียงพอ' : `ต้องออม ~${fmt(plan.reqMonthly)}/เดือน`}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════
+   CHILD CRUD
+═══════════════════════════════════════════ */
+function openChildModal(id) {
+  editingChildId = id || null;
+  document.getElementById('child-modal-title').textContent = id ? 'แก้ไขข้อมูลบุตร' : 'เพิ่มข้อมูลบุตร';
+  if (id) {
+    const c = getChildren().find(x => x.id === id);
+    if (c) {
+      document.getElementById('cf-name').value = c.name || '';
+      document.getElementById('cf-gender').value = c.gender || 'ชาย';
+      document.getElementById('cf-birthdate').value = c.birthdate || '';
+      document.getElementById('cf-savings').value = c.eduSavings || '';
+    }
+  } else {
+    document.getElementById('cf-name').value = '';
+    document.getElementById('cf-gender').value = 'ชาย';
+    document.getElementById('cf-birthdate').value = '';
+    document.getElementById('cf-savings').value = '';
+  }
+  document.getElementById('child-modal').classList.add('open');
+}
+
+function closeChildModal() {
+  document.getElementById('child-modal').classList.remove('open');
+  editingChildId = null;
+}
+
+function saveChild() {
+  const name = document.getElementById('cf-name').value.trim();
+  const birthdate = document.getElementById('cf-birthdate').value;
+  if (!name) { showToast('⚠️ กรุณาใส่ชื่อบุตร'); return; }
+  if (!birthdate) { showToast('⚠️ กรุณาใส่วันเกิด'); return; }
+
+  const ch = {
+    id: editingChildId || ('ch' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
+    name,
+    gender: document.getElementById('cf-gender').value,
+    birthdate,
+    eduSavings: parseMoney(document.getElementById('cf-savings')),
+  };
+
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.children) c.children = [];
+    if (editingChildId) {
+      const idx = c.children.findIndex(x => x.id === editingChildId);
+      if (idx >= 0) {
+        // Preserve other fields
+        c.children[idx] = { ...c.children[idx], ...ch };
+      }
+    } else {
+      ch.level = 'medium';
+      ch.includeMaster = false;
+      ch.includePhd = false;
+      ch.eduMonthly = 0;
+      ch.customCosts = {};
+      ch.inflationRate = DEFAULT_INFLATION;
+      c.children.push(ch);
+    }
+  });
+
+  closeChildModal();
+  render();
+  showToast(editingChildId ? '✅ อัปเดตแล้ว' : '✅ เพิ่มบุตรแล้ว');
+}
+
+function deleteChild(id) {
+  const ch = getChildren().find(x => x.id === id);
+  if (!ch) return;
+  if (!confirm(`ลบข้อมูลของ "${ch.name}"?`)) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c && c.children) c.children = c.children.filter(x => x.id !== id);
+  });
+  render();
+  showToast('🗑️ ลบแล้ว');
+}
+
+function updateChildLevel(id, level) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    const ch = c.children.find(x => x.id === id);
+    if (ch) ch.level = level;
+  });
+  render();
+}
+
+function updateChildField(id, field, value) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    const ch = c.children.find(x => x.id === id);
+    if (ch) ch[field] = value;
+  });
+  render();
+}
+
+function updateChildCost(id, custKey, value) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    const ch = c.children.find(x => x.id === id);
+    if (!ch) return;
+    if (!ch.customCosts) ch.customCosts = {};
+    ch.customCosts[custKey] = Math.max(0, Number(value) || 0);
+  });
+  render();
+  showToast('💾 บันทึกค่าเทอมที่กำหนดเองแล้ว');
+}
+
+function resetChildCost(id, custKey) {
+  if (!confirm('รีเซ็ตค่าเทอมกลับเป็นค่าเริ่มต้น?')) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    const ch = c.children.find(x => x.id === id);
+    if (!ch || !ch.customCosts) return;
+    delete ch.customCosts[custKey];
+  });
+  render();
+  showToast('↩️ รีเซ็ตเป็นค่าเริ่มต้นแล้ว');
+}
+
+/* ════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+})();
+
+document.getElementById('child-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeChildModal();
+});
+</script>
+</body>
+</html>

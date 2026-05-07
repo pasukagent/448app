@@ -309,70 +309,267 @@
     .cal-empty { /* placeholder cells */ }
 
     @media(max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ─── Renewal Reminders Panel ─── */
+    .renewal-panel {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); margin-bottom: 22px; overflow: hidden;
+    }
+    .renewal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; cursor: pointer; user-select: none;
+      border-bottom: 1px solid transparent; transition: border-color .2s;
+    }
+    .renewal-header.open { border-bottom-color: var(--gray-100); }
+    .renewal-header-left { display: flex; align-items: center; gap: 10px; }
+    .renewal-header-title { font-weight: 700; font-size: .97rem; color: var(--gray-800); }
+    .renewal-badge-row    { display: flex; gap: 6px; }
+    .renewal-badge {
+      padding: 2px 9px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+    }
+    .rb-red    { background: #FEE2E2; color: #C0392B; }
+    .rb-orange { background: #FFF3E0; color: #E67E22; }
+    .rb-yellow { background: #FFFDE7; color: #F39C12; }
+    .rb-gray   { background: var(--gray-100); color: var(--gray-500); }
+    .renewal-toggle { font-size: .85rem; color: var(--gray-400); transition: transform .2s; }
+    .renewal-toggle.open { transform: rotate(180deg); }
+
+    .renewal-body { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .2s; }
+    .renewal-body.open { max-height: 800px; padding: 16px 20px; }
+
+    .renewal-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .rtab {
+      padding: 5px 14px; border-radius: 20px; font-size: .8rem; font-weight: 700;
+      border: 1.5px solid var(--gray-200); background: var(--gray-100); color: var(--gray-600);
+      cursor: pointer; font-family: var(--font); transition: all .15s;
+    }
+    .rtab.active { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-primary); }
+
+    .renewal-list { display: flex; flex-direction: column; gap: 8px; }
+    .renewal-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 10px; background: var(--gray-100);
+      transition: background .15s;
+    }
+    .renewal-item:hover { background: #FFF5F5; }
+    .renewal-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot-red    { background: #E74C3C; }
+    .dot-orange { background: #E67E22; }
+    .dot-yellow { background: #F1C40F; }
+    .renewal-info { flex: 1; min-width: 0; }
+    .renewal-client { font-size: .88rem; font-weight: 700; color: var(--gray-800); }
+    .renewal-policy { font-size: .78rem; color: var(--gray-500); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .renewal-days {
+      font-size: .8rem; font-weight: 800; padding: 3px 10px;
+      border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .days-red    { background: #FEE2E2; color: #C0392B; }
+    .days-orange { background: #FFF3E0; color: #E67E22; }
+    .days-yellow { background: #FFFDE7; color: #E67E22; }
+
+    .renewal-empty { text-align: center; padding: 24px 16px; color: var(--gray-400); font-size: .88rem; }
+
+    /* ─── Upcoming Appointments Widget ─── */
+    .appt-widget {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 18px 22px; margin-bottom: 22px;
+    }
+    .appt-widget-hd {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .appt-widget-title {
+      font-weight: 700; font-size: .97rem; color: var(--gray-800);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .appt-widget-link {
+      font-size: .82rem; color: var(--red-primary); font-weight: 600; text-decoration: none;
+    }
+    .appt-widget-link:hover { text-decoration: underline; }
+    .appt-widget-list { display: flex; flex-direction: column; gap: 8px; }
+    .aw-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 10px; background: var(--gray-100);
+      border-left: 3px solid transparent; transition: all .15s; cursor: pointer;
+    }
+    .aw-item:hover { background: #FFF5F5; transform: translateX(2px); }
+    .aw-item.tm-meet  { border-left-color: #D0021B; }
+    .aw-item.tm-call  { border-left-color: #FF8C00; }
+    .aw-item.tm-online{ border-left-color: #0E76A8; }
+    .aw-item.tm-video { border-left-color: #7B2FF7; }
+    .aw-date {
+      min-width: 44px; text-align: center;
+      background: white; border-radius: 8px; padding: 4px 6px; line-height: 1.1;
+      flex-shrink: 0;
+    }
+    .aw-day { font-size: 1.1rem; font-weight: 800; color: var(--gray-800); }
+    .aw-mon { font-size: .65rem; font-weight: 700; color: var(--gray-500); }
+    .aw-item.today .aw-day { color: var(--red-primary); }
+    .aw-item.today .aw-date { background: var(--red-soft); }
+    .aw-info { flex: 1; min-width: 0; }
+    .aw-name { font-size: .88rem; font-weight: 700; color: var(--gray-800); }
+    .aw-meta { font-size: .75rem; color: var(--gray-500); margin-top: 1px; }
+    .aw-time-badge {
+      font-size: .73rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+      background: white; color: var(--gray-600); white-space: nowrap; flex-shrink: 0;
+    }
+    .aw-item.today .aw-time-badge { background: var(--red-primary); color: white; }
+    .aw-empty { text-align: center; padding: 18px 12px; color: var(--gray-400); font-size: .88rem; }
+
+    /* ─── Birthday Panel ─── */
+    .bday-panel {
+      background: linear-gradient(135deg, #FFF7E6, #FFEDF1);
+      border-radius: var(--radius); padding: 18px 22px; margin-bottom: 22px;
+      border-left: 4px solid #FFB347;
+    }
+    .bday-hd {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      font-weight: 700; font-size: .97rem; color: var(--gray-800);
+    }
+    .bday-list { display: flex; gap: 10px; flex-wrap: wrap; }
+    .bday-item {
+      display: flex; align-items: center; gap: 8px;
+      background: white; border-radius: 24px; padding: 6px 14px 6px 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05); cursor: pointer; transition: all .15s;
+    }
+    .bday-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,179,71,.25); }
+    .bday-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg,#FFB347,#FF6B6B);
+      color: white; font-weight: 800; font-size: .8rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .bday-info { line-height: 1.2; }
+    .bday-name { font-size: .82rem; font-weight: 700; color: var(--gray-800); }
+    .bday-when { font-size: .7rem; color: #C68A00; font-weight: 600; }
+    .bday-empty { font-size: .85rem; color: var(--gray-500); padding: 4px 0; }
+
+    /* ─── Tasks Widget ─── */
+    .tasks-panel {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 18px 22px; margin-bottom: 22px;
+    }
+    .tasks-hd {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .tasks-title {
+      font-weight: 700; font-size: .97rem; color: var(--gray-800);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .task-add-btn {
+      background: var(--red-soft); color: var(--red-primary);
+      border: none; border-radius: 8px; padding: 6px 12px;
+      font-size: .8rem; font-weight: 700; cursor: pointer; font-family: var(--font);
+      transition: all .15s;
+    }
+    .task-add-btn:hover { background: var(--red-primary); color: white; }
+    .task-input-row { display: none; gap: 8px; margin-bottom: 12px; }
+    .task-input-row.open { display: flex; }
+    .task-input-row input {
+      flex: 1; padding: 8px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .88rem; font-family: var(--font);
+    }
+    .task-input-row input:focus { outline: none; border-color: var(--red-primary); }
+    .task-input-row button {
+      padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer;
+      font-size: .85rem; font-weight: 700; font-family: var(--font);
+    }
+    .task-input-row .ti-save { background: var(--red-primary); color: white; }
+    .task-input-row .ti-cancel { background: var(--gray-100); color: var(--gray-600); }
+    .tasks-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .task-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 8px; background: var(--gray-100); transition: all .15s;
+    }
+    .task-item:hover { background: #FFF5F5; }
+    .task-item.done { opacity: .55; }
+    .task-item.done .task-text { text-decoration: line-through; color: var(--gray-400); }
+    .task-check {
+      width: 18px; height: 18px; border: 2px solid var(--gray-300); border-radius: 4px;
+      cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all .15s; background: white;
+    }
+    .task-check.checked { background: var(--red-primary); border-color: var(--red-primary); }
+    .task-check.checked::after { content: '✓'; color: white; font-size: .8rem; font-weight: 800; }
+    .task-text { flex: 1; font-size: .88rem; color: var(--gray-800); cursor: pointer; }
+    .task-del { background: none; border: none; color: var(--gray-400); cursor: pointer; padding: 4px 6px; font-size: .9rem; }
+    .task-del:hover { color: #c00; }
+    .tasks-empty { text-align: center; padding: 20px 12px; color: var(--gray-400); font-size: .88rem; }
   </style>
 </head>
 <body>
 
-<!-- ─── NAVBAR ─── -->
-<nav class="navbar">
-  <div class="navbar-inner">
-    <div class="navbar-brand">
-      <div class="navbar-logo">
-        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="dlg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#F0021E"/><stop offset="1" stop-color="#7A000F"/>
-            </linearGradient>
-          </defs>
-          <rect width="42" height="42" rx="12" fill="url(#dlg)"/>
-          <rect x="0" y="0" width="42" height="21" rx="12" fill="rgba(255,255,255,.07)"/>
-          <rect x="8"  y="24" width="6" height="11" rx="1.8" fill="white" opacity=".55"/>
-          <rect x="18" y="17" width="6" height="18" rx="1.8" fill="white" opacity=".82"/>
-          <rect x="28" y="10" width="6" height="25" rx="1.8" fill="white"/>
-          <path d="M11 23 L21 16 L31 9" stroke="rgba(255,255,255,.38)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2.5 2"/>
-          <circle cx="31" cy="9" r="2" fill="white" opacity=".9"/>
-        </svg>
-      </div>
-      <div><div class="navbar-name">448 Wealth <span>Management Plan</span></div></div>
+<!-- ─── APP LAYOUT (Mockup C) ─── -->
+<div class="app-layout">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
     </div>
-    <ul class="navbar-menu">
-      <li><a href="index.html">หน้าหลัก</a></li>
-      <li><a href="dashboard.html" class="active">ฟีเจอร์</a></li>
-      <li><a href="guide.html">คู่มือการใช้งาน</a></li>
-      <li><a href="#">ติดต่อเรา</a></li>
-    </ul>
-    <div class="navbar-actions">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);cursor:pointer;">?</div>
-        <span id="nav-name" style="font-weight:600;font-size:.9rem;">...</span>
-        <button onclick="doLogout()" style="border:none;background:none;cursor:pointer;color:var(--gray-400);font-size:.82rem;padding:4px 8px;border-radius:6px;transition:all .2s;" onmouseover="this.style.background='var(--red-soft)';this.style.color='var(--red-primary)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">ออกจากระบบ</button>
+    <div class="sb-divider"></div>
+
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item active" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
       </div>
     </div>
-  </div>
-</nav>
+  </aside>
 
-<div class="page">
-  <div class="dashboard-page">
+  <!-- ─── MAIN AREA ─── -->
+  <main class="app-main">
 
-    <!-- ─── SIDEBAR ─── -->
-    <aside class="sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-label">เมนูหลัก</div>
-        <div class="sidebar-item active" onclick="location.href='dashboard.html'"><span class="ico">🏠</span> หน้าแรก</div>
-        <div class="sidebar-item" onclick="location.href='clients.html'"><span class="ico">👥</span> รายชื่อลูกค้า</div>
-        <div class="sidebar-item" onclick="location.href='financial.html'"><span class="ico">💰</span> วางแผนการเงิน</div>
-        <div class="sidebar-item" onclick="location.href='policies.html'"><span class="ico">📋</span> สรุปกรมธรรม์</div>
+    <!-- Topbar -->
+    <div class="app-topbar">
+      <div class="app-topbar-left">
+        <div class="tb-title" id="greeting">หน้าแรก 👋</div>
+        <div class="tb-date"  id="greeting-sub">กำลังโหลดข้อมูล...</div>
       </div>
-    </aside>
-
-    <!-- ─── MAIN CONTENT ─── -->
-    <main class="dashboard-content">
-
-      <!-- Greeting header -->
-      <div class="dashboard-header">
-        <h2 id="greeting">สวัสดี 👋</h2>
-        <p id="greeting-sub">กำลังโหลดข้อมูล...</p>
+      <div class="app-topbar-right">
+        <button class="btn-app-ghost" onclick="location.href='clients.html'">+ เพิ่มลูกค้า</button>
+        <button class="btn-app-primary" onclick="location.href='policies.html'">+ เพิ่มกรมธรรม์</button>
       </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="app-content">
 
       <!-- ─── CLIENT SELECTOR STRIP ─── -->
       <div class="client-strip-wrap">
@@ -412,43 +609,115 @@
         </div>
       </div>
 
-      <!-- ─── STATS ROW ─── -->
-      <div class="stats-row" style="margin-bottom:28px;">
-        <div class="stat-card" id="stat-card-plans" onclick="goToFinancial()" style="cursor:pointer;transition:all .2s;">
-          <div class="s-label">วางแผนการเงิน</div>
-          <div class="s-value" id="stat-plans">0 แผน</div>
-          <div class="s-change" id="stat-plans-sub">เริ่มสร้างแผนได้เลย</div>
+      <!-- ─── STATS ROW (Mockup C) — รวมทุกลูกค้า ─── -->
+      <div class="mc-stats">
+        <div class="mc-stat">
+          <div class="mc-stat-ico">👥</div>
+          <div>
+            <div class="mc-stat-lbl">ลูกค้าทั้งหมด</div>
+            <div class="mc-stat-val" id="mc-clients-total">0 ราย</div>
+            <span class="mc-stat-tag green" id="mc-clients-tag">—</span>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="s-label">ประหยัดภาษีปีนี้</div>
-          <div class="s-value" id="stat-tax">฿ 0</div>
-          <div class="s-change">คำนวณภาษีเพื่อดูผล</div>
+        <div class="mc-stat">
+          <div class="mc-stat-ico">📋</div>
+          <div>
+            <div class="mc-stat-lbl">กรมธรรม์รวม</div>
+            <div class="mc-stat-val" id="mc-policies-total">0 ฉบับ</div>
+            <span class="mc-stat-tag gray">ทุกลูกค้า</span>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="s-label">นัดหมายที่ใกล้มา</div>
-          <div class="s-value" id="stat-appts">0 รายการ</div>
-          <div class="s-change">📅 เพิ่มนัดหมาย</div>
+        <div class="mc-stat">
+          <div class="mc-stat-ico">💳</div>
+          <div>
+            <div class="mc-stat-lbl">เบี้ยรายปีรวม</div>
+            <div class="mc-stat-val red" id="mc-premium-total">฿ 0</div>
+            <span class="mc-stat-tag gray">บาท/ปี</span>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="s-label">สิ่งดีดี</div>
-          <div class="s-value" id="stat-good">0 รายการ</div>
-          <div class="s-change">★ บันทึกสิ่งดีดี</div>
+        <div class="mc-stat" onclick="goToFinancial()" style="cursor:pointer;" title="วางแผนการเงิน">
+          <div class="mc-stat-ico">✂️</div>
+          <div>
+            <div class="mc-stat-lbl">ลดหย่อนภาษีได้</div>
+            <div class="mc-stat-val" id="mc-tax-total">฿ 0</div>
+            <span class="mc-stat-tag green" id="mc-tax-tag">คลิกวางแผน →</span>
+          </div>
         </div>
       </div>
 
-      <!-- ─── FEATURE CARDS ─── -->
-      <h3 style="margin-bottom:16px;">เข้าใช้งานฟีเจอร์</h3>
-      <div class="dashboard-grid">
-        <div class="dash-card" onclick="goToFinancial()">
-          <div class="dash-icon">📊</div>
-          <div class="dash-label">วางแผนการเงิน</div>
-          <div class="dash-sub">Financial Planning</div>
-          <div class="dash-tag">ยอดนิยม</div>
+      <!-- ─── FEATURE QUICK ACCESS ─── -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;">
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px;border:1px solid #F5F5F5;cursor:pointer;transition:all .18s;" onclick="goToFinancial()" onmouseover="this.style.borderColor='var(--red-primary)'" onmouseout="this.style.borderColor='#F5F5F5'">
+          <div style="font-size:1.3rem;margin-bottom:8px;">💰</div>
+          <div style="font-size:.85rem;font-weight:700;color:#333;">วางแผนการเงิน</div>
+          <div style="font-size:.74rem;color:#bbb;">TVM / เป้าหมาย</div>
         </div>
-        <div class="dash-card" onclick="goToPolicies()">
-          <div class="dash-icon">📋</div>
-          <div class="dash-label">สรุปกรมธรรม์ลูกค้า</div>
-          <div class="dash-sub">Policy Summary</div>
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px;border:1px solid #F5F5F5;cursor:pointer;transition:all .18s;" onclick="goToPolicies()" onmouseover="this.style.borderColor='var(--red-primary)'" onmouseout="this.style.borderColor='#F5F5F5'">
+          <div style="font-size:1.3rem;margin-bottom:8px;">📊</div>
+          <div style="font-size:.85rem;font-weight:700;color:#333;">สรุปกรมธรรม์</div>
+          <div style="font-size:.74rem;color:#bbb;">ภาพรวมลูกค้า</div>
+        </div>
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px;border:1px solid #F5F5F5;cursor:pointer;transition:all .18s;" onclick="location.href='clients.html'" onmouseover="this.style.borderColor='var(--red-primary)'" onmouseout="this.style.borderColor='#F5F5F5'">
+          <div style="font-size:1.3rem;margin-bottom:8px;">👥</div>
+          <div style="font-size:.85rem;font-weight:700;color:#333;">รายชื่อลูกค้า</div>
+          <div style="font-size:.74rem;color:#bbb;">จัดการ</div>
+        </div>
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px;border:1px solid #F5F5F5;cursor:pointer;transition:all .18s;" onclick="location.href='guide.html'" onmouseover="this.style.borderColor='var(--red-primary)'" onmouseout="this.style.borderColor='#F5F5F5'">
+          <div style="font-size:1.3rem;margin-bottom:8px;">📖</div>
+          <div style="font-size:.85rem;font-weight:700;color:#333;">คู่มือ</div>
+          <div style="font-size:.74rem;color:#bbb;">วิธีใช้งาน</div>
+        </div>
+      </div>
+
+      <!-- ─── BIRTHDAY REMINDERS ─── -->
+      <div id="bday-panel-wrap"></div>
+
+      <!-- ─── TWO-COL: Upcoming Appointments + Tasks ─── -->
+      <div class="two-col" style="margin-bottom:22px;">
+
+        <!-- Upcoming Appointments -->
+        <div class="appt-widget">
+          <div class="appt-widget-hd">
+            <div class="appt-widget-title">📅 นัดหมายที่กำลังมาถึง</div>
+            <a href="appointments.html" class="appt-widget-link">+ เพิ่มนัดหมาย / ดูทั้งหมด →</a>
+          </div>
+          <div class="appt-widget-list" id="appt-widget-list"></div>
+        </div>
+
+        <!-- Tasks To-do -->
+        <div class="tasks-panel">
+          <div class="tasks-hd">
+            <div class="tasks-title">✅ สิ่งที่ต้องทำ</div>
+            <button class="task-add-btn" onclick="openTaskInput()">+ เพิ่มงาน</button>
+          </div>
+          <div class="task-input-row" id="task-input-row">
+            <input id="task-input" type="text" placeholder="พิมพ์งานที่ต้องทำ..." onkeydown="if(event.key==='Enter')saveTask()">
+            <button class="ti-save" onclick="saveTask()">บันทึก</button>
+            <button class="ti-cancel" onclick="cancelTaskInput()">ยกเลิก</button>
+          </div>
+          <div class="tasks-list" id="tasks-list"></div>
+        </div>
+
+      </div>
+
+      <!-- ─── RENEWAL REMINDERS ─── -->
+      <div class="renewal-panel" id="renewal-panel">
+        <div class="renewal-header open" id="renewal-header" onclick="toggleRenewal()">
+          <div class="renewal-header-left">
+            <span style="font-size:1.1rem;">🔔</span>
+            <span class="renewal-header-title">แจ้งเตือนต่ออายุกรมธรรม์</span>
+            <div class="renewal-badge-row" id="renewal-badge-row"></div>
+          </div>
+          <span class="renewal-toggle open" id="renewal-toggle">▼</span>
+        </div>
+        <div class="renewal-body open" id="renewal-body">
+          <div class="renewal-tabs">
+            <button class="rtab active" data-days="30"  onclick="setRenewalTab(30,this)">🔴 ≤ 30 วัน</button>
+            <button class="rtab"        data-days="60"  onclick="setRenewalTab(60,this)">🟠 ≤ 60 วัน</button>
+            <button class="rtab"        data-days="90"  onclick="setRenewalTab(90,this)">🟡 ≤ 90 วัน</button>
+            <button class="rtab"        data-days="0"   onclick="setRenewalTab(0,this)">📋 ทั้งหมด</button>
+          </div>
+          <div class="renewal-list" id="renewal-list"></div>
         </div>
       </div>
 
@@ -491,25 +760,26 @@
       <!-- hidden file input -->
       <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(this)">
 
-    </main>
+    </div><!-- end app-content -->
+  </main><!-- end app-main -->
 
-    <!-- ─── IMPORT CONFIRM MODAL ─── -->
-    <div class="import-modal-overlay" id="import-modal-overlay" onclick="closeImportModal(event)">
-      <div class="import-modal">
-        <h3>⚠️ ยืนยันการ Import ข้อมูล</h3>
-        <p>การ import จะ<strong>แทนที่ข้อมูลทั้งหมด</strong>ของบัญชีนี้ด้วยไฟล์ที่เลือก<br>ข้อมูลปัจจุบันจะหายไป — แนะนำให้ Export สำรองก่อน</p>
-        <div class="import-modal-file" id="import-modal-filename">📄 —</div>
-        <div class="import-modal-btns">
-          <button class="btn-cancel-import" onclick="closeImportModal()">ยกเลิก</button>
-          <button class="btn-confirm-import" onclick="confirmImport()">ยืนยัน Import</button>
-        </div>
+  <!-- ─── IMPORT CONFIRM MODAL ─── -->
+  <div class="import-modal-overlay" id="import-modal-overlay" onclick="closeImportModal(event)">
+    <div class="import-modal">
+      <h3>⚠️ ยืนยันการ Import ข้อมูล</h3>
+      <p>การ import จะ<strong>แทนที่ข้อมูลทั้งหมด</strong>ของบัญชีนี้ด้วยไฟล์ที่เลือก<br>ข้อมูลปัจจุบันจะหายไป — แนะนำให้ Export สำรองก่อน</p>
+      <div class="import-modal-file" id="import-modal-filename">📄 —</div>
+      <div class="import-modal-btns">
+        <button class="btn-cancel-import" onclick="closeImportModal()">ยกเลิก</button>
+        <button class="btn-confirm-import" onclick="confirmImport()">ยืนยัน Import</button>
       </div>
     </div>
-
-    <!-- ─── TOAST ─── -->
-    <div class="toast" id="toast"></div>
   </div>
-</div>
+
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
+
+</div><!-- end app-layout -->
 
 <script>
 /* ════════════════════════════════════════════════════
@@ -598,6 +868,7 @@ function renderClientStrip() {
 
 function selectClient(cid) {
   selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
   renderClientStrip();
   updateDashboard();
 }
@@ -690,26 +961,26 @@ function updateDashboard() {
   premEl.textContent     = '฿ ' + totalPremium.toLocaleString('th-TH');
   taxDEl.textContent     = '฿ ' + taxDeduct.toLocaleString('th-TH');
 
-  /* ── Stats row ── */
-  const goalCount  = client ? (client.financialGoals || []).length : 0;
-  const taxSaved   = client ? Math.round(taxDeduct * 0.20) : 0;
-  const apptCount  = user.data.appointments ? user.data.appointments.length : 0;
-  const goodCount  = user.data.goodThings   || 0;
+  /* ── MC Stat cards (totals across ALL clients) ── */
+  const allC          = getClients();
+  const allPolicies   = allC.flatMap(c => c.policies || []);
+  const allAnnuityT   = ['บำนาญ','เกษียณ','ลดหย่อนภาษี'];
+  const allPremTotal  = allPolicies.reduce((s, p) => s + (Number(p.premium) || 0), 0);
+  const allAnnuityP   = allPolicies.filter(p => allAnnuityT.includes(p.type)).reduce((s,p) => s+(Number(p.premium)||0), 0);
+  const allOtherP     = allPolicies.filter(p => !allAnnuityT.includes(p.type)).reduce((s,p) => s+(Number(p.premium)||0), 0);
+  const allTaxDeduct  = Math.min(allOtherP, 100000) + Math.min(allAnnuityP, 200000);
 
-  const plansEl = document.getElementById('stat-plans');
-  const planSubEl = document.getElementById('stat-plans-sub');
-  if (plansEl) {
-    plansEl.textContent   = goalCount + ' แผน';
-    planSubEl.textContent = goalCount > 0 ? '▲ อัปเดตล่าสุดวันนี้' : 'เริ่มสร้างแผนได้เลย';
-  }
-  const taxStatEl = document.getElementById('stat-tax');
-  if (taxStatEl) taxStatEl.textContent = '฿ ' + taxSaved.toLocaleString('th-TH');
+  const el = id => document.getElementById(id);
+  if (el('mc-clients-total'))  el('mc-clients-total').textContent  = allC.length + ' ราย';
+  if (el('mc-clients-tag'))    el('mc-clients-tag').textContent    = allC.length > 0 ? '+' + allC.length + ' ราย' : 'เพิ่มลูกค้าได้เลย';
+  if (el('mc-policies-total')) el('mc-policies-total').textContent = allPolicies.length + ' ฉบับ';
+  if (el('mc-premium-total'))  el('mc-premium-total').textContent  = '฿' + allPremTotal.toLocaleString('th-TH');
+  if (el('mc-tax-total'))      el('mc-tax-total').textContent      = '฿' + allTaxDeduct.toLocaleString('th-TH');
+  if (el('mc-tax-tag'))        el('mc-tax-tag').textContent        = allTaxDeduct > 0 ? 'ประหยัดได้ ~฿' + Math.round(allTaxDeduct*.2).toLocaleString('th-TH') : 'คลิกวางแผน →';
 
-  const apptsEl = document.getElementById('stat-appts');
-  if (apptsEl) apptsEl.textContent = apptCount + ' รายการ';
-
-  const goodEl = document.getElementById('stat-good');
-  if (goodEl) goodEl.textContent = goodCount + ' รายการ';
+  /* Sidebar badge update */
+  const sbBadge = el('sb-client-badge');
+  if (sbBadge) sbBadge.textContent = allC.length;
 
   /* ── Gap bars ── */
   renderGapBars(policies);
@@ -861,8 +1132,11 @@ function exportData() {
   const payload = {
     exportedAt : new Date().toISOString(),
     exportedBy : user.firstName + ' ' + user.lastName,
-    appVersion : '1.0',
-    data       : user.data   // clients, activities, financialGoals, etc.
+    appVersion : '2.0',
+    // ─── ข้อมูลตัวแทน (profile) ───
+    profile    : user.profile || null,   // photo, license, AIA code, LINE ID, etc.
+    // ─── ข้อมูลลูกค้าและงานทั้งหมด ───
+    data       : user.data    // clients, activities, appointments, tasks, families, etc.
   };
   const json     = JSON.stringify(payload, null, 2);
   const blob     = new Blob([json], { type: 'application/json' });
@@ -902,8 +1176,9 @@ function handleImportFile(input) {
       }
       _pendingImportData = payload;
       // Show modal
+      const hasProfile = payload.profile ? ' · 👤 รวมโปรไฟล์ตัวแทน' : '';
       document.getElementById('import-modal-filename').innerHTML =
-        '📄 ' + file.name + ' · ' + (payload.data.clients.length) + ' ลูกค้า · Export เมื่อ ' +
+        '📄 ' + file.name + ' · ' + (payload.data.clients.length) + ' ลูกค้า' + hasProfile + ' · Export เมื่อ ' +
         (payload.exportedAt ? new Date(payload.exportedAt).toLocaleDateString('th-TH-u-ca-gregory') : 'ไม่ทราบ');
       document.getElementById('import-modal-overlay').classList.add('open');
     } catch {
@@ -921,6 +1196,10 @@ function confirmImport() {
   if (idx === -1) { showToast('❌ ไม่พบบัญชีผู้ใช้', 'error'); return; }
 
   allUsers[idx].data = _pendingImportData.data;
+  // Restore profile if present in payload (Phase 2.0+ backups)
+  if (_pendingImportData.profile) {
+    allUsers[idx].profile = _pendingImportData.profile;
+  }
   localStorage.setItem('aia_users', JSON.stringify(allUsers));
   _pendingImportData = null;
   closeImportModal();
@@ -942,41 +1221,461 @@ function closeImportModal(e) {
 }
 
 /* ════════════════════════════════════════════════════
+   Upcoming Appointments Widget
+════════════════════════════════════════════════════ */
+const TYPE_MAP_DASH = {
+  meet:   { icon:'🤝', label:'พบหน้า',   cls:'tm-meet'  },
+  call:   { icon:'📞', label:'โทรศัพท์', cls:'tm-call'  },
+  online: { icon:'💻', label:'ออนไลน์',  cls:'tm-online'},
+  video:  { icon:'📹', label:'วิดีโอ',    cls:'tm-video' },
+};
+const TH_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function getAppointments() {
+  const u = getUser();
+  return (u.data && u.data.appointments) ? u.data.appointments : [];
+}
+
+function renderAppointmentsWidget() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
+  const all = getAppointments()
+    .filter(a => a.date >= todayStr)
+    .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))
+    .slice(0, 5);
+
+  const listEl = document.getElementById('appt-widget-list');
+  if (!listEl) return;
+
+  if (all.length === 0) {
+    listEl.innerHTML = `<div class="aw-empty">
+      📭 ยังไม่มีนัดหมายที่กำลังมาถึง<br>
+      <a href="appointments.html" style="color:var(--red-primary);font-weight:600;text-decoration:none;font-size:.85rem;">+ เพิ่มนัดหมายแรก</a>
+    </div>`;
+    return;
+  }
+
+  listEl.innerHTML = all.map(a => {
+    const tm = TYPE_MAP_DASH[a.type] || TYPE_MAP_DASH.meet;
+    const isToday = a.date === todayStr;
+    const [y,m,d] = a.date.split('-');
+    return `<div class="aw-item ${tm.cls} ${isToday?'today':''}" onclick="location.href='appointments.html'">
+      <div class="aw-date">
+        <div class="aw-day">${parseInt(d)}</div>
+        <div class="aw-mon">${TH_MONTHS_SHORT[parseInt(m)-1]}</div>
+      </div>
+      <div class="aw-info">
+        <div class="aw-name">${tm.icon} ${a.clientName || '—'}</div>
+        <div class="aw-meta">${tm.label}${a.place ? ' · '+a.place : ''}</div>
+      </div>
+      <span class="aw-time-badge">${a.time || ''}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   Birthday Reminders
+════════════════════════════════════════════════════ */
+function renderBirthdayPanel() {
+  const wrap = document.getElementById('bday-panel-wrap');
+  if (!wrap) return;
+  const clients = getClients();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const upcoming = [];
+  clients.forEach(c => {
+    const birthDateStr = c.dob || c.birthdate;
+    if (!birthDateStr) return;
+    const bd = new Date(birthDateStr);
+    if (isNaN(bd)) return;
+    // Compute next birthday
+    const next = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+    if (next < today) next.setFullYear(today.getFullYear()+1);
+    const diff = Math.ceil((next - today) / 86400000);
+    if (diff <= 30) {
+      upcoming.push({
+        client: c,
+        name: (c.firstName || '') + ' ' + (c.lastName || ''),
+        nick: c.nickname,
+        bd, next, diff,
+        age: next.getFullYear() - bd.getFullYear()
+      });
+    }
+  });
+  upcoming.sort((a,b) => a.diff - b.diff);
+
+  if (upcoming.length === 0) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const items = upcoming.map(u => {
+    const initial = (u.client.firstName || '?').charAt(0);
+    const whenLbl = u.diff === 0 ? '🎂 วันนี้!' : u.diff === 1 ? 'พรุ่งนี้' : `อีก ${u.diff} วัน`;
+    const dateLbl = `${u.next.getDate()} ${TH_MONTHS_SHORT[u.next.getMonth()]}`;
+    const nameLbl = u.client.firstName + (u.nick ? ` (${u.nick})` : '');
+    return `<div class="bday-item" onclick="goToClient('${u.client.id}')" title="${u.name.trim()} · ครบ ${u.age} ปี">
+      <div class="bday-avatar">${initial}</div>
+      <div class="bday-info">
+        <div class="bday-name">${nameLbl}</div>
+        <div class="bday-when">🎂 ${dateLbl} · ${whenLbl}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="bday-panel">
+    <div class="bday-hd">🎂 วันเกิดลูกค้าใน 30 วัน <span style="background:#FFB347;color:white;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;">${upcoming.length}</span></div>
+    <div class="bday-list">${items}</div>
+  </div>`;
+}
+
+function goToClient(id) {
+  localStorage.setItem('aia_selectedClient', id);
+  location.href = 'clients.html';
+}
+
+/* ════════════════════════════════════════════════════
+   Tasks To-do
+════════════════════════════════════════════════════ */
+function getTasks() {
+  const u = getUser();
+  return (u.data && u.data.tasks) ? u.data.tasks : [];
+}
+
+function saveTasks(tasks) {
+  const allUsers = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = allUsers.findIndex(u => u.id === uid);
+  if (idx === -1) return;
+  if (!allUsers[idx].data) allUsers[idx].data = {};
+  allUsers[idx].data.tasks = tasks;
+  localStorage.setItem('aia_users', JSON.stringify(allUsers));
+}
+
+function renderTasks() {
+  const listEl = document.getElementById('tasks-list');
+  if (!listEl) return;
+  const tasks = getTasks();
+  // Sort: incomplete first, then by createdAt desc
+  const sorted = [...tasks].sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return (b.createdAt || '').localeCompare(a.createdAt || '');
+  });
+
+  if (sorted.length === 0) {
+    listEl.innerHTML = `<div class="tasks-empty">📝 ยังไม่มีรายการ</div>`;
+    return;
+  }
+
+  listEl.innerHTML = sorted.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')"></div>
+      <div class="task-text" onclick="toggleTask('${t.id}')">${t.text}</div>
+      <button class="task-del" onclick="deleteTask('${t.id}')" title="ลบ">×</button>
+    </div>
+  `).join('');
+}
+
+function openTaskInput() {
+  document.getElementById('task-input-row').classList.add('open');
+  document.getElementById('task-input').focus();
+}
+
+function cancelTaskInput() {
+  document.getElementById('task-input-row').classList.remove('open');
+  document.getElementById('task-input').value = '';
+}
+
+function saveTask() {
+  const input = document.getElementById('task-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const tasks = getTasks();
+  tasks.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+    text,
+    done: false,
+    createdAt: new Date().toISOString()
+  });
+  saveTasks(tasks);
+  input.value = '';
+  cancelTaskInput();
+  renderTasks();
+}
+
+function toggleTask(id) {
+  const tasks = getTasks();
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  saveTasks(tasks);
+  renderTasks();
+}
+
+function deleteTask(id) {
+  const tasks = getTasks().filter(t => t.id !== id);
+  saveTasks(tasks);
+  renderTasks();
+}
+
+/* ════════════════════════════════════════════════════
+   Renewal Reminders
+════════════════════════════════════════════════════ */
+let renewalTabDays = 30;
+
+function toggleRenewal() {
+  const body   = document.getElementById('renewal-body');
+  const header = document.getElementById('renewal-header');
+  const toggle = document.getElementById('renewal-toggle');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+}
+
+function setRenewalTab(days, el) {
+  renewalTabDays = days;
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderRenewal();
+}
+
+function computeEndDate(policy) {
+  // Try explicit endDate first
+  if (policy.endDate) return new Date(policy.endDate);
+  // Try startDate + duration (years)
+  if (policy.startDate && policy.duration) {
+    const d = new Date(policy.startDate);
+    d.setFullYear(d.getFullYear() + Number(policy.duration));
+    return d;
+  }
+  // Try renewalDate
+  if (policy.renewalDate) return new Date(policy.renewalDate);
+  return null;
+}
+
+function renderRenewal() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const allClients = getClients();
+
+  // Collect all policies with computed days-remaining
+  const items = [];
+  allClients.forEach(c => {
+    (c.policies || []).forEach(p => {
+      const end = computeEndDate(p);
+      if (!end || isNaN(end)) return;
+      const diffMs = end - today;
+      const days   = Math.ceil(diffMs / 86400000);
+      if (days < 0) return; // already expired
+      items.push({
+        clientName: (c.firstName || '') + ' ' + (c.lastName || ''),
+        policyName: p.name || p.type || 'กรมธรรม์',
+        type:       p.type || '',
+        company:    p.company || '',
+        endDate:    end,
+        days
+      });
+    });
+  });
+
+  items.sort((a,b) => a.days - b.days);
+
+  // Badge counts
+  const cnt30 = items.filter(i => i.days <= 30).length;
+  const cnt60 = items.filter(i => i.days > 30 && i.days <= 60).length;
+  const cnt90 = items.filter(i => i.days > 60 && i.days <= 90).length;
+  const badgeEl = document.getElementById('renewal-badge-row');
+  if (badgeEl) {
+    let bHtml = '';
+    if (cnt30 > 0) bHtml += `<span class="renewal-badge rb-red">🔴 ${cnt30}</span>`;
+    if (cnt60 > 0) bHtml += `<span class="renewal-badge rb-orange">🟠 ${cnt60}</span>`;
+    if (cnt90 > 0) bHtml += `<span class="renewal-badge rb-yellow">🟡 ${cnt90}</span>`;
+    if (cnt30+cnt60+cnt90 === 0) bHtml += `<span class="renewal-badge rb-gray">ไม่มีที่ใกล้ครบ 90 วัน</span>`;
+    badgeEl.innerHTML = bHtml;
+  }
+
+  // Filter for current tab
+  const shown = renewalTabDays === 0
+    ? items
+    : items.filter(i => i.days <= renewalTabDays);
+
+  const listEl = document.getElementById('renewal-list');
+  if (!listEl) return;
+
+  if (shown.length === 0) {
+    listEl.innerHTML = `<div class="renewal-empty">
+      ✅ ไม่มีกรมธรรม์ที่ต้องต่ออายุใน${renewalTabDays === 0 ? '90' : renewalTabDays} วันนี้
+    </div>`;
+    return;
+  }
+
+  const thMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  listEl.innerHTML = shown.map(i => {
+    const dotCls  = i.days <= 30 ? 'dot-red'    : i.days <= 60 ? 'dot-orange'  : 'dot-yellow';
+    const daysCls = i.days <= 30 ? 'days-red'   : i.days <= 60 ? 'days-orange' : 'days-yellow';
+    const daysLbl = i.days === 0 ? 'วันนี้!' : i.days === 1 ? 'พรุ่งนี้' : `อีก ${i.days} วัน`;
+    const endFmt  = `${i.endDate.getDate()} ${thMonths[i.endDate.getMonth()]} ${i.endDate.getFullYear()+543}`;
+    const detail  = [i.policyName, i.company].filter(Boolean).join(' · ');
+    return `<div class="renewal-item">
+      <div class="renewal-dot ${dotCls}"></div>
+      <div class="renewal-info">
+        <div class="renewal-client">${i.clientName.trim()}</div>
+        <div class="renewal-policy">${detail} · ครบ ${endFmt}</div>
+      </div>
+      <span class="renewal-days ${daysCls}">${daysLbl}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   Browser Notifications
+════════════════════════════════════════════════════ */
+function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') showToast('🔔 เปิดการแจ้งเตือนแล้ว', 'success');
+    });
+  }
+}
+
+function showBrowserNotification(title, body, icon) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    new Notification(title, { body, icon: icon || '/favicon.ico', tag: title+body });
+  } catch(e) {}
+}
+
+function scheduleNotificationCheck() {
+  // ไม่ขอสิทธิ์อัตโนมัติแล้ว — จะส่งการแจ้งเตือนเฉพาะกรณีที่ผู้ใช้อนุญาตไว้แล้วเท่านั้น
+  // Run check immediately and every 5 minutes
+  checkUpcomingNotifications();
+  setInterval(checkUpcomingNotifications, 5 * 60 * 1000);
+}
+
+function checkUpcomingNotifications() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const sentKey = 'aia_notif_sent_' + now.toISOString().slice(0,10);
+  const sent = JSON.parse(localStorage.getItem(sentKey) || '[]');
+
+  // 1) Today's appointments — notify according to reminder lead time
+  const appts = getAppointments();
+  const today = now.toISOString().slice(0,10);
+  appts.filter(a => a.date === today).forEach(a => {
+    if (!a.reminder) return;
+    const leadMin = parseInt(a.reminder, 10);
+    if (isNaN(leadMin)) return;
+    const apptTime = new Date(`${a.date}T${a.time || '10:00'}`);
+    const notifyAt = new Date(apptTime.getTime() - leadMin*60000);
+    const id = 'appt-' + a.id;
+    if (now >= notifyAt && now <= apptTime && !sent.includes(id)) {
+      const tm = TYPE_MAP_DASH[a.type] || TYPE_MAP_DASH.meet;
+      showBrowserNotification(
+        `📅 นัดหมายในอีก ${leadMin} นาที`,
+        `${tm.icon} ${a.clientName}${a.place ? ' · '+a.place : ''} เวลา ${a.time}`
+      );
+      sent.push(id);
+    }
+  });
+
+  // 2) Today's birthdays — notify once per day
+  const clients = getClients();
+  clients.forEach(c => {
+    const birthDateStr = c.dob || c.birthdate;
+    if (!birthDateStr) return;
+    const bd = new Date(birthDateStr);
+    if (isNaN(bd)) return;
+    if (bd.getMonth() === now.getMonth() && bd.getDate() === now.getDate()) {
+      const id = 'bday-' + c.id;
+      if (!sent.includes(id)) {
+        showBrowserNotification(
+          '🎂 วันเกิดลูกค้าวันนี้!',
+          `${c.firstName || ''} ${c.lastName || ''}`.trim() + ' ครบรอบวันเกิด'
+        );
+        sent.push(id);
+      }
+    }
+  });
+
+  // 3) Renewals due in 7 days — notify once per day
+  clients.forEach(c => {
+    (c.policies || []).forEach(p => {
+      const end = computeEndDate(p);
+      if (!end) return;
+      const days = Math.ceil((end - now) / 86400000);
+      if (days >= 0 && days <= 7) {
+        const id = 'renewal-' + c.id + '-' + (p.id || p.name || 'pol');
+        if (!sent.includes(id)) {
+          showBrowserNotification(
+            `🔔 กรมธรรม์ใกล้ครบกำหนด (อีก ${days} วัน)`,
+            `${c.firstName || ''} - ${p.name || p.type || 'กรมธรรม์'}`
+          );
+          sent.push(id);
+        }
+      }
+    });
+  });
+
+  localStorage.setItem(sentKey, JSON.stringify(sent));
+}
+
+/* ════════════════════════════════════════════════════
    Init
 ════════════════════════════════════════════════════ */
 (function init() {
   const user = getUser();
 
-  /* Navbar */
-  document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
-  document.getElementById('nav-name').textContent   = user.firstName + ' ' + user.lastName;
+  /* Sidebar profile */
+  const initChar = (user.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = (user.firstName || '') + ' ' + (user.lastName || '');
+  if (sbAv) {
+    const photo = user.profile && user.profile.photo;
+    if (photo) {
+      sbAv.style.backgroundImage = `url('${photo}')`;
+      sbAv.classList.add('has-photo');
+      sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initChar;
+    }
+  }
 
-  /* Greeting */
-  const hour       = new Date().getHours();
-  const greetWord  = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
-  const thDate     = new Date().toLocaleDateString('th-TH-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' });
+  /* Sidebar client badge */
+  const allClients = getClients();
+  const badgeEl = document.getElementById('sb-client-badge');
+  if (badgeEl) badgeEl.textContent = allClients.length;
+
+  /* Topbar greeting + date */
+  const hour      = new Date().getHours();
+  const greetWord = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+  const thDate    = new Date().toLocaleDateString('th-TH-u-ca-gregory', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
   document.getElementById('greeting').textContent     = greetWord + ', ' + user.firstName + ' 👋';
-  document.getElementById('greeting-sub').textContent = 'วันนี้ ' + thDate + ' — ภาพรวมแผนการเงินของคุณ';
+  document.getElementById('greeting-sub').textContent = thDate;
 
-  /* User-level stats (appointment, goodThings) pre-populate */
-  const apptCount = user.data.appointments ? user.data.appointments.length : 0;
-  const goodCount = user.data.goodThings || 0;
-  const apptsEl   = document.getElementById('stat-appts');
-  const goodEl    = document.getElementById('stat-good');
-  if (apptsEl) apptsEl.textContent = apptCount + ' รายการ';
-  if (goodEl)  goodEl.textContent  = goodCount + ' รายการ';
+  /* (user-level stats integrated into mc-stats via updateDashboard) */
 
-  /* Client strip — auto-select first client */
+  /* Client strip — restore from localStorage or auto-select first */
   const clients = getClients();
   if (clients.length > 0) {
-    selectedClientId = clients[0].id;
+    const stored = localStorage.getItem('aia_selectedClient');
+    selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+    localStorage.setItem('aia_selectedClient', selectedClientId);
   }
   renderClientStrip();
   updateDashboard();
 
-  /* Activity & calendar */
+  /* Activity, calendar, renewal reminders, appointments, birthdays, tasks */
   renderActivity(user);
   renderCalendar();
+  renderAppointmentsWidget();
+  renderBirthdayPanel();
+  renderTasks();
+  renderRenewal();
+  scheduleNotificationCheck();
 
   /* แจ้งเตือนเครื่องใหม่ → ให้ Import ข้อมูล */
   if (localStorage.getItem('aia_newDevice') === '1') {

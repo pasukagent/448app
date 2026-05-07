@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 — โปรไฟล์ตัวแทน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    /* ─── Profile page styles ─── */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── Left: Agent card ── */
+    .agent-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #F0F0F0;
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+    .agent-card-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      padding: 32px 24px 48px;
+      position: relative;
+      text-align: center;
+    }
+    .agent-card-header::after {
+      content: '';
+      position: absolute;
+      right: -30px; top: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+    .agent-avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .agent-avatar {
+      width: 86px; height: 86px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      border: 3px solid rgba(255,255,255,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: #fff;
+      margin: 0 auto;
+      cursor: pointer;
+      transition: all .2s;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+    .agent-avatar:hover { border-color: rgba(255,255,255,.9); transform: scale(1.04); }
+    .agent-avatar .avatar-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .2s;
+      font-size: .75rem; color: #fff; font-weight: 700; letter-spacing: .3px;
+      border-radius: 50%;
+    }
+    .agent-avatar:hover .avatar-overlay { opacity: 1; }
+    .avatar-edit-hint {
+      position: absolute; bottom: 0; right: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      transition: transform .15s;
+    }
+    .avatar-edit-hint:hover { transform: scale(1.15); }
+    /* Sidebar avatar with photo */
+    .sb-avatar-box.has-photo {
+      background-size: cover; background-position: center;
+      background-repeat: no-repeat; color: transparent; font-size: 0;
+    }
+    .agent-card-name {
+      color: #fff; font-size: 1.1rem; font-weight: 800; margin-bottom: 4px;
+    }
+    .agent-card-role {
+      color: rgba(255,255,255,.75); font-size: .8rem;
+    }
+
+    .agent-card-body { padding: 24px; }
+    .agent-info-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F5F5F5;
+      font-size: .88rem; color: #444;
+    }
+    .agent-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .ai-ico { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+    .ai-lbl { font-size: .74rem; color: #bbb; font-weight: 600; display: block; }
+    .ai-val { font-weight: 600; color: #1a1a1a; }
+
+    .agent-stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: #F5F5F5;
+      border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+    }
+    .agent-stat {
+      background: #fff; padding: 14px 12px; text-align: center;
+    }
+    .agent-stat .as-val {
+      font-size: 1.25rem; font-weight: 800; color: var(--red-primary);
+    }
+    .agent-stat .as-lbl { font-size: .7rem; color: #bbb; margin-top: 2px; }
+
+    /* Share buttons */
+    .share-row {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+    }
+    .share-btn {
+      flex: 1; min-width: 80px;
+      padding: 9px 12px; border-radius: 10px;
+      border: 1.5px solid #EFEFEF;
+      font-size: .78rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+      background: #fff; color: #555;
+      transition: all .18s; text-align: center;
+    }
+    .share-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+    .share-btn.line  { background: #06C755; color: #fff; border-color: #06C755; }
+    .share-btn.line:hover  { background: #05b04d; }
+    .share-btn.copy  { background: var(--red-primary); color: #fff; border-color: var(--red-primary); }
+    .share-btn.copy:hover  { background: var(--red-dark); }
+
+    /* ── Right: Edit form + license ── */
+    .profile-right { display: flex; flex-direction: column; gap: 20px; }
+
+    .pcard {
+      background: #fff; border-radius: 16px;
+      border: 1px solid #F0F0F0; padding: 24px;
+    }
+    .pcard-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .pcard-title { font-size: .95rem; font-weight: 800; color: #1a1a1a; }
+    .pcard-edit-btn {
+      padding: 7px 16px; border-radius: 8px;
+      font-family: var(--font); font-size: .8rem; font-weight: 700;
+      cursor: pointer; border: 1.5px solid #FFCDD2;
+      background: transparent; color: var(--red-primary); transition: all .18s;
+    }
+    .pcard-edit-btn:hover { background: var(--red-soft); }
+    .pcard-save-btn {
+      padding: 7px 16px; border-radius: 8px;
+      font-family: var(--font); font-size: .8rem; font-weight: 700;
+      cursor: pointer; border: none;
+      background: var(--red-primary); color: #fff; transition: background .18s;
+    }
+    .pcard-save-btn:hover { background: var(--red-dark); }
+
+    /* Profile form grid */
+    .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pf-group { display: flex; flex-direction: column; gap: 5px; }
+    .pf-group.full { grid-column: 1 / -1; }
+    .pf-group label {
+      font-size: .75rem; font-weight: 700; color: #888;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .pf-group input,
+    .pf-group textarea,
+    .pf-group select {
+      padding: 9px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: var(--font);
+      transition: border-color .2s;
+    }
+    .pf-group input:focus,
+    .pf-group textarea:focus,
+    .pf-group select:focus {
+      outline: none; border-color: var(--red-primary);
+      box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .pf-group input[readonly],
+    .pf-group textarea[readonly] {
+      background: #FAFAFA; color: #888; cursor: default;
+      border-color: #F0F0F0;
+    }
+    .pf-group textarea { resize: vertical; min-height: 70px; }
+
+    /* Display rows (read mode) */
+    .pf-display { display: flex; flex-direction: column; gap: 10px; }
+    .pf-display-row {
+      display: flex; gap: 8px; align-items: baseline;
+      padding-bottom: 10px; border-bottom: 1px solid #F8F8F8;
+    }
+    .pf-display-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .pfd-lbl { font-size: .75rem; color: #bbb; font-weight: 700; min-width: 130px; }
+    .pfd-val { font-size: .9rem; color: #1a1a1a; font-weight: 600; }
+    .pfd-empty { color: #ccc; font-style: italic; }
+
+    /* License card */
+    .license-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .license-item {
+      background: #FAFAFA; border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .lic-ico { font-size: 1.3rem; margin-bottom: 6px; }
+    .lic-lbl { font-size: .72rem; color: #bbb; font-weight: 600; margin-bottom: 3px; }
+    .lic-val { font-size: .9rem; font-weight: 700; color: #1a1a1a; }
+    .lic-exp { font-size: .72rem; color: #888; margin-top: 3px; }
+    .lic-exp.warn { color: #E67E22; }
+    .lic-exp.expired { color: #E74C3C; }
+
+    /* QR section */
+    .qr-section {
+      display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+    }
+    .qr-box {
+      width: 140px; height: 140px; border-radius: 12px;
+      border: 2px dashed #DDD;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; cursor: pointer;
+      transition: border-color .2s;
+      flex-shrink: 0;
+    }
+    .qr-box:hover { border-color: var(--red-primary); }
+    .qr-box .qr-ico { font-size: 2.5rem; }
+    .qr-box .qr-hint { font-size: .72rem; color: #bbb; text-align: center; }
+    .qr-info { flex: 1; min-width: 180px; }
+    .qr-info h4 { font-size: .9rem; font-weight: 800; color: #1a1a1a; margin-bottom: 6px; }
+    .qr-info p  { font-size: .82rem; color: #888; line-height: 1.6; margin-bottom: 12px; }
+    .qr-line-id {
+      display: flex; align-items: center; gap: 10px;
+      background: #F0FFF4; border: 1.5px solid #B7EBC6;
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .qr-line-ico { font-size: 1.4rem; }
+    .qr-line-lbl { font-size: .72rem; color: #27AE60; font-weight: 700; }
+    .qr-line-val { font-size: .95rem; font-weight: 800; color: #1a1a1a; }
+    input#pf-line-id { font-size: .9rem; font-family: var(--font); padding: 9px 12px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px; width: 100%; transition: border-color .2s; }
+    input#pf-line-id:focus { outline: none; border-color: #06C755; box-shadow: 0 0 0 3px #d5f5e3; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1a1a2e; color: white; padding: 12px 24px;
+      border-radius: 50px; font-size: .88rem; font-weight: 600;
+      z-index: 99999; opacity: 0; transition: all .35s ease;
+      pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #28a745; }
+
+    @media(max-width: 900px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .agent-card { position: static; }
+      .pf-grid { grid-template-columns: 1fr; }
+      .license-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row active" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="app-main">
+    <div class="app-topbar">
+      <div class="app-topbar-left">
+        <div class="tb-title">👤 โปรไฟล์ตัวแทน</div>
+        <div class="tb-date" id="topbar-date"></div>
+      </div>
+      <div class="app-topbar-right">
+        <button class="btn-app-ghost" onclick="doLogout()">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div class="profile-layout">
+
+        <!-- ── LEFT: Agent card ── -->
+        <div>
+          <div class="agent-card">
+            <div class="agent-card-header">
+              <div class="agent-avatar-wrap">
+                <div class="agent-avatar" id="avatar-display" onclick="document.getElementById('photo-upload').click()" title="คลิกเพื่ออัปโหลดรูป">
+                  <span id="avatar-initial">P</span>
+                  <div class="avatar-overlay">📷 เปลี่ยนรูป</div>
+                </div>
+                <div class="avatar-edit-hint" id="avatar-edit-hint" onclick="handleAvatarHintClick(event)" title="อัปโหลดรูป">📷</div>
+              </div>
+              <!-- hidden file input -->
+              <input type="file" id="photo-upload" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+              <!-- Remove photo button (only visible when photo exists) -->
+              <div id="remove-photo-btn" style="display:none;margin-top:8px;">
+                <button onclick="removePhoto()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.72rem;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:var(--font);">🗑️ ลบรูป</button>
+              </div>
+              <div class="agent-card-name" id="card-name">Agent</div>
+              <div class="agent-card-role" id="card-role">AIA · ตัวแทน</div>
+            </div>
+
+            <div class="agent-card-body">
+              <!-- Quick stats -->
+              <div class="agent-stats-row" id="agent-stats">
+                <div class="agent-stat">
+                  <div class="as-val" id="stat-clients">0</div>
+                  <div class="as-lbl">ลูกค้า</div>
+                </div>
+                <div class="agent-stat">
+                  <div class="as-val" id="stat-policies">0</div>
+                  <div class="as-lbl">กรมธรรม์</div>
+                </div>
+                <div class="agent-stat">
+                  <div class="as-val" id="stat-premium">฿0</div>
+                  <div class="as-lbl">เบี้ย/ปี</div>
+                </div>
+              </div>
+
+              <!-- Contact info -->
+              <div id="card-info-rows"><!-- rendered by JS --></div>
+
+              <!-- Share row -->
+              <div class="share-row">
+                <button class="share-btn line" onclick="shareLine()">💬 LINE</button>
+                <button class="share-btn" onclick="shareWhatsApp()">💚 WA</button>
+                <button class="share-btn copy" onclick="copyContact()">📋 คัดลอก</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RIGHT: Edit sections ── -->
+        <div class="profile-right">
+
+          <!-- ── Section 1: ข้อมูลส่วนตัว ── -->
+          <div class="pcard" id="card-personal">
+            <div class="pcard-hdr">
+              <div class="pcard-title">ข้อมูลส่วนตัว</div>
+              <button class="pcard-edit-btn" id="btn-edit-personal" onclick="toggleEditSection('personal')">✏️ แก้ไข</button>
+            </div>
+            <!-- Display mode -->
+            <div id="display-personal" class="pf-display"><!-- rendered --></div>
+            <!-- Edit mode (hidden) -->
+            <div id="edit-personal" style="display:none;">
+              <div class="pf-grid">
+                <div class="pf-group">
+                  <label>ชื่อ *</label>
+                  <input id="pf-first" type="text" placeholder="ชื่อ">
+                </div>
+                <div class="pf-group">
+                  <label>นามสกุล</label>
+                  <input id="pf-last" type="text" placeholder="นามสกุล">
+                </div>
+                <div class="pf-group">
+                  <label>ชื่อเล่น</label>
+                  <input id="pf-nickname" type="text" placeholder="ชื่อเล่น">
+                </div>
+                <div class="pf-group">
+                  <label>โทรศัพท์</label>
+                  <input id="pf-phone" type="tel" placeholder="0xx-xxx-xxxx">
+                </div>
+                <div class="pf-group full">
+                  <label>Email</label>
+                  <input id="pf-email" type="email" placeholder="agent@email.com">
+                </div>
+                <div class="pf-group full">
+                  <label>ที่อยู่</label>
+                  <textarea id="pf-address" placeholder="ที่อยู่ตัวแทน"></textarea>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+                <button class="pcard-edit-btn" onclick="toggleEditSection('personal')">ยกเลิก</button>
+                <button class="pcard-save-btn" onclick="saveSection('personal')">💾 บันทึก</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Section 2: ใบอนุญาต ── -->
+          <div class="pcard" id="card-license">
+            <div class="pcard-hdr">
+              <div class="pcard-title">📜 ใบอนุญาตตัวแทน</div>
+              <button class="pcard-edit-btn" id="btn-edit-license" onclick="toggleEditSection('license')">✏️ แก้ไข</button>
+            </div>
+            <!-- Display mode -->
+            <div id="display-license"><!-- rendered --></div>
+            <!-- Edit mode (hidden) -->
+            <div id="edit-license" style="display:none;">
+              <div class="pf-grid">
+                <div class="pf-group">
+                  <label>เลขที่ใบอนุญาต (ชีวิต)</label>
+                  <input id="pf-lic-life" type="text" placeholder="xxx-xxxx-xxxx">
+                </div>
+                <div class="pf-group">
+                  <label>วันหมดอายุ (ชีวิต)</label>
+                  <input id="pf-lic-life-exp" type="date">
+                </div>
+                <div class="pf-group">
+                  <label>เลขที่ใบอนุญาต (วินาศภัย)</label>
+                  <input id="pf-lic-nonlife" type="text" placeholder="xxx-xxxx-xxxx">
+                </div>
+                <div class="pf-group">
+                  <label>วันหมดอายุ (วินาศภัย)</label>
+                  <input id="pf-lic-nonlife-exp" type="date">
+                </div>
+                <div class="pf-group">
+                  <label>รหัสตัวแทน (AIA Code)</label>
+                  <input id="pf-aia-code" type="text" placeholder="AIA Agent Code">
+                </div>
+                <div class="pf-group">
+                  <label>สังกัด / หน่วย</label>
+                  <input id="pf-unit" type="text" placeholder="ชื่อหน่วย / สาขา">
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+                <button class="pcard-edit-btn" onclick="toggleEditSection('license')">ยกเลิก</button>
+                <button class="pcard-save-btn" onclick="saveSection('license')">💾 บันทึก</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Section 3: LINE & QR ── -->
+          <div class="pcard" id="card-line">
+            <div class="pcard-hdr">
+              <div class="pcard-title">💬 LINE ID & QR Code</div>
+              <button class="pcard-edit-btn" id="btn-edit-line" onclick="toggleEditSection('line')">✏️ แก้ไข</button>
+            </div>
+            <div id="display-line" class="qr-section"><!-- rendered --></div>
+            <div id="edit-line" style="display:none;">
+              <div class="pf-grid">
+                <div class="pf-group">
+                  <label>LINE ID</label>
+                  <input id="pf-line-id" type="text" placeholder="@line_id หรือ line_id">
+                </div>
+                <div class="pf-group">
+                  <label>ชื่อที่แสดงใน LINE</label>
+                  <input id="pf-line-name" type="text" placeholder="ชื่อที่แสดงใน LINE">
+                </div>
+              </div>
+              <div style="margin-top:12px;">
+                <p style="font-size:.82rem;color:#888;line-height:1.6;">
+                  QR Code จะถูกสร้างอัตโนมัติจาก LINE ID ของคุณ สามารถแชร์หรือพิมพ์เพื่อให้ลูกค้าสแกนได้
+                </p>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+                <button class="pcard-edit-btn" onclick="toggleEditSection('line')">ยกเลิก</button>
+                <button class="pcard-save-btn" onclick="saveSection('line')">💾 บันทึก</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end profile-right -->
+      </div><!-- end profile-layout -->
+    </div><!-- end app-content -->
+  </main><!-- end app-main -->
+</div><!-- end app-layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Auth guard ── */
+const uid = localStorage.getItem('aia_currentUser');
+if (!uid) window.location.href = 'login.html';
+
+/* ══════════════════════════════════════════
+   PHOTO UPLOAD
+══════════════════════════════════════════ */
+function handlePhotoUpload(input) {
+  const file = input.files[0];
+  input.value = ''; // reset so same file triggers again
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('❌ กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)', 'error'); return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      /* Resize to max 300px, JPEG quality 0.82 → ประมาณ 20–50KB */
+      const MAX = 300;
+      let w = img.width, h = img.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else       { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+      /* Save */
+      updateUser(u => { if (!u.profile) u.profile = {}; u.profile.photo = dataUrl; });
+      applyPhoto(dataUrl);
+      showToast('✅ อัปโหลดรูปสำเร็จ');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyPhoto(photoUrl) {
+  const avatarEl    = document.getElementById('avatar-display');
+  const initialEl   = document.getElementById('avatar-initial');
+  const sbAvatarEl  = document.getElementById('sb-avatar');
+  const removeBtnEl = document.getElementById('remove-photo-btn');
+  const hintEl      = document.getElementById('avatar-edit-hint');
+
+  if (photoUrl) {
+    /* Large avatar */
+    avatarEl.style.backgroundImage = `url('${photoUrl}')`;
+    if (initialEl) initialEl.style.display = 'none';
+
+    /* Sidebar avatar */
+    sbAvatarEl.style.backgroundImage = `url('${photoUrl}')`;
+    sbAvatarEl.classList.add('has-photo');
+
+    /* Show remove button */
+    if (removeBtnEl) removeBtnEl.style.display = '';
+    if (hintEl)      hintEl.textContent = '✏️';
+  } else {
+    avatarEl.style.backgroundImage = '';
+    if (initialEl) initialEl.style.display = '';
+    sbAvatarEl.style.backgroundImage = '';
+    sbAvatarEl.classList.remove('has-photo');
+
+    /* Hide remove button */
+    if (removeBtnEl) removeBtnEl.style.display = 'none';
+    if (hintEl)      hintEl.textContent = '📷';
+  }
+}
+
+function handleAvatarHintClick(e) {
+  e.stopPropagation();
+  document.getElementById('photo-upload').click();
+}
+
+function removePhoto() {
+  if (!confirm('ลบรูปโปรไฟล์ออกใช่ไหม?')) return;
+  updateUser(u => { if (u.profile) u.profile.photo = null; });
+  applyPhoto(null);
+  showToast('🗑️ ลบรูปโปรไฟล์แล้ว');
+}
+
+fbAuth.onAuthStateChanged(u => {
+  if (!u) { localStorage.removeItem('aia_currentUser'); window.location.href = 'login.html'; }
+});
+
+/* ── Data helpers ── */
+function getUsers() { return JSON.parse(localStorage.getItem('aia_users') || '[]'); }
+function saveUsers(arr) { localStorage.setItem('aia_users', JSON.stringify(arr)); }
+function getCurrentUser() {
+  const u = getUsers().find(u => u.id === uid);
+  if (!u) { window.location.href = 'login.html'; } return u;
+}
+function updateUser(fn) {
+  const all = getUsers(); const idx = all.findIndex(u => u.id === uid);
+  if (idx === -1) return; fn(all[idx]); saveUsers(all);
+}
+function getProfile() {
+  return getCurrentUser().profile || {};
+}
+
+/* ── Toast ── */
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── Date helpers ── */
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('th-TH-u-ca-gregory', { year:'numeric', month:'long', day:'numeric' });
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const diff = new Date(dateStr) - new Date();
+  return Math.ceil(diff / (1000*60*60*24));
+}
+
+/* ── Render card info rows ── */
+function renderCardInfoRows(profile, user) {
+  const rows = [
+    { ico: '📞', lbl: 'โทรศัพท์', val: profile.phone || user.phone || '' },
+    { ico: '📧', lbl: 'Email',    val: profile.email || user.email || '' },
+    { ico: '🏢', lbl: 'รหัส AIA',  val: profile.aiaCode || '' },
+    { ico: '🏠', lbl: 'สังกัด',   val: profile.unit || '' },
+  ].filter(r => r.val);
+
+  document.getElementById('card-info-rows').innerHTML = rows.map(r => `
+    <div class="agent-info-row">
+      <span class="ai-ico">${r.ico}</span>
+      <div>
+        <span class="ai-lbl">${r.lbl}</span>
+        <span class="ai-val">${r.val}</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Render display sections ── */
+function renderPersonalDisplay(profile, user) {
+  const rows = [
+    { lbl: 'ชื่อ-นามสกุล',   val: (user.firstName||'') + ' ' + (user.lastName||'') },
+    { lbl: 'ชื่อเล่น',        val: profile.nickname || '' },
+    { lbl: 'โทรศัพท์',        val: profile.phone || '' },
+    { lbl: 'Email',            val: profile.email || '' },
+    { lbl: 'ที่อยู่',          val: profile.address || '' },
+  ];
+  document.getElementById('display-personal').innerHTML = rows.map(r =>
+    `<div class="pf-display-row">
+      <span class="pfd-lbl">${r.lbl}</span>
+      <span class="pfd-val ${r.val ? '' : 'pfd-empty'}">${r.val || '— ยังไม่ได้กรอก'}</span>
+    </div>`
+  ).join('');
+}
+
+function renderLicenseDisplay(profile) {
+  const items = [
+    { ico:'🛡️', lbl:'ใบอนุญาตชีวิต', num: profile.licLife||'', exp: profile.licLifeExp||'' },
+    { ico:'🏠', lbl:'ใบอนุญาตวินาศภัย', num: profile.licNonLife||'', exp: profile.licNonLifeExp||'' },
+    { ico:'🆔', lbl:'รหัสตัวแทน AIA', num: profile.aiaCode||'', exp:'' },
+    { ico:'🏢', lbl:'สังกัด / หน่วย', num: profile.unit||'', exp:'' },
+  ];
+
+  document.getElementById('display-license').innerHTML = `
+    <div class="license-grid">
+      ${items.map(it => {
+        const days = it.exp ? daysUntil(it.exp) : null;
+        const expClass = days === null ? '' : days < 0 ? 'expired' : days < 90 ? 'warn' : '';
+        const expText  = it.exp ? fmtDate(it.exp) + (days !== null ? ` (${days < 0 ? 'หมดอายุแล้ว' : days + ' วัน'})` : '') : '';
+        return `<div class="license-item">
+          <div class="lic-ico">${it.ico}</div>
+          <div class="lic-lbl">${it.lbl}</div>
+          <div class="lic-val">${it.num || '<span style="color:#ccc;font-style:italic;font-weight:400;">ยังไม่ได้กรอก</span>'}</div>
+          ${expText ? `<div class="lic-exp ${expClass}">${expText}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderLineDisplay(profile) {
+  const lineId   = profile.lineId || '';
+  const lineName = profile.lineName || '';
+  const qrUrl    = lineId ? `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent('https://line.me/ti/p/~' + lineId)}` : '';
+
+  document.getElementById('display-line').innerHTML = `
+    <div class="qr-box" onclick="${lineId ? 'window.open(\'https://line.me/ti/p/~' + lineId + '\',\'_blank\')' : 'toggleEditSection(\'line\')'}">
+      ${qrUrl
+        ? `<img src="${qrUrl}" alt="QR LINE" style="width:120px;height:120px;border-radius:8px;">`
+        : `<div class="qr-ico">📱</div><div class="qr-hint">ใส่ LINE ID<br>เพื่อสร้าง QR</div>`
+      }
+    </div>
+    <div class="qr-info">
+      <h4>LINE Contact</h4>
+      <p>ลูกค้าสแกน QR Code เพื่อเพิ่มเพื่อนใน LINE ได้ทันที<br>
+         สามารถพิมพ์หรือแชร์ลิงก์ได้เลย</p>
+      <div class="qr-line-id">
+        <div class="qr-line-ico">💬</div>
+        <div>
+          <div class="qr-line-lbl">LINE ID</div>
+          <div class="qr-line-val">${lineId || '<span style="color:#ccc;font-style:italic;">ยังไม่ได้กรอก</span>'}</div>
+          ${lineName ? `<div style="font-size:.72rem;color:#888;">${lineName}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Edit section toggle ── */
+const editState = { personal: false, license: false, line: false };
+
+function toggleEditSection(section) {
+  editState[section] = !editState[section];
+  const editEl = document.getElementById('edit-' + section);
+  const dispEl = document.getElementById('display-' + section);
+  const btnEl  = document.getElementById('btn-edit-' + section);
+
+  if (editState[section]) {
+    // Populate fields
+    const p = getProfile(); const u = getCurrentUser();
+    if (section === 'personal') {
+      document.getElementById('pf-first').value    = u.firstName    || '';
+      document.getElementById('pf-last').value     = u.lastName     || '';
+      document.getElementById('pf-nickname').value = p.nickname     || '';
+      document.getElementById('pf-phone').value    = p.phone        || '';
+      document.getElementById('pf-email').value    = p.email        || '';
+      document.getElementById('pf-address').value  = p.address      || '';
+    } else if (section === 'license') {
+      document.getElementById('pf-lic-life').value     = p.licLife        || '';
+      document.getElementById('pf-lic-life-exp').value = p.licLifeExp     || '';
+      document.getElementById('pf-lic-nonlife').value  = p.licNonLife     || '';
+      document.getElementById('pf-lic-nonlife-exp').value = p.licNonLifeExp || '';
+      document.getElementById('pf-aia-code').value     = p.aiaCode        || '';
+      document.getElementById('pf-unit').value         = p.unit           || '';
+    } else if (section === 'line') {
+      document.getElementById('pf-line-id').value   = p.lineId   || '';
+      document.getElementById('pf-line-name').value = p.lineName || '';
+    }
+    editEl.style.display = '';
+    if (dispEl) dispEl.style.display = 'none';
+    if (btnEl)  btnEl.textContent = '✕ ปิด';
+  } else {
+    editEl.style.display = 'none';
+    if (dispEl) dispEl.style.display = '';
+    if (btnEl)  btnEl.textContent = '✏️ แก้ไข';
+  }
+}
+
+/* ── Save sections ── */
+function saveSection(section) {
+  updateUser(u => {
+    if (!u.profile) u.profile = {};
+    const p = u.profile;
+
+    if (section === 'personal') {
+      const first = document.getElementById('pf-first').value.trim();
+      if (!first) { document.getElementById('pf-first').focus(); return; }
+      u.firstName  = first;
+      u.lastName   = document.getElementById('pf-last').value.trim();
+      p.nickname   = document.getElementById('pf-nickname').value.trim();
+      p.phone      = document.getElementById('pf-phone').value.trim();
+      p.email      = document.getElementById('pf-email').value.trim();
+      p.address    = document.getElementById('pf-address').value.trim();
+    } else if (section === 'license') {
+      p.licLife       = document.getElementById('pf-lic-life').value.trim();
+      p.licLifeExp    = document.getElementById('pf-lic-life-exp').value;
+      p.licNonLife    = document.getElementById('pf-lic-nonlife').value.trim();
+      p.licNonLifeExp = document.getElementById('pf-lic-nonlife-exp').value;
+      p.aiaCode       = document.getElementById('pf-aia-code').value.trim();
+      p.unit          = document.getElementById('pf-unit').value.trim();
+    } else if (section === 'line') {
+      p.lineId    = document.getElementById('pf-line-id').value.trim();
+      p.lineName  = document.getElementById('pf-line-name').value.trim();
+    }
+  });
+
+  editState[section] = true;
+  toggleEditSection(section); // closes edit → re-renders display
+  renderAll();
+  showToast('✅ บันทึกข้อมูลสำเร็จ');
+}
+
+/* ── Share functions ── */
+function shareLine() {
+  const profile = getProfile();
+  const user    = getCurrentUser();
+  const name    = (user.firstName || '') + ' ' + (user.lastName || '');
+  const phone   = profile.phone || '';
+  const lineId  = profile.lineId ? '\nLINE: ' + profile.lineId : '';
+  const msg     = `สวัสดีครับ/ค่ะ ผม/หนูชื่อ ${name.trim()} ตัวแทน AIA\nโทร: ${phone}${lineId}\nพร้อมให้คำปรึกษาด้านประกันชีวิตและวางแผนการเงินครับ`;
+  window.open('https://line.me/share/ui?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function shareWhatsApp() {
+  const profile = getProfile();
+  const user    = getCurrentUser();
+  const name    = (user.firstName || '') + ' ' + (user.lastName || '');
+  const phone   = profile.phone || '';
+  const msg     = `สวัสดีครับ/ค่ะ ผม/หนูชื่อ ${name.trim()} ตัวแทน AIA\nโทร: ${phone}\nพร้อมให้คำปรึกษาครับ`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function copyContact() {
+  const profile = getProfile();
+  const user    = getCurrentUser();
+  const name    = (user.firstName || '') + ' ' + (user.lastName || '');
+  const lines   = [
+    name.trim() + ' — ตัวแทน AIA',
+    profile.phone   ? '📞 ' + profile.phone   : '',
+    profile.email   ? '📧 ' + profile.email   : '',
+    profile.lineId  ? '💬 LINE: ' + profile.lineId : '',
+    profile.aiaCode ? '🆔 AIA Code: ' + profile.aiaCode : '',
+  ].filter(Boolean);
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    showToast('📋 คัดลอกข้อมูลแล้ว');
+  }).catch(() => {
+    showToast('❌ ไม่สามารถคัดลอกได้', 'error');
+  });
+}
+
+/* ── Render all ── */
+function renderAll() {
+  const user    = getCurrentUser();
+  const profile = user.profile || {};
+
+  // Sidebar
+  const initChar = (user.firstName||'?').charAt(0);
+  document.getElementById('sb-name').textContent = (user.firstName||'') + ' ' + (user.lastName||'');
+
+  // Agent card header — initial letter
+  const initialEl = document.getElementById('avatar-initial');
+  if (initialEl) initialEl.textContent = initChar;
+  document.getElementById('card-name').textContent = (user.firstName||'') + ' ' + (user.lastName||'');
+  const roleText = [profile.unit || 'AIA', 'ตัวแทน'].filter(Boolean).join(' · ');
+  document.getElementById('card-role').textContent = roleText;
+
+  // Photo (restore on load)
+  applyPhoto(profile.photo || null);
+  // Sidebar initial (only if no photo)
+  if (!profile.photo) {
+    document.getElementById('sb-avatar').textContent = initChar;
+  }
+
+  // Stats
+  const clients  = user.data.clients || [];
+  const allPols  = clients.flatMap(c => c.policies || []);
+  const totPrem  = allPols.reduce((s,p) => s + (Number(p.premium)||0), 0);
+  document.getElementById('stat-clients').textContent  = clients.length;
+  document.getElementById('stat-policies').textContent = allPols.length;
+  document.getElementById('stat-premium').textContent  = '฿' + Math.round(totPrem).toLocaleString('th-TH');
+
+  // Card info rows
+  renderCardInfoRows(profile, user);
+
+  // Section displays
+  renderPersonalDisplay(profile, user);
+  renderLicenseDisplay(profile);
+  renderLineDisplay(profile);
+}
+
+/* ── Init ── */
+(function init() {
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  renderAll();
+})();
+
+function doLogout() {
+  fbAuth.signOut();
+  localStorage.removeItem('aia_currentUser');
+  window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

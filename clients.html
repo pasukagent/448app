@@ -21,7 +21,7 @@
   </script>
   <style>
     .clients-page {
-      display: flex; height: calc(100vh - 68px); overflow: hidden;
+      display: flex; flex: 1; overflow: hidden;
     }
 
     /* ── LEFT PANEL ── */
@@ -247,6 +247,78 @@
     .recent-card { background: white; border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-sm); }
     .recent-card h4 { font-size: .88rem; font-weight: 800; color: var(--gray-700); margin-bottom: 14px; display: flex; justify-content: space-between; }
     .recent-card h4 a { font-weight: 600; color: var(--red-primary); font-size: .82rem; }
+
+    /* ─── Notes/Activity Log ─── */
+    .notes-card { background: white; border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-sm); }
+    .notes-card h4 { font-size: .88rem; font-weight: 800; color: var(--gray-700); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .notes-card h4 .note-count { background: var(--red-soft); color: var(--red-primary); font-size: .72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+
+    .note-input-wrap {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+      padding: 12px; background: var(--gray-100); border-radius: 10px;
+    }
+    .note-type-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .note-type-chip {
+      padding: 4px 11px; border-radius: 16px; font-size: .76rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: white; color: var(--gray-600);
+      cursor: pointer; transition: all .15s; font-family: var(--font);
+    }
+    .note-type-chip:hover { border-color: var(--red-primary); }
+    .note-type-chip.active { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-primary); }
+    .note-textarea {
+      width: 100%; min-height: 70px; padding: 10px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .9rem; font-family: var(--font); resize: vertical; box-sizing: border-box;
+      transition: border-color .2s;
+    }
+    .note-textarea:focus { outline: none; border-color: var(--red-primary); }
+    .note-actions-row { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+    .note-actions-row .note-hint { flex: 1; font-size: .75rem; color: var(--gray-400); }
+    .btn-save-note {
+      background: var(--red-primary); color: white; border: none;
+      border-radius: 8px; padding: 8px 16px; font-size: .85rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: background .2s;
+    }
+    .btn-save-note:hover { background: var(--red-dark); }
+    .btn-save-note:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+    .notes-timeline { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 22px; }
+    .notes-timeline::before {
+      content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--gray-100);
+    }
+    .note-entry { position: relative; padding: 10px 0 14px; }
+    .note-entry::before {
+      content: ''; position: absolute; left: -19px; top: 14px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: white; border: 3px solid var(--red-primary);
+    }
+    .note-entry.type-call::before    { border-color: #FF8C00; }
+    .note-entry.type-meet::before    { border-color: #28a745; }
+    .note-entry.type-line::before    { border-color: #06C755; }
+    .note-entry.type-email::before   { border-color: #0E76A8; }
+    .note-entry.type-quote::before   { border-color: #7B2FF7; }
+    .note-entry.type-other::before   { border-color: var(--gray-400); }
+
+    .note-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .note-type-badge {
+      font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px;
+      background: var(--red-soft); color: var(--red-primary);
+    }
+    .note-type-badge.tb-call  { background: #FFF3E0; color: #E67E22; }
+    .note-type-badge.tb-meet  { background: #E8F5E9; color: #28a745; }
+    .note-type-badge.tb-line  { background: #E8F8EF; color: #06C755; }
+    .note-type-badge.tb-email { background: #E8F4FB; color: #0E76A8; }
+    .note-type-badge.tb-quote { background: #F3EEFF; color: #7B2FF7; }
+    .note-type-badge.tb-other { background: var(--gray-100); color: var(--gray-500); }
+    .note-time { font-size: .75rem; color: var(--gray-400); }
+    .note-del-btn {
+      background: none; border: none; color: var(--gray-300); cursor: pointer;
+      font-size: .9rem; padding: 0 4px; margin-left: auto;
+    }
+    .note-del-btn:hover { color: #c00; }
+    .note-text { font-size: .92rem; color: var(--gray-800); line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+
+    .notes-empty { text-align: center; padding: 20px 12px; color: var(--gray-400); font-size: .88rem; }
     .policy-mini { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
     .policy-mini:last-child { border-bottom: none; }
     .pm-ico { font-size: 1.3rem; width: 32px; text-align: center; }
@@ -266,21 +338,66 @@
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="navbar-inner">
-    <div class="navbar-brand">
-      <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;color:var(--gray-600);font-size:.9rem;font-weight:600;">← กลับ</a>
-    </div>
-    <div style="font-weight:800;font-size:1.05rem;">👤 ลูกค้า</div>
-    <div class="navbar-actions">
-      <div id="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--red-primary);">?</div>
-      <span id="nav-name" style="font-size:.9rem;font-weight:600;"></span>
-    </div>
-  </div>
-</nav>
+<div class="app-layout">
 
-<div class="page">
-  <div class="clients-page">
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item active" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="app-main" style="overflow:hidden;">
+    <div class="app-topbar">
+      <div class="app-topbar-left">
+        <div class="tb-title">👤 รายชื่อลูกค้า</div>
+        <div class="tb-date" id="topbar-date"></div>
+      </div>
+      <div class="app-topbar-right">
+        <button class="btn-app-primary" onclick="toggleAddForm()">+ เพิ่มลูกค้า</button>
+      </div>
+    </div>
+
+    <div class="clients-page">
 
     <!-- ── LEFT: Client list ── -->
     <div class="clients-left">
@@ -362,15 +479,19 @@
           </div>
           <div class="edit-form-row">
             <div class="edit-form-group">
+              <label>ชื่อเล่น</label>
+              <input id="ef-nickname" type="text" placeholder="ชื่อเล่น">
+            </div>
+            <div class="edit-form-group">
               <label>เลขบัตรประชาชน</label>
               <input id="ef-idcard" type="text" placeholder="x-xxxx-xxxxx-xx-x" maxlength="17">
             </div>
+          </div>
+          <div class="edit-form-row">
             <div class="edit-form-group">
               <label>วันเดือนปีเกิด</label>
               <input id="ef-dob" type="date">
             </div>
-          </div>
-          <div class="edit-form-row">
             <div class="edit-form-group">
               <label>เพศ</label>
               <select id="ef-gender">
@@ -380,37 +501,66 @@
                 <option value="อื่น ๆ">อื่น ๆ</option>
               </select>
             </div>
+          </div>
+          <div class="edit-form-row">
             <div class="edit-form-group">
-              <label>หมายเลขโทรศัพท์</label>
-              <input id="ef-phone" type="tel" placeholder="0xx-xxx-xxxx">
+              <label>น้ำหนัก (กก.)</label>
+              <input id="ef-weight" type="number" placeholder="เช่น 65" min="1" max="300">
+            </div>
+            <div class="edit-form-group">
+              <label>ส่วนสูง (ซม.)</label>
+              <input id="ef-height" type="number" placeholder="เช่น 170" min="50" max="250">
             </div>
           </div>
 
           <div class="ef-section-lbl">ข้อมูลติดต่อและอาชีพ</div>
           <div class="edit-form-row">
             <div class="edit-form-group">
-              <label>Email</label>
-              <input id="ef-email" type="email" placeholder="example@email.com">
+              <label>หมายเลขโทรศัพท์</label>
+              <input id="ef-phone" type="tel" placeholder="0xx-xxx-xxxx">
             </div>
             <div class="edit-form-group">
-              <label>อาชีพ</label>
-              <input id="ef-job" type="text" placeholder="เช่น วิศวกร, แพทย์, ธุรกิจส่วนตัว">
+              <label>Email</label>
+              <input id="ef-email" type="email" placeholder="example@email.com">
             </div>
           </div>
           <div class="edit-form-row">
             <div class="edit-form-group">
+              <label>อาชีพ</label>
+              <input id="ef-job" type="text" placeholder="เช่น วิศวกร, แพทย์, ธุรกิจส่วนตัว">
+            </div>
+            <div class="edit-form-group">
+              <label>ตำแหน่ง</label>
+              <input id="ef-position" type="text" placeholder="เช่น ผู้จัดการ, วิศวกรอาวุโส">
+            </div>
+          </div>
+          <div class="edit-form-row">
+            <div class="edit-form-group">
+              <label>สถานที่ทำงาน</label>
+              <input id="ef-workplace" type="text" placeholder="ชื่อบริษัท/สถานที่">
+            </div>
+            <div class="edit-form-group">
               <label>รายได้ต่อปี (บาท)</label>
               <input id="ef-income" type="number" placeholder="0" min="0">
             </div>
+          </div>
+          <div class="edit-form-row">
             <div class="edit-form-group">
               <label>ครอบครัว</label>
               <select id="ef-family" class="form-select" onchange="handleFamilySelect('ef')"></select>
               <input id="ef-family-new" type="text" placeholder="ชื่อครอบครัวใหม่" style="display:none;margin-top:6px;padding:9px 12px;border:1.5px solid var(--red-primary);border-radius:var(--radius-sm);font-size:.9rem;font-family:var(--font);width:100%;">
             </div>
+            <div class="edit-form-group" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:4px;">
+              <label>&nbsp;</label><!-- spacer -->
+            </div>
           </div>
           <div class="edit-form-group">
             <label>ที่อยู่</label>
             <textarea id="ef-address" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+          </div>
+          <div class="edit-form-group">
+            <label>ที่อยู่ที่ทำงาน</label>
+            <textarea id="ef-work-address" placeholder="ที่อยู่สถานที่ทำงาน"></textarea>
           </div>
 
           <div class="edit-form-actions">
@@ -465,10 +615,34 @@
           <div id="recent-policy-list"></div>
         </div>
 
+        <!-- Notes / Activity Log -->
+        <div class="notes-card" id="notes-card">
+          <h4>📝 บันทึก / Activity Log <span class="note-count" id="note-count">0</span></h4>
+
+          <div class="note-input-wrap">
+            <div class="note-type-row" id="note-type-row">
+              <button class="note-type-chip active" data-type="meet"  onclick="selectNoteType(this)">🤝 พบหน้า</button>
+              <button class="note-type-chip"        data-type="call"  onclick="selectNoteType(this)">📞 โทรศัพท์</button>
+              <button class="note-type-chip"        data-type="line"  onclick="selectNoteType(this)">💬 LINE</button>
+              <button class="note-type-chip"        data-type="email" onclick="selectNoteType(this)">📧 Email</button>
+              <button class="note-type-chip"        data-type="quote" onclick="selectNoteType(this)">📋 ใบเสนอ</button>
+              <button class="note-type-chip"        data-type="other" onclick="selectNoteType(this)">📌 อื่นๆ</button>
+            </div>
+            <textarea id="note-textarea" class="note-textarea" placeholder="พิมพ์บันทึกการติดต่อลูกค้า เช่น สรุปการประชุม, สิ่งที่ตกลง, ติดตามต่อ..."></textarea>
+            <div class="note-actions-row">
+              <span class="note-hint">💡 บันทึกจะแสดงเป็น timeline ตามลำดับเวลา</span>
+              <button class="btn-save-note" onclick="saveNote()">💾 บันทึก</button>
+            </div>
+          </div>
+
+          <div class="notes-timeline" id="notes-timeline"></div>
+        </div>
+
       </div>
     </div>
-  </div>
-</div>
+    </div><!-- end clients-page -->
+  </main><!-- end app-main -->
+</div><!-- end app-layout -->
 
 <script>
   const uid = localStorage.getItem('aia_currentUser');
@@ -493,8 +667,6 @@
   const TYPE_ICONS = { 'ชีวิต':'🛡️','สุขภาพ':'❤️','โรคร้ายแรง':'🏥','อุบัติเหตุ':'🚑','บำนาญ':'🏦','รถยนต์':'🚗','อื่นๆ':'📄' };
   function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
   function fmtShort(n) {
-    if (n >= 1e6) return '฿' + (n/1e6).toFixed(1) + 'ล.';
-    if (n >= 1e3) return '฿' + (n/1e3).toFixed(0) + 'K';
     return fmt(n);
   }
 
@@ -502,8 +674,22 @@
 
   // ── Init ──
   const user = getCurrentUser();
-  document.getElementById('nav-avatar').textContent = (user.firstName||'?').charAt(0);
-  document.getElementById('nav-name').textContent   = user.firstName || '';
+  (function applySbAvatar(){
+    const sbAv = document.getElementById('sb-avatar');
+    const sbNm = document.getElementById('sb-name');
+    if (sbNm) sbNm.textContent = (user.firstName||'') + ' ' + (user.lastName||'');
+    if (!sbAv) return;
+    const photo = user.profile && user.profile.photo;
+    if (photo) {
+      sbAv.style.backgroundImage = `url('${photo}')`;
+      sbAv.classList.add('has-photo');
+      sbAv.textContent = '';
+    } else {
+      sbAv.textContent = (user.firstName||'?').charAt(0).toUpperCase();
+    }
+  })();
+  const tdEl = document.getElementById('topbar-date');
+  if (tdEl) tdEl.textContent = new Date().toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   renderList();
   if (selectedClientId) showProfile(selectedClientId);
 
@@ -630,8 +816,9 @@
       ageStr = age + ' ปี';
     }
 
+    const nicknamePart = client.nickname ? ` (${client.nickname})` : '';
     document.getElementById('p-avatar').textContent     = initial;
-    document.getElementById('p-name').textContent       = fullName;
+    document.getElementById('p-name').textContent       = fullName + nicknamePart;
     document.getElementById('p-sub').textContent        = familyTag + (client.gender || '') + (client.gender && ageStr ? ' · ' : '') + ageStr + (ageStr || client.gender ? ' · ' : '') + policies.length + ' กรมธรรม์';
     document.getElementById('p-stat-pol').textContent   = policies.length + ' ฉบับ';
     document.getElementById('p-stat-cov').textContent   = fmtShort(totalCoverage);
@@ -639,15 +826,21 @@
     document.getElementById('p-stat-tax').textContent   = fmtShort(taxDeduct);
 
     // Personal info card
+    const bmiStr = (client.weight && client.height)
+      ? ` · BMI ${(client.weight / ((client.height/100)**2)).toFixed(1)}`
+      : '';
     const infoRows = [
       { lbl: 'เลขบัตรประชาชน', val: client.idCard   || '' },
       { lbl: 'วันเกิด',        val: client.dob ? new Date(client.dob).toLocaleDateString('th-TH-u-ca-gregory',{year:'numeric',month:'long',day:'numeric'}) + (ageStr ? ' (อายุ ' + ageStr + ')' : '') : '' },
       { lbl: 'เพศ',            val: client.gender   || '' },
+      { lbl: 'น้ำหนัก / ส่วนสูง', val: (client.weight || client.height) ? (client.weight ? client.weight + ' กก.' : '') + (client.weight && client.height ? ' / ' : '') + (client.height ? client.height + ' ซม.' : '') + bmiStr : '' },
       { lbl: 'โทรศัพท์',      val: client.phone    || '' },
       { lbl: 'Email',          val: client.email    || '' },
-      { lbl: 'อาชีพ',          val: client.job      || '' },
+      { lbl: 'อาชีพ',          val: [client.job, client.position].filter(Boolean).join(' · ') },
+      { lbl: 'สถานที่ทำงาน',  val: client.workplace || '' },
       { lbl: 'รายได้ต่อปี',   val: client.income   ? '฿' + Number(client.income).toLocaleString('th-TH') : '' },
       { lbl: 'ที่อยู่',        val: client.address  || '', full: true },
+      { lbl: 'ที่อยู่ที่ทำงาน', val: client.workAddress || '', full: true },
     ];
     const hasAny = infoRows.some(r => r.val);
     document.getElementById('p-info-card').style.display = hasAny ? '' : 'none';
@@ -671,7 +864,100 @@
     document.getElementById('profile-empty').style.display = 'none';
     document.getElementById('profile-content').classList.add('show');
     document.getElementById('edit-form').classList.remove('open');
+    // Render notes timeline for this client
+    renderNotes();
     renderList();
+  }
+
+  /* ── Notes / Activity Log ── */
+  let selectedNoteType = 'meet';
+  const NOTE_TYPE_MAP = {
+    meet:  { icon:'🤝', label:'พบหน้า',   badge:'tb-meet',  cls:'type-meet'  },
+    call:  { icon:'📞', label:'โทรศัพท์', badge:'tb-call',  cls:'type-call'  },
+    line:  { icon:'💬', label:'LINE',     badge:'tb-line',  cls:'type-line'  },
+    email: { icon:'📧', label:'Email',    badge:'tb-email', cls:'type-email' },
+    quote: { icon:'📋', label:'ใบเสนอ',   badge:'tb-quote', cls:'type-quote' },
+    other: { icon:'📌', label:'อื่นๆ',    badge:'tb-other', cls:'type-other' },
+  };
+
+  function selectNoteType(el) {
+    document.querySelectorAll('#note-type-row .note-type-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    selectedNoteType = el.dataset.type;
+  }
+
+  function getClientNotes(client) {
+    return (client && client.notes) ? client.notes : [];
+  }
+
+  function renderNotes() {
+    if (!selectedClientId) return;
+    const u = getCurrentUser();
+    const client = (u.data.clients || []).find(c => c.id === selectedClientId);
+    if (!client) return;
+    const notes = getClientNotes(client);
+
+    document.getElementById('note-count').textContent = notes.length;
+
+    const tlEl = document.getElementById('notes-timeline');
+    if (notes.length === 0) {
+      tlEl.innerHTML = '<div class="notes-empty">ยังไม่มีบันทึก — เพิ่มบันทึกแรกได้เลย</div>';
+      return;
+    }
+
+    // Sort newest first
+    const sorted = [...notes].sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    tlEl.innerHTML = sorted.map(n => {
+      const t = NOTE_TYPE_MAP[n.type] || NOTE_TYPE_MAP.other;
+      const dt = n.createdAt ? new Date(n.createdAt) : new Date();
+      const dateStr = dt.toLocaleDateString('th-TH-u-ca-gregory', {year:'numeric', month:'short', day:'numeric'});
+      const timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+      const escaped = (n.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div class="note-entry ${t.cls}">
+        <div class="note-meta-row">
+          <span class="note-type-badge ${t.badge}">${t.icon} ${t.label}</span>
+          <span class="note-time">${dateStr} · ${timeStr}</span>
+          <button class="note-del-btn" onclick="deleteNote('${n.id}')" title="ลบ">🗑️</button>
+        </div>
+        <div class="note-text">${escaped}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function saveNote() {
+    if (!selectedClientId) return;
+    const text = document.getElementById('note-textarea').value.trim();
+    if (!text) {
+      document.getElementById('note-textarea').focus();
+      return;
+    }
+
+    const note = {
+      id:        Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      type:      selectedNoteType,
+      text,
+      createdAt: new Date().toISOString()
+    };
+
+    updateCurrentUser(u => {
+      const c = (u.data.clients || []).find(x => x.id === selectedClientId);
+      if (!c) return;
+      if (!c.notes) c.notes = [];
+      c.notes.push(note);
+    });
+
+    document.getElementById('note-textarea').value = '';
+    renderNotes();
+  }
+
+  function deleteNote(noteId) {
+    if (!confirm('ลบบันทึกนี้?')) return;
+    updateCurrentUser(u => {
+      const c = (u.data.clients || []).find(x => x.id === selectedClientId);
+      if (!c || !c.notes) return;
+      c.notes = c.notes.filter(n => n.id !== noteId);
+    });
+    renderNotes();
   }
 
   // ── Navigate to feature ──
@@ -717,16 +1003,22 @@
       const u      = getCurrentUser();
       const client = (u.data.clients||[]).find(c => c.id === selectedClientId);
       if (client) {
-        document.getElementById('ef-first').value   = client.firstName || '';
-        document.getElementById('ef-last').value    = client.lastName  || '';
-        document.getElementById('ef-idcard').value  = client.idCard    || '';
-        document.getElementById('ef-dob').value     = client.dob       || '';
-        document.getElementById('ef-gender').value  = client.gender    || '';
-        document.getElementById('ef-phone').value   = client.phone     || '';
-        document.getElementById('ef-email').value   = client.email     || '';
-        document.getElementById('ef-job').value     = client.job       || '';
-        document.getElementById('ef-income').value  = client.income    || '';
-        document.getElementById('ef-address').value = client.address   || '';
+        document.getElementById('ef-first').value        = client.firstName   || '';
+        document.getElementById('ef-last').value         = client.lastName    || '';
+        document.getElementById('ef-nickname').value     = client.nickname    || '';
+        document.getElementById('ef-idcard').value       = client.idCard      || '';
+        document.getElementById('ef-dob').value          = client.dob         || '';
+        document.getElementById('ef-gender').value       = client.gender      || '';
+        document.getElementById('ef-weight').value       = client.weight      || '';
+        document.getElementById('ef-height').value       = client.height      || '';
+        document.getElementById('ef-phone').value        = client.phone       || '';
+        document.getElementById('ef-email').value        = client.email       || '';
+        document.getElementById('ef-job').value          = client.job         || '';
+        document.getElementById('ef-position').value     = client.position    || '';
+        document.getElementById('ef-workplace').value    = client.workplace   || '';
+        document.getElementById('ef-income').value       = client.income      || '';
+        document.getElementById('ef-address').value      = client.address     || '';
+        document.getElementById('ef-work-address').value = client.workAddress || '';
         populateFamilySelect('ef-family', client.familyId || null);
         document.getElementById('ef-family-new').style.display = 'none';
       }
@@ -741,17 +1033,23 @@
     updateCurrentUser(u => {
       const c = (u.data.clients||[]).find(c => c.id === selectedClientId);
       if (c) {
-        c.firstName = first;
-        c.lastName  = document.getElementById('ef-last').value.trim();
-        c.idCard    = document.getElementById('ef-idcard').value.trim();
-        c.dob       = document.getElementById('ef-dob').value;
-        c.gender    = document.getElementById('ef-gender').value;
-        c.phone     = document.getElementById('ef-phone').value.trim();
-        c.email     = document.getElementById('ef-email').value.trim();
-        c.job       = document.getElementById('ef-job').value.trim();
-        c.income    = parseFloat(document.getElementById('ef-income').value) || null;
-        c.address   = document.getElementById('ef-address').value.trim();
-        c.familyId  = familyId || null;
+        c.firstName   = first;
+        c.lastName    = document.getElementById('ef-last').value.trim();
+        c.nickname    = document.getElementById('ef-nickname').value.trim();
+        c.idCard      = document.getElementById('ef-idcard').value.trim();
+        c.dob         = document.getElementById('ef-dob').value;
+        c.gender      = document.getElementById('ef-gender').value;
+        c.weight      = parseFloat(document.getElementById('ef-weight').value) || null;
+        c.height      = parseFloat(document.getElementById('ef-height').value) || null;
+        c.phone       = document.getElementById('ef-phone').value.trim();
+        c.email       = document.getElementById('ef-email').value.trim();
+        c.job         = document.getElementById('ef-job').value.trim();
+        c.position    = document.getElementById('ef-position').value.trim();
+        c.workplace   = document.getElementById('ef-workplace').value.trim();
+        c.income      = parseFloat(document.getElementById('ef-income').value) || null;
+        c.address     = document.getElementById('ef-address').value.trim();
+        c.workAddress = document.getElementById('ef-work-address').value.trim();
+        c.familyId    = familyId || null;
       }
     });
     toggleEditForm();

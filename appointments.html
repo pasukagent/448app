@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — นัดหมาย</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    /* ─── Page Layout ─── */
+    .appt-layout { display: flex; gap: 24px; align-items: flex-start; }
+    .appt-left   { flex: 1; min-width: 0; }
+    .appt-right  { width: 320px; flex-shrink: 0; position: sticky; top: 72px; }
+
+    /* ─── Top Hero ─── */
+    .appt-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .appt-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .appt-hero p  { opacity: .85; font-size: .92rem; }
+    .appt-hero-row { display: flex; align-items: center; justify-content: space-between; }
+
+    .btn-add-appt {
+      background: rgba(255,255,255,.18); color: white;
+      border: 1.5px solid rgba(255,255,255,.5); border-radius: 8px;
+      padding: 9px 18px; font-size: .92rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: background .2s;
+      font-family: var(--font);
+    }
+    .btn-add-appt:hover { background: rgba(255,255,255,.28); }
+
+    /* ─── Filter Bar ─── */
+    .filter-bar {
+      background: white; border-radius: var(--radius); padding: 14px 20px;
+      box-shadow: var(--shadow-sm); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .filter-label { font-size: .78rem; font-weight: 700; color: var(--gray-600); white-space: nowrap; }
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .fchip {
+      padding: 5px 12px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: var(--gray-100); color: var(--gray-600);
+      cursor: pointer; transition: all .18s; font-family: var(--font);
+    }
+    .fchip.active { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-primary); }
+    .filter-divider { width: 1px; height: 24px; background: var(--gray-200); }
+    .search-appt {
+      flex: 1; min-width: 180px; padding: 7px 12px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: .88rem; font-family: var(--font);
+    }
+    .search-appt:focus { outline: none; border-color: var(--red-primary); }
+
+    /* ─── Section Header ─── */
+    .section-hd {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .75rem; font-weight: 800; color: var(--red-primary);
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 6px 0 8px; margin-top: 8px;
+    }
+    .section-hd::after { content: ''; flex: 1; height: 1px; background: var(--red-soft); }
+
+    /* ─── Appointment Card ─── */
+    .appt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .appt-card {
+      background: white; border-radius: var(--radius); padding: 16px 18px;
+      box-shadow: var(--shadow-sm); display: flex; gap: 14px; align-items: flex-start;
+      border-left: 4px solid transparent; transition: box-shadow .18s, transform .18s; cursor: default;
+    }
+    .appt-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+    .appt-card.type-meet  { border-left-color: #D0021B; }
+    .appt-card.type-call  { border-left-color: #FF8C00; }
+    .appt-card.type-online{ border-left-color: #0E76A8; }
+    .appt-card.type-video { border-left-color: #7B2FF7; }
+    .appt-card.past       { opacity: .55; }
+
+    .appt-date-col {
+      min-width: 52px; text-align: center; background: var(--gray-100);
+      border-radius: 10px; padding: 8px 6px; line-height: 1.2;
+    }
+    .appt-day   { font-size: 1.5rem; font-weight: 800; color: var(--gray-800); }
+    .appt-month { font-size: .7rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; }
+    .appt-card.today .appt-date-col { background: var(--red-soft); }
+    .appt-card.today .appt-day  { color: var(--red-primary); }
+    .appt-card.today .appt-month{ color: var(--red-primary); }
+
+    .appt-body { flex: 1; min-width: 0; }
+    .appt-client-name { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 3px; }
+    .appt-time-row { display: flex; align-items: center; gap: 8px; font-size: .83rem; margin-bottom: 5px; }
+    .appt-time { color: var(--gray-600); display: flex; align-items: center; gap: 4px; }
+    .appt-type-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 20px; font-size: .73rem; font-weight: 700;
+    }
+    .badge-meet   { background: #FFF0F0; color: #D0021B; }
+    .badge-call   { background: #FFF5E5; color: #FF8C00; }
+    .badge-online { background: #E8F4FB; color: #0E76A8; }
+    .badge-video  { background: #F3EEFF; color: #7B2FF7; }
+
+    .appt-notes { font-size: .82rem; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .appt-actions { display: flex; gap: 6px; }
+    .appt-btn {
+      border: none; background: var(--gray-100); border-radius: 6px;
+      padding: 6px 10px; font-size: .8rem; cursor: pointer; font-family: var(--font);
+      color: var(--gray-600); transition: all .15s;
+    }
+    .appt-btn:hover { background: var(--red-soft); color: var(--red-primary); }
+    .appt-btn.del:hover { background: #FEE; color: #c00; }
+
+    .empty-state {
+      text-align: center; padding: 48px 24px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .empty-state .es-icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .empty-state p { font-size: .95rem; }
+
+    /* ─── Mini Calendar (right panel) ─── */
+    .mini-cal-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      overflow: hidden; margin-bottom: 18px;
+    }
+    .cal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cal-header .cal-title { font-size: .95rem; font-weight: 700; }
+    .cal-nav { background: none; border: none; color: white; cursor: pointer; font-size: 1.1rem; padding: 4px 8px; font-family: var(--font); }
+    .cal-nav:hover { background: rgba(255,255,255,.2); border-radius: 4px; }
+    .cal-grid { padding: 12px; }
+    .cal-dow-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 4px; }
+    .cal-dow { font-size: .68rem; font-weight: 700; text-align: center; color: var(--gray-400); padding: 4px 0; }
+    .cal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .cal-cell {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; border-radius: 6px; cursor: pointer; position: relative;
+      color: var(--gray-700); transition: background .15s;
+    }
+    .cal-cell:hover { background: var(--gray-100); }
+    .cal-cell.other-month { color: var(--gray-300); }
+    .cal-cell.today { background: var(--red-soft); color: var(--red-primary); font-weight: 800; }
+    .cal-cell.selected { background: var(--red-primary) !important; color: white !important; font-weight: 700; }
+    .cal-cell.has-appt::after {
+      content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--red-primary);
+    }
+    .cal-cell.selected::after { background: white; }
+
+    /* ─── Stats card ─── */
+    .appt-stats {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 18px;
+    }
+    .appt-stats h4 { font-size: .82rem; font-weight: 700; color: var(--gray-600); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: .85rem; }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .s-lbl { color: var(--gray-600); display: flex; align-items: center; gap: 6px; }
+    .stat-row .s-val { font-weight: 800; color: var(--gray-800); font-size: 1rem; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 500; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: var(--radius); width: 480px; max-width: 95vw;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+      border-radius: var(--radius) var(--radius) 0 0; position: sticky; top: 0;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; line-height: 1; }
+    .modal-body  { padding: 22px; }
+    .modal-footer { padding: 14px 22px; background: var(--gray-100); border-radius: 0 0 var(--radius) var(--radius); display: flex; gap: 10px; justify-content: flex-end; }
+
+    .form-row { margin-bottom: 16px; }
+    .form-row label { display: block; font-size: .83rem; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; padding: 10px 13px; border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm); font-size: .92rem; font-family: var(--font); box-sizing: border-box;
+      transition: border-color .2s;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+      outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .form-row textarea { resize: vertical; min-height: 80px; }
+    .form-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .type-selector { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .type-opt {
+      padding: 8px 6px; border: 2px solid var(--gray-200); border-radius: 8px;
+      text-align: center; cursor: pointer; font-size: .78rem; font-weight: 600;
+      color: var(--gray-600); transition: all .15s; line-height: 1.4;
+      font-family: var(--font); background: white;
+    }
+    .type-opt:hover { border-color: var(--red-primary); }
+    .type-opt.selected { border-color: var(--red-primary); background: var(--red-soft); color: var(--red-primary); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1A1A2E; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s ease;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media(max-width: 900px) {
+      .appt-layout { flex-direction: column; }
+      .appt-right { width: 100%; position: static; }
+    }
+    @media(max-width: 600px) {
+      .form-two-col { grid-template-columns: 1fr; }
+      .type-selector { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item active" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── Main ─── -->
+  <main class="app-main" style="overflow-y:auto;">
+
+    <!-- Hero -->
+    <div class="appt-hero">
+      <div class="appt-hero-row">
+        <div>
+          <h2>📅 นัดหมาย</h2>
+          <p>บริหารนัดหมายลูกค้าของคุณในที่เดียว</p>
+        </div>
+        <button class="btn-add-appt" onclick="openModal()">＋ เพิ่มนัดหมาย</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="app-content">
+      <div class="appt-layout">
+
+        <!-- ─── LEFT: List ─── -->
+        <div class="appt-left">
+
+          <!-- Filter Bar -->
+          <div class="filter-bar">
+            <span class="filter-label">แสดง:</span>
+            <div class="filter-chips">
+              <button class="fchip active" data-filter="upcoming" onclick="setFilter('upcoming',this)">📌 ที่กำลังมาถึง</button>
+              <button class="fchip" data-filter="today"    onclick="setFilter('today',this)">⚡ วันนี้</button>
+              <button class="fchip" data-filter="week"     onclick="setFilter('week',this)">📆 7 วัน</button>
+              <button class="fchip" data-filter="all"      onclick="setFilter('all',this)">📋 ทั้งหมด</button>
+              <button class="fchip" data-filter="past"     onclick="setFilter('past',this)">🕐 ผ่านมาแล้ว</button>
+            </div>
+            <div class="filter-divider"></div>
+            <input class="search-appt" id="search-input" type="text" placeholder="🔍 ค้นหาชื่อลูกค้า…" oninput="renderList()">
+          </div>
+
+          <!-- List -->
+          <div id="appt-list-container"></div>
+        </div>
+
+        <!-- ─── RIGHT: Calendar + Stats ─── -->
+        <div class="appt-right">
+
+          <!-- Mini Calendar -->
+          <div class="mini-cal-card">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="calPrev()">‹</button>
+              <span class="cal-title" id="cal-title"></span>
+              <button class="cal-nav" onclick="calNext()">›</button>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-dow-row">
+                <div class="cal-dow">อา</div><div class="cal-dow">จ</div>
+                <div class="cal-dow">อ</div><div class="cal-dow">พ</div>
+                <div class="cal-dow">พฤ</div><div class="cal-dow">ศ</div>
+                <div class="cal-dow">ส</div>
+              </div>
+              <div class="cal-days" id="cal-days"></div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="appt-stats">
+            <h4>📊 สรุปนัดหมาย</h4>
+            <div class="stat-row">
+              <span class="s-lbl">📌 ที่กำลังมาถึง</span>
+              <span class="s-val" id="stat-upcoming">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="s-lbl">⚡ วันนี้</span>
+              <span class="s-val" id="stat-today">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="s-lbl">🤝 พบหน้า</span>
+              <span class="s-val" id="stat-meet">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="s-lbl">📞 โทรศัพท์</span>
+              <span class="s-val" id="stat-call">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="s-lbl">💻 ออนไลน์ / วิดีโอ</span>
+              <span class="s-val" id="stat-online">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="s-lbl">📦 ทั้งหมด</span>
+              <span class="s-val" id="stat-all">0</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end appt-layout -->
+    </div><!-- end app-content -->
+  </main>
+</div><!-- end app-layout -->
+
+<!-- ─── Add/Edit Modal ─── -->
+<div class="modal-overlay" id="appt-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">เพิ่มนัดหมาย</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Type Selector -->
+      <div class="form-row">
+        <label>ประเภทนัดหมาย</label>
+        <div class="type-selector">
+          <button class="type-opt selected" data-type="meet"   onclick="selectType(this)">🤝<br>พบหน้า</button>
+          <button class="type-opt"          data-type="call"   onclick="selectType(this)">📞<br>โทรศัพท์</button>
+          <button class="type-opt"          data-type="online" onclick="selectType(this)">💻<br>ออนไลน์</button>
+          <button class="type-opt"          data-type="video"  onclick="selectType(this)">📹<br>วิดีโอคอล</button>
+        </div>
+      </div>
+
+      <!-- Client -->
+      <div class="form-row">
+        <label>ชื่อลูกค้า <span style="color:var(--red-primary)">*</span></label>
+        <input id="f-client" type="text" placeholder="พิมพ์ชื่อลูกค้า…" list="client-datalist" oninput="filterClientSuggestions(this.value)">
+        <datalist id="client-datalist"></datalist>
+      </div>
+
+      <!-- Date + Time -->
+      <div class="form-two-col">
+        <div class="form-row" style="margin-bottom:0">
+          <label>วันที่ <span style="color:var(--red-primary)">*</span></label>
+          <input id="f-date" type="date">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label>เวลา</label>
+          <input id="f-time" type="time" value="10:00">
+        </div>
+      </div>
+
+      <!-- Location / Link -->
+      <div class="form-row" style="margin-top:16px">
+        <label id="f-place-label">สถานที่</label>
+        <input id="f-place" type="text" placeholder="เช่น ร้านกาแฟ / ที่ทำงานลูกค้า">
+      </div>
+
+      <!-- Notes -->
+      <div class="form-row">
+        <label>หมายเหตุ</label>
+        <textarea id="f-notes" placeholder="วัตถุประสงค์, สิ่งที่ต้องเตรียม…"></textarea>
+      </div>
+
+      <!-- Reminder -->
+      <div class="form-row" style="margin-bottom:0">
+        <label>แจ้งเตือนก่อน</label>
+        <select id="f-reminder">
+          <option value="">ไม่แจ้งเตือน</option>
+          <option value="15">15 นาที</option>
+          <option value="30" selected>30 นาที</option>
+          <option value="60">1 ชั่วโมง</option>
+          <option value="1440">1 วัน</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary"   onclick="saveAppt()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA HELPERS — uses shared aia_users storage
+═══════════════════════════════════════════ */
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getAppts() {
+  const u = getUser();
+  if (!u.data) u.data = {};
+  if (!u.data.appointments) u.data.appointments = [];
+  return u.data.appointments;
+}
+function getClients() {
+  const u = getUser();
+  return (u.data && u.data.clients) ? u.data.clients : [];
+}
+
+/* ═══════════════════════════════════════════
+   DATE UTILITIES
+═══════════════════════════════════════════ */
+const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function todayStr() {
+  const d = new Date(); return d.toISOString().slice(0,10);
+}
+function inNDays(n) {
+  const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  return `${parseInt(d)} ${MONTHS_TH[parseInt(m)-1]} ${parseInt(y)+543}`;
+}
+function formatTime(t) {
+  if (!t) return '';
+  const [h,min] = t.split(':');
+  return `${h}:${min} น.`;
+}
+function isPast(dateStr) {
+  return dateStr < todayStr();
+}
+function isToday(dateStr) {
+  return dateStr === todayStr();
+}
+
+/* ═══════════════════════════════════════════
+   FILTER STATE
+═══════════════════════════════════════════ */
+let currentFilter = 'upcoming';
+let editingId = null;
+let calYear, calMonth, selectedCalDate = null;
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderList();
+}
+
+function filterAppts(appts) {
+  const today = todayStr();
+  const week  = inNDays(7);
+  const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  return appts.filter(a => {
+    const matchQ = !q || a.clientName.toLowerCase().includes(q);
+    if (!matchQ) return false;
+    if (selectedCalDate) return a.date === selectedCalDate;
+    if (currentFilter === 'today')    return isToday(a.date);
+    if (currentFilter === 'upcoming') return a.date >= today;
+    if (currentFilter === 'week')     return a.date >= today && a.date <= week;
+    if (currentFilter === 'past')     return a.date < today;
+    return true; // 'all'
+  });
+}
+
+/* ═══════════════════════════════════════════
+   TYPE HELPERS
+═══════════════════════════════════════════ */
+const TYPE_MAP = {
+  meet:   { icon:'🤝', label:'พบหน้า',    badge:'badge-meet',   cls:'type-meet'  },
+  call:   { icon:'📞', label:'โทรศัพท์', badge:'badge-call',   cls:'type-call'  },
+  online: { icon:'💻', label:'ออนไลน์',  badge:'badge-online', cls:'type-online'},
+  video:  { icon:'📹', label:'วิดีโอคอล',badge:'badge-video',  cls:'type-video' },
+};
+function typeInfo(t) { return TYPE_MAP[t] || TYPE_MAP.meet; }
+
+/* ═══════════════════════════════════════════
+   RENDER LIST
+═══════════════════════════════════════════ */
+function renderList() {
+  const allAppts  = getAppts().sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+  const filtered  = filterAppts(allAppts);
+  const container = document.getElementById('appt-list-container');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="es-icon">📭</div>
+      <p>ไม่พบนัดหมาย</p>
+      <p style="font-size:.83rem;margin-top:6px;color:var(--gray-400)">กดปุ่ม "เพิ่มนัดหมาย" เพื่อเริ่มต้น</p>
+    </div>`;
+    updateStats(allAppts);
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  filtered.forEach(a => {
+    const k = a.date;
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(a);
+  });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(date => {
+    let sectionLabel;
+    if (isToday(date))    sectionLabel = '⚡ วันนี้ · ' + formatDate(date);
+    else if (date === inNDays(1)) sectionLabel = '🔜 พรุ่งนี้ · ' + formatDate(date);
+    else if (isPast(date)) sectionLabel = '🕐 ' + formatDate(date);
+    else sectionLabel = '📅 ' + formatDate(date);
+    html += `<div class="section-hd">${sectionLabel}</div><div class="appt-list">`;
+    groups[date].forEach(a => { html += renderCard(a); });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  updateStats(allAppts);
+}
+
+function renderCard(a) {
+  const ti = typeInfo(a.type);
+  const past = isPast(a.date) ? 'past' : '';
+  const todayCls = isToday(a.date) ? 'today' : '';
+  const [y,m,d] = a.date.split('-');
+  return `<div class="appt-card ${ti.cls} ${past} ${todayCls}" data-id="${a.id}">
+    <div class="appt-date-col">
+      <div class="appt-day">${parseInt(d)}</div>
+      <div class="appt-month">${MONTHS_TH[parseInt(m)-1]}</div>
+    </div>
+    <div class="appt-body">
+      <div class="appt-client-name">${a.clientName || '—'}</div>
+      <div class="appt-time-row">
+        <span class="appt-time">${a.time ? '🕐 '+formatTime(a.time) : ''}</span>
+        <span class="appt-type-badge ${ti.badge}">${ti.icon} ${ti.label}</span>
+      </div>
+      ${a.place  ? `<div class="appt-notes">📍 ${a.place}</div>` : ''}
+      ${a.notes  ? `<div class="appt-notes">💬 ${a.notes}</div>` : ''}
+    </div>
+    <div class="appt-actions">
+      <button class="appt-btn" onclick="openModal('${a.id}')">✏️</button>
+      <button class="appt-btn del" onclick="deleteAppt('${a.id}')">🗑️</button>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════ */
+function updateStats(all) {
+  const today = todayStr();
+  const el = id => document.getElementById(id);
+  const upcoming = all.filter(a => a.date >= today).length;
+  const todayCnt = all.filter(a => isToday(a.date)).length;
+  const meet     = all.filter(a => a.type === 'meet').length;
+  const call     = all.filter(a => a.type === 'call').length;
+  const onl      = all.filter(a => a.type === 'online' || a.type === 'video').length;
+  el('stat-upcoming').textContent = upcoming;
+  el('stat-today').textContent    = todayCnt;
+  el('stat-meet').textContent     = meet;
+  el('stat-call').textContent     = call;
+  el('stat-online').textContent   = onl;
+  el('stat-all').textContent      = all.length;
+}
+
+/* ═══════════════════════════════════════════
+   MINI CALENDAR
+═══════════════════════════════════════════ */
+function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCal();
+}
+
+function renderCal() {
+  const appts = getAppts();
+  const apptDates = new Set(appts.map(a => a.date));
+  const today = todayStr();
+  document.getElementById('cal-title').textContent = `${MONTHS_FULL[calMonth]} ${calYear + 543}`;
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  let html = '';
+  // prev month filler
+  for (let i = firstDay-1; i >= 0; i--) {
+    const d = prevDays - i;
+    html += `<div class="cal-cell other-month">${d}</div>`;
+  }
+  // current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cls = [
+      ds === today ? 'today' : '',
+      ds === selectedCalDate ? 'selected' : '',
+      apptDates.has(ds) ? 'has-appt' : ''
+    ].join(' ');
+    html += `<div class="cal-cell ${cls}" onclick="selectCal('${ds}')">${d}</div>`;
+  }
+  // next month filler
+  const total = firstDay + daysInMonth;
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= rem; d++) {
+    html += `<div class="cal-cell other-month">${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal(); }
+function calNext() { calMonth++; if (calMonth > 11){ calMonth = 0;  calYear++; } renderCal(); }
+
+function selectCal(ds) {
+  if (selectedCalDate === ds) {
+    selectedCalDate = null;
+    setFilter('upcoming', document.querySelector('.fchip[data-filter="upcoming"]'));
+  } else {
+    selectedCalDate = ds;
+    document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
+    renderList();
+  }
+  renderCal();
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+let modalType = 'meet';
+
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modal-title').textContent = id ? 'แก้ไขนัดหมาย' : 'เพิ่มนัดหมาย';
+  document.getElementById('appt-modal').classList.add('open');
+
+  // populate client datalist
+  const clients = getClients();
+  const dl = document.getElementById('client-datalist');
+  dl.innerHTML = clients.map(c => `<option value="${c.firstName || ''} ${c.lastName || ''}">`.trim()).join('');
+
+  if (id) {
+    const a = getAppts().find(x => x.id === id);
+    if (a) {
+      selectTypeByKey(a.type || 'meet');
+      document.getElementById('f-client').value  = a.clientName || '';
+      document.getElementById('f-date').value    = a.date || '';
+      document.getElementById('f-time').value    = a.time || '10:00';
+      document.getElementById('f-place').value   = a.place || '';
+      document.getElementById('f-notes').value   = a.notes || '';
+      document.getElementById('f-reminder').value = a.reminder || '30';
+    }
+  } else {
+    // defaults
+    selectTypeByKey('meet');
+    document.getElementById('f-client').value  = '';
+    document.getElementById('f-date').value    = selectedCalDate || todayStr();
+    document.getElementById('f-time').value    = '10:00';
+    document.getElementById('f-place').value   = '';
+    document.getElementById('f-notes').value   = '';
+    document.getElementById('f-reminder').value = '30';
+  }
+}
+
+function closeModal() {
+  document.getElementById('appt-modal').classList.remove('open');
+  editingId = null;
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  modalType = el.dataset.type;
+  const placeLabel = document.getElementById('f-place-label');
+  if (modalType === 'online' || modalType === 'video') placeLabel.textContent = 'ลิงก์ / แพลตฟอร์ม';
+  else placeLabel.textContent = 'สถานที่';
+}
+
+function selectTypeByKey(key) {
+  document.querySelectorAll('.type-opt').forEach(o => {
+    o.classList.toggle('selected', o.dataset.type === key);
+  });
+  modalType = key;
+}
+
+function filterClientSuggestions(val) { /* datalist handles natively */ }
+
+function saveAppt() {
+  const clientName = document.getElementById('f-client').value.trim();
+  const date       = document.getElementById('f-date').value;
+  if (!clientName) { showToast('⚠️ กรุณาใส่ชื่อลูกค้า'); return; }
+  if (!date)       { showToast('⚠️ กรุณาเลือกวันที่'); return; }
+
+  const appt = {
+    id:         editingId || Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    clientName,
+    date,
+    time:       document.getElementById('f-time').value,
+    type:       modalType,
+    place:      document.getElementById('f-place').value.trim(),
+    notes:      document.getElementById('f-notes').value.trim(),
+    reminder:   document.getElementById('f-reminder').value,
+    createdAt:  editingId ? undefined : new Date().toISOString(),
+  };
+
+  updateUser(u => {
+    if (!u.data) u.data = {};
+    if (!u.data.appointments) u.data.appointments = [];
+    if (editingId) {
+      const idx = u.data.appointments.findIndex(a => a.id === editingId);
+      if (idx >= 0) { appt.createdAt = u.data.appointments[idx].createdAt; u.data.appointments[idx] = appt; }
+    } else {
+      u.data.appointments.push(appt);
+    }
+  });
+
+  closeModal();
+  renderList();
+  renderCal();
+  showToast(editingId ? '✅ อัปเดตนัดหมายแล้ว' : '✅ เพิ่มนัดหมายแล้ว');
+}
+
+function deleteAppt(id) {
+  if (!confirm('ลบนัดหมายนี้?')) return;
+  updateUser(u => {
+    if (u.data && u.data.appointments) {
+      u.data.appointments = u.data.appointments.filter(a => a.id !== id);
+    }
+  });
+  renderList();
+  renderCal();
+  showToast('🗑️ ลบนัดหมายแล้ว');
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════
+   INIT NAV / AUTH
+═══════════════════════════════════════════ */
+function initNav() {
+  const u = getUser();
+  const p = u.profile || {};
+  const fullName = (u.firstName || '') + (u.lastName ? ' ' + u.lastName : '');
+  const name = fullName.trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover';
+      sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo');
+      sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+// Auth + init
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return; }
+});
+
+// Init immediately (don't wait for Firebase)
+(function init() {
+  initNav();
+  initCal();
+  renderList();
+})();
+
+// Close modal on overlay click
+document.getElementById('appt-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

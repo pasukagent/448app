@@ -350,6 +350,144 @@ footer span { color: var(--red-primary); font-weight: 700; }
 .mt-8 { margin-top: 32px; }
 .gap-16 { gap: 16px; }
 
+/* ════════════════════════════════════════════════
+   APP SHELL — Mockup C layout
+   (ใช้กับ dashboard.html, clients.html, etc.)
+════════════════════════════════════════════════ */
+.app-layout {
+  display: flex; min-height: 100vh; background: #FAFAFA;
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: 240px; background: #fff;
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  border-right: 1px solid #EFEFEF; z-index: 50;
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+}
+.app-sidebar::-webkit-scrollbar { width: 6px; }
+.app-sidebar::-webkit-scrollbar-track { background: transparent; }
+.app-sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+.app-sidebar::-webkit-scrollbar-thumb:hover { background: var(--red-primary); }
+.sb-top-accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--red-primary), #FF6B6B);
+  flex-shrink: 0;
+}
+.sb-logo-area { padding: 14px 22px 10px; }
+.sb-brand { font-size: 1.35rem; font-weight: 800; color: var(--red-primary); }
+.sb-tagline {
+  font-size: .66rem; color: #bbb;
+  letter-spacing: .8px; text-transform: uppercase; margin-top: 2px;
+}
+.sb-divider { height: 1px; background: #F5F5F5; margin: 0 22px 8px; }
+.app-sb-section { padding: 0 12px; margin-bottom: 6px; }
+.app-sb-lbl {
+  font-size: .62rem; color: #ccc; font-weight: 700;
+  letter-spacing: .9px; text-transform: uppercase;
+  padding: 0 10px; margin-bottom: 3px;
+}
+.app-sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 8px;
+  font-size: .85rem; font-weight: 600; color: #888;
+  cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.app-sb-item:hover  { background: #FFF5F5; color: var(--red-primary); }
+.app-sb-item.active { background: #FFF0F0; color: var(--red-primary); font-weight: 700; }
+.app-sb-item .sb-ico { font-size: .95rem; width: 20px; text-align: center; flex-shrink: 0; }
+.app-sb-item .sb-badge {
+  margin-left: auto; background: var(--red-primary); color: #fff;
+  font-size: .63rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+}
+.sb-bottom-area {
+  margin-top: auto; padding: 10px 14px;
+  border-top: 1px solid #F5F5F5;
+}
+.sb-profile-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px; border-radius: 10px; background: #FAFAFA;
+  cursor: pointer; transition: background .15s;
+}
+.sb-profile-row:hover { background: #FFF5F5; }
+.sb-avatar-box {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--red-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: .9rem; flex-shrink: 0;
+}
+.sb-avatar-box.has-photo {
+  background-size: cover; background-position: center;
+  background-repeat: no-repeat; color: transparent; font-size: 0;
+}
+.sb-profile-name { font-size: .82rem; font-weight: 700; color: #333; }
+.sb-profile-role { font-size: .68rem; color: #bbb; }
+
+/* Main area */
+.app-main {
+  margin-left: 240px; flex: 1;
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* Sticky topbar */
+.app-topbar {
+  background: #fff; border-bottom: 1px solid #F0F0F0;
+  padding: 14px 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.app-topbar-left .tb-title { font-size: .98rem; font-weight: 800; color: #1a1a1a; }
+.app-topbar-left .tb-date  { font-size: .76rem; color: #bbb; margin-top: 1px; }
+.app-topbar-right { display: flex; gap: 10px; }
+.btn-app-primary {
+  padding: 8px 18px; border-radius: 8px;
+  font-family: var(--font); font-size: .82rem; font-weight: 700;
+  cursor: pointer; border: none;
+  background: var(--red-primary); color: #fff; transition: background .18s;
+}
+.btn-app-primary:hover { background: var(--red-dark); }
+.btn-app-ghost {
+  padding: 8px 18px; border-radius: 8px;
+  font-family: var(--font); font-size: .82rem; font-weight: 700;
+  cursor: pointer; background: transparent;
+  color: var(--red-primary); border: 1.5px solid #FFCDD2; transition: all .18s;
+}
+.btn-app-ghost:hover { background: var(--red-soft); }
+
+/* Scrollable content */
+.app-content { padding: 22px 30px; flex: 1; }
+
+/* Hide old navbar + reset page padding when app-layout is used */
+body:has(.app-layout) .navbar { display: none !important; }
+body:has(.app-layout) .page   { padding-top: 0; }
+
+/* ─── STAT CARDS (Mockup C icon style) ─── */
+.mc-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 22px;
+}
+.mc-stat {
+  background: #fff; border-radius: 12px;
+  padding: 18px 20px; border: 1px solid #F5F5F5;
+  display: flex; align-items: flex-start; gap: 14px;
+  transition: box-shadow .18s;
+}
+.mc-stat:hover { box-shadow: 0 4px 16px rgba(208,2,27,.1); }
+.mc-stat-ico { font-size: 1.35rem; margin-top: 2px; flex-shrink: 0; }
+.mc-stat-lbl { font-size: .72rem; color: #bbb; font-weight: 600; margin-bottom: 5px; }
+.mc-stat-val { font-size: 1.3rem; font-weight: 800; color: #1a1a1a; line-height: 1.1; }
+.mc-stat-val.red { color: var(--red-primary); }
+.mc-stat-tag {
+  font-size: .68rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 6px;
+  margin-top: 5px; display: inline-block;
+}
+.mc-stat-tag.green { color: #27AE60; background: #E8F8EE; }
+.mc-stat-tag.gray  { color: #888;    background: #F0F0F0; }
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; }

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — ประกันสุขภาพ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; color: white; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Hospital picker */
+    .hospital-card {
+      background: white; border-radius: var(--radius); padding: 18px 22px;
+      box-shadow: var(--shadow-sm); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .hospital-card-label { font-weight: 700; font-size: .92rem; color: var(--gray-700); display: flex; align-items: center; gap: 6px; }
+    .hospital-display {
+      flex: 1; min-width: 240px; padding: 10px 14px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: .92rem; color: var(--gray-800); background: var(--gray-100);
+      cursor: pointer; transition: all .15s;
+    }
+    .hospital-display:hover { border-color: var(--red-primary); }
+    .hospital-display.selected { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-dark); font-weight: 700; }
+    .hospital-display .h-rate { font-size: .76rem; color: var(--gray-500); margin-left: 6px; }
+    .hospital-display.selected .h-rate { color: var(--red-primary); }
+    .btn-pick-hospital {
+      background: var(--red-primary); color: white; border: none;
+      border-radius: 8px; padding: 10px 16px; font-size: .88rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+    }
+    .btn-pick-hospital:hover { background: var(--red-dark); }
+
+    /* Coverage table */
+    .coverage-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 18px 22px; margin-bottom: 18px; overflow-x: auto;
+    }
+    .coverage-card h3 {
+      font-weight: 800; font-size: 1rem; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .coverage-table { width: 100%; border-collapse: collapse; }
+    .coverage-table th {
+      background: var(--gray-100); padding: 10px 12px; text-align: left;
+      font-size: .82rem; font-weight: 700; color: var(--gray-700);
+      border-bottom: 2px solid var(--gray-200);
+    }
+    .coverage-table th.col-num { text-align: right; }
+    .coverage-table td {
+      padding: 10px 12px; font-size: .88rem;
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    .coverage-table tr:last-child td { border-bottom: none; }
+    .coverage-table tr.passed td { background: #FAFFF8; }
+    .ct-label { font-weight: 600; color: var(--gray-700); }
+    .ct-input {
+      width: 130px; padding: 6px 10px; border: 1.5px solid var(--gray-200);
+      border-radius: 6px; font-family: var(--font); font-size: .88rem; text-align: right;
+      background: white;
+    }
+    .ct-input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 2px var(--red-soft); }
+    .ct-recommend {
+      font-weight: 700; color: #28a745; text-align: right;
+    }
+    .ct-recommend.danger { color: var(--red-primary); }
+    .ct-status {
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+      margin-right: 6px; vertical-align: middle;
+    }
+    .ct-status.ok    { background: #28a745; }
+    .ct-status.warn  { background: #FF8C00; }
+    .ct-status.bad   { background: #DC3545; }
+    .ct-status.empty { background: var(--gray-300); }
+    .ct-select {
+      padding: 5px 10px; border: 1.5px solid var(--gray-200); border-radius: 6px;
+      font-family: var(--font); font-size: .85rem;
+    }
+
+    /* Premium */
+    .premium-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 16px 22px; margin-bottom: 22px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .premium-card label { font-weight: 700; color: var(--gray-700); }
+    .premium-card .pc-input {
+      flex: 1; min-width: 200px; padding: 10px 14px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-family: var(--font); font-size: 1rem; text-align: right; font-weight: 700;
+    }
+    .premium-card .pc-input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 2px var(--red-soft); }
+
+    /* Progress */
+    .progress-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 18px 22px; margin-bottom: 22px;
+    }
+    .progress-title {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .88rem; font-weight: 700; color: var(--gray-700); margin-bottom: 8px;
+    }
+    .progress-title .pct { font-size: 1.2rem; font-weight: 800; }
+    .progress-bar-wrap {
+      height: 18px; background: var(--gray-100); border-radius: 9px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #5cbb5c);
+      border-radius: 9px; transition: width .4s ease;
+    }
+    .progress-bar-fill.warn { background: linear-gradient(90deg, #FF8C00, #FFB347); }
+    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #FF6B6B); }
+
+    /* Hospital picker modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: var(--radius); width: 800px; max-width: 100%;
+      max-height: 90vh; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 16px 22px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+    .modal-search {
+      flex: 1; padding: 8px 14px; border: none; border-radius: 8px;
+      font-family: var(--font); font-size: .9rem;
+    }
+    .modal-tabs {
+      display: flex; gap: 4px; padding: 8px 22px; background: var(--gray-100);
+      overflow-x: auto;
+    }
+    .modal-tab {
+      padding: 7px 14px; border: 1.5px solid transparent; border-radius: 18px;
+      font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      background: white; color: var(--gray-700); font-family: var(--font);
+    }
+    .modal-tab.active { background: var(--red-soft); color: var(--red-primary); border-color: var(--red-primary); }
+    .modal-tab:hover:not(.active) { border-color: var(--gray-300); }
+
+    .hospital-list {
+      flex: 1; overflow-y: auto; padding: 14px 22px;
+    }
+    .hospital-row {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--gray-100);
+    }
+    .hospital-row:last-child { border-bottom: none; }
+    .hospital-info { min-width: 0; }
+    .hospital-name {
+      font-weight: 700; font-size: .92rem; color: var(--gray-800);
+    }
+    .hospital-region {
+      font-size: .76rem; color: var(--gray-500); font-style: italic;
+    }
+    .hospital-rate-btn {
+      padding: 8px 18px; border: none; border-radius: 8px;
+      color: white; font-weight: 700; font-size: .88rem; cursor: pointer;
+      font-family: var(--font); min-width: 130px;
+      transition: transform .1s;
+    }
+    .hospital-rate-btn.std { background: var(--red-primary); }
+    .hospital-rate-btn.std:hover { background: var(--red-dark); }
+    .hospital-rate-btn.vip { background: var(--gray-300); color: var(--gray-700); }
+    .hospital-rate-btn.vip.active { background: #7B2FF7; color: white; }
+    .hospital-rate-btn.vip.active:hover { background: #5C1FBF; }
+    .hospital-rate-btn:active { transform: scale(0.97); }
+
+    /* Add custom hospital */
+    .modal-footer {
+      padding: 12px 22px; border-top: 1px solid var(--gray-100);
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    .add-hosp-btn {
+      background: var(--red-primary); color: white; border: none;
+      padding: 8px 14px; border-radius: 6px; font-size: .85rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+    }
+    .add-hosp-btn:hover { background: var(--red-dark); }
+
+    /* No client */
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media(max-width:768px) {
+      .modal-box { width: 100%; height: 95vh; max-height: 95vh; }
+      .hospital-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item active" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>⚕️ ประกันสุขภาพ</h2>
+        <p>เปรียบเทียบความคุ้มครองที่มีกับมาตรฐานโรงพยาบาลที่ลูกค้าไว้ใจ</p>
+      </div>
+      <div class="client-pick">
+        <label>👤</label>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Hospital picker modal -->
+<div class="modal-overlay" id="hospital-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🏥 เลือกโรงพยาบาล</h3>
+      <input class="modal-search" id="hospital-search" placeholder="🔍 ค้นหาชื่อโรงพยาบาล..." oninput="renderHospitalList()">
+      <button class="modal-close" onclick="closeHospitalModal()">✕</button>
+    </div>
+    <div class="modal-tabs" id="region-tabs"></div>
+    <div class="hospital-list" id="hospital-list"></div>
+    <div class="modal-footer">
+      <button class="add-hosp-btn" onclick="openAddHospital()">+ เพิ่ม รพ. เอง</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add custom hospital -->
+<div class="modal-overlay" id="addhosp-modal">
+  <div class="modal-box" style="width:480px;">
+    <div class="modal-header">
+      <h3>เพิ่มโรงพยาบาลที่ไว้ใจ</h3>
+      <button class="modal-close" onclick="closeAddHospital()">✕</button>
+    </div>
+    <div style="padding:22px;">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;">ชื่อโรงพยาบาล *</label>
+        <input id="ah-name" type="text" placeholder="เช่น โรงพยาบาลพระรามเก้า" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:var(--font);box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;">ภูมิภาค</label>
+        <select id="ah-region" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:var(--font);box-sizing:border-box;">
+          <option>กรุงเทพและปริมณฑล</option>
+          <option>ภาคเหนือ</option>
+          <option>ภาคกลาง</option>
+          <option>ภาคใต้</option>
+          <option>ภาคตะวันออกเฉียงเหนือ</option>
+          <option>ภาคตะวันออก</option>
+          <option>ภาคตะวันตก</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;">ค่าห้อง STD/วัน</label>
+          <input id="ah-std" class="money-fmt" inputmode="decimal" placeholder="0" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:var(--font);box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;">ค่าห้อง VIP/วัน</label>
+          <input id="ah-vip" class="money-fmt" inputmode="decimal" placeholder="0" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:var(--font);box-sizing:border-box;">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="saveCustomHospital()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+let selectedClientId = null;
+
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+function fmtBaht(n) { return '฿' + fmt(n); }
+
+/* ════════════════════════════════════════════
+   HOSPITAL DATABASE — Thai hospital std rates
+═══════════════════════════════════════════ */
+const HOSPITALS = [
+  // กรุงเทพและปริมณฑล (Greater Bangkok)
+  { name:'โรงพยาบาลกรุงเทพ',                region:'กรุงเทพและปริมณฑล', std:11300, vip:0 },
+  { name:'โรงพยาบาลกรุงเทพคริสเตียน',     region:'กรุงเทพและปริมณฑล', std:6100,  vip:0 },
+  { name:'โรงพยาบาลกลาง',                   region:'กรุงเทพและปริมณฑล', std:3000,  vip:0 },
+  { name:'โรงพยาบาลคามิลเลียน',             region:'กรุงเทพและปริมณฑล', std:4400,  vip:0 },
+  { name:'โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย', region:'กรุงเทพและปริมณฑล', std:5000,  vip:0 },
+  { name:'โรงพยาบาลซีจีเอช พหลโยธิน',      region:'กรุงเทพและปริมณฑล', std:4930,  vip:0 },
+  { name:'โรงพยาบาลบำรุงราษฎร์',           region:'กรุงเทพและปริมณฑล', std:9500,  vip:14000 },
+  { name:'โรงพยาบาลสมิติเวช สุขุมวิท',     region:'กรุงเทพและปริมณฑล', std:8500,  vip:13000 },
+  { name:'โรงพยาบาลสมิติเวช ศรีนครินทร์',  region:'กรุงเทพและปริมณฑล', std:7500,  vip:11500 },
+  { name:'โรงพยาบาลกรุงเทพ พระราม 9',      region:'กรุงเทพและปริมณฑล', std:7800,  vip:12000 },
+  { name:'โรงพยาบาลพระราม 9',              region:'กรุงเทพและปริมณฑล', std:6500,  vip:9000 },
+  { name:'โรงพยาบาลพญาไท 1',                region:'กรุงเทพและปริมณฑล', std:5500,  vip:8500 },
+  { name:'โรงพยาบาลพญาไท 2',                region:'กรุงเทพและปริมณฑล', std:5800,  vip:9000 },
+  { name:'โรงพยาบาลพญาไท 3',                region:'กรุงเทพและปริมณฑล', std:5500,  vip:8500 },
+  { name:'โรงพยาบาลเปาโล โชคชัย 4',        region:'กรุงเทพและปริมณฑล', std:4500,  vip:7500 },
+  { name:'โรงพยาบาลเปาโล พหลโยธิน',       region:'กรุงเทพและปริมณฑล', std:4500,  vip:7500 },
+  { name:'โรงพยาบาลรามาธิบดี',              region:'กรุงเทพและปริมณฑล', std:4500,  vip:0 },
+  { name:'โรงพยาบาลศิริราช',                region:'กรุงเทพและปริมณฑล', std:4500,  vip:8000 },
+  { name:'โรงพยาบาลพระมงกุฎเกล้า',         region:'กรุงเทพและปริมณฑล', std:3500,  vip:0 },
+  { name:'โรงพยาบาลตำรวจ',                  region:'กรุงเทพและปริมณฑล', std:3000,  vip:0 },
+  { name:'โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ', region:'กรุงเทพและปริมณฑล', std:3500, vip:0 },
+  { name:'โรงพยาบาล BNH',                    region:'กรุงเทพและปริมณฑล', std:7500,  vip:11000 },
+  { name:'โรงพยาบาลเมดพาร์ค',              region:'กรุงเทพและปริมณฑล', std:9500,  vip:14000 },
+  { name:'โรงพยาบาลสินแพทย์',               region:'กรุงเทพและปริมณฑล', std:5500,  vip:8500 },
+  { name:'โรงพยาบาลวิภาวดี',                region:'กรุงเทพและปริมณฑล', std:5000,  vip:8000 },
+  { name:'โรงพยาบาลวิชัยยุทธ',              region:'กรุงเทพและปริมณฑล', std:4500,  vip:7000 },
+  { name:'โรงพยาบาลรามคำแหง',               region:'กรุงเทพและปริมณฑล', std:4500,  vip:7500 },
+  { name:'โรงพยาบาลเกษมราษฎร์ ประชาชื่น', region:'กรุงเทพและปริมณฑล', std:4000,  vip:6500 },
+  { name:'โรงพยาบาลเกษมราษฎร์ บางแค',      region:'กรุงเทพและปริมณฑล', std:4000,  vip:6500 },
+  { name:'โรงพยาบาลนนทเวช',                 region:'กรุงเทพและปริมณฑล', std:4000,  vip:6500 },
+  { name:'โรงพยาบาลศิครินทร์',              region:'กรุงเทพและปริมณฑล', std:4500,  vip:7000 },
+  { name:'โรงพยาบาลกล้วยน้ำไท',             region:'กรุงเทพและปริมณฑล', std:3500,  vip:5500 },
+  { name:'โรงพยาบาลธนบุรี',                 region:'กรุงเทพและปริมณฑล', std:5000,  vip:8000 },
+  { name:'โรงพยาบาลพระจอมเกล้า',          region:'กรุงเทพและปริมณฑล', std:3500,  vip:5500 },
+  // ภาคเหนือ
+  { name:'โรงพยาบาลกรุงเทพ เชียงใหม่',     region:'ภาคเหนือ', std:7000,  vip:11000 },
+  { name:'โรงพยาบาลแม็คคอร์มิค',            region:'ภาคเหนือ', std:4500,  vip:7000 },
+  { name:'โรงพยาบาลเชียงใหม่ ราม',          region:'ภาคเหนือ', std:5000,  vip:7500 },
+  { name:'โรงพยาบาลมหาราชนครเชียงใหม่',  region:'ภาคเหนือ', std:3500,  vip:0 },
+  { name:'โรงพยาบาลลานนา',                  region:'ภาคเหนือ', std:4000,  vip:6500 },
+  { name:'โรงพยาบาลเชียงรายประชานุเคราะห์', region:'ภาคเหนือ', std:2500, vip:0 },
+  // ภาคกลาง
+  { name:'โรงพยาบาลพระนารายณ์มหาราช',     region:'ภาคกลาง', std:3000,  vip:0 },
+  { name:'โรงพยาบาลกรุงเทพ พิษณุโลก',     region:'ภาคกลาง', std:6500,  vip:10000 },
+  { name:'โรงพยาบาลพุทธชินราช',            region:'ภาคกลาง', std:3000,  vip:0 },
+  // ภาคใต้
+  { name:'โรงพยาบาลกรุงเทพ ภูเก็ต',         region:'ภาคใต้', std:7500,  vip:11500 },
+  { name:'โรงพยาบาลกรุงเทพ หาดใหญ่',        region:'ภาคใต้', std:7000,  vip:11000 },
+  { name:'โรงพยาบาลกรุงเทพ สมุย',           region:'ภาคใต้', std:7500,  vip:11500 },
+  { name:'โรงพยาบาลสงขลานครินทร์',         region:'ภาคใต้', std:3500,  vip:0 },
+  { name:'โรงพยาบาลสุราษฎร์ธานี',           region:'ภาคใต้', std:2800,  vip:0 },
+  // ภาคตะวันออกเฉียงเหนือ
+  { name:'โรงพยาบาลกรุงเทพ อุดร',           region:'ภาคตะวันออกเฉียงเหนือ', std:6500, vip:10000 },
+  { name:'โรงพยาบาลศรีนครินทร์',            region:'ภาคตะวันออกเฉียงเหนือ', std:3500, vip:0 },
+  { name:'โรงพยาบาลขอนแก่น',                region:'ภาคตะวันออกเฉียงเหนือ', std:3000, vip:0 },
+  { name:'โรงพยาบาลมหาราชนครราชสีมา',    region:'ภาคตะวันออกเฉียงเหนือ', std:3000, vip:0 },
+  // ภาคตะวันออก
+  { name:'โรงพยาบาลกรุงเทพ พัทยา',          region:'ภาคตะวันออก', std:7500,  vip:11500 },
+  { name:'โรงพยาบาลกรุงเทพ ระยอง',          region:'ภาคตะวันออก', std:7000,  vip:11000 },
+  { name:'โรงพยาบาลกรุงเทพ ตราด',           region:'ภาคตะวันออก', std:6500,  vip:10000 },
+  { name:'โรงพยาบาลพญาไท ศรีราชา',          region:'ภาคตะวันออก', std:6000,  vip:9500 },
+  // ภาคตะวันตก
+  { name:'โรงพยาบาลกรุงเทพ สนามจันทร์',   region:'ภาคตะวันตก', std:6000,  vip:9000 },
+  { name:'โรงพยาบาลกรุงเทพ เพชรบุรี',       region:'ภาคตะวันตก', std:6500,  vip:10000 },
+];
+
+const REGIONS = ['ทั้งหมด','กรุงเทพและปริมณฑล','ภาคเหนือ','ภาคกลาง','ภาคใต้','ภาคตะวันออกเฉียงเหนือ','ภาคตะวันออก','ภาคตะวันตก'];
+
+const COVERAGE_ROWS = [
+  { key:'roomMeal',          label:'ค่าห้อง ค่าอาหาร', isMoney:true },
+  { key:'nursingService',    label:'ค่าบริการพยาบาล',  selectOptions:['เหมาจ่าย','รวมกับค่าห้อง'] },
+  { key:'perVisit',          label:'วงเงินค่ารักษา (ต่อครั้ง)', isMoney:true },
+  { key:'opdPerVisit',       label:'ค่ารักษาพยาบาลผู้ป่วยนอก (ต่อครั้ง)', isMoney:true },
+  { key:'opdPerYear',        label:'ค่ารักษาพยาบาลผู้ป่วยนอก (ต่อปี)', isMoney:true },
+  { key:'incomeReplace',     label:'ชดเชยรายได้ (รายวัน)', isMoney:true },
+  { key:'ciEarly',           label:'ชดเชยโรคร้ายแรง (ระยะต้น-ปานกลาง)', isMoney:true },
+  { key:'ciSevere',          label:'ชดเชยโรคร้ายแรง (ระยะรุนแรง)', isMoney:true },
+  { key:'accidentWeekly',    label:'ชดเชยอุบัติเหตุ (ต่อสัปดาห์)', isMoney:true },
+  { key:'accidentTreatment', label:'ค่ารักษาพยาบาลอุบัติเหตุ (ต่อครั้ง)', isMoney:true },
+  { key:'disability',        label:'ทุพพลภาพ', isMoney:true },
+];
+
+/* ════════════════════════════════════════════
+   AUTO-CALCULATE RECOMMENDATIONS
+   ขึ้นกับ: รพ.ที่เลือก + อายุ + รายได้ ของลูกค้า
+═══════════════════════════════════════════ */
+function getHospitalTier(hospitalRate) {
+  if (hospitalRate < 3000) return 'state';        // รพ.รัฐ
+  if (hospitalRate < 6000) return 'mid';          // เอกชนทั่วไป
+  if (hospitalRate < 10000) return 'premium';     // Premium
+  return 'international';                          // International
+}
+
+function getClientAge(client) {
+  const dob = client && (client.dob || client.birthdate);
+  if (!dob) return null;
+  const bd = new Date(dob);
+  if (isNaN(bd)) return null;
+  const today = new Date();
+  let age = today.getFullYear() - bd.getFullYear();
+  const m = today.getMonth() - bd.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+  return age;
+}
+
+function getClientMonthlyIncome(client) {
+  if (!client) return 0;
+  // From client.income (annual) → monthly
+  if (client.income) return Number(client.income) / 12;
+  // From cashflow.income (monthly)
+  if (client.cashflow && client.cashflow.income) return Number(client.cashflow.income);
+  return 0;
+}
+
+function computeRecommendations(client, hospital, tier) {
+  const hospitalRate = hospital ? (tier === 'vip' ? hospital.vip : hospital.std) : 0;
+  const tierKey = getHospitalTier(hospitalRate || 3000);
+
+  // Per-tier multipliers
+  const tierConfig = {
+    state:         { perVisitMult: 100, opdRatio: 0.25, accidentTreat: 50000  },
+    mid:           { perVisitMult: 130, opdRatio: 0.27, accidentTreat: 100000 },
+    premium:       { perVisitMult: 150, opdRatio: 0.30, accidentTreat: 200000 },
+    international: { perVisitMult: 200, opdRatio: 0.35, accidentTreat: 500000 },
+  };
+  const m = tierConfig[tierKey];
+
+  const monthlyIncome = getClientMonthlyIncome(client);
+  const annualIncome  = monthlyIncome * 12;
+  const dailyIncome   = monthlyIncome / 30;
+
+  // Age-based multiplier (older → recommend higher)
+  const age = getClientAge(client) || 35;
+  const ageMult = age < 30 ? 0.85 : age < 45 ? 1.0 : age < 60 ? 1.2 : 1.4;
+
+  // Defaults (when no income data)
+  const incomeFallback = monthlyIncome > 0 ? null : 30000;
+  const baseMonthly    = monthlyIncome || incomeFallback;
+
+  return {
+    roomMeal:          hospitalRate || 3000,
+    nursingService:    'เหมาจ่าย',
+    perVisit:          Math.round((hospitalRate || 3000) * m.perVisitMult * ageMult / 100000) * 100000, // round to 100k
+    opdPerVisit:       Math.round((hospitalRate || 3000) * m.opdRatio / 100) * 100,                     // round to 100
+    opdPerYear:        Math.round((hospitalRate || 3000) * m.opdRatio * 20 / 1000) * 1000,              // round to 1k
+    incomeReplace:     Math.max(Math.round(dailyIncome * 0.7 / 500) * 500, 1500),
+    ciEarly:           Math.max(Math.round(annualIncome * 2 / 100000) * 100000, 500000),
+    ciSevere:          Math.max(Math.round(annualIncome * 5 / 100000) * 100000, 2000000),
+    accidentWeekly:    Math.max(Math.round(dailyIncome * 7 / 1000) * 1000, 5000),
+    accidentTreatment: Math.round(m.accidentTreat * ageMult / 10000) * 10000,
+    disability:        Math.max(Math.round(baseMonthly * 24 * ageMult / 100000) * 100000, 1000000),
+  };
+}
+
+/* ════════════════════════════════════════════
+   SCHEMA HELPERS
+═══════════════════════════════════════════ */
+function getHealthInputs() {
+  const c = getCurrent();
+  if (!c) return null;
+  if (!c.healthInputs) c.healthInputs = {};
+  if (!c.healthInputs.prepared) c.healthInputs.prepared = {};
+  if (c.healthInputs.premium == null) c.healthInputs.premium = 0;
+  return c.healthInputs;
+}
+
+function saveHealthInputs(modify) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.healthInputs) c.healthInputs = {};
+    modify(c.healthInputs);
+  });
+}
+
+function getCustomHospitals() {
+  const u = getUser();
+  return (u.data && u.data.customHospitals) || [];
+}
+
+function getAllHospitals() {
+  return [...HOSPITALS, ...getCustomHospitals()];
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const hi = getHealthInputs();
+  const hospital = hi.hospital || null;
+  const tier = hi.tier || 'std';
+  const hospitalRate = hospital ? (tier === 'vip' ? hospital.vip : hospital.std) : 0;
+  const client = getCurrent();
+  const customRec = hi.customRecommendations || {};
+
+  // Compute auto recommendations and merge with custom overrides
+  const autoRec = computeRecommendations(client, hospital, tier);
+  const finalRec = {};
+  Object.keys(autoRec).forEach(k => {
+    finalRec[k] = customRec[k] != null ? customRec[k] : autoRec[k];
+  });
+
+  // Compute coverage status
+  let okCount = 0;
+  COVERAGE_ROWS.forEach(r => {
+    if (r.selectOptions) return;
+    const recommend = Number(finalRec[r.key] || 0);
+    const prepared = Number(hi.prepared[r.key] || 0);
+    if (prepared >= recommend && recommend > 0) okCount++;
+  });
+  const targetCount = COVERAGE_ROWS.filter(r => !r.selectOptions).length;
+  const coverPct = Math.round(okCount / targetCount * 100);
+
+  // Has custom overrides?
+  const hasCustomRec = Object.keys(customRec).length > 0;
+  const age = getClientAge(client);
+  const monthlyIncome = getClientMonthlyIncome(client);
+
+  wrap.innerHTML = `
+    <!-- Hospital picker -->
+    <div class="hospital-card">
+      <div class="hospital-card-label">🏥 โรงพยาบาลที่ไว้วางใจ:</div>
+      <div class="hospital-display ${hospital ? 'selected' : ''}" onclick="openHospitalModal()">
+        ${hospital
+          ? `<b>${hospital.name}</b> · ${tier === 'vip' ? 'VIP' : 'STD'}
+             <span class="h-rate">${fmtBaht(hospitalRate)}/วัน · ${hospital.region}</span>`
+          : 'คลิกเพื่อเลือกโรงพยาบาล...'
+        }
+      </div>
+      <button class="btn-pick-hospital" onclick="openHospitalModal()">${hospital ? '🔄 เปลี่ยน' : '🔍 เลือก'}</button>
+    </div>
+
+    <!-- Coverage table -->
+    <div class="coverage-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <h3 style="margin-bottom:4px;">📊 ความคุ้มครองสุขภาพ</h3>
+          <p style="font-size:.78rem;color:var(--gray-500);">
+            ${hospital
+              ? `🤖 คำนวณจาก <b>${hospital.name}</b> (${tier === 'vip' ? 'VIP' : 'STD'})${age ? ' · อายุ ' + age + ' ปี' : ''}${monthlyIncome > 0 ? ' · รายได้ ' + fmtBaht(monthlyIncome) + '/เดือน' : ' · ยังไม่ระบุรายได้'}`
+              : '⚠️ เลือกโรงพยาบาลก่อนเพื่อดูคำแนะนำที่ปรับตาม รพ.'
+            }
+            ${hasCustomRec ? '<span style="color:var(--red-primary);font-weight:700;"> · ✏️ มีการแก้ไขเอง</span>' : ''}
+          </p>
+        </div>
+        ${hasCustomRec
+          ? `<button onclick="resetRecommendations()" style="background:var(--red-soft);color:var(--red-primary);border:1.5px solid var(--red-primary);border-radius:8px;padding:7px 14px;font-size:.83rem;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;">↺ รีเซ็ตค่าแนะนำ</button>`
+          : ''
+        }
+      </div>
+      <table class="coverage-table">
+        <thead>
+          <tr>
+            <th>วงเงินค่ารักษา</th>
+            <th class="col-num">เตรียมไว้แล้ว</th>
+            <th class="col-num">แนะนำ <span style="font-weight:400;color:var(--gray-400);font-size:.7rem;">(แก้ไขได้)</span></th>
+            <th class="col-num">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${COVERAGE_ROWS.map(r => renderCoverageRow(r, hi.prepared, finalRec, customRec)).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Premium -->
+    <div class="premium-card">
+      <label>💸 เบี้ยประกันสุขภาพ/ปี:</label>
+      <input class="pc-input money-fmt" type="text" inputmode="decimal"
+        value="${hi.premium || 0}"
+        onchange="updatePremium(parseMoney(this))"
+        placeholder="0">
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="progress-title">
+        <span>🎯 ความครอบคลุมเทียบกับมาตรฐาน รพ.</span>
+        <span class="pct" style="color:${coverPct >= 80 ? '#28a745' : coverPct >= 50 ? '#FF8C00' : '#DC3545'}">${coverPct}%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill ${coverPct >= 80 ? '' : coverPct >= 50 ? 'warn' : 'bad'}" style="width:${coverPct}%"></div>
+      </div>
+      <div style="font-size:.78rem;color:var(--gray-500);margin-top:8px;">
+        ผ่านเกณฑ์ ${okCount}/${targetCount} รายการ · ${hospital ? 'เทียบกับ ' + hospital.name : 'ยังไม่เลือก รพ.'}
+      </div>
+    </div>
+  `;
+  refreshAllMoneyInputs();
+}
+
+function renderCoverageRow(row, prepared, finalRec, customRec) {
+  const isCustom = customRec[row.key] != null;
+  const customStyle = isCustom
+    ? 'border-color:var(--red-primary);background:#FFF8F8;color:var(--red-primary);font-weight:700;'
+    : '';
+  const customTitle = isCustom ? 'แก้ไขเอง — กดปุ่ม "↺ รีเซ็ต" ด้านบนเพื่อกลับเป็นค่าแนะนำ' : 'ค่าแนะนำอัตโนมัติ — แก้ไขได้';
+
+  if (row.selectOptions) {
+    const value = prepared[row.key] || 'เหมาจ่าย';
+    const recommend = finalRec[row.key];
+    const isOk = value === recommend;
+    return `<tr>
+      <td class="ct-label">${row.label}</td>
+      <td class="col-num" style="text-align:right;">
+        <select class="ct-select" onchange="updatePrepared('${row.key}',this.value)">
+          ${row.selectOptions.map(o => `<option value="${o}" ${value === o ? 'selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td class="col-num" style="text-align:right;">
+        <select class="ct-select" style="${customStyle}" title="${customTitle}" onchange="updateRecommendation('${row.key}',this.value)">
+          ${(row.selectOptions||[]).map(o => `<option value="${o}" ${recommend === o ? 'selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td class="col-num"><span class="ct-status ${isOk ? 'ok' : 'warn'}"></span>${isOk ? 'ครอบคลุม' : 'แนะนำ'}</td>
+    </tr>`;
+  }
+
+  const preparedVal   = Number(prepared[row.key] || 0);
+  const recommendVal  = Number(finalRec[row.key] || 0);
+  const isOk      = preparedVal >= recommendVal && recommendVal > 0;
+  const isPartial = preparedVal > 0 && preparedVal < recommendVal;
+  const statusCls  = preparedVal === 0 ? 'empty' : (isOk ? 'ok' : (isPartial ? 'warn' : 'bad'));
+  const statusText = preparedVal === 0 ? '—' : (isOk ? '✅' : (isPartial ? `${Math.round(preparedVal/recommendVal*100)}%` : 'ไม่พอ'));
+
+  return `<tr>
+    <td class="ct-label">${row.label}</td>
+    <td class="col-num" style="text-align:right;">
+      <input class="ct-input money-fmt" type="text" inputmode="decimal"
+        value="${preparedVal}"
+        onchange="updatePrepared('${row.key}',parseMoney(this))"
+        placeholder="0">
+    </td>
+    <td class="col-num" style="text-align:right;">
+      <input class="ct-input money-fmt" type="text" inputmode="decimal"
+        value="${recommendVal}"
+        style="${customStyle}"
+        title="${customTitle}"
+        onchange="updateRecommendation('${row.key}',parseMoney(this))"
+        placeholder="0">
+    </td>
+    <td class="col-num"><span class="ct-status ${statusCls}"></span>${statusText}</td>
+  </tr>`;
+}
+
+function updatePrepared(key, value) {
+  saveHealthInputs(hi => {
+    if (!hi.prepared) hi.prepared = {};
+    hi.prepared[key] = value;
+  });
+  render();
+}
+
+function updateRecommendation(key, value) {
+  saveHealthInputs(hi => {
+    if (!hi.customRecommendations) hi.customRecommendations = {};
+    hi.customRecommendations[key] = value;
+  });
+  render();
+  showToast('💾 บันทึกค่าแนะนำที่กำหนดเองแล้ว');
+}
+
+function resetRecommendations() {
+  if (!confirm('รีเซ็ตค่าแนะนำทั้งหมดกลับเป็นค่าเริ่มต้นที่คำนวณจาก รพ./อายุ/รายได้?')) return;
+  saveHealthInputs(hi => {
+    hi.customRecommendations = {};
+  });
+  render();
+  showToast('↺ รีเซ็ตค่าแนะนำเป็นค่าเริ่มต้นแล้ว');
+}
+
+function updatePremium(value) {
+  saveHealthInputs(hi => { hi.premium = Number(value) || 0; });
+}
+
+/* ════════════════════════════════════════════
+   HOSPITAL PICKER MODAL
+═══════════════════════════════════════════ */
+let currentRegion = 'ทั้งหมด';
+
+function openHospitalModal() {
+  document.getElementById('hospital-modal').classList.add('open');
+  // Render region tabs
+  const tabsEl = document.getElementById('region-tabs');
+  tabsEl.innerHTML = REGIONS.map(r =>
+    `<button class="modal-tab ${currentRegion === r ? 'active':''}" onclick="setRegion('${r}')">${r}</button>`
+  ).join('');
+  document.getElementById('hospital-search').value = '';
+  renderHospitalList();
+  setTimeout(() => document.getElementById('hospital-search').focus(), 100);
+}
+
+function closeHospitalModal() {
+  document.getElementById('hospital-modal').classList.remove('open');
+}
+
+function setRegion(r) {
+  currentRegion = r;
+  document.querySelectorAll('.modal-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent === r);
+  });
+  renderHospitalList();
+}
+
+function renderHospitalList() {
+  const q = (document.getElementById('hospital-search').value || '').toLowerCase().trim();
+  const all = getAllHospitals();
+  const filtered = all.filter(h => {
+    if (currentRegion !== 'ทั้งหมด' && h.region !== currentRegion) return false;
+    if (q && !h.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const listEl = document.getElementById('hospital-list');
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center;padding:40px 12px;color:var(--gray-400);">
+      🔍 ไม่พบโรงพยาบาล "${q}" ในภูมิภาค ${currentRegion}
+    </div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map((h, idx) => `
+    <div class="hospital-row">
+      <div class="hospital-info">
+        <div class="hospital-name">${h.name}</div>
+        <div class="hospital-region">${h.region}${h.custom ? ' · ✏️ ของฉัน' : ''}</div>
+      </div>
+      <button class="hospital-rate-btn std" onclick="selectHospital(${idx},'std')">
+        Standard: ${h.std.toLocaleString('th-TH')}
+      </button>
+      <button class="hospital-rate-btn vip ${h.vip > 0 ? 'active':''}" onclick="${h.vip > 0 ? `selectHospital(${idx},'vip')` : ''}">
+        VIP: ${h.vip > 0 ? h.vip.toLocaleString('th-TH') : '–'}
+      </button>
+    </div>
+  `).join('');
+  // Store filtered for click handler
+  window._filteredHospitals = filtered;
+}
+
+function selectHospital(idx, tier) {
+  const h = window._filteredHospitals[idx];
+  if (!h) return;
+  saveHealthInputs(hi => {
+    hi.hospital = { name: h.name, region: h.region, std: h.std, vip: h.vip };
+    hi.tier = tier;
+  });
+  closeHospitalModal();
+  render();
+  showToast(`✅ เลือก ${h.name} (${tier === 'vip' ? 'VIP' : 'STD'})`);
+}
+
+/* ════════════════════════════════════════════
+   ADD CUSTOM HOSPITAL
+═══════════════════════════════════════════ */
+function openAddHospital() {
+  document.getElementById('hospital-modal').classList.remove('open');
+  document.getElementById('addhosp-modal').classList.add('open');
+  document.getElementById('ah-name').value = '';
+  document.getElementById('ah-std').value = '';
+  document.getElementById('ah-vip').value = '';
+  setTimeout(() => document.getElementById('ah-name').focus(), 100);
+}
+
+function closeAddHospital() {
+  document.getElementById('addhosp-modal').classList.remove('open');
+}
+
+function saveCustomHospital() {
+  const name = document.getElementById('ah-name').value.trim();
+  if (!name) { showToast('⚠️ กรุณาใส่ชื่อโรงพยาบาล'); return; }
+  const region = document.getElementById('ah-region').value;
+  const std = parseMoney(document.getElementById('ah-std'));
+  const vip = parseMoney(document.getElementById('ah-vip'));
+
+  updateUser(u => {
+    if (!u.data.customHospitals) u.data.customHospitals = [];
+    u.data.customHospitals.push({ name, region, std, vip, custom: true });
+  });
+
+  closeAddHospital();
+  showToast('✅ เพิ่ม รพ. แล้ว');
+  setTimeout(() => openHospitalModal(), 200);
+}
+
+/* ════════════════════════════════════════════
+   UTILS + INIT
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+})();
+
+document.getElementById('hospital-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeHospitalModal();
+});
+document.getElementById('addhosp-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddHospital();
+});
+</script>
+</body>
+</html>

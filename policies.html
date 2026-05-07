@@ -9,6 +9,7 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -137,6 +138,124 @@
 
     /* ─── TABLE CARD ─── */
     .table-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 20px; overflow: hidden; }
+
+    /* ─── Phase 3.3 — Life Needs Analysis ─── */
+    .needs-card, .health-gap-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .nc-header, .hgc-header {
+      padding: 14px 20px; cursor: pointer; user-select: none;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid transparent; transition: border-color .2s;
+    }
+    .nc-header.open, .hgc-header.open { border-bottom-color: var(--gray-100); }
+    .nc-title, .hgc-title { font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+    .nc-summary, .hgc-summary {
+      font-size: .85rem; padding: 3px 12px; border-radius: 14px; font-weight: 700;
+    }
+    .ns-good { background: #E8F5E9; color: #28a745; }
+    .ns-warn { background: #FFF3E0; color: #FF8C00; }
+    .ns-bad  { background: #FEE2E2; color: #DC3545; }
+    .nc-toggle, .hgc-toggle { font-size: .85rem; color: var(--gray-400); transition: transform .2s; margin-left: 8px; }
+    .nc-toggle.open, .hgc-toggle.open { transform: rotate(180deg); }
+
+    .nc-body, .hgc-body { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .2s; }
+    .nc-body.open { max-height: 1200px; padding: 18px 20px; }
+    .hgc-body.open { max-height: 900px; padding: 18px 20px; }
+
+    .nc-grid {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 18px;
+    }
+    .nc-inputs { display: flex; flex-direction: column; gap: 12px; }
+    .nc-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+      padding: 10px 14px; background: var(--gray-100); border-radius: 10px;
+      border-left: 4px solid var(--gray-300);
+    }
+    .nc-row.cat-debt   { border-left-color: #DC3545; }
+    .nc-row.cat-income { border-left-color: #FF8C00; }
+    .nc-row.cat-edu    { border-left-color: #7B2FF7; }
+    .nc-row.cat-final  { border-left-color: #0E76A8; }
+    .nc-row.cat-have   { border-left-color: #28a745; background: #E8F5E9; }
+    .nc-row-label { display: flex; flex-direction: column; gap: 2px; }
+    .nc-row-name { font-size: .9rem; font-weight: 700; color: var(--gray-800); }
+    .nc-row-hint { font-size: .73rem; color: var(--gray-500); }
+    .nc-row input {
+      width: 140px; padding: 7px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .9rem; font-family: var(--font); text-align: right;
+      background: white; box-sizing: border-box;
+    }
+    .nc-row input:focus { outline: none; border-color: var(--red-primary); }
+
+    .nc-result {
+      background: linear-gradient(135deg, #FFF5F5, #FFEDF1);
+      border-radius: 10px; padding: 18px; border: 1.5px solid var(--red-soft);
+    }
+    .nc-result h4 { font-size: .85rem; font-weight: 800; color: var(--red-primary); margin-bottom: 12px; }
+    .nc-line { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-size: .88rem; }
+    .nc-line:last-of-type { border-bottom: none; }
+    .nc-line .l-lbl { color: var(--gray-700); }
+    .nc-line .l-val { font-weight: 700; color: var(--gray-800); }
+    .nc-need-big {
+      background: white; border-radius: 8px; padding: 14px; margin: 12px 0;
+      text-align: center; border: 2px solid var(--red-primary);
+    }
+    .nc-need-big .nb-lbl { font-size: .76rem; color: var(--gray-600); font-weight: 700; }
+    .nc-need-big .nb-val { font-size: 1.6rem; font-weight: 800; color: var(--red-primary); margin-top: 4px; }
+    .nc-gap-strip {
+      padding: 12px; border-radius: 8px; font-size: .9rem; font-weight: 700;
+      text-align: center;
+    }
+    .nc-gap-strip.bad  { background: #FEE2E2; color: #DC3545; }
+    .nc-gap-strip.good { background: #E8F5E9; color: #28a745; }
+
+    /* ─── Phase 3.4 — Health Coverage Gap ─── */
+    .hospital-tiers { display: flex; flex-direction: column; gap: 10px; }
+    .htier {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 12px;
+      padding: 14px; background: var(--gray-100); border-radius: 10px;
+      border-left: 4px solid var(--gray-300); align-items: center;
+    }
+    .htier.tier-1 { border-left-color: #28a745; }
+    .htier.tier-2 { border-left-color: #0E76A8; }
+    .htier.tier-3 { border-left-color: #FF8C00; }
+    .htier.tier-4 { border-left-color: #7B2FF7; }
+    .ht-info {}
+    .ht-name { font-size: .92rem; font-weight: 800; color: var(--gray-800); }
+    .ht-desc { font-size: .76rem; color: var(--gray-500); margin-top: 2px; }
+    .ht-cost { text-align: right; }
+    .ht-cost-lbl { font-size: .72rem; color: var(--gray-500); }
+    .ht-cost-val { font-size: 1.05rem; font-weight: 800; color: var(--gray-800); }
+    .ht-cost-sub { font-size: .7rem; color: var(--gray-400); }
+    .ht-status {
+      padding: 5px 11px; border-radius: 16px; font-size: .76rem; font-weight: 700;
+      white-space: nowrap; min-width: 110px; text-align: center;
+    }
+    .ht-status.s-good { background: #E8F5E9; color: #28a745; }
+    .ht-status.s-warn { background: #FFF3E0; color: #FF8C00; }
+    .ht-status.s-bad  { background: #FEE2E2; color: #DC3545; }
+
+    .hgc-stat-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px;
+    }
+    .hgc-stat {
+      background: var(--gray-100); border-radius: 8px; padding: 12px 14px; text-align: center;
+    }
+    .hgc-stat .hs-lbl { font-size: .72rem; color: var(--gray-500); font-weight: 600; }
+    .hgc-stat .hs-val { font-size: 1.15rem; font-weight: 800; color: var(--gray-800); margin-top: 3px; }
+
+    .needs-empty {
+      padding: 30px; text-align: center; color: var(--gray-400); font-size: .9rem;
+    }
+    .needs-empty a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width:768px) {
+      .nc-grid { grid-template-columns: 1fr; }
+      .hgc-stat-row { grid-template-columns: 1fr; }
+      .htier { grid-template-columns: 1fr; }
+      .ht-cost { text-align: left; }
+    }
     .table-card-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .table-card-header h3 { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
@@ -191,8 +310,240 @@
     .tbl-btn.del:hover  { border-color: #FF4D4D; background: #FFF0F0; }
 
     /* ─── ADD POLICY FORM ─── */
-    .add-form { display: none; background: var(--gray-100); border-radius: var(--radius-sm); padding: 20px; margin: 0 20px 20px; }
-    .add-form.open { display: block; }
+    /* ─── Policy Form (Modal style — Phase 3.3 redesign) ─── */
+    .add-form {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 500;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .add-form.open { display: flex; }
+    .pf-modal {
+      background: white; border-radius: 18px;
+      width: 560px; max-width: 100%; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      padding: 28px 30px; position: relative;
+    }
+    .pf-close-btn {
+      position: absolute; top: 18px; right: 22px;
+      background: none; border: none; font-size: 1.5rem;
+      cursor: pointer; color: var(--gray-500); line-height: 1;
+      padding: 0; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: all .15s;
+    }
+    .pf-close-btn:hover { background: var(--gray-100); color: #c00; }
+    .pf-row {
+      display: grid; grid-template-columns: 180px 1fr; gap: 14px;
+      align-items: center; margin-bottom: 12px;
+    }
+    .pf-row label {
+      font-size: .92rem; font-weight: 600; color: var(--gray-700);
+    }
+    .pf-row input[type="text"],
+    .pf-row input[type="number"],
+    .pf-row input[type="date"],
+    .pf-row select {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--gray-700);
+      border-radius: 30px; font-family: var(--font); font-size: .95rem;
+      background: white; box-sizing: border-box; color: var(--gray-800);
+    }
+    .pf-row input[type="date"] { color: var(--red-primary); font-weight: 700; text-align: center; }
+    .pf-row input:focus, .pf-row select:focus {
+      outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .pf-row input[readonly] { background: #FAFAFA; }
+    .pf-row select { cursor: pointer; }
+    .pf-rider-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--red-primary); font-weight: 700; font-size: .92rem;
+      cursor: pointer; padding: 8px 0; margin-top: 8px;
+      background: none; border: none; font-family: var(--font);
+    }
+    .pf-rider-link:hover { color: var(--red-dark); text-decoration: underline; }
+    .pf-rider-link .pf-plus {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--gray-300); color: white;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800;
+    }
+    .pf-save-row {
+      display: flex; justify-content: center; margin-top: 18px; gap: 10px;
+    }
+    .pf-save-btn {
+      background: white; color: var(--gray-800);
+      border: 1.5px solid var(--gray-700); border-radius: 30px;
+      padding: 10px 36px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: all .15s;
+    }
+    .pf-save-btn:hover { background: var(--red-primary); color: white; border-color: var(--red-primary); }
+    .pf-cancel-btn {
+      background: none; color: var(--gray-500);
+      border: 1.5px solid var(--gray-300); border-radius: 30px;
+      padding: 10px 22px; font-size: .9rem; font-weight: 600;
+      cursor: pointer; font-family: var(--font);
+    }
+    .pf-cancel-btn:hover { color: var(--gray-700); border-color: var(--gray-500); }
+
+    .pf-rider-section {
+      display: block; margin-top: 14px; padding-top: 14px;
+      border-top: 1.5px dashed var(--gray-200);
+    }
+    .pf-rider-section .form-section-hdr {
+      grid-column: 1 / -1; font-size: .82rem; font-weight: 700;
+      color: var(--red-primary); margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--red-soft);
+    }
+    .pf-rider-section .rider-table { font-size: .82rem; }
+    .pf-rider-section .rider-table input[type="text"],
+    .pf-rider-section .rider-table input[type="number"],
+    .pf-rider-section .rider-table input[type="date"] {
+      padding: 6px 10px; border-radius: 6px; font-size: .82rem;
+    }
+
+    /* ─── Rider Card (dynamic list) ─── */
+    .rider-card {
+      background: white; border: 1.5px solid var(--gray-200);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+      position: relative;
+    }
+    .rider-card-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+      padding-bottom: 10px; border-bottom: 1px dashed var(--gray-200);
+    }
+    .rider-num {
+      font-size: 1rem; font-weight: 800; color: var(--red-primary);
+    }
+    .rider-type-pill {
+      background: var(--red-soft); color: var(--red-primary);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: .85rem; font-weight: 700;
+    }
+    .rider-remove-btn {
+      margin-left: auto;
+      background: none; border: none; font-size: 1.2rem; cursor: pointer;
+      color: var(--gray-400); padding: 0 6px; line-height: 1;
+    }
+    .rider-remove-btn:hover { color: #c00; }
+    .rider-card .pf-row label {
+      font-size: .82rem; color: var(--gray-500);
+    }
+    .rider-card .pf-row {
+      grid-template-columns: 160px 1fr;
+      margin-bottom: 8px;
+    }
+    .rider-card .pf-row input,
+    .rider-card .pf-row select {
+      padding: 7px 12px; font-size: .88rem;
+    }
+    .rider-card .pf-section-subhdr {
+      font-weight: 800; font-size: .92rem; color: var(--gray-700);
+      margin: 8px 0 8px 0;
+    }
+    .rider-row-with-freq {
+      display: grid; grid-template-columns: 1fr 100px; gap: 6px;
+    }
+    .rider-row-with-freq select {
+      padding: 7px 8px !important; font-size: .82rem !important;
+      border-radius: 30px; border: 1.5px solid var(--gray-700);
+      font-family: var(--font); background: white;
+    }
+
+    /* Add rider dropdown */
+    .rider-add-wrap { position: relative; margin-top: 12px; }
+    .rider-add-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; background: var(--red-primary); color: white;
+      border: none; border-radius: 30px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .92rem;
+      transition: all .15s;
+      box-shadow: 0 3px 10px rgba(208,2,27,.25);
+    }
+    .rider-add-btn:hover {
+      background: var(--red-dark);
+      box-shadow: 0 4px 14px rgba(208,2,27,.4);
+      transform: translateY(-1px);
+    }
+    .rider-add-btn .ra-plus {
+      width: 22px; height: 22px; border-radius: 50%; background: white;
+      color: var(--red-primary); font-size: 1.05rem; font-weight: 800;
+      display: inline-flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .rider-add-btn:hover .ra-plus { color: var(--red-dark); }
+
+    .rider-type-dropdown {
+      display: none;
+      background: white; border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      border: 1.5px solid var(--gray-200);
+      padding: 6px; margin-top: 8px;
+    }
+    .rider-type-dropdown.open { display: block; }
+    .rider-type-dropdown button {
+      display: block; width: 100%; padding: 12px 22px;
+      border: none; background: white; text-align: center;
+      cursor: pointer; font-family: var(--font);
+      font-size: 1rem; font-weight: 700; color: var(--red-primary);
+      transition: background .15s; border-radius: 8px;
+      margin-bottom: 2px;
+    }
+    .rider-type-dropdown button:last-child { margin-bottom: 0; }
+    .rider-type-dropdown button:hover { background: var(--red-soft); }
+    .rider-type-dropdown button:active { background: #FFE0E5; }
+
+    /* ─── Type-specific dynamic fields ─── */
+    .pf-type-section {
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1.5px dashed var(--gray-200);
+    }
+    .pf-section-title {
+      font-size: 1rem; font-weight: 700; color: var(--gray-800);
+      text-align: center; padding: 6px 0 12px;
+    }
+    .pf-cashreturn-row {
+      display: grid; grid-template-columns: 100px 1fr 90px 32px; gap: 10px;
+      align-items: center; margin-bottom: 10px; padding-left: 12px;
+    }
+    .pf-cashreturn-row .cr-label {
+      color: var(--gray-500); font-size: .9rem;
+    }
+    .pf-cashreturn-row input {
+      padding: 9px 14px; border: 1.5px solid var(--gray-700);
+      border-radius: 30px; font-family: var(--font); font-size: .92rem;
+      background: white; box-sizing: border-box;
+    }
+    .pf-cashreturn-row input:focus {
+      outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    .pf-cr-del {
+      background: none; border: none; cursor: pointer;
+      color: var(--gray-400); font-size: 1.1rem; padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pf-cr-del:hover { color: #c00; }
+    .pf-cr-add-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #1a1a2e; color: white; border: none;
+      cursor: pointer; font-size: 1.2rem; font-weight: 800;
+      margin: 6px auto 12px; padding: 0; line-height: 1;
+      font-family: var(--font);
+    }
+    .pf-cr-add-btn:hover { background: var(--red-primary); transform: scale(1.05); }
+    /* Yellow highlighted summary rows */
+    .pf-row.pf-row-summary label {
+      color: #E67E22; font-weight: 700;
+    }
+    .pf-row.pf-row-summary input {
+      border-color: var(--gray-700);
+    }
+
+    @media(max-width: 600px) {
+      .pf-modal { padding: 22px 18px; }
+      .pf-row { grid-template-columns: 1fr; gap: 4px; margin-bottom: 14px; }
+      .pf-cashreturn-row { grid-template-columns: 80px 1fr 70px 28px; gap: 6px; }
+    }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .fg { display: flex; flex-direction: column; gap: 4px; }
     .fg label { font-size: .82rem; font-weight: 600; color: var(--gray-800); }
@@ -453,35 +804,50 @@
 </head>
 <body>
 
-<!-- ─── Navbar ─── -->
-<nav class="navbar">
-  <div class="navbar-inner">
-    <div class="navbar-brand">
-      <div class="navbar-logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="plg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#D0021B"/>
-              <stop offset="100%" stop-color="#9B0013"/>
-            </linearGradient>
-          </defs>
-          <rect width="32" height="32" rx="8" fill="url(#plg)"/>
-          <text x="16" y="22" text-anchor="middle" font-family="Sarabun, sans-serif" font-weight="800" font-size="14" fill="white">448</text>
-        </svg>
-      </div>
-      <div>
-        <div class="navbar-name">448 Wealth <span>Management Plan</span></div>
-      </div>
-    </div>
-    <div class="navbar-actions">
-      <div id="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);font-size:1rem;">?</div>
-      <span id="nav-name" style="font-size:.9rem;font-weight:600;"></span>
-      <button onclick="doLogout()" class="btn btn-outline" style="padding:6px 14px;font-size:.82rem;">ออกจากระบบ</button>
-    </div>
-  </div>
-</nav>
+<div class="app-layout">
 
-<div class="page">
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area"><div class="sb-brand">448</div><div class="sb-tagline">Wealth Management</div></div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item active" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div><div class="sb-profile-name" id="sb-name">Agent</div><div class="sb-profile-role">AIA · ดูโปรไฟล์</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="app-main" style="overflow-y:auto;">
+<div style="padding-top:0;"><!-- policies content -->
 
   <!-- ════════════════════════════════════════
        VIEW 1: CLIENT LIST
@@ -560,6 +926,12 @@
         <div class="cib-family" id="cib-family" style="display:none;"></div>
       </div>
 
+      <!-- ═════ PHASE 3.3 — Life Insurance Needs Analysis ═════ -->
+      <div id="needs-analysis-section"></div>
+
+      <!-- ═════ PHASE 3.4 — Health Coverage Gap Analysis ═════ -->
+      <div id="health-gap-section"></div>
+
       <!-- Main Table Card -->
       <div class="table-card">
         <div class="table-card-header">
@@ -567,134 +939,156 @@
           <button onclick="toggleForm()" id="add-btn" class="btn btn-primary" style="padding:7px 16px;font-size:.82rem;">+ เพิ่มกรมธรรม์</button>
         </div>
 
-        <!-- Add Policy Form -->
-        <div class="add-form" id="add-form">
+        <!-- Add Policy Form (Modal style — Phase 3.3 redesign per mockup) -->
+        <div class="add-form" id="add-form" onclick="if(event.target===this)toggleForm()">
+          <div class="pf-modal">
+            <button class="pf-close-btn" onclick="toggleForm()" type="button">✕</button>
 
-          <!-- ── ส่วนที่ 1: รายละเอียดกรมธรรม์ ── -->
-          <div class="form-grid">
-            <div class="form-section-hdr">1 · รายละเอียดกรมธรรม์</div>
-            <div class="fg"><label>เลขที่กรมธรรม์</label><input id="p-number" type="text" placeholder="ไม่บังคับ"></div>
-            <div class="fg"><label>บริษัทประกัน *</label><input id="p-company" type="text" placeholder="เช่น AIA Thailand"></div>
-            <div class="fg">
-              <label>ประเภทประกัน *</label>
-              <select id="p-type">
-                <option value="">— เลือกประเภท —</option>
-                <option value="ทุนชีวิต">ทุนชีวิต</option>
-                <option value="สุขภาพ">สุขภาพ</option>
-                <option value="โรคร้ายแรง">โรคร้ายแรง</option>
+            <!-- 1. หมายเลขกรมธรรม์ -->
+            <div class="pf-row">
+              <label>หมายเลขกรมธรรม์</label>
+              <input id="p-number" type="text" placeholder="เช่น T1111111">
+            </div>
+            <!-- 2. แบบประกัน -->
+            <div class="pf-row">
+              <label>แบบประกัน</label>
+              <input id="p-name" type="text" placeholder="ชื่อแบบประกัน">
+            </div>
+            <!-- 3. ประเภท -->
+            <div class="pf-row">
+              <label>ประเภท</label>
+              <select id="p-type" onchange="onPolicyTypeChange()">
+                <option value="ตลอดชีพ">ตลอดชีพ</option>
+                <option value="สะสมทรัพย์">สะสมทรัพย์</option>
                 <option value="บำนาญ">บำนาญ</option>
-                <option value="เกษียณ">เกษียณ</option>
-                <option value="ลดหย่อนภาษี">ลดหย่อนภาษี</option>
-                <option value="ลงทุน">ลงทุน</option>
-                <option value="การศึกษา">การศึกษา</option>
-                <option value="ส่งมอบ">ส่งมอบ</option>
-                <option value="อุบัติเหตุ">อุบัติเหตุ</option>
+                <option value="Unit Linked">Unit Linked</option>
+                <option value="PA">PA</option>
               </select>
             </div>
-            <div class="fg"><label>ชื่อแบบประกัน</label><input id="p-name" type="text" placeholder="เช่น AIA Health Saver"></div>
-            <div class="fg"><label>วันที่เริ่มสัญญา</label><input id="p-start" type="date"></div>
-            <div class="fg"><label>วันที่สิ้นสุดสัญญา</label><input id="p-end" type="date"></div>
-          </div>
+            <!-- 4. บริษัท -->
+            <div class="pf-row">
+              <label>บริษัท</label>
+              <input id="p-company" type="text" placeholder="เช่น AIA Thailand">
+            </div>
+            <!-- 5. เงินเอาประกัน -->
+            <div class="pf-row">
+              <label>เงินเอาประกัน</label>
+              <input id="p-life-cov" class="money-fmt" inputmode="decimal" placeholder="0">
+            </div>
+            <!-- 6. ทุพพลภาพ -->
+            <div class="pf-row">
+              <label>ทุพพลภาพ</label>
+              <input id="p-disability" class="money-fmt" inputmode="decimal" placeholder="0">
+            </div>
+            <!-- 7. คุ้มครองสูงสุดถึงอายุ -->
+            <div class="pf-row">
+              <label>คุ้มครองสูงสุดถึงอายุ</label>
+              <input id="p-cov-up-to-age" type="number" placeholder="เช่น 99" min="1" max="120">
+            </div>
+            <!-- 8. เบี้ยประกัน -->
+            <div class="pf-row">
+              <label>เบี้ยประกัน</label>
+              <input id="p-premium" class="money-fmt" inputmode="decimal" placeholder="0">
+            </div>
+            <!-- 9. วันที่เริ่ม -->
+            <div class="pf-row">
+              <label>วันที่เริ่ม</label>
+              <input id="p-start" type="date">
+            </div>
+            <!-- 10. ระยะเวลาชำระเบี้ย -->
+            <div class="pf-row">
+              <label>ระยะเวลาชำระเบี้ย</label>
+              <input id="p-pay-main" type="number" placeholder="ปี" min="1" max="99">
+            </div>
+            <!-- 11. วันที่ชำระเบี้ยครั้งสุดท้าย -->
+            <div class="pf-row">
+              <label>วันที่ชำระเบี้ยครั้งสุดท้าย</label>
+              <input id="p-end" type="date">
+            </div>
 
-          <!-- ── ส่วนที่ 2: ข้อมูลสัญญาหลัก ── -->
-          <div class="form-grid">
-            <div class="form-section-hdr">2 · ข้อมูลสัญญาหลัก</div>
-            <div class="fg"><label>ทุนประกันชีวิต (฿)</label><input id="p-life-cov" type="number" placeholder="เช่น 1000000" min="0"></div>
-            <div class="fg"><label>เบี้ยสัญญาหลักรายปี (฿) *</label><input id="p-premium" type="number" placeholder="เช่น 20000" min="0"></div>
-            <div class="fg"><label>สัญญาหลัก ชำระ (ปี)</label><input id="p-pay-main" type="number" placeholder="เช่น 20" min="1" max="99"></div>
-            <div class="fg"><label>สัญญาเพิ่มเติม ชำระ (ปี)</label><input id="p-pay-rider" type="number" placeholder="เช่น 10" min="1" max="99"></div>
-            <div class="fg"><label>วางแผนชำระอีก (ปี)</label><input id="p-plan-years" type="number" placeholder="เช่น 15" min="0"></div>
-            <div class="fg"><label>ลดทุนประกันเหลือ (฿)</label><input id="p-paid-up" type="number" placeholder="กรณีหยุดชำระก่อนครบ" min="0"></div>
-          </div>
+            <!-- Type-specific dynamic fields -->
+            <div id="pf-type-specific"></div>
 
-          <!-- ── ส่วนที่ 3: ข้อมูลสัญญาเพิ่มเติม ── -->
-          <div class="form-grid">
-            <div class="form-section-hdr">3 · ข้อมูลสัญญาเพิ่มเติม</div>
-          </div>
-          <table class="rider-table">
-            <thead>
-              <tr>
-                <th style="width:130px;">ประเภทสัญญาเพิ่มเติม</th>
-                <th>ชื่อแบบ</th>
-                <th>วงเงิน / ทุน (฿)</th>
-                <th>เบี้ย (฿/ปี)</th>
-                <th>วันสิ้นสุด</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><div class="rider-lbl">❤️ สุขภาพ</div></td>
-                <td><input id="p-rider-health-name" type="text" placeholder="ชื่อแบบสุขภาพ"></td>
-                <td><input id="p-rider-health-cov"  type="number" placeholder="วงเงินคุ้มครองสุขภาพ" min="0"></td>
-                <td><input id="p-rider-health-prem" type="number" placeholder="เบี้ยสุขภาพ" min="0"></td>
-                <td><input id="p-rider-health-end"  type="date"></td>
-              </tr>
-              <tr>
-                <td><div class="rider-lbl">💵 ค่าชดเชย</div></td>
-                <td><input id="p-rider-income-name" type="text" placeholder="ชื่อแบบค่าชดเชย"></td>
-                <td><input id="p-rider-income-daily" type="number" placeholder="ค่าชดเชยรายวัน (฿/วัน)" min="0"></td>
-                <td><input id="p-rider-income-prem"  type="number" placeholder="เบี้ยค่าชดเชย" min="0"></td>
-                <td><input id="p-rider-income-end"  type="date"></td>
-              </tr>
-              <tr>
-                <td><div class="rider-lbl">🏥 โรคร้ายแรง</div></td>
-                <td><input id="p-rider-critical-name" type="text" placeholder="ชื่อแบบโรคร้ายแรง"></td>
-                <td><input id="p-rider-critical-cov"  type="number" placeholder="ทุนโรคร้ายแรง" min="0"></td>
-                <td><input id="p-rider-critical-prem" type="number" placeholder="เบี้ยโรคร้ายแรง" min="0"></td>
-                <td><input id="p-rider-critical-end"  type="date"></td>
-              </tr>
-              <tr>
-                <td><div class="rider-lbl">🚑 อุบัติเหตุ</div></td>
-                <td><input id="p-rider-accident-name" type="text" placeholder="ชื่อแบบอุบัติเหตุ"></td>
-                <td><input id="p-rider-accident-cov"  type="number" placeholder="ทุนอุบัติเหตุ" min="0"></td>
-                <td><input id="p-rider-accident-prem" type="number" placeholder="เบี้ยอุบัติเหตุ" min="0"></td>
-                <td><input id="p-rider-accident-end"  type="date"></td>
-              </tr>
-              <tr>
-                <td><div class="rider-lbl">♿ ทุพพลภาพ</div></td>
-                <td><input id="p-rider-disability-name" type="text" placeholder="ชื่อแบบทุพพลภาพ"></td>
-                <td><input id="p-rider-disability-monthly" type="number" placeholder="เงินทดแทน" min="0"></td>
-                <td><input id="p-rider-disability-prem"    type="number" placeholder="เบี้ยทุพพลภาพ" min="0"></td>
-                <td><input id="p-rider-disability-end"  type="date"></td>
-              </tr>
-            </tbody>
-          </table>
+            <!-- Rider section (always visible) -->
+            <div class="pf-rider-section" id="pf-rider-section">
+              <!-- Dynamic riders list -->
+              <div id="riders-list"></div>
 
-          <!-- ── ส่วนที่ 4: สลักหลัง ── -->
-          <div class="form-grid" style="gap:12px;margin-top:16px;">
-            <div class="form-section-hdr">4 · สลักหลัง</div>
-          </div>
-          <div id="p-endorse-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px;"></div>
-          <button type="button" onclick="toggleAddEndorseForm()" style="font-size:.8rem;padding:5px 14px;border-radius:50px;border:1.5px solid var(--red-primary);background:white;color:var(--red-primary);cursor:pointer;font-weight:700;font-family:var(--font);">+ เพิ่มสลักหลัง</button>
-          <div id="p-endorse-form" style="display:none;background:var(--gray-100);border-radius:var(--radius-sm);padding:14px;margin-top:10px;">
-            <div class="form-grid">
-              <div class="fg"><label>ชื่อสลักหลัง *</label><input id="p-en-name" type="text" placeholder="เช่น สัญญาเพิ่มเติมอุบัติเหตุ"></div>
-              <div class="fg">
-                <label>ประเภท</label>
-                <select id="p-en-type">
-                  <option value="สัญญาเพิ่มเติม">สัญญาเพิ่มเติม (Rider)</option>
-                  <option value="ขยายความคุ้มครอง">ขยายความคุ้มครอง</option>
-                  <option value="ยกเว้นความคุ้มครอง">ยกเว้นความคุ้มครอง</option>
-                  <option value="เปลี่ยนแปลงผู้รับประโยชน์">เปลี่ยนแปลงผู้รับประโยชน์</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
+              <!-- Add rider dropdown -->
+              <div class="rider-add-wrap">
+                <button type="button" class="rider-add-btn" onclick="toggleRiderDropdown(event)">
+                  <span class="ra-plus">+</span>
+                  <span>สัญญาเพิ่มเติม</span>
+                </button>
+                <div class="rider-type-dropdown" id="rider-type-dropdown">
+                  <button type="button" onclick="addRider('medical')">ค่ารักษาพยาบาล</button>
+                  <button type="button" onclick="addRider('income')">ชดเชยรายได้</button>
+                  <button type="button" onclick="addRider('accident')">อุบัติเหตุ</button>
+                  <button type="button" onclick="addRider('critical')">โรคร้ายแรง</button>
+                  <button type="button" onclick="addRider('disability')">ทุพพลภาพ</button>
+                </div>
               </div>
-              <div class="fg" style="grid-column:1/-1;">
-                <label>📅 วันส่งเอกสารปลดสลักหลัง</label>
-                <input id="p-en-release" type="date" style="border-color:#F39C12;">
+              <!-- Hidden legacy inputs for backward compat with addPolicy() reads -->
+              <div style="display:none;">
+                <input id="p-rider-health-name" type="text">
+                <input id="p-rider-health-cov" type="text">
+                <input id="p-rider-health-prem" type="text">
+                <input id="p-rider-health-end" type="date">
+                <input id="p-rider-income-name" type="text">
+                <input id="p-rider-income-daily" type="text">
+                <input id="p-rider-income-prem" type="text">
+                <input id="p-rider-income-end" type="date">
+                <input id="p-rider-critical-name" type="text">
+                <input id="p-rider-critical-cov" type="text">
+                <input id="p-rider-critical-prem" type="text">
+                <input id="p-rider-critical-end" type="date">
+                <input id="p-rider-accident-name" type="text">
+                <input id="p-rider-accident-cov" type="text">
+                <input id="p-rider-accident-prem" type="text">
+                <input id="p-rider-accident-end" type="date">
+                <input id="p-rider-disability-name" type="text">
+                <input id="p-rider-disability-monthly" type="text">
+                <input id="p-rider-disability-prem" type="text">
+                <input id="p-rider-disability-end" type="date">
+              </div>
+
+              <!-- Endorsements (สลักหลัง) -->
+              <div style="margin-top:14px;">
+                <div class="form-section-hdr">📎 สลักหลัง</div>
+                <div id="p-endorse-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"></div>
+                <button type="button" onclick="toggleAddEndorseForm()" style="font-size:.8rem;padding:5px 14px;border-radius:30px;border:1.5px solid var(--red-primary);background:white;color:var(--red-primary);cursor:pointer;font-weight:700;font-family:var(--font);">+ เพิ่มสลักหลัง</button>
+                <div id="p-endorse-form" style="display:none;background:var(--gray-100);border-radius:8px;padding:12px;margin-top:8px;">
+                  <div class="form-grid">
+                    <div class="fg"><label>ชื่อสลักหลัง *</label><input id="p-en-name" type="text" placeholder="เช่น สัญญาเพิ่มเติม"></div>
+                    <div class="fg">
+                      <label>ประเภท</label>
+                      <select id="p-en-type">
+                        <option value="สัญญาเพิ่มเติม">สัญญาเพิ่มเติม</option>
+                        <option value="ขยายความคุ้มครอง">ขยายความคุ้มครอง</option>
+                        <option value="ยกเว้นความคุ้มครอง">ยกเว้นความคุ้มครอง</option>
+                        <option value="เปลี่ยนแปลงผู้รับประโยชน์">เปลี่ยนแปลงผู้รับประโยชน์</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                      </select>
+                    </div>
+                    <div class="fg" style="grid-column:1/-1;">
+                      <label>📅 วันส่งเอกสารปลดสลักหลัง</label>
+                      <input id="p-en-release" type="date" style="border-color:#F39C12;">
+                    </div>
+                  </div>
+                  <div class="fg" style="margin-top:10px;"><label>หมายเหตุ</label><input id="p-en-note" type="text" placeholder="รายละเอียด"></div>
+                  <div style="display:flex;gap:8px;margin-top:10px;">
+                    <button class="btn btn-primary" onclick="addPendingEndorsement()" style="padding:6px 14px;font-size:.82rem;">+ เพิ่ม</button>
+                    <button class="btn btn-outline" onclick="toggleAddEndorseForm()" style="padding:6px 14px;font-size:.82rem;">ยกเลิก</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="fg" style="margin-top:10px;"><label>หมายเหตุ</label><input id="p-en-note" type="text" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-              <button class="btn btn-primary" onclick="addPendingEndorsement()" style="padding:7px 16px;font-size:.85rem;">+ เพิ่ม</button>
-              <button class="btn btn-outline" onclick="toggleAddEndorseForm()" style="padding:7px 16px;font-size:.85rem;">ยกเลิก</button>
-            </div>
-          </div>
 
-          <div id="p-error" style="display:none;margin-top:14px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#C0021B;"></div>
-          <div style="display:flex;gap:10px;margin-top:14px;">
-            <button class="btn btn-primary" onclick="addPolicy()" style="padding:9px 20px;font-size:.88rem;">💾 บันทึก</button>
-            <button class="btn btn-outline" onclick="toggleForm()" style="padding:9px 20px;font-size:.88rem;">ยกเลิก</button>
+            <div id="p-error" style="display:none;margin-top:14px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#C0021B;"></div>
+
+            <div class="pf-save-row">
+              <button class="pf-save-btn" onclick="addPolicy()">บันทึก</button>
+            </div>
           </div>
         </div>
 
@@ -793,6 +1187,8 @@
           <div class="detail-item"><div class="d-lbl">เลขที่กรมธรรม์</div><div class="d-val" id="md-number">—</div></div>
           <div class="detail-item"><div class="d-lbl">วันที่เริ่มสัญญา</div><div class="d-val" id="md-start">—</div></div>
           <div class="detail-item"><div class="d-lbl">วันที่สิ้นสุดสัญญา</div><div class="d-val" id="md-end">—</div></div>
+          <div class="detail-item" id="md-disability-item" style="display:none;"><div class="d-lbl">♿ ทุนทุพพลภาพ</div><div class="d-val" id="md-disability-amt">—</div></div>
+          <div class="detail-item" id="md-covage-item" style="display:none;"><div class="d-lbl">🛡 คุ้มครองสูงสุดถึงอายุ</div><div class="d-val" id="md-covage-val">—</div></div>
         </div>
       </div>
 
@@ -800,6 +1196,24 @@
       <div class="detail-section" id="md-riders-section" style="display:none;">
         <div class="detail-section-title">🔗 สัญญาเพิ่มเติม (Riders)</div>
         <div id="md-riders-grid" class="detail-grid"></div>
+      </div>
+
+      <!-- Section 1.5c: Phase 3.3 — Type-specific (สะสมทรัพย์/บำนาญ/Unit Linked/PA) -->
+      <div class="detail-section" id="md-endowment-section" style="display:none;">
+        <div class="detail-section-title">💰 ผลประโยชน์สะสมทรัพย์</div>
+        <div id="md-endowment-body"></div>
+      </div>
+      <div class="detail-section" id="md-annuity-section" style="display:none;">
+        <div class="detail-section-title">👴 ผลประโยชน์บำนาญ</div>
+        <div id="md-annuity-body"></div>
+      </div>
+      <div class="detail-section" id="md-ul-section" style="display:none;">
+        <div class="detail-section-title">🔗 ผลประโยชน์ Unit Linked</div>
+        <div id="md-ul-body"></div>
+      </div>
+      <div class="detail-section" id="md-pa-section" style="display:none;">
+        <div class="detail-section-title">🚑 ผลประโยชน์อุบัติเหตุส่วนบุคคล (PA)</div>
+        <div id="md-pa-body"></div>
       </div>
 
       <!-- Section 1.5: การชำระเบี้ยและแผนลดทุน -->
@@ -918,12 +1332,12 @@
         <!-- ── ส่วนที่ 2 ── -->
         <div class="form-grid" style="gap:12px;">
           <div class="form-section-hdr">2 · ข้อมูลสัญญาหลัก</div>
-          <div class="fg"><label>ทุนประกันชีวิต (฿)</label><input id="ep-life-cov" type="number" placeholder="เช่น 1000000" min="0"></div>
-          <div class="fg"><label>เบี้ยสัญญาหลักรายปี (฿) *</label><input id="ep-premium" type="number" placeholder="เช่น 20000" min="0"></div>
+          <div class="fg"><label>ทุนประกันชีวิต (฿)</label><input id="ep-life-cov" class="money-fmt" inputmode="decimal" placeholder="เช่น 1000000" min="0"></div>
+          <div class="fg"><label>เบี้ยสัญญาหลักรายปี (฿) *</label><input id="ep-premium" class="money-fmt" inputmode="decimal" placeholder="เช่น 20000" min="0"></div>
           <div class="fg"><label>สัญญาหลัก ชำระ (ปี)</label><input id="ep-pay-main" type="number" placeholder="เช่น 20" min="1" max="99"></div>
           <div class="fg"><label>สัญญาเพิ่มเติม ชำระ (ปี)</label><input id="ep-pay-rider" type="number" placeholder="เช่น 10" min="1" max="99"></div>
           <div class="fg"><label>วางแผนชำระอีก (ปี)</label><input id="ep-plan-years" type="number" placeholder="เช่น 15" min="0"></div>
-          <div class="fg"><label>ลดทุนประกันเหลือ (฿)</label><input id="ep-paid-up" type="number" placeholder="กรณีหยุดชำระก่อนครบ" min="0"></div>
+          <div class="fg"><label>ลดทุนประกันเหลือ (฿)</label><input id="ep-paid-up" class="money-fmt" inputmode="decimal" placeholder="กรณีหยุดชำระก่อนครบ" min="0"></div>
         </div>
 
         <!-- ── ส่วนที่ 3 ── -->
@@ -944,36 +1358,36 @@
             <tr>
               <td><div class="rider-lbl">❤️ สุขภาพ</div></td>
               <td><input id="ep-rider-health-name" type="text" placeholder="ชื่อแบบสุขภาพ"></td>
-              <td><input id="ep-rider-health-cov"  type="number" placeholder="วงเงินคุ้มครองสุขภาพ" min="0"></td>
-              <td><input id="ep-rider-health-prem" type="number" placeholder="เบี้ยสุขภาพ" min="0"></td>
+              <td><input id="ep-rider-health-cov"  class="money-fmt" inputmode="decimal" placeholder="วงเงินคุ้มครองสุขภาพ" min="0"></td>
+              <td><input id="ep-rider-health-prem" class="money-fmt" inputmode="decimal" placeholder="เบี้ยสุขภาพ" min="0"></td>
               <td><input id="ep-rider-health-end"  type="date"></td>
             </tr>
             <tr>
               <td><div class="rider-lbl">💵 ค่าชดเชย</div></td>
               <td><input id="ep-rider-income-name" type="text" placeholder="ชื่อแบบค่าชดเชย"></td>
-              <td><input id="ep-rider-income-daily" type="number" placeholder="ค่าชดเชยรายวัน (฿/วัน)" min="0"></td>
-              <td><input id="ep-rider-income-prem"  type="number" placeholder="เบี้ยค่าชดเชย" min="0"></td>
+              <td><input id="ep-rider-income-daily" class="money-fmt" inputmode="decimal" placeholder="ค่าชดเชยรายวัน (฿/วัน)" min="0"></td>
+              <td><input id="ep-rider-income-prem"  class="money-fmt" inputmode="decimal" placeholder="เบี้ยค่าชดเชย" min="0"></td>
               <td><input id="ep-rider-income-end"  type="date"></td>
             </tr>
             <tr>
               <td><div class="rider-lbl">🏥 โรคร้ายแรง</div></td>
               <td><input id="ep-rider-critical-name" type="text" placeholder="ชื่อแบบโรคร้ายแรง"></td>
-              <td><input id="ep-rider-critical-cov"  type="number" placeholder="ทุนโรคร้ายแรง" min="0"></td>
-              <td><input id="ep-rider-critical-prem" type="number" placeholder="เบี้ยโรคร้ายแรง" min="0"></td>
+              <td><input id="ep-rider-critical-cov"  class="money-fmt" inputmode="decimal" placeholder="ทุนโรคร้ายแรง" min="0"></td>
+              <td><input id="ep-rider-critical-prem" class="money-fmt" inputmode="decimal" placeholder="เบี้ยโรคร้ายแรง" min="0"></td>
               <td><input id="ep-rider-critical-end"  type="date"></td>
             </tr>
             <tr>
               <td><div class="rider-lbl">🚑 อุบัติเหตุ</div></td>
               <td><input id="ep-rider-accident-name" type="text" placeholder="ชื่อแบบอุบัติเหตุ"></td>
-              <td><input id="ep-rider-accident-cov"  type="number" placeholder="ทุนอุบัติเหตุ" min="0"></td>
-              <td><input id="ep-rider-accident-prem" type="number" placeholder="เบี้ยอุบัติเหตุ" min="0"></td>
+              <td><input id="ep-rider-accident-cov"  class="money-fmt" inputmode="decimal" placeholder="ทุนอุบัติเหตุ" min="0"></td>
+              <td><input id="ep-rider-accident-prem" class="money-fmt" inputmode="decimal" placeholder="เบี้ยอุบัติเหตุ" min="0"></td>
               <td><input id="ep-rider-accident-end"  type="date"></td>
             </tr>
             <tr>
               <td><div class="rider-lbl">♿ ทุพพลภาพ</div></td>
               <td><input id="ep-rider-disability-name" type="text" placeholder="ชื่อแบบทุพพลภาพ"></td>
-              <td><input id="ep-rider-disability-monthly" type="number" placeholder="เงินทดแทน" min="0"></td>
-              <td><input id="ep-rider-disability-prem"    type="number" placeholder="เบี้ยทุพพลภาพ" min="0"></td>
+              <td><input id="ep-rider-disability-monthly" class="money-fmt" inputmode="decimal" placeholder="เงินทดแทน" min="0"></td>
+              <td><input id="ep-rider-disability-prem"    class="money-fmt" inputmode="decimal" placeholder="เบี้ยทุพพลภาพ" min="0"></td>
               <td><input id="ep-rider-disability-end"  type="date"></td>
             </tr>
           </tbody>
@@ -1023,7 +1437,7 @@
     <div class="modal-footer" id="modal-footer-view">
       <button class="btn btn-outline" style="padding:9px 20px;font-size:.88rem;" onclick="closeDetail()">ปิด</button>
       <div style="display:flex;gap:10px;margin-left:auto;">
-        <button class="btn btn-outline" style="padding:9px 16px;font-size:.88rem;border-color:var(--red-primary);color:var(--red-primary);" onclick="openEditMode()">✏️ แก้ไข</button>
+        <button class="btn btn-outline" style="padding:9px 16px;font-size:.88rem;border-color:var(--red-primary);color:var(--red-primary);" onclick="closeDetail();openPolicyFormForEdit(currentPolicyIdx)">✏️ แก้ไข</button>
         <button class="btn btn-primary" style="padding:9px 16px;font-size:.88rem;background:#c82333;" id="md-del-btn">🗑️ ลบ</button>
       </div>
     </div>
@@ -1067,7 +1481,7 @@
       <div class="form-grid-2">
         <div class="fg2"><label>Email</label><input id="cm-email" type="email" placeholder="example@email.com"></div>
         <div class="fg2"><label>อาชีพ</label><input id="cm-job" type="text" placeholder="เช่น วิศวกร, แพทย์, ธุรกิจส่วนตัว"></div>
-        <div class="fg2"><label>รายได้ต่อปี (บาท)</label><input id="cm-income" type="number" placeholder="0" min="0"></div>
+        <div class="fg2"><label>รายได้ต่อปี (บาท)</label><input id="cm-income" class="money-fmt" inputmode="decimal" placeholder="0" min="0"></div>
         <div class="fg2"></div>
         <div class="fg2" style="grid-column:1/-1"><label>ที่อยู่</label><textarea id="cm-address" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:.9rem;font-family:var(--font);resize:vertical;min-height:68px;"></textarea></div>
         <div class="fg2" style="grid-column:1/-1">
@@ -1087,7 +1501,9 @@
       <button class="btn btn-primary" onclick="saveClient()" style="padding:9px 20px;font-size:.88rem;">💾 บันทึก</button>
     </div>
   </div>
-</div>
+</div><!-- end policies content -->
+  </main><!-- end app-main -->
+</div><!-- end app-layout -->
 
 <!-- ════════════════════════════════════════
      JAVASCRIPT
@@ -1101,19 +1517,28 @@ let spiderChartInstance = null;
 
 // ─── CONSTANTS ───
 const TYPE_ICONS = {
+  // Legacy types
   'ชีวิต':'🛡️','ทุนชีวิต':'🛡️',
   'สุขภาพ':'❤️','โรคร้ายแรง':'🏥',
   'อุบัติเหตุ':'🚑','บำนาญ':'🏦','เกษียณ':'🏦',
   'ลดหย่อนภาษี':'✂️','ลงทุน':'📈','การศึกษา':'🎓','ส่งมอบ':'🎁',
-  'รถยนต์':'🚗','ค่าชดเชย':'💵','ทุพพลภาพ':'♿','อื่นๆ':'📄'
+  'รถยนต์':'🚗','ค่าชดเชย':'💵','ทุพพลภาพ':'♿','อื่นๆ':'📄',
+  // ─── Phase 3.3 new types ───
+  'ตลอดชีพ':'🛡️','สะสมทรัพย์':'💰','Unit Linked':'🔗','PA':'🚑'
 };
 const COVERAGE_TYPES = ['ชีวิต','สุขภาพ','โรคร้ายแรง','อุบัติเหตุ','บำนาญ','รถยนต์','อื่นๆ'];
 const TYPE_TO_COL = {
+  // Legacy
   'ชีวิต':'ชีวิต','ทุนชีวิต':'ชีวิต',
   'สุขภาพ':'สุขภาพ','โรคร้ายแรง':'โรคร้ายแรง',
   'อุบัติเหตุ':'อุบัติเหตุ',
   'บำนาญ':'บำนาญ','เกษียณ':'บำนาญ','ลดหย่อนภาษี':'บำนาญ',
-  'ลงทุน':'อื่นๆ','การศึกษา':'อื่นๆ','ส่งมอบ':'อื่นๆ','รถยนต์':'รถยนต์'
+  'ลงทุน':'อื่นๆ','การศึกษา':'อื่นๆ','ส่งมอบ':'อื่นๆ','รถยนต์':'รถยนต์',
+  // ─── Phase 3.3 new types ───
+  'ตลอดชีพ':'ชีวิต',       // Whole life → ทุนชีวิต column
+  'สะสมทรัพย์':'ชีวิต',     // Endowment → ทุนชีวิต column
+  'Unit Linked':'ชีวิต',    // UL → ทุนชีวิต column
+  'PA':'อุบัติเหตุ'         // PA → อุบัติเหตุ column
 };
 
 function primaryCovOf(p) {
@@ -1215,9 +1640,7 @@ function calcAgeFromBirth() {
 }
 function fmtShort(n) {
   if (!n) return '—';
-  if (n >= 1000000) return '฿' + (n/1000000).toFixed(1).replace('.0','') + 'ล.';
-  if (n >= 1000)    return '฿' + (n/1000).toFixed(0) + 'K';
-  return '฿' + n.toLocaleString();
+  return '฿' + Math.round(n).toLocaleString('th-TH');
 }
 function parseLocal(s) {
   if (!s) return null;
@@ -1243,12 +1666,23 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
-// ─── INIT NAVBAR ───
+// ─── INIT SIDEBAR ───
 function initNavbar() {
   const user = getCurrentUser();
   if (!user) return;
-  document.getElementById('nav-avatar').textContent = user.firstName.charAt(0);
-  document.getElementById('nav-name').textContent   = user.firstName;
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = (user.firstName||'') + ' ' + (user.lastName||'');
+  if (sbAv) {
+    const photo = user.profile && user.profile.photo;
+    if (photo) {
+      sbAv.style.backgroundImage = `url('${photo}')`;
+      sbAv.classList.add('has-photo');
+      sbAv.textContent = '';
+    } else {
+      sbAv.textContent = (user.firstName||'A').charAt(0).toUpperCase();
+    }
+  }
 }
 
 // ─── VIEW SWITCHING ───
@@ -1261,9 +1695,12 @@ function showList() {
 
 function showDetail(cid) {
   currentClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-list').style.display   = 'none';
   document.getElementById('view-detail').style.display = '';
   render();
+  renderNeedsAnalysis();
+  renderHealthGap();
 }
 
 // ─── CLIENT LIST ───
@@ -1429,6 +1866,27 @@ function render() {
   renderExpiryAlerts(policies);
 }
 
+// ─── RIDER COVERAGE HELPER (Phase 3.3 schema) ───
+// Aggregate rider coverage by category (handles new riders[] + legacy fields)
+function getRiderCoverageByCategory(p, category) {
+  let total = 0;
+  // From new riders[]
+  (p.riders || []).forEach(r => {
+    if (category === 'health'     && r.type === 'medical')     total += Number(r.perVisit || 0);
+    if (category === 'critical'   && r.type === 'critical')    total += Number(r.ciSevere || 0);
+    if (category === 'accident'   && r.type === 'accident')    total += Number(r.deathByAccident || 0);
+    if (category === 'income'     && r.type === 'income')      total += Number(r.dailyComp || 0);
+    if (category === 'disability' && r.type === 'disability')  total += Number(r.disabilityAmt || 0);
+  });
+  // Fallback to legacy single-field schema
+  if (category === 'health'     && (p.coverage || p.riderHealthCov)) total += Number(p.coverage || p.riderHealthCov || 0);
+  if (category === 'critical'   && p.riderCriticalCov)               total += Number(p.riderCriticalCov || 0);
+  if (category === 'accident'   && p.riderAccidentCov)               total += Number(p.riderAccidentCov || 0);
+  if (category === 'income'     && p.riderIncomeDaily)               total += Number(p.riderIncomeDaily || 0);
+  if (category === 'disability' && p.riderDisabilityMonthly)         total += Number(p.riderDisabilityMonthly || 0);
+  return total;
+}
+
 // ─── POLICY TABLE ───
 function renderTable(policies) {
   const tbody      = document.getElementById('policy-tbody');
@@ -1447,6 +1905,9 @@ function renderTable(policies) {
   tableWrap.style.display = '';
 
   const today = new Date(); today.setHours(0,0,0,0);
+
+  // Compute per-policy tax breakdown (for net cost in premium column)
+  const taxBd = computePolicyTaxBreakdown(policies, getCurrentClient());
 
   tbody.innerHTML = policies.map((p, i) => {
     const endDt   = parseLocal(p.end);
@@ -1481,9 +1942,9 @@ function renderTable(policies) {
                 </td>`;
       // Rider coverages (เฉพาะกรมธรรม์ที่ไม่ใช่ type นั้นโดยตรง)
       let riderAmt = 0;
-      if (t === 'สุขภาพ'      && p.type !== 'สุขภาพ')      riderAmt = p.coverage          || 0;
-      if (t === 'โรคร้ายแรง' && p.type !== 'โรคร้ายแรง') riderAmt = p.riderCriticalCov   || 0;
-      if (t === 'อุบัติเหตุ' && p.type !== 'อุบัติเหตุ') riderAmt = p.riderAccidentCov   || 0;
+      if (t === 'สุขภาพ'      && p.type !== 'สุขภาพ')      riderAmt = getRiderCoverageByCategory(p, 'health');
+      if (t === 'โรคร้ายแรง' && p.type !== 'โรคร้ายแรง') riderAmt = getRiderCoverageByCategory(p, 'critical');
+      if (t === 'อุบัติเหตุ' && p.type !== 'อุบัติเหตุ') riderAmt = getRiderCoverageByCategory(p, 'accident');
       if (riderAmt > 0) return `<td class="cov-amount" style="opacity:.75;">
         ${fmtShort(riderAmt)}<div style="font-size:.62rem;color:var(--gray-400);font-weight:400;line-height:1;">ไรเดอร์</div>
       </td>`;
@@ -1499,7 +1960,17 @@ function renderTable(policies) {
           <span class="type-badge">${p.type}</span>
         </td>
         <td class="col-date">${dateHtml}</td>
-        <td style="font-weight:700;color:var(--red-primary);">${fmtShort(p.premium)}</td>
+        <td style="font-weight:700;color:var(--red-primary);">
+          ${fmtShort(p.premium)}
+          ${(() => {
+            const policyDeduct = taxBd.policyDeducts.get(i) || 0;
+            const policySaving = policyDeduct * taxBd.tax.rate;
+            const policyNet    = (p.premium||0) - policySaving;
+            return policySaving > 0
+              ? `<div style="font-size:.68rem;color:var(--gray-500);font-weight:500;line-height:1.3;margin-top:2px;" title="หัก ${taxBd.tax.label} จาก ${fmtShort(policyDeduct)} = ประหยัด ${fmtShort(policySaving)}">สุทธิ ${fmtShort(policyNet)}</div>`
+              : '';
+          })()}
+        </td>
         ${covCols}
         <td class="col-action" onclick="event.stopPropagation()">
           <div class="tbl-actions">
@@ -1519,10 +1990,19 @@ function renderTable(policies) {
     if (pCol2 && totByType[pCol2] !== undefined) totByType[pCol2] += primaryCovOf(p);
     // ทุนชีวิตจากประกันสุขภาพ
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0) totByType['ชีวิต'] += p.lifeCoverage;
-    // Rider coverages จากกรมธรรม์ชีวิต/ประเภทอื่น
-    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) totByType['สุขภาพ']      = (totByType['สุขภาพ']      || 0) + p.coverage;
-    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) totByType['โรคร้ายแรง'] = (totByType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
-    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) totByType['อุบัติเหตุ'] = (totByType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
+    // Rider coverages จากกรมธรรม์ชีวิต/ประเภทอื่น (Phase 3.3 schema)
+    if (p.type !== 'สุขภาพ') {
+      const v = getRiderCoverageByCategory(p, 'health');
+      if (v > 0) totByType['สุขภาพ'] = (totByType['สุขภาพ'] || 0) + v;
+    }
+    if (p.type !== 'โรคร้ายแรง') {
+      const v = getRiderCoverageByCategory(p, 'critical');
+      if (v > 0) totByType['โรคร้ายแรง'] = (totByType['โรคร้ายแรง'] || 0) + v;
+    }
+    if (p.type !== 'อุบัติเหตุ') {
+      const v = getRiderCoverageByCategory(p, 'accident');
+      if (v > 0) totByType['อุบัติเหตุ'] = (totByType['อุบัติเหตุ'] || 0) + v;
+    }
   });
 
   const totCovCols = COVERAGE_TYPES.map(t =>
@@ -1555,12 +2035,23 @@ function renderSpiderChart(policies) {
     byType[pCol3] = (byType[pCol3] || 0) + primaryCovOf(p);
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
       byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
-    // Rider coverages
-    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) byType['สุขภาพ']      = (byType['สุขภาพ']      || 0) + p.coverage;
-    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
-    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
-    if (p.riderIncomeDaily)       byType['ค่าชดเชย']  = (byType['ค่าชดเชย']  || 0) + (p.riderIncomeDaily       || 0);
-    if (p.riderDisabilityMonthly) byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + (p.riderDisabilityMonthly || 0);
+    // Rider coverages (Phase 3.3 — uses riders[] + legacy)
+    if (p.type !== 'สุขภาพ') {
+      const v = getRiderCoverageByCategory(p, 'health');
+      if (v > 0) byType['สุขภาพ'] = (byType['สุขภาพ'] || 0) + v;
+    }
+    if (p.type !== 'โรคร้ายแรง') {
+      const v = getRiderCoverageByCategory(p, 'critical');
+      if (v > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + v;
+    }
+    if (p.type !== 'อุบัติเหตุ') {
+      const v = getRiderCoverageByCategory(p, 'accident');
+      if (v > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + v;
+    }
+    const incomeV = getRiderCoverageByCategory(p, 'income');
+    if (incomeV > 0) byType['ค่าชดเชย'] = (byType['ค่าชดเชย'] || 0) + incomeV;
+    const disabV  = getRiderCoverageByCategory(p, 'disability');
+    if (disabV > 0)  byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + disabV;
   });
 
   const pctValues = checks.map(c => {
@@ -1694,12 +2185,23 @@ function renderGapAnalysis(policies) {
     byType[pCol4] = (byType[pCol4] || 0) + primaryCovOf(p);
     if (p.type === 'สุขภาพ' && p.lifeCoverage > 0)
       byType['ชีวิต'] = (byType['ชีวิต'] || 0) + p.lifeCoverage;
-    // Rider coverages
-    if (p.type !== 'สุขภาพ'      && (p.coverage          || 0) > 0) byType['สุขภาพ']      = (byType['สุขภาพ']      || 0) + p.coverage;
-    if (p.type !== 'โรคร้ายแรง' && (p.riderCriticalCov   || 0) > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + p.riderCriticalCov;
-    if (p.type !== 'อุบัติเหตุ' && (p.riderAccidentCov   || 0) > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + p.riderAccidentCov;
-    if (p.riderIncomeDaily)       byType['ค่าชดเชย']  = (byType['ค่าชดเชย']  || 0) + (p.riderIncomeDaily       || 0);
-    if (p.riderDisabilityMonthly) byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + (p.riderDisabilityMonthly || 0);
+    // Rider coverages (Phase 3.3 — uses riders[] + legacy)
+    if (p.type !== 'สุขภาพ') {
+      const v = getRiderCoverageByCategory(p, 'health');
+      if (v > 0) byType['สุขภาพ'] = (byType['สุขภาพ'] || 0) + v;
+    }
+    if (p.type !== 'โรคร้ายแรง') {
+      const v = getRiderCoverageByCategory(p, 'critical');
+      if (v > 0) byType['โรคร้ายแรง'] = (byType['โรคร้ายแรง'] || 0) + v;
+    }
+    if (p.type !== 'อุบัติเหตุ') {
+      const v = getRiderCoverageByCategory(p, 'accident');
+      if (v > 0) byType['อุบัติเหตุ'] = (byType['อุบัติเหตุ'] || 0) + v;
+    }
+    const incomeV = getRiderCoverageByCategory(p, 'income');
+    if (incomeV > 0) byType['ค่าชดเชย'] = (byType['ค่าชดเชย'] || 0) + incomeV;
+    const disabV  = getRiderCoverageByCategory(p, 'disability');
+    if (disabV > 0)  byType['ทุพพลภาพ'] = (byType['ทุพพลภาพ'] || 0) + disabV;
   });
 
   document.getElementById('gap-list').innerHTML = checks.map(c => {
@@ -1733,33 +2235,203 @@ function renderGapAnalysis(policies) {
 }
 
 // ─── COST SUMMARY ───
+/* ════════════════════════════════════════════
+   Marginal Tax Rate — คำนวณขั้นภาษีจริงจากข้อมูลลูกค้า
+═══════════════════════════════════════════ */
+function getBracketRate(netIncome) {
+  // Thai personal income tax brackets 2024
+  if (netIncome <= 150000)  return { rate: 0,    label: '0%' };
+  if (netIncome <= 300000)  return { rate: 0.05, label: '5%' };
+  if (netIncome <= 500000)  return { rate: 0.10, label: '10%' };
+  if (netIncome <= 750000)  return { rate: 0.15, label: '15%' };
+  if (netIncome <= 1000000) return { rate: 0.20, label: '20%' };
+  if (netIncome <= 2000000) return { rate: 0.25, label: '25%' };
+  if (netIncome <= 5000000) return { rate: 0.30, label: '30%' };
+  return { rate: 0.35, label: '35%' };
+}
+
+function getClientMarginalTax(client) {
+  // Priority 1: ใช้ taxHistory ล่าสุด (ลูกค้าเคยกดบันทึกใน tax.html)
+  if (client && client.taxHistory && client.taxHistory.length > 0) {
+    const latest = client.taxHistory[0];
+    const netIncome = Math.max((latest.income || 0) - (latest.deduct || 0), 0);
+    return { ...getBracketRate(netIncome), source: 'history' };
+  }
+
+  // Priority 2: คำนวณจาก taxInputs ที่บันทึกไว้
+  if (client && client.taxInputs) {
+    const ti = client.taxInputs;
+    const inc1 = Number(ti.salary||0) + Number(ti.bonus||0);
+    const inc2 = Number(ti.inc402||0);
+    const inc3 = Number(ti.inc403||0);
+    const inc4 = Number(ti.inc404||0);
+    const inc5 = Number(ti.inc405||0);
+    const inc6 = Number(ti.inc406||0);
+    const inc7 = Number(ti.inc407||0);
+    const inc8 = Number(ti.inc408||0);
+    const totalIncome = inc1 + inc2 + inc3 + inc4 + inc5 + inc6 + inc7 + inc8 + Number(ti.other||0);
+    if (totalIncome > 0) {
+      // Approx expense: 50%(แต่ไม่เกิน 100k) สำหรับ 40(1-3)
+      const salaryGroupExpense = Math.min((inc1 + inc2 + inc3) * 0.5, 100000);
+      const expense = salaryGroupExpense + inc5 * 0.30 + inc6 * (ti.isMedical ? 0.60 : 0.30) + inc7 * 0.60 + inc8 * 0.60;
+      const totalDeduct = Number(ti.personal||60000) + Number(ti.spouse||0) + Number(ti.child||0)
+                        + Number(ti.lifeIns||0) + Number(ti.healthIns||0) + Number(ti.parentIns||0) + Number(ti.annuity||0)
+                        + Number(ti.pvd||0) + Number(ti.rmf||0) + Number(ti.ssf||0) + Number(ti.sso||0) + Number(ti.donate||0);
+      const netIncome = Math.max(totalIncome - expense - totalDeduct, 0);
+      return { ...getBracketRate(netIncome), source: 'inputs' };
+    }
+  }
+
+  // Priority 3: ประมาณการจาก client.income หรือ cashflow
+  const annualIncome = Number(client && client.income) ||
+    (client && client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
+  if (annualIncome > 0) {
+    const expense = Math.min(annualIncome * 0.5, 100000);
+    const netIncome = Math.max(annualIncome - expense - 60000, 0);
+    return { ...getBracketRate(netIncome), source: 'estimated' };
+  }
+
+  // Priority 4: Fallback (ไม่มีข้อมูลรายได้เลย)
+  return { rate: 0.20, label: '20%', source: 'default' };
+}
+
+/* ════════════════════════════════════════════
+   SHARED — คำนวณภาษีของกรมธรรม์ + per-policy
+═══════════════════════════════════════════ */
+function computePolicyTaxBreakdown(policies, client) {
+  // ─── 1. แยกเบี้ยตามหมวด ───
+  const annuityTypes = ['บำนาญ','เกษียณ','ลดหย่อนภาษี'];
+  const healthTypes  = ['สุขภาพ'];
+
+  const annuityPrem = policies.filter(p => annuityTypes.includes(p.type))
+                              .reduce((s,p) => s + (p.premium||0), 0);
+  const healthPrem  = policies.filter(p => healthTypes.includes(p.type))
+                              .reduce((s,p) => s + (p.premium||0), 0);
+  const lifePrem    = policies.filter(p => !annuityTypes.includes(p.type) && !healthTypes.includes(p.type))
+                              .reduce((s,p) => s + (p.premium||0), 0);
+  const totalPremium = annuityPrem + healthPrem + lifePrem;
+
+  // ─── 2. เพดานเบี้ยประกัน ───
+  const healthDeduct  = Math.min(healthPrem, 25000);
+  const lifeDeduct    = Math.min(lifePrem, 100000 - healthDeduct);
+  let   annuityDeduct = Math.min(annuityPrem, 200000);
+
+  // ─── 3. ลดหย่อนสินทรัพย์ (PVD/RMF/SSF/ThaiESG) ───
+  const annualIncome = Number(client && client.income) ||
+    (client && client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
+  const assets = (client && client.assets) || [];
+
+  const pvdContrib     = assets.filter(a => a.type === 'pvd').reduce((s,a) => s + Number(a.contribution||0), 0);
+  const rmfContrib     = assets.filter(a => a.type === 'rmf').reduce((s,a) => s + Number(a.contribution||0), 0);
+  const ssfContrib     = assets.filter(a => a.type === 'ssf').reduce((s,a) => s + Number(a.contribution||0), 0);
+  const thaiesgContrib = assets.filter(a => a.type === 'thaiesg').reduce((s,a) => s + Number(a.contribution||0), 0);
+
+  // เพดานแต่ละกองทุน (ใช้ % รายได้ถ้ามี)
+  const incomeBased15 = annualIncome > 0 ? annualIncome * 0.15 : Infinity;
+  const incomeBased30 = annualIncome > 0 ? annualIncome * 0.30 : Infinity;
+
+  let pvdDeduct     = Math.min(pvdContrib,     incomeBased15, 500000);
+  let rmfDeduct     = Math.min(rmfContrib,     incomeBased30, 500000);
+  const ssfDeduct   = Math.min(ssfContrib,     incomeBased30, 200000);
+  const thaiesgDeduct = Math.min(thaiesgContrib, incomeBased30, 300000);
+
+  // ⚠️ เพดานรวม PVD + RMF + ประกันบำนาญ ≤ 500,000
+  const combinedRetirement = pvdDeduct + rmfDeduct + annuityDeduct;
+  if (combinedRetirement > 500000 && combinedRetirement > 0) {
+    const ratio = 500000 / combinedRetirement;
+    pvdDeduct     *= ratio;
+    rmfDeduct     *= ratio;
+    annuityDeduct *= ratio;
+  }
+
+  const insuranceDeduct = lifeDeduct + healthDeduct + annuityDeduct;
+  const assetDeduct     = pvdDeduct + rmfDeduct + ssfDeduct + thaiesgDeduct;
+  const totalDeduct     = insuranceDeduct + assetDeduct;
+
+  // ─── 4. Per-policy effective deduction (allocate proportionally within category) ───
+  const policyDeducts = new Map();
+  policies.forEach((p, i) => {
+    const prem = Number(p.premium || 0);
+    let deduct = 0;
+    if (annuityTypes.includes(p.type)) {
+      deduct = annuityPrem > 0 ? (prem / annuityPrem) * annuityDeduct : 0;
+    } else if (healthTypes.includes(p.type)) {
+      deduct = healthPrem  > 0 ? (prem / healthPrem)  * healthDeduct  : 0;
+    } else {
+      deduct = lifePrem    > 0 ? (prem / lifePrem)    * lifeDeduct    : 0;
+    }
+    policyDeducts.set(i, deduct);
+  });
+
+  // ─── 5. Marginal Tax Rate ───
+  const tax = getClientMarginalTax(client);
+
+  return {
+    totalPremium, annuityPrem, healthPrem, lifePrem,
+    lifeDeduct, healthDeduct, annuityDeduct,
+    pvdContrib, rmfContrib, ssfContrib, thaiesgContrib,
+    pvdDeduct, rmfDeduct, ssfDeduct, thaiesgDeduct,
+    insuranceDeduct, assetDeduct, totalDeduct,
+    policyDeducts, tax
+  };
+}
+
 function renderCostSummary(policies) {
-  const totalPremium   = policies.reduce((s,p) => s + (p.premium||0), 0);
-  const annuityTypes   = ['บำนาญ','เกษียณ','ลดหย่อนภาษี'];
-  const annuityPrem    = policies.filter(p => annuityTypes.includes(p.type)).reduce((s,p) => s + (p.premium||0), 0);
-  const otherPrem      = policies.filter(p => !annuityTypes.includes(p.type)).reduce((s,p) => s + (p.premium||0), 0);
-  const taxDeduct      = Math.min(otherPrem, 100000) + Math.min(annuityPrem, 200000);
-  const monthlyPrem    = totalPremium / 12;
-  const netCost        = totalPremium - taxDeduct * 0.20;
+  const client = getCurrentClient();
+  const b = computePolicyTaxBreakdown(policies, client);
+
+  const monthlyPrem = b.totalPremium / 12;
+  // ต้นทุนสุทธิ = เบี้ยรวม - (เงินที่ประหยัดภาษี = totalDeduct × marginal rate)
+  // หมายเหตุ: ใช้ totalDeduct (ครบทั้งประกัน + กองทุน) เพราะ tax savings มาจากผลรวม
+  const netCost = b.totalPremium - b.totalDeduct * b.tax.rate;
+
+  // Source label
+  const sourceLabel = {
+    history:   '📊 จากประวัติคำนวณภาษี',
+    inputs:    '📝 จากข้อมูลที่บันทึก',
+    estimated: '🔍 ประมาณการจากรายได้',
+    default:   '⚠️ ค่าเริ่มต้น (ยังไม่มีข้อมูล)'
+  }[b.tax.source];
+
+  // Insurance breakdown
+  const insBreakdown = [];
+  if (b.lifePrem > 0)    insBreakdown.push(`ชีวิต ${fmt(b.lifeDeduct)}`);
+  if (b.healthPrem > 0)  insBreakdown.push(`สุขภาพ ${fmt(b.healthDeduct)}`);
+  if (b.annuityPrem > 0) insBreakdown.push(`บำนาญ ${fmt(b.annuityDeduct)}`);
+  const insBreakdownStr = insBreakdown.length > 0 ? insBreakdown.join(' · ') : 'ตามเกณฑ์';
+
+  // Asset breakdown (PVD/RMF/SSF/ThaiESG)
+  const assetBreakdown = [];
+  if (b.pvdContrib > 0)     assetBreakdown.push(`PVD ${fmt(b.pvdDeduct)}`);
+  if (b.rmfContrib > 0)     assetBreakdown.push(`RMF ${fmt(b.rmfDeduct)}`);
+  if (b.ssfContrib > 0)     assetBreakdown.push(`SSF ${fmt(b.ssfDeduct)}`);
+  if (b.thaiesgContrib > 0) assetBreakdown.push(`ThaiESG ${fmt(b.thaiesgDeduct)}`);
+  const assetBreakdownStr = assetBreakdown.length > 0 ? assetBreakdown.join(' · ') : '';
 
   document.getElementById('cost-grid').innerHTML = `
     <div class="cost-box">
       <div class="c-ico">📅</div><div class="c-lbl">เบี้ยรายปี</div>
-      <div class="c-val">${fmt(totalPremium)}</div><div class="c-sub">${policies.length} กรมธรรม์</div>
+      <div class="c-val">${fmt(b.totalPremium)}</div><div class="c-sub">${policies.length} กรมธรรม์</div>
     </div>
     <div class="cost-box">
       <div class="c-ico">📆</div><div class="c-lbl">เฉลี่ย/เดือน</div>
       <div class="c-val">${fmt(Math.round(monthlyPrem))}</div>
     </div>
-    <div class="cost-box">
+    <div class="cost-box" title="ชีวิต+สุขภาพ ≤ ฿100k (สุขภาพย่อย ≤ ฿25k) · บำนาญ ≤ ฿200k · PVD+RMF+บำนาญรวม ≤ ฿500k">
       <div class="c-ico">✂️</div><div class="c-lbl">ลดหย่อนภาษี</div>
-      <div class="c-val">${fmt(taxDeduct)}</div><div class="c-sub">สูงสุดตามเกณฑ์</div>
+      <div class="c-val">${fmt(b.totalDeduct)}</div>
+      <div class="c-sub" style="font-size:.68rem;line-height:1.4;">
+        ${insBreakdownStr}
+        ${assetBreakdownStr ? '<br>' + assetBreakdownStr : ''}
+      </div>
     </div>
     <div class="cost-box" style="background:var(--red-soft);">
       <div class="c-ico">💡</div>
       <div class="c-lbl" style="color:var(--red-dark);">ต้นทุนสุทธิ (ประมาณ)</div>
       <div class="c-val" style="color:var(--red-primary);">${fmt(Math.max(Math.round(netCost),0))}</div>
-      <div class="c-sub" style="color:var(--red-dark);">หลังลดหย่อนภาษี 20%</div>
+      <div class="c-sub" style="color:var(--red-dark);" title="${sourceLabel}">
+        ลดหย่อน ${b.tax.label} · ${sourceLabel}
+      </div>
     </div>`;
 }
 
@@ -1852,7 +2524,7 @@ function saveEditedPolicy() {
   const name    = document.getElementById('ep-name').value.trim();
   const company = document.getElementById('ep-company').value.trim();
   const type    = document.getElementById('ep-type').value;
-  const premium = parseFloat(document.getElementById('ep-premium').value) || 0;
+  const premium = parseMoney(document.getElementById('ep-premium'));
   const number  = document.getElementById('ep-number').value.trim();
   const start   = document.getElementById('ep-start').value;
   const end     = document.getElementById('ep-end').value;
@@ -1864,21 +2536,21 @@ function saveEditedPolicy() {
   }
   errEl.style.display = 'none';
 
-  const lifeCoverage           = parseFloat(document.getElementById('ep-life-cov').value)               || 0;
+  const lifeCoverage           = parseMoney(document.getElementById('ep-life-cov'));
   const payYearsMain           = parseInt(document.getElementById('ep-pay-main').value)                  || 0;
   const payYearsRider          = parseInt(document.getElementById('ep-pay-rider').value)                 || 0;
   const plannedPayYears        = parseInt(document.getElementById('ep-plan-years').value)                || 0;
-  const paidUpCoverage         = parseFloat(document.getElementById('ep-paid-up').value)                 || 0;
-  const coverage               = parseFloat(document.getElementById('ep-rider-health-cov').value)        || 0;
-  const riderHealthPrem        = parseFloat(document.getElementById('ep-rider-health-prem').value)       || 0;
-  const riderIncomeDaily       = parseFloat(document.getElementById('ep-rider-income-daily').value)      || 0;
-  const riderIncomePrem        = parseFloat(document.getElementById('ep-rider-income-prem').value)       || 0;
-  const riderCriticalCov       = parseFloat(document.getElementById('ep-rider-critical-cov').value)     || 0;
-  const riderCriticalPrem      = parseFloat(document.getElementById('ep-rider-critical-prem').value)    || 0;
-  const riderAccidentCov       = parseFloat(document.getElementById('ep-rider-accident-cov').value)     || 0;
-  const riderAccidentPrem      = parseFloat(document.getElementById('ep-rider-accident-prem').value)    || 0;
-  const riderDisabilityMonthly = parseFloat(document.getElementById('ep-rider-disability-monthly').value)|| 0;
-  const riderDisabilityPrem    = parseFloat(document.getElementById('ep-rider-disability-prem').value)  || 0;
+  const paidUpCoverage         = parseMoney(document.getElementById('ep-paid-up'));
+  const coverage               = parseMoney(document.getElementById('ep-rider-health-cov'));
+  const riderHealthPrem        = parseMoney(document.getElementById('ep-rider-health-prem'));
+  const riderIncomeDaily       = parseMoney(document.getElementById('ep-rider-income-daily'));
+  const riderIncomePrem        = parseMoney(document.getElementById('ep-rider-income-prem'));
+  const riderCriticalCov       = parseMoney(document.getElementById('ep-rider-critical-cov'));
+  const riderCriticalPrem      = parseMoney(document.getElementById('ep-rider-critical-prem'));
+  const riderAccidentCov       = parseMoney(document.getElementById('ep-rider-accident-cov'));
+  const riderAccidentPrem      = parseMoney(document.getElementById('ep-rider-accident-prem'));
+  const riderDisabilityMonthly = parseMoney(document.getElementById('ep-rider-disability-monthly'));
+  const riderDisabilityPrem    = parseMoney(document.getElementById('ep-rider-disability-prem'));
   const riderHealthName        = (document.getElementById('ep-rider-health-name')?.value     || '').trim();
   const riderHealthEnd         =  document.getElementById('ep-rider-health-end')?.value      || '';
   const riderIncomeName        = (document.getElementById('ep-rider-income-name')?.value     || '').trim();
@@ -1991,7 +2663,19 @@ function openDetail(i) {
   document.getElementById('md-type').textContent     = (TYPE_ICONS[p.type]||'') + ' ' + p.type;
   document.getElementById('md-added').textContent    = fmtDate(p.addedAt?.split('T')[0]) || '—';
 
-  // ─── Riders section ───
+  // ─── Phase 3.3: disabilityAmount + covUpToAge ───
+  const disabItem = document.getElementById('md-disability-item');
+  if (Number(p.disabilityAmount || 0) > 0) {
+    disabItem.style.display = '';
+    document.getElementById('md-disability-amt').textContent = fmt(p.disabilityAmount) + ' บาท';
+  } else { disabItem.style.display = 'none'; }
+  const covAgeItem = document.getElementById('md-covage-item');
+  if (p.covUpToAge) {
+    covAgeItem.style.display = '';
+    document.getElementById('md-covage-val').textContent = p.covUpToAge + ' ปี';
+  } else { covAgeItem.style.display = 'none'; }
+
+  // ─── Riders section (legacy 5-rider + new riders[]) ───
   const riderRows = [];
   if ((p.coverage || 0) > 0 || p.riderHealthName)
     riderRows.push({ lbl:'❤️ สุขภาพ' + (p.riderHealthName ? ` (${p.riderHealthName})` : ''), val: fmt(p.coverage||0), sub: p.riderHealthEnd ? fmtDate(p.riderHealthEnd) : '', prem: p.riderHealthPrem });
@@ -2004,19 +2688,134 @@ function openDetail(i) {
   if ((p.riderDisabilityMonthly || 0) > 0 || p.riderDisabilityName)
     riderRows.push({ lbl:'♿ ทุพพลภาพ' + (p.riderDisabilityName ? ` (${p.riderDisabilityName})` : ''), val: fmt(p.riderDisabilityMonthly||0) + '/เดือน', sub: p.riderDisabilityEnd ? fmtDate(p.riderDisabilityEnd) : '', prem: p.riderDisabilityPrem });
 
+  // Phase 3.3 dynamic riders[]
+  const typeLabels = {
+    medical:    '❤️ ค่ารักษาพยาบาล',
+    income:     '💵 ชดเชยรายได้',
+    accident:   '🚑 อุบัติเหตุ',
+    critical:   '🏥 โรคร้ายแรง',
+    disability: '♿ ทุพพลภาพ'
+  };
+  const ridersDynamicHtml = (p.riders || []).map(r => {
+    const lbl = typeLabels[r.type] || ('🔗 ' + (r.type || 'rider'));
+    const lines = [];
+    if (r.name) lines.push(`<div style="font-size:.78rem;color:var(--gray-500);font-weight:600;">${r.name}</div>`);
+    if (r.type === 'medical') {
+      if (r.roomMeal)   lines.push(`ค่าห้อง/ค่าอาหาร: <b>${fmt(r.roomMeal)}/วัน</b>`);
+      if (r.perVisit)   lines.push(`ต่อครั้ง (IPD): <b>${fmt(r.perVisit)}</b>`);
+      if (r.opdPerYear) lines.push(`OPD ต่อปี: <b>${fmt(r.opdPerYear)}</b>`);
+    } else if (r.type === 'income') {
+      if (r.dailyComp) lines.push(`ค่าชดเชย: <b>${fmt(r.dailyComp)}/วัน</b>`);
+    } else if (r.type === 'accident') {
+      if (r.deathByAccident) lines.push(`เสียชีวิต/อวัยวะ: <b>${fmt(r.deathByAccident)}</b>`);
+      if (r.medicalExpense)  lines.push(`ค่ารักษา: <b>${fmt(r.medicalExpense)}</b>`);
+    } else if (r.type === 'critical') {
+      if (r.ciSevere) lines.push(`ระยะรุนแรง: <b>${fmt(r.ciSevere)}</b>`);
+      if (r.ciEarly)  lines.push(`ระยะเริ่มต้น: <b>${fmt(r.ciEarly)}</b>`);
+      if (r.ciDeath)  lines.push(`เสียชีวิต: <b>${fmt(r.ciDeath)}</b>`);
+    } else if (r.type === 'disability') {
+      if (r.disabilityAmt) lines.push(`ทุนทุพพลภาพ: <b>${fmt(r.disabilityAmt)}</b>`);
+    }
+    if (r.premium)   lines.push(`<span style="color:var(--gray-400);">เบี้ย ${fmt(r.premium)}/ปี</span>`);
+    if (r.endDate)   lines.push(`<span style="font-size:.75rem;color:var(--gray-400);">ถึง ${fmtDate(r.endDate)}</span>`);
+    return `<div class="detail-item">
+      <div class="d-lbl">${lbl}</div>
+      <div class="d-val" style="font-size:.95rem;line-height:1.5;">${lines.join('<br>')}</div>
+    </div>`;
+  }).join('');
+
   const ridersSection = document.getElementById('md-riders-section');
   const ridersGrid    = document.getElementById('md-riders-grid');
-  if (riderRows.length > 0) {
-    ridersSection.style.display = '';
-    ridersGrid.innerHTML = riderRows.map(r => `
+  const legacyHtml    = riderRows.map(r => `
       <div class="detail-item">
         <div class="d-lbl">${r.lbl}</div>
         <div class="d-val">${r.val}${r.prem ? ` <span style="font-size:.8rem;color:var(--gray-400);">/ เบี้ย ${fmt(r.prem)}</span>` : ''}</div>
         ${r.sub ? `<div style="font-size:.78rem;color:var(--gray-400);">ถึง ${r.sub}</div>` : ''}
       </div>`).join('');
+  if (riderRows.length > 0 || (p.riders || []).length > 0) {
+    ridersSection.style.display = '';
+    ridersGrid.innerHTML = legacyHtml + ridersDynamicHtml;
   } else {
     ridersSection.style.display = 'none';
   }
+
+  // ─── Phase 3.3: Type-specific sections ───
+  // Endowment
+  const endowSec  = document.getElementById('md-endowment-section');
+  const endowBody = document.getElementById('md-endowment-body');
+  if (p.endowment && (
+    (p.endowment.cashReturns || []).length > 0 ||
+    p.endowment.totalCashReturn || p.endowment.estimatedDividend || p.endowment.totalReceive
+  )) {
+    endowSec.style.display = '';
+    const rows = (p.endowment.cashReturns || []).map((cr, idx) =>
+      `<tr><td style="padding:6px 10px;">ครั้งที่ ${idx + 1}</td>
+            <td style="padding:6px 10px;text-align:center;">ปีที่ ${cr.year || '—'}</td>
+            <td style="padding:6px 10px;text-align:right;font-weight:600;">${fmt(cr.amount || 0)}</td></tr>`
+    ).join('');
+    endowBody.innerHTML = `
+      ${rows ? `
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+          <thead><tr style="background:var(--gray-50);">
+            <th style="padding:8px 10px;text-align:left;">เงินคืนตามสัญญา</th>
+            <th style="padding:8px 10px;text-align:center;">ปีที่</th>
+            <th style="padding:8px 10px;text-align:right;">จำนวนเงิน</th>
+          </tr></thead><tbody>${rows}</tbody></table></div>` : ''}
+      <div class="detail-grid" style="margin-top:10px;">
+        <div class="detail-item"><div class="d-lbl">รวมเงินคืนตามสัญญา</div><div class="d-val">${fmt(p.endowment.totalCashReturn || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">เงินปันผลโดยประมาณ</div><div class="d-val">${fmt(p.endowment.estimatedDividend || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">รวมรับทั้งหมด</div><div class="d-val big">${fmt(p.endowment.totalReceive || 0)}</div></div>
+      </div>`;
+  } else { endowSec.style.display = 'none'; }
+
+  // Annuity
+  const annSec  = document.getElementById('md-annuity-section');
+  const annBody = document.getElementById('md-annuity-body');
+  if (p.annuity && (
+    p.annuity.pensionPerPeriod || p.annuity.ageStart || p.annuity.totalPension
+  )) {
+    annSec.style.display = '';
+    annBody.innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="d-lbl">เงินบำนาญต่องวด</div><div class="d-val">${fmt(p.annuity.pensionPerPeriod || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">เริ่มรับเมื่ออายุ</div><div class="d-val">${p.annuity.ageStart || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">สิ้นสุดเมื่ออายุ</div><div class="d-val">${p.annuity.ageEnd || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">จำนวนปีที่รับ</div><div class="d-val">${p.annuity.yearsReceiving || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">รวมเงินบำนาญทั้งหมด</div><div class="d-val big">${fmt(p.annuity.totalPension || 0)}</div></div>
+      </div>`;
+  } else { annSec.style.display = 'none'; }
+
+  // Unit Linked
+  const ulSec  = document.getElementById('md-ul-section');
+  const ulBody = document.getElementById('md-ul-body');
+  if (p.unitLinked && (
+    p.unitLinked.withdrawPerYear || p.unitLinked.totalReceive || p.unitLinked.remaining
+  )) {
+    ulSec.style.display = '';
+    ulBody.innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="d-lbl">ถอนต่อปี</div><div class="d-val">${fmt(p.unitLinked.withdrawPerYear || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">เริ่มถอนเมื่ออายุ</div><div class="d-val">${p.unitLinked.withdrawAgeStart || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">สิ้นสุดเมื่ออายุ</div><div class="d-val">${p.unitLinked.withdrawAgeEnd || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">จำนวนปีที่ถอน</div><div class="d-val">${p.unitLinked.withdrawYears || '—'} ปี</div></div>
+        <div class="detail-item"><div class="d-lbl">รวมแผนถอนทั้งหมด</div><div class="d-val">${fmt(p.unitLinked.totalPlannedWithdraw || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">ถอนกรณีอื่น</div><div class="d-val">${fmt(p.unitLinked.otherWithdraw || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">มูลค่าคงเหลือ</div><div class="d-val">${fmt(p.unitLinked.remaining || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">รวมรับทั้งหมด</div><div class="d-val big">${fmt(p.unitLinked.totalReceive || 0)}</div></div>
+      </div>`;
+  } else { ulSec.style.display = 'none'; }
+
+  // PA
+  const paSec  = document.getElementById('md-pa-section');
+  const paBody = document.getElementById('md-pa-body');
+  if (p.pa && (p.pa.accidentLifeCoverage || p.pa.medicalCoverage)) {
+    paSec.style.display = '';
+    paBody.innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="d-lbl">ทุนเสียชีวิตจากอุบัติเหตุ</div><div class="d-val big">${fmt(p.pa.accidentLifeCoverage || 0)}</div></div>
+        <div class="detail-item"><div class="d-lbl">วงเงินค่ารักษาพยาบาล</div><div class="d-val big">${fmt(p.pa.medicalCoverage || 0)}</div></div>
+      </div>`;
+  } else { paSec.style.display = 'none'; }
 
   // Coverage meter
   const rec = RECOMMEND[p.type];
@@ -2144,43 +2943,689 @@ function handlePolicyOverlayClick(e) {
 // ─── ADD POLICY FORM ───
 function toggleForm() {
   const f   = document.getElementById('add-form');
-  const btn = document.getElementById('add-btn');
   const open = f.classList.toggle('open');
-  btn.textContent = open ? '✕ ปิด' : '+ เพิ่มกรมธรรม์';
   if (!open) clearPolicyForm();
+}
+
+function toggleRiderSection() {
+  // Kept for backward compatibility — now a no-op since rider section is always visible
+}
+
+function onPolicyTypeChange() {
+  const type = document.getElementById('p-type').value;
+  renderTypeSpecificFields(type);
+}
+
+/* ════════════════════════════════════════════════════
+   TYPE-SPECIFIC DYNAMIC FIELDS
+══════════════════════════════════════════════════════ */
+let cashReturnRows = [];   // for สะสมทรัพย์
+
+function renderTypeSpecificFields(type) {
+  const wrap = document.getElementById('pf-type-specific');
+  if (!wrap) return;
+
+  if (type === 'สะสมทรัพย์') {
+    wrap.innerHTML = renderEndowmentFields();
+    refreshAllMoneyInputs();
+  } else if (type === 'บำนาญ') {
+    wrap.innerHTML = renderAnnuityFields();
+    refreshAllMoneyInputs();
+  } else if (type === 'Unit Linked') {
+    wrap.innerHTML = renderUnitLinkedFields();
+    refreshAllMoneyInputs();
+  } else {
+    wrap.innerHTML = '';
+  }
+
+  // Adjust standard rows for PA (PA changes labels + hides/inserts rows)
+  adjustStandardFieldsForType(type);
+}
+
+function adjustStandardFieldsForType(type) {
+  const isPA = type === 'PA';
+
+  // 1. Change "เงินเอาประกัน" → "คุ้มครองชีวิต(อุบัติเหตุ)" for PA
+  const lifeCovInput = document.getElementById('p-life-cov');
+  if (lifeCovInput) {
+    const lifeCovRow = lifeCovInput.closest('.pf-row');
+    const lbl = lifeCovRow ? lifeCovRow.querySelector('label') : null;
+    if (lbl) lbl.textContent = isPA ? 'คุ้มครองชีวิต(อุบัติเหตุ)' : 'เงินเอาประกัน';
+  }
+
+  // 2. Hide/show ทุพพลภาพ (only PA hides this)
+  const disInput = document.getElementById('p-disability');
+  if (disInput) {
+    const disRow = disInput.closest('.pf-row');
+    if (disRow) disRow.style.display = isPA ? 'none' : '';
+    if (isPA) disInput.value = '';
+  }
+
+  // 3. Insert/show "ค่ารักษาพยาบาล" row for PA
+  let medRow = document.getElementById('pa-medical-row');
+  if (isPA) {
+    if (!medRow) {
+      // Create row and insert before "คุ้มครองสูงสุดถึงอายุ"
+      const covAgeInput = document.getElementById('p-cov-up-to-age');
+      const covAgeRow = covAgeInput ? covAgeInput.closest('.pf-row') : null;
+      if (covAgeRow) {
+        medRow = document.createElement('div');
+        medRow.id = 'pa-medical-row';
+        medRow.className = 'pf-row';
+        medRow.innerHTML = `
+          <label>ค่ารักษาพยาบาล</label>
+          <input id="p-pa-medical" class="money-fmt" inputmode="decimal" placeholder="0">
+        `;
+        covAgeRow.parentNode.insertBefore(medRow, covAgeRow);
+        refreshAllMoneyInputs();
+      }
+    } else {
+      medRow.style.display = '';
+    }
+  } else if (medRow) {
+    medRow.style.display = 'none';
+    const medInput = document.getElementById('p-pa-medical');
+    if (medInput) medInput.value = '';
+  }
+}
+
+function renderUnitLinkedFields() {
+  return `
+    <div class="pf-type-section">
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">วางแผนการถอนปีละ</label>
+        <input id="p-ul-withdraw-per-year" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">อายุที่ถอน</label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
+          <input id="p-ul-age-start" type="number" min="0" max="120" placeholder="อายุ"
+            style="padding:10px 14px;border:1.5px solid var(--gray-700);border-radius:30px;font-family:var(--font);font-size:.95rem;text-align:center;">
+          <span style="color:var(--gray-500);font-size:.95rem;">ถึง</span>
+          <input id="p-ul-age-end" type="number" min="0" max="120" placeholder="อายุ"
+            style="padding:10px 14px;border:1.5px solid var(--gray-700);border-radius:30px;font-family:var(--font);font-size:.95rem;text-align:center;">
+        </div>
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">จำนวนปีที่ถอน</label>
+        <input id="p-ul-years" type="number" min="0" max="99" placeholder="0">
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">ถอนตามแผนรวม</label>
+        <input id="p-ul-planned-total" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">ถอนอื่นๆ รวม</label>
+        <input id="p-ul-other-total" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">เงินที่เหลือ</label>
+        <input id="p-ul-remaining" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row pf-row-summary">
+        <label>รวมรับทั้งหมด</label>
+        <input id="p-ul-total-receive" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+    </div>
+  `;
+}
+
+function renderAnnuityFields() {
+  return `
+    <div class="pf-type-section">
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">เงินบำนาญรายงวด</label>
+        <input id="p-annuity-per-period" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">อายุที่รับบำนาญ</label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
+          <input id="p-annuity-age-start" type="number" min="0" max="120" placeholder="อายุ"
+            style="padding:10px 14px;border:1.5px solid var(--gray-700);border-radius:30px;font-family:var(--font);font-size:.95rem;text-align:center;">
+          <span style="color:var(--gray-500);font-size:.95rem;">ถึง</span>
+          <input id="p-annuity-age-end" type="number" min="0" max="120" placeholder="อายุ"
+            style="padding:10px 14px;border:1.5px solid var(--gray-700);border-radius:30px;font-family:var(--font);font-size:.95rem;text-align:center;">
+        </div>
+      </div>
+      <div class="pf-row">
+        <label style="color:var(--gray-400);">จำนวนปีที่รับบำนาญ</label>
+        <input id="p-annuity-years" type="number" min="0" max="99" placeholder="0">
+      </div>
+      <div class="pf-row pf-row-summary">
+        <label>รวมเงินบำนาญ</label>
+        <input id="p-annuity-total" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+    </div>
+  `;
+}
+
+function renderEndowmentFields() {
+  // Initialize with at least one row if empty
+  if (cashReturnRows.length === 0) {
+    cashReturnRows = [{ id: genId(), amount: '', year: '' }];
+  }
+
+  return `
+    <div class="pf-type-section">
+      <div class="pf-section-title">เงินคืนตามสัญญา</div>
+      <div id="cash-return-list">
+        ${cashReturnRows.map((r, i) => renderCashReturnRow(r, i)).join('')}
+      </div>
+      <button type="button" class="pf-cr-add-btn" onclick="addCashReturnRow()" title="เพิ่มเงินคืน">+</button>
+
+      <div class="pf-row pf-row-summary">
+        <label>รวมเงินคืนตามสัญญา</label>
+        <input id="p-total-cash-return" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row pf-row-summary">
+        <label>รวมปันผลโดยประมาณ</label>
+        <input id="p-est-dividend" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="pf-row pf-row-summary">
+        <label>รวมรับทั้งหมด</label>
+        <input id="p-total-receive" class="money-fmt" inputmode="decimal" placeholder="0">
+      </div>
+    </div>
+  `;
+}
+
+function renderCashReturnRow(row, idx) {
+  return `
+    <div class="pf-cashreturn-row" data-id="${row.id}">
+      <div class="cr-label">ครั้งที่ ${idx + 1}</div>
+      <input class="money-fmt" inputmode="decimal" placeholder="จำนวนเงิน"
+        value="${row.amount || ''}"
+        onchange="updateCashReturn('${row.id}','amount',parseMoney(this))">
+      <input type="number" placeholder="ปี" min="0" max="99"
+        value="${row.year || ''}"
+        onchange="updateCashReturn('${row.id}','year',this.value)">
+      <button type="button" class="pf-cr-del" onclick="deleteCashReturnRow('${row.id}')" title="ลบ">×</button>
+    </div>
+  `;
+}
+
+function addCashReturnRow() {
+  cashReturnRows.push({ id: genId(), amount: '', year: '' });
+  renderTypeSpecificFields(document.getElementById('p-type').value);
+}
+
+function deleteCashReturnRow(id) {
+  cashReturnRows = cashReturnRows.filter(r => r.id !== id);
+  if (cashReturnRows.length === 0) cashReturnRows.push({ id: genId(), amount: '', year: '' });
+  renderTypeSpecificFields(document.getElementById('p-type').value);
+}
+
+function updateCashReturn(id, field, value) {
+  const row = cashReturnRows.find(r => r.id === id);
+  if (row) row[field] = value;
+}
+
+function genId() {
+  return 'cr' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+}
+
+/* ════════════════════════════════════════════════════
+   DYNAMIC RIDERS (สัญญาเพิ่มเติม)
+══════════════════════════════════════════════════════ */
+let policyRiders = [];
+
+const RIDER_TYPES = {
+  medical:    { label: 'ค่ารักษาพยาบาล' },
+  income:     { label: 'ชดเชยรายได้' },
+  accident:   { label: 'อุบัติเหตุ' },
+  critical:   { label: 'โรคร้ายแรง' },
+  disability: { label: 'ทุพพลภาพ' },
+};
+
+function toggleRiderDropdown(event) {
+  if (event) event.stopPropagation();
+  const dd = document.getElementById('rider-type-dropdown');
+  if (!dd) return;
+  dd.classList.toggle('open');
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('rider-type-dropdown');
+  if (!dd || !dd.classList.contains('open')) return;
+  const wrap = e.target.closest('.rider-add-wrap');
+  if (!wrap) dd.classList.remove('open');
+});
+
+function addRider(type) {
+  const dd = document.getElementById('rider-type-dropdown');
+  if (dd) dd.classList.remove('open');
+  policyRiders.push({
+    id: 'rd' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+    type,
+    name: '',
+    payToAge: '',
+    coverToAge: '',
+    premium: '',
+    // type-specific defaults will be added in render
+  });
+  renderRiders();
+}
+
+function removeRider(id) {
+  if (!confirm('ลบสัญญาเพิ่มเติมนี้?')) return;
+  policyRiders = policyRiders.filter(r => r.id !== id);
+  renderRiders();
+}
+
+function updateRiderField(id, field, value) {
+  const r = policyRiders.find(x => x.id === id);
+  if (r) r[field] = value;
+}
+
+function renderRiders() {
+  const list = document.getElementById('riders-list');
+  if (!list) return;
+  list.innerHTML = policyRiders.map((r, idx) => renderRiderCard(r, idx + 1)).join('');
+  refreshAllMoneyInputs();
+}
+
+function renderRiderCard(rider, num) {
+  const t = RIDER_TYPES[rider.type] || { label: rider.type };
+  const id = rider.id;
+  return `
+    <div class="rider-card" data-id="${id}">
+      <div class="rider-card-header">
+        <span class="rider-num">${num}.</span>
+        <span class="rider-type-pill">${t.label}</span>
+        <button type="button" class="rider-remove-btn" onclick="removeRider('${id}')" title="ลบ">×</button>
+      </div>
+      <div class="rider-card-body">
+        ${renderRiderFields(rider)}
+        ${renderRiderCommonFields(rider)}
+      </div>
+    </div>
+  `;
+}
+
+function renderRiderCommonFields(r) {
+  const id = r.id;
+  return `
+    <div class="pf-row">
+      <label>ชำระเบี้ยถึงอายุ</label>
+      <input type="number" min="0" max="120" value="${r.payToAge || ''}"
+        oninput="updateRiderField('${id}','payToAge',this.value)">
+    </div>
+    <div class="pf-row">
+      <label>คุ้มครองสูงสุดถึงอายุ</label>
+      <input type="number" min="0" max="120" value="${r.coverToAge || ''}"
+        oninput="updateRiderField('${id}','coverToAge',this.value)">
+    </div>
+    <div class="pf-row">
+      <label>เบี้ยประกันต่อปี</label>
+      <input class="money-fmt" inputmode="decimal" value="${r.premium || ''}"
+        onchange="updateRiderField('${id}','premium',parseMoney(this))">
+    </div>
+  `;
+}
+
+function renderRiderFields(r) {
+  const id = r.id;
+  if (r.type === 'medical') {
+    return `
+      <div class="pf-row">
+        <label>ชื่อแบบ</label>
+        <input type="text" value="${(r.name||'').replace(/"/g,'&quot;')}"
+          oninput="updateRiderField('${id}','name',this.value)">
+      </div>
+      <div class="pf-row">
+        <label>ค่าห้อง ค่าอาหาร</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.roomMeal || ''}"
+          onchange="updateRiderField('${id}','roomMeal',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ค่าบริการพยาบาล</label>
+        <select onchange="updateRiderField('${id}','nursingService',this.value)">
+          <option value="">โปรดเลือก</option>
+          <option value="เหมาจ่าย" ${r.nursingService === 'เหมาจ่าย' ? 'selected' : ''}>เหมาจ่าย</option>
+          <option value="รวมกับค่าห้อง" ${r.nursingService === 'รวมกับค่าห้อง' ? 'selected' : ''}>รวมกับหมวดค่าห้อง</option>
+        </select>
+      </div>
+      <div class="pf-row">
+        <label>ค่ารักษาพยาบาลแบบ</label>
+        <select onchange="updateRiderField('${id}','treatmentType',this.value)">
+          <option value="">โปรดเลือก</option>
+          <option value="เหมาจ่าย" ${r.treatmentType === 'เหมาจ่าย' ? 'selected' : ''}>เหมาจ่าย</option>
+          <option value="รวมกับค่าห้อง" ${r.treatmentType === 'รวมกับค่าห้อง' ? 'selected' : ''}>รวมกับหมวดค่าห้อง</option>
+        </select>
+      </div>
+      <div class="pf-row">
+        <label>วงเงินค่ารักษาต่อครั้ง</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.perVisit || ''}"
+          onchange="updateRiderField('${id}','perVisit',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ผู้ป่วยนอกต่อปี</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.opdPerYear || ''}"
+          onchange="updateRiderField('${id}','opdPerYear',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ผู้ป่วยนอกต่อครั้ง</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.opdPerVisit || ''}"
+          onchange="updateRiderField('${id}','opdPerVisit',parseMoney(this))">
+      </div>
+    `;
+  }
+
+  if (r.type === 'income') {
+    return `
+      <div class="pf-row">
+        <label>ชื่อแบบ</label>
+        <input type="text" value="${(r.name||'').replace(/"/g,'&quot;')}"
+          oninput="updateRiderField('${id}','name',this.value)">
+      </div>
+      <div class="rider-card .pf-section-subhdr" style="font-weight:800;font-size:.92rem;color:var(--gray-700);margin:8px 0;">ชดเชยรายได้</div>
+      <div class="pf-row">
+        <label>ค่าชดเชยรายวัน</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.dailyComp || ''}"
+          onchange="updateRiderField('${id}','dailyComp',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ค่ายากลับบ้าน</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.takeHomeMed || ''}"
+          onchange="updateRiderField('${id}','takeHomeMed',parseMoney(this))">
+      </div>
+    `;
+  }
+
+  if (r.type === 'accident') {
+    const freqOpts = (val) => `
+      <option value="ต่อวัน" ${val === 'ต่อวัน' ? 'selected' : ''}>ต่อวัน</option>
+      <option value="ต่อสัปดาห์" ${val === 'ต่อสัปดาห์' ? 'selected' : ''}>ต่อสัปดาห์</option>
+      <option value="ต่อปี" ${val === 'ต่อปี' ? 'selected' : ''}>ต่อปี</option>
+    `;
+    return `
+      <div class="pf-row">
+        <label>ชื่อแบบ</label>
+        <input type="text" value="${(r.name||'').replace(/"/g,'&quot;')}"
+          oninput="updateRiderField('${id}','name',this.value)">
+      </div>
+      <div class="pf-section-subhdr">ชดเชยอุบัติเหตุ</div>
+      <div class="pf-row">
+        <label>เสียชีวิตอุบัติเหตุ</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.deathByAccident || ''}"
+          onchange="updateRiderField('${id}','deathByAccident',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>สูญเสียอวัยวะสูงสุด</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.organLossMax || ''}"
+          onchange="updateRiderField('${id}','organLossMax',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ทุพพลภาพสิ้นเชิง</label>
+        <div class="rider-row-with-freq">
+          <input class="money-fmt" inputmode="decimal" value="${r.disComplete || ''}"
+            onchange="updateRiderField('${id}','disComplete',parseMoney(this))">
+          <select onchange="updateRiderField('${id}','disCompleteFreq',this.value)">${freqOpts(r.disCompleteFreq || 'ต่อสัปดาห์')}</select>
+        </div>
+      </div>
+      <div class="pf-row">
+        <label>ทุพพลภาพบางส่วน</label>
+        <div class="rider-row-with-freq">
+          <input class="money-fmt" inputmode="decimal" value="${r.disPartial || ''}"
+            onchange="updateRiderField('${id}','disPartial',parseMoney(this))">
+          <select onchange="updateRiderField('${id}','disPartialFreq',this.value)">${freqOpts(r.disPartialFreq || 'ต่อสัปดาห์')}</select>
+        </div>
+      </div>
+      <div class="pf-row">
+        <label>ทุพพลภาพถาวรสิ้นเชิง</label>
+        <div class="rider-row-with-freq">
+          <input class="money-fmt" inputmode="decimal" value="${r.disPermanent || ''}"
+            onchange="updateRiderField('${id}','disPermanent',parseMoney(this))">
+          <select onchange="updateRiderField('${id}','disPermanentFreq',this.value)">${freqOpts(r.disPermanentFreq || 'ต่อสัปดาห์')}</select>
+        </div>
+      </div>
+      <div class="pf-row">
+        <label>เข้ารักษาเป็นผู้ป่วยใน</label>
+        <div class="rider-row-with-freq">
+          <input class="money-fmt" inputmode="decimal" value="${r.ipdComp || ''}"
+            onchange="updateRiderField('${id}','ipdComp',parseMoney(this))">
+          <select onchange="updateRiderField('${id}','ipdCompFreq',this.value)">${freqOpts(r.ipdCompFreq || 'ต่อสัปดาห์')}</select>
+        </div>
+      </div>
+    `;
+  }
+
+  if (r.type === 'critical') {
+    return `
+      <div class="pf-row">
+        <label>ชื่อแบบ</label>
+        <input type="text" value="${(r.name||'').replace(/"/g,'&quot;')}"
+          oninput="updateRiderField('${id}','name',this.value)">
+      </div>
+      <div class="pf-section-subhdr">ชดเชยโรคร้ายแรง</div>
+      <div class="pf-row">
+        <label>เสียชีวิต</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.ciDeath || ''}"
+          onchange="updateRiderField('${id}','ciDeath',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ระยะเริ่มต้น-ปานกลาง</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.ciEarly || ''}"
+          onchange="updateRiderField('${id}','ciEarly',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>ระยะรุนแรงสูงสุด</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.ciSevere || ''}"
+          onchange="updateRiderField('${id}','ciSevere',parseMoney(this))">
+      </div>
+      <div class="pf-row" style="grid-template-columns:160px 1fr;align-items:start;">
+        <label style="padding-top:6px;">เงื่อนไขเพิ่มเติม</label>
+        <textarea rows="3" style="padding:8px 12px;border:1.5px solid var(--gray-700);border-radius:18px;font-family:var(--font);font-size:.88rem;resize:vertical;"
+          oninput="updateRiderField('${id}','condition',this.value)">${(r.condition||'').replace(/</g,'&lt;')}</textarea>
+      </div>
+    `;
+  }
+
+  if (r.type === 'disability') {
+    return `
+      <div class="pf-row">
+        <label>ชื่อแบบ</label>
+        <input type="text" value="${(r.name||'').replace(/"/g,'&quot;')}"
+          oninput="updateRiderField('${id}','name',this.value)">
+      </div>
+      <div class="pf-row">
+        <label>ทุพพลภาพ</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.disabilityAmt || ''}"
+          onchange="updateRiderField('${id}','disabilityAmt',parseMoney(this))">
+      </div>
+      <div class="pf-row" style="grid-template-columns:160px 1fr;align-items:start;">
+        <label style="padding-top:6px;">เงื่อนไขเพิ่มเติม</label>
+        <textarea rows="3" style="padding:8px 12px;border:1.5px solid var(--gray-700);border-radius:18px;font-family:var(--font);font-size:.88rem;resize:vertical;"
+          oninput="updateRiderField('${id}','condition',this.value)">${(r.condition||'').replace(/</g,'&lt;')}</textarea>
+      </div>
+    `;
+  }
+
+  return '';
+}
+
+/* ════════════════════════════════════════════════════
+   UNIFIED ADD/EDIT — ใช้ฟอร์มเดียวกันทั้งเพิ่มและแก้ไข
+══════════════════════════════════════════════════════ */
+let editingPolicyIndex = null;   // null = adding new, number = editing existing
+
+function legacyRidersToArray(p) {
+  const riders = [];
+  // Convert legacy rider fields to new riders[] structure
+  if (p.riderHealthName || Number(p.coverage) > 0 || Number(p.riderHealthCov) > 0 || Number(p.riderHealthPrem) > 0) {
+    riders.push({
+      id: 'leg-med-' + Math.random().toString(36).slice(2,6),
+      type: 'medical',
+      name: p.riderHealthName || '',
+      perVisit: Number(p.coverage || p.riderHealthCov || 0),
+      premium: Number(p.riderHealthPrem || 0),
+    });
+  }
+  if (p.riderIncomeName || Number(p.riderIncomeDaily) > 0 || Number(p.riderIncomePrem) > 0) {
+    riders.push({
+      id: 'leg-inc-' + Math.random().toString(36).slice(2,6),
+      type: 'income',
+      name: p.riderIncomeName || '',
+      dailyComp: Number(p.riderIncomeDaily || 0),
+      premium: Number(p.riderIncomePrem || 0),
+    });
+  }
+  if (p.riderCriticalName || Number(p.riderCriticalCov) > 0 || Number(p.riderCriticalPrem) > 0) {
+    riders.push({
+      id: 'leg-cri-' + Math.random().toString(36).slice(2,6),
+      type: 'critical',
+      name: p.riderCriticalName || '',
+      ciSevere: Number(p.riderCriticalCov || 0),
+      premium: Number(p.riderCriticalPrem || 0),
+    });
+  }
+  if (p.riderAccidentName || Number(p.riderAccidentCov) > 0 || Number(p.riderAccidentPrem) > 0) {
+    riders.push({
+      id: 'leg-acc-' + Math.random().toString(36).slice(2,6),
+      type: 'accident',
+      name: p.riderAccidentName || '',
+      deathByAccident: Number(p.riderAccidentCov || 0),
+      premium: Number(p.riderAccidentPrem || 0),
+    });
+  }
+  if (p.riderDisabilityName || Number(p.riderDisabilityMonthly) > 0 || Number(p.riderDisabilityPrem) > 0) {
+    riders.push({
+      id: 'leg-dis-' + Math.random().toString(36).slice(2,6),
+      type: 'disability',
+      name: p.riderDisabilityName || '',
+      disabilityAmt: Number(p.riderDisabilityMonthly || 0),
+      premium: Number(p.riderDisabilityPrem || 0),
+    });
+  }
+  return riders;
+}
+
+function setVal(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.value = v == null ? '' : v;
+}
+
+function populatePolicyForm(p) {
+  if (!p) return;
+
+  // 1) Set type FIRST so dynamic fields render
+  setVal('p-type', p.type || 'ตลอดชีพ');
+  // Trigger type-specific render
+  onPolicyTypeChange();
+
+  // 2) Common fields
+  setVal('p-number',          p.number);
+  setVal('p-name',             p.name);
+  setVal('p-company',          p.company);
+  setVal('p-life-cov',         p.lifeCoverage || (p.pa && p.pa.accidentLifeCoverage) || '');
+  setVal('p-disability',       p.disabilityAmount);
+  setVal('p-cov-up-to-age',    p.covUpToAge);
+  setVal('p-premium',          p.premium);
+  setVal('p-start',            p.start);
+  setVal('p-pay-main',         p.payYearsMain);
+  setVal('p-end',              p.end);
+
+  // 3) Type-specific data
+  if (p.type === 'สะสมทรัพย์' && p.endowment) {
+    cashReturnRows = (p.endowment.cashReturns || []).map(c => ({
+      id: genId(), amount: c.amount, year: c.year
+    }));
+    if (cashReturnRows.length === 0) cashReturnRows = [{ id: genId(), amount:'', year:'' }];
+    renderTypeSpecificFields('สะสมทรัพย์');
+    setVal('p-total-cash-return', p.endowment.totalCashReturn);
+    setVal('p-est-dividend',      p.endowment.estimatedDividend);
+    setVal('p-total-receive',     p.endowment.totalReceive);
+  } else if (p.type === 'บำนาญ' && p.annuity) {
+    setVal('p-annuity-per-period', p.annuity.pensionPerPeriod);
+    setVal('p-annuity-age-start',  p.annuity.ageStart);
+    setVal('p-annuity-age-end',    p.annuity.ageEnd);
+    setVal('p-annuity-years',      p.annuity.yearsReceiving);
+    setVal('p-annuity-total',      p.annuity.totalPension);
+  } else if (p.type === 'Unit Linked' && p.unitLinked) {
+    setVal('p-ul-withdraw-per-year', p.unitLinked.withdrawPerYear);
+    setVal('p-ul-age-start',         p.unitLinked.withdrawAgeStart);
+    setVal('p-ul-age-end',           p.unitLinked.withdrawAgeEnd);
+    setVal('p-ul-years',             p.unitLinked.withdrawYears);
+    setVal('p-ul-planned-total',     p.unitLinked.totalPlannedWithdraw);
+    setVal('p-ul-other-total',       p.unitLinked.otherWithdraw);
+    setVal('p-ul-remaining',         p.unitLinked.remaining);
+    setVal('p-ul-total-receive',     p.unitLinked.totalReceive);
+  } else if (p.type === 'PA' && p.pa) {
+    // PA has additional medical field (created dynamically by adjustStandardFieldsForType)
+    setTimeout(() => setVal('p-pa-medical', p.pa.medicalCoverage), 50);
+  }
+
+  // 4) Riders[] — use new schema or convert from legacy
+  if (Array.isArray(p.riders) && p.riders.length > 0) {
+    policyRiders = p.riders.map(r => ({ ...r }));
+  } else {
+    policyRiders = legacyRidersToArray(p);
+  }
+  renderRiders();
+
+  // 5) Pending endorsements
+  pendingEndorsements = Array.isArray(p.endorsements) ? [...p.endorsements] : [];
+  renderPendingEndorseList();
+
+  // 6) Refresh money formats
+  if (window.refreshAllMoneyInputs) refreshAllMoneyInputs();
+}
+
+function openPolicyFormForEdit(idx) {
+  const client = getCurrentClient();
+  if (!client || !client.policies || !client.policies[idx]) return;
+  const p = client.policies[idx];
+
+  editingPolicyIndex = idx;
+  // Open form modal first
+  const f = document.getElementById('add-form');
+  f.classList.add('open');
+  // Populate
+  populatePolicyForm(p);
+  // Update save button text
+  const saveBtn = document.querySelector('.pf-save-btn');
+  if (saveBtn) saveBtn.textContent = 'อัปเดต';
 }
 
 function addPolicy() {
   const name    = document.getElementById('p-name').value.trim();
   const company = document.getElementById('p-company').value.trim();
   const type    = document.getElementById('p-type').value;
-  const premium = parseFloat(document.getElementById('p-premium').value) || 0;
+  const premium = parseMoney(document.getElementById('p-premium'));
   const number  = document.getElementById('p-number').value.trim();
   const start   = document.getElementById('p-start').value;
   const end     = document.getElementById('p-end').value;
   const err     = document.getElementById('p-error');
 
   if (!name || !company || !type || !premium) {
-    err.textContent = 'กรุณากรอก ชื่อแบบประกัน, บริษัท, ประเภท และเบี้ยประกัน';
+    err.textContent = 'กรุณากรอก แบบประกัน, บริษัท, ประเภท และเบี้ยประกัน';
     err.style.display = 'block'; return;
   }
   err.style.display = 'none';
 
-  const lifeCoverage           = parseFloat(document.getElementById('p-life-cov').value)               || 0;
+  const lifeCoverage           = parseMoney(document.getElementById('p-life-cov'));
+  // New fields (Phase 3.3 redesign)
+  const disabilityAmount       = parseMoney(document.getElementById('p-disability'));
+  const covUpToAge             = parseInt(document.getElementById('p-cov-up-to-age').value)              || 0;
   const payYearsMain           = parseInt(document.getElementById('p-pay-main').value)                  || 0;
-  const payYearsRider          = parseInt(document.getElementById('p-pay-rider').value)                 || 0;
-  const plannedPayYears        = parseInt(document.getElementById('p-plan-years').value)                || 0;
-  const paidUpCoverage         = parseFloat(document.getElementById('p-paid-up').value)                 || 0;
-  const coverage               = parseFloat(document.getElementById('p-rider-health-cov').value)        || 0;
-  const riderHealthPrem        = parseFloat(document.getElementById('p-rider-health-prem').value)       || 0;
-  const riderIncomeDaily       = parseFloat(document.getElementById('p-rider-income-daily').value)      || 0;
-  const riderIncomePrem        = parseFloat(document.getElementById('p-rider-income-prem').value)       || 0;
-  const riderCriticalCov       = parseFloat(document.getElementById('p-rider-critical-cov').value)     || 0;
-  const riderCriticalPrem      = parseFloat(document.getElementById('p-rider-critical-prem').value)    || 0;
-  const riderAccidentCov       = parseFloat(document.getElementById('p-rider-accident-cov').value)     || 0;
-  const riderAccidentPrem      = parseFloat(document.getElementById('p-rider-accident-prem').value)    || 0;
-  const riderDisabilityMonthly = parseFloat(document.getElementById('p-rider-disability-monthly').value)|| 0;
-  const riderDisabilityPrem    = parseFloat(document.getElementById('p-rider-disability-prem').value)  || 0;
+  // Legacy fields (kept for backward compatibility — empty by default in new form)
+  const payYearsRiderEl        = document.getElementById('p-pay-rider');
+  const plannedPayYearsEl      = document.getElementById('p-plan-years');
+  const paidUpEl               = document.getElementById('p-paid-up');
+  const payYearsRider          = payYearsRiderEl   ? (parseInt(payYearsRiderEl.value) || 0) : 0;
+  const plannedPayYears        = plannedPayYearsEl ? (parseInt(plannedPayYearsEl.value) || 0) : 0;
+  const paidUpCoverage         = paidUpEl ? parseMoney(paidUpEl) : 0;
+  const coverage               = parseMoney(document.getElementById('p-rider-health-cov'));
+  const riderHealthPrem        = parseMoney(document.getElementById('p-rider-health-prem'));
+  const riderIncomeDaily       = parseMoney(document.getElementById('p-rider-income-daily'));
+  const riderIncomePrem        = parseMoney(document.getElementById('p-rider-income-prem'));
+  const riderCriticalCov       = parseMoney(document.getElementById('p-rider-critical-cov'));
+  const riderCriticalPrem      = parseMoney(document.getElementById('p-rider-critical-prem'));
+  const riderAccidentCov       = parseMoney(document.getElementById('p-rider-accident-cov'));
+  const riderAccidentPrem      = parseMoney(document.getElementById('p-rider-accident-prem'));
+  const riderDisabilityMonthly = parseMoney(document.getElementById('p-rider-disability-monthly'));
+  const riderDisabilityPrem    = parseMoney(document.getElementById('p-rider-disability-prem'));
   const riderHealthName        = document.getElementById('p-rider-health-name').value.trim();
   const riderHealthEnd         = document.getElementById('p-rider-health-end').value;
   const riderIncomeName        = document.getElementById('p-rider-income-name').value.trim();
@@ -2197,9 +3642,74 @@ function addPolicy() {
     const client = u.data.clients.find(c => c.id === cid);
     if (!client) return;
     if (!client.policies) client.policies = [];
-    client.policies.push({
+    // Type-specific data (สะสมทรัพย์)
+    let endowmentData = null;
+    if (type === 'สะสมทรัพย์') {
+      const validRows = cashReturnRows
+        .filter(r => Number(r.amount) > 0 || r.year)
+        .map(r => ({ amount: Number(r.amount) || 0, year: Number(r.year) || 0 }));
+      endowmentData = {
+        cashReturns: validRows,
+        totalCashReturn:   parseMoney(document.getElementById('p-total-cash-return')),
+        estimatedDividend: parseMoney(document.getElementById('p-est-dividend')),
+        totalReceive:      parseMoney(document.getElementById('p-total-receive')),
+      };
+    }
+
+    // Type-specific data (บำนาญ)
+    let annuityData = null;
+    if (type === 'บำนาญ') {
+      annuityData = {
+        pensionPerPeriod: parseMoney(document.getElementById('p-annuity-per-period')),
+        ageStart:         parseInt(document.getElementById('p-annuity-age-start').value) || 0,
+        ageEnd:           parseInt(document.getElementById('p-annuity-age-end').value) || 0,
+        yearsReceiving:   parseInt(document.getElementById('p-annuity-years').value) || 0,
+        totalPension:     parseMoney(document.getElementById('p-annuity-total')),
+      };
+    }
+
+    // Type-specific data (Unit Linked)
+    let unitLinkedData = null;
+    if (type === 'Unit Linked') {
+      unitLinkedData = {
+        withdrawPerYear:      parseMoney(document.getElementById('p-ul-withdraw-per-year')),
+        withdrawAgeStart:     parseInt(document.getElementById('p-ul-age-start').value) || 0,
+        withdrawAgeEnd:       parseInt(document.getElementById('p-ul-age-end').value) || 0,
+        withdrawYears:        parseInt(document.getElementById('p-ul-years').value) || 0,
+        totalPlannedWithdraw: parseMoney(document.getElementById('p-ul-planned-total')),
+        otherWithdraw:        parseMoney(document.getElementById('p-ul-other-total')),
+        remaining:            parseMoney(document.getElementById('p-ul-remaining')),
+        totalReceive:         parseMoney(document.getElementById('p-ul-total-receive')),
+      };
+    }
+
+    // Type-specific data (PA — Personal Accident)
+    let paData = null;
+    if (type === 'PA') {
+      const medEl = document.getElementById('p-pa-medical');
+      paData = {
+        // PA reuses lifeCoverage as "คุ้มครองชีวิต(อุบัติเหตุ)"
+        accidentLifeCoverage: lifeCoverage,
+        medicalCoverage:      medEl ? parseMoney(medEl) : 0,
+      };
+    }
+
+    const policyData = {
       name, company, type, premium, number, start, end,
       lifeCoverage, coverage,
+      // ─── Phase 3.3 new fields ───
+      disabilityAmount, covUpToAge,
+      // ─── Type-specific (สะสมทรัพย์) ───
+      ...(endowmentData ? { endowment: endowmentData } : {}),
+      // ─── Type-specific (บำนาญ) ───
+      ...(annuityData ? { annuity: annuityData } : {}),
+      // ─── Type-specific (Unit Linked) ───
+      ...(unitLinkedData ? { unitLinked: unitLinkedData } : {}),
+      // ─── Type-specific (PA) ───
+      ...(paData ? { pa: paData } : {}),
+      // ─── Dynamic riders (Phase 3.3 redesign) ───
+      riders: [...policyRiders],
+      // ─── Legacy fields ───
       payYearsMain, payYearsRider, plannedPayYears, paidUpCoverage,
       riderHealthPrem, riderIncomeDaily, riderIncomePrem,
       riderCriticalCov, riderCriticalPrem,
@@ -2211,10 +3721,35 @@ function addPolicy() {
       riderAccidentName, riderAccidentEnd,
       riderDisabilityName, riderDisabilityEnd,
       endorsements: pendingEndorsements.length > 0 ? [...pendingEndorsements] : [],
-      addedAt: new Date().toISOString()
-    });
-    if (u.data.activities) {
-      u.data.activities.push({ icon:'📊', title:'เพิ่มกรมธรรม์ '+name+' ('+client.firstName+')', time:'วันนี้ เวลา '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+    };
+
+    if (editingPolicyIndex !== null && client.policies && client.policies[editingPolicyIndex]) {
+      // ─── UPDATE existing policy ───
+      const existing = client.policies[editingPolicyIndex];
+      // Preserve metadata from original (addedAt, id, etc.)
+      client.policies[editingPolicyIndex] = {
+        ...existing,
+        ...policyData,
+        // Clear type-specific data not matching new type
+        endowment:  type === 'สะสมทรัพย์'  ? policyData.endowment  : undefined,
+        annuity:    type === 'บำนาญ'      ? policyData.annuity    : undefined,
+        unitLinked: type === 'Unit Linked' ? policyData.unitLinked : undefined,
+        pa:         type === 'PA'         ? policyData.pa         : undefined,
+        updatedAt:  new Date().toISOString(),
+      };
+      if (u.data.activities) {
+        u.data.activities.push({ icon:'✏️', title:'แก้ไขกรมธรรม์ '+name+' ('+client.firstName+')', time:'วันนี้ เวลา '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+      }
+    } else {
+      // ─── ADD new policy ───
+      if (!client.policies) client.policies = [];
+      client.policies.push({
+        ...policyData,
+        addedAt: new Date().toISOString()
+      });
+      if (u.data.activities) {
+        u.data.activities.push({ icon:'📊', title:'เพิ่มกรมธรรม์ '+name+' ('+client.firstName+')', time:'วันนี้ เวลา '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+      }
     }
   });
   toggleForm();
@@ -2233,6 +3768,7 @@ function deletePolicy(i) {
 
 function clearPolicyForm() {
   ['p-name','p-company','p-number','p-start','p-end','p-life-cov','p-premium',
+   'p-disability','p-cov-up-to-age',
    'p-pay-main','p-pay-rider','p-plan-years','p-paid-up',
    'p-rider-health-cov','p-rider-health-prem',
    'p-rider-income-daily','p-rider-income-prem',
@@ -2244,12 +3780,31 @@ function clearPolicyForm() {
    'p-rider-critical-name','p-rider-critical-end',
    'p-rider-accident-name','p-rider-accident-end',
    'p-rider-disability-name','p-rider-disability-end'
-  ].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('p-type').value = '';
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('p-type').value = 'ตลอดชีพ';
   document.getElementById('p-error').style.display = 'none';
   pendingEndorsements = [];
   renderPendingEndorseList();
   document.getElementById('p-endorse-form').style.display = 'none';
+  // (Rider section is always visible now — no toggle to reset)
+  // Reset type-specific fields (cash returns for สะสมทรัพย์)
+  cashReturnRows = [];
+  const typeSpecific = document.getElementById('pf-type-specific');
+  if (typeSpecific) typeSpecific.innerHTML = '';
+  // Reset dynamic riders (Phase 3.3 redesign)
+  policyRiders = [];
+  const ridersList = document.getElementById('riders-list');
+  if (ridersList) ridersList.innerHTML = '';
+  const riderDd = document.getElementById('rider-type-dropdown');
+  if (riderDd) riderDd.classList.remove('open');
+  // Reset PA-specific row state
+  if (typeof adjustStandardFieldsForType === 'function') {
+    adjustStandardFieldsForType('ตลอดชีพ');
+  }
+  // Reset edit mode
+  editingPolicyIndex = null;
+  const saveBtn = document.querySelector('.pf-save-btn');
+  if (saveBtn) saveBtn.textContent = 'บันทึก';
 }
 
 // ─── PENDING ENDORSEMENTS (add-policy form) ───
@@ -2571,7 +4126,7 @@ function saveClient() {
     phone     : document.getElementById('cm-phone').value.trim(),
     email     : document.getElementById('cm-email').value.trim(),
     job       : document.getElementById('cm-job').value.trim(),
-    income    : parseFloat(document.getElementById('cm-income').value) || null,
+    income    : parseMoney(document.getElementById('cm-income')) || null,
     address   : document.getElementById('cm-address').value.trim(),
     familyId  : resolveCmFamilyId(),
   };
@@ -2656,7 +4211,7 @@ document.addEventListener('keydown', e => {
 
   // 4. Show client list or pre-selected client
   const preselect = localStorage.getItem('aia_selectedClient');
-  localStorage.removeItem('aia_selectedClient');
+  // ไม่ลบ key — ให้ persist ข้ามหน้า
   if (preselect && (user.data.clients||[]).find(c => c.id === preselect)) {
     showDetail(preselect);
   } else {
@@ -2671,6 +4226,332 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+/* ════════════════════════════════════════════════════════
+   PHASE 3.3 — LIFE INSURANCE NEEDS ANALYSIS
+══════════════════════════════════════════════════════ */
+let needsCardOpen = true;
+
+function getCurrentClient() {
+  const u = getCurrentUser();
+  return (u.data.clients||[]).find(c => c.id === currentClientId) || null;
+}
+
+function fmtTH(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtShortTH(n) {
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+function getNeedsInputs() {
+  const c = getCurrentClient();
+  if (!c) return null;
+  const n = c.needsInputs || {};
+
+  // Auto-defaults from existing client data
+  const totalDebt = (c.liabilities || []).reduce((s,l) => s + Number(l.principal||0), 0);
+  const annualIncome = Number(c.income) || (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
+  const childrenCount = (c.children || []).length;
+  const eduPerChild = 2500000; // baseline estimate
+
+  return {
+    debt:     n.debt     != null ? n.debt     : totalDebt,
+    income:   n.income   != null ? n.income   : annualIncome,
+    incomeYears: n.incomeYears != null ? n.incomeYears : 10,
+    edu:      n.edu      != null ? n.edu      : (childrenCount * eduPerChild),
+    final:    n.final    != null ? n.final    : 500000,
+    haveLife: n.haveLife != null ? n.haveLife : 0,
+    haveAssets: n.haveAssets != null ? n.haveAssets : 0,
+  };
+}
+
+function computeLifeNeeds(client, inputs) {
+  if (!client || !inputs) return null;
+  const totalNeed = Number(inputs.debt||0) + Number(inputs.income||0) * Number(inputs.incomeYears||0)
+                  + Number(inputs.edu||0) + Number(inputs.final||0);
+  // Current life coverage from policies
+  const policies = client.policies || [];
+  const lifeTypes = ['ทุนชีวิต','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา','โรคร้ายแรง','เกษียณ','ลงทุน','ส่งมอบ','ลดหย่อนภาษี'];
+  const currentLifeCoverage = policies.reduce((s,p) => {
+    if (lifeTypes.includes(p.type)) return s + Number(p.lifeCoverage || 0);
+    return s;
+  }, 0);
+  const haveTotal = currentLifeCoverage + Number(inputs.haveAssets||0) + Number(inputs.haveLife||0);
+  const gap = Math.max(totalNeed - haveTotal, 0);
+  return { totalNeed, currentLifeCoverage, haveTotal, gap };
+}
+
+function renderNeedsAnalysis() {
+  const wrap = document.getElementById('needs-analysis-section');
+  if (!wrap) return;
+  const client = getCurrentClient();
+  if (!client) { wrap.innerHTML = ''; return; }
+
+  const inputs = getNeedsInputs();
+  const result = computeLifeNeeds(client, inputs);
+  const summaryClass = result.gap === 0 ? 'ns-good' : (result.haveTotal >= result.totalNeed * 0.7 ? 'ns-warn' : 'ns-bad');
+  const summaryText = result.gap === 0
+    ? '✅ ความคุ้มครองพอแล้ว'
+    : (result.haveTotal >= result.totalNeed * 0.7 ? '⚠️ ขาดบางส่วน' : '⛔ ขาดมาก');
+
+  wrap.innerHTML = `<div class="needs-card">
+    <div class="nc-header ${needsCardOpen ? 'open':''}" onclick="toggleNeedsCard()">
+      <div class="nc-title">🛡️ วิเคราะห์ความต้องการประกันชีวิต</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="nc-summary ${summaryClass}">${summaryText} · ขาดอีก ${fmtShortTH(result.gap)}</span>
+        <span class="nc-toggle ${needsCardOpen ? 'open':''}">▼</span>
+      </div>
+    </div>
+    <div class="nc-body ${needsCardOpen ? 'open':''}">
+      <p style="font-size:.83rem;color:var(--gray-500);margin-bottom:14px;">
+        คำนวณทุนประกันชีวิตที่เหมาะสมตามสูตร <b>หนี้สิน + ภาระดูแล + การศึกษาบุตร + ค่าใช้จ่ายปลายทาง</b>
+        — ดึงข้อมูลจากโปรไฟล์ลูกค้าอัตโนมัติ
+      </p>
+
+      <div class="nc-grid">
+        <!-- LEFT: inputs -->
+        <div class="nc-inputs">
+          <div class="nc-row cat-debt">
+            <div class="nc-row-label">
+              <span class="nc-row-name">💸 หนี้สินรวม</span>
+              <span class="nc-row-hint">ต้องชำระหนี้ทั้งหมดถ้าเสียชีวิต</span>
+            </div>
+            <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.debt}" onchange="updateNeedsInput('debt',parseMoney(this))">
+          </div>
+          <div class="nc-row cat-income">
+            <div class="nc-row-label">
+              <span class="nc-row-name">💼 รายได้ต่อปี × จำนวนปีที่ดูแล</span>
+              <span class="nc-row-hint">ทดแทนรายได้ให้ครอบครัว</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.income}" onchange="updateNeedsInput('income',parseMoney(this))" placeholder="รายได้/ปี" style="width:100px;">
+              <span style="align-self:center;color:var(--gray-500);">×</span>
+              <input type="number" min="0" max="30" value="${inputs.incomeYears}" onchange="updateNeedsInput('incomeYears',Number(this.value))" style="width:50px;" title="จำนวนปี">
+              <span style="align-self:center;color:var(--gray-500);font-size:.8rem;">ปี</span>
+            </div>
+          </div>
+          <div class="nc-row cat-edu">
+            <div class="nc-row-label">
+              <span class="nc-row-name">🎓 ค่าการศึกษาบุตร</span>
+              <span class="nc-row-hint">${(client.children || []).length} คน × ~2,500,000/คน (ปรับได้)</span>
+            </div>
+            <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.edu}" onchange="updateNeedsInput('edu',parseMoney(this))">
+          </div>
+          <div class="nc-row cat-final">
+            <div class="nc-row-label">
+              <span class="nc-row-name">⚱️ ค่าใช้จ่ายปลายทาง</span>
+              <span class="nc-row-hint">งานศพ, ค่าใช้จ่ายสุดท้าย</span>
+            </div>
+            <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.final}" onchange="updateNeedsInput('final',parseMoney(this))">
+          </div>
+          <div class="nc-row cat-have">
+            <div class="nc-row-label">
+              <span class="nc-row-name">💰 สินทรัพย์ + ทุนประกันชีวิตที่มีแล้ว</span>
+              <span class="nc-row-hint">รวมจาก policies (${fmtTH(result.currentLifeCoverage)}) + เพิ่มเติม</span>
+            </div>
+            <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.haveAssets}" onchange="updateNeedsInput('haveAssets',parseMoney(this))" placeholder="สินทรัพย์อื่น">
+          </div>
+        </div>
+
+        <!-- RIGHT: result -->
+        <div class="nc-result">
+          <h4>📊 สรุปการวิเคราะห์</h4>
+          <div class="nc-line"><span class="l-lbl">หนี้สิน</span><span class="l-val">${fmtTH(inputs.debt)}</span></div>
+          <div class="nc-line"><span class="l-lbl">ภาระดูแลครอบครัว</span><span class="l-val">${fmtTH(inputs.income * inputs.incomeYears)}</span></div>
+          <div class="nc-line"><span class="l-lbl">การศึกษาบุตร</span><span class="l-val">${fmtTH(inputs.edu)}</span></div>
+          <div class="nc-line"><span class="l-lbl">ค่าใช้จ่ายปลายทาง</span><span class="l-val">${fmtTH(inputs.final)}</span></div>
+
+          <div class="nc-need-big">
+            <div class="nb-lbl">💎 ทุนประกันชีวิตที่ควรมี</div>
+            <div class="nb-val">${fmtTH(result.totalNeed)}</div>
+          </div>
+
+          <div class="nc-line"><span class="l-lbl">📦 มีอยู่ (รวมประกัน + สินทรัพย์)</span><span class="l-val">${fmtTH(result.haveTotal)}</span></div>
+
+          <div class="nc-gap-strip ${result.gap === 0 ? 'good' : 'bad'}">
+            ${result.gap === 0
+              ? `✅ ความคุ้มครองพอแล้ว ${fmtTH(result.haveTotal - result.totalNeed)}`
+              : `⚠️ ทุนประกันยังขาดอีก ${fmtTH(result.gap)}`}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleNeedsCard() {
+  needsCardOpen = !needsCardOpen;
+  renderNeedsAnalysis();
+}
+
+function updateNeedsInput(field, value) {
+  updateCurrentUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === currentClientId);
+    if (!c) return;
+    if (!c.needsInputs) c.needsInputs = {};
+    c.needsInputs[field] = value;
+  });
+  renderNeedsAnalysis();
+}
+
+/* ════════════════════════════════════════════════════════
+   PHASE 3.4 — HEALTH COVERAGE GAP ANALYSIS
+══════════════════════════════════════════════════════ */
+let healthCardOpen = true;
+
+// Hospital tiers (typical Thai healthcare costs)
+const HOSPITAL_TIERS = [
+  { tier:1, name:'🏥 รพ.รัฐ / รพ.ประกันสังคม', desc:'รักษาทั่วไป + ห้องสามัญ', dailyRoom: 1500, surgeryAvg: 50000, ipdAvg: 30000 },
+  { tier:2, name:'🏨 รพ.เอกชนทั่วไป',         desc:'เครือกลาง เช่น เกษมราษฎร์, พญาไท', dailyRoom: 3500, surgeryAvg: 150000, ipdAvg: 80000 },
+  { tier:3, name:'⭐ รพ.เอกชน Premium',        desc:'สมิติเวช, บำรุงราษฎร์, BNH', dailyRoom: 8000, surgeryAvg: 400000, ipdAvg: 200000 },
+  { tier:4, name:'🌐 รพ.อินเตอร์',             desc:'รักษาเฉพาะทาง / ต่างประเทศ', dailyRoom: 15000, surgeryAvg: 800000, ipdAvg: 500000 },
+];
+
+function getCurrentHealthCoverage(client) {
+  if (!client || !client.policies) return { totalIPD: 0, dailyRoom: 0, ciCoverage: 0 };
+  let totalIPD = 0;
+  let dailyRoom = 0;
+  let ciCoverage = 0;
+
+  client.policies.forEach(p => {
+    // Health coverage from policy's main type or rider (Phase 3.3 — both legacy + new riders[])
+    if (p.type === 'สุขภาพ') totalIPD += Number(p.coverage || 0);
+    if (Number(p.riderHealthCov || 0) > 0) totalIPD += Number(p.riderHealthCov);
+    if (Number(p.coverage || 0) > 0 && p.type !== 'สุขภาพ') totalIPD += Number(p.coverage);
+
+    // From new riders[] (medical type)
+    (p.riders || []).forEach(r => {
+      if (r.type === 'medical') {
+        totalIPD  += Number(r.perVisit  || 0);
+        totalIPD  += Number(r.opdPerYear || 0);
+        dailyRoom += Number(r.roomMeal  || 0);
+      }
+      if (r.type === 'critical')  ciCoverage += Number(r.ciSevere || 0);
+      if (r.type === 'income')    dailyRoom  += Number(r.dailyComp || 0);
+    });
+
+    // Legacy daily compensation
+    if (Number(p.riderIncomeDaily || 0) > 0) dailyRoom += Number(p.riderIncomeDaily);
+
+    // CI coverage (legacy)
+    if (p.type === 'โรคร้ายแรง') ciCoverage += Number(p.lifeCoverage || p.coverage || 0);
+    if (Number(p.riderCriticalCov || 0) > 0) ciCoverage += Number(p.riderCriticalCov);
+  });
+
+  return { totalIPD, dailyRoom, ciCoverage };
+}
+
+function renderHealthGap() {
+  const wrap = document.getElementById('health-gap-section');
+  if (!wrap) return;
+  const client = getCurrentClient();
+  if (!client) { wrap.innerHTML = ''; return; }
+
+  const cov = getCurrentHealthCoverage(client);
+  const trustedTier = client.trustedHospitalTier || 2;
+
+  // Determine summary
+  const trustedTierData = HOSPITAL_TIERS[trustedTier - 1];
+  const ipdNeed = trustedTierData.ipdAvg;
+  const summaryGap = Math.max(ipdNeed - cov.totalIPD, 0);
+
+  const summaryClass = summaryGap === 0 ? 'ns-good' : (cov.totalIPD >= ipdNeed * 0.5 ? 'ns-warn' : 'ns-bad');
+  const summaryText = summaryGap === 0
+    ? '✅ ความคุ้มครองครอบคลุม'
+    : (cov.totalIPD >= ipdNeed * 0.5 ? '⚠️ คุ้มครองบางส่วน' : '⛔ คุ้มครองไม่พอ');
+
+  wrap.innerHTML = `<div class="health-gap-card">
+    <div class="hgc-header ${healthCardOpen ? 'open':''}" onclick="toggleHealthCard()">
+      <div class="hgc-title">❤️ วิเคราะห์ประกันสุขภาพ + เปรียบเทียบ รพ.</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="hgc-summary ${summaryClass}">${summaryText}</span>
+        <span class="hgc-toggle ${healthCardOpen ? 'open':''}">▼</span>
+      </div>
+    </div>
+    <div class="hgc-body ${healthCardOpen ? 'open':''}">
+      <p style="font-size:.83rem;color:var(--gray-500);margin-bottom:14px;">
+        เปรียบเทียบประกันสุขภาพปัจจุบันกับค่าใช้จ่าย รพ. แต่ละระดับ
+      </p>
+
+      <!-- Current coverage -->
+      <div class="hgc-stat-row">
+        <div class="hgc-stat">
+          <div class="hs-lbl">🏥 IPD ทั้งหมด</div>
+          <div class="hs-val">${fmtTH(cov.totalIPD)}</div>
+        </div>
+        <div class="hgc-stat">
+          <div class="hs-lbl">🛏️ ค่าห้อง/วัน</div>
+          <div class="hs-val">${fmtTH(cov.dailyRoom)}</div>
+        </div>
+        <div class="hgc-stat">
+          <div class="hs-lbl">🏥 CI</div>
+          <div class="hs-val">${fmtTH(cov.ciCoverage)}</div>
+        </div>
+      </div>
+
+      <!-- Trusted hospital selector -->
+      <div style="margin-bottom:14px;font-size:.85rem;">
+        <label style="font-weight:700;margin-right:10px;">🎯 รพ. ที่ลูกค้าไว้ใจ:</label>
+        <select onchange="updateTrustedHospital(this.value)" style="padding:6px 12px;border:1.5px solid var(--gray-200);border-radius:6px;font-family:var(--font);font-size:.85rem;">
+          ${HOSPITAL_TIERS.map(t =>
+            `<option value="${t.tier}" ${trustedTier == t.tier ? 'selected':''}>${t.name}</option>`
+          ).join('')}
+        </select>
+        <span style="color:var(--gray-500);margin-left:10px;font-size:.78rem;">
+          IPD เฉลี่ย/admission ${fmtTH(trustedTierData.ipdAvg)}
+        </span>
+      </div>
+
+      <!-- Tier comparison -->
+      <div class="hospital-tiers">
+        ${HOSPITAL_TIERS.map(t => {
+          const ipdGap = Math.max(t.ipdAvg - cov.totalIPD, 0);
+          const roomGap = Math.max(t.dailyRoom - cov.dailyRoom, 0);
+          const isTrusted = t.tier == trustedTier;
+          let statusCls, statusText;
+          if (cov.totalIPD >= t.ipdAvg && cov.dailyRoom >= t.dailyRoom) {
+            statusCls = 's-good'; statusText = '✅ ครอบคลุมเต็ม';
+          } else if (cov.totalIPD >= t.ipdAvg * 0.5) {
+            statusCls = 's-warn'; statusText = `⚠️ ขาด ${fmtShortTH(ipdGap)}`;
+          } else {
+            statusCls = 's-bad'; statusText = `⛔ ขาด ${fmtShortTH(ipdGap)}`;
+          }
+
+          return `<div class="htier tier-${t.tier}" ${isTrusted ? 'style="box-shadow:0 0 0 2px var(--red-primary);"' : ''}>
+            <div class="ht-info">
+              <div class="ht-name">${t.name}${isTrusted ? ' 🎯' : ''}</div>
+              <div class="ht-desc">${t.desc}</div>
+            </div>
+            <div class="ht-cost">
+              <div class="ht-cost-lbl">IPD เฉลี่ย</div>
+              <div class="ht-cost-val">${fmtShortTH(t.ipdAvg)}</div>
+              <div class="ht-cost-sub">ห้อง ${t.dailyRoom.toLocaleString('th-TH')}/วัน</div>
+            </div>
+            <div class="ht-status ${statusCls}">${statusText}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <p style="font-size:.74rem;color:var(--gray-400);margin-top:12px;font-style:italic;">
+        💡 ค่าเฉลี่ยอ้างอิง — อาจแตกต่างตามโรค/ระยะเวลารักษา
+      </p>
+    </div>
+  </div>`;
+}
+
+function toggleHealthCard() {
+  healthCardOpen = !healthCardOpen;
+  renderHealthGap();
+}
+
+function updateTrustedHospital(tier) {
+  updateCurrentUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === currentClientId);
+    if (!c) return;
+    c.trustedHospitalTier = Number(tier);
+  });
+  renderHealthGap();
+}
+
 </script>
 <div id="save-toast"></div>
 </body>

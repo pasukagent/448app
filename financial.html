@@ -9,6 +9,7 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -420,6 +421,99 @@
       .hero-pills { gap: 8px; }
       .hero-pill { padding: 5px 12px; }
     }
+
+    /* ─── Cashflow Section ─── */
+    .cf-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 24px 26px; margin-bottom: 22px;
+    }
+    .cf-card h3 {
+      font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cf-card .cf-sub {
+      font-size: .82rem; color: var(--gray-400); margin-bottom: 18px;
+    }
+    .cf-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .cf-input-col { display: flex; flex-direction: column; gap: 12px; }
+    .cf-input-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+      padding: 10px 14px; background: var(--gray-100); border-radius: 10px;
+      border-left: 4px solid var(--gray-300);
+      transition: border-color .15s;
+    }
+    .cf-input-row.cf-income      { border-left-color: #28a745; }
+    .cf-input-row.cf-fixed       { border-left-color: #DC3545; }
+    .cf-input-row.cf-variable    { border-left-color: #FF8C00; }
+    .cf-input-row.cf-debt        { border-left-color: #C0392B; }
+    .cf-input-row.cf-savings     { border-left-color: #0E76A8; }
+    .cf-row-label {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .cf-row-label .lb-name { font-size: .9rem; font-weight: 700; color: var(--gray-800); }
+    .cf-row-label .lb-hint { font-size: .73rem; color: var(--gray-500); }
+    .cf-row-input {
+      width: 130px; padding: 8px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .92rem; font-family: var(--font); text-align: right;
+      background: white; box-sizing: border-box;
+    }
+    .cf-row-input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft); }
+
+    .cf-summary-strip {
+      margin-top: 16px; padding: 14px 18px; border-radius: 10px;
+      background: linear-gradient(135deg, #FFF5F5, white);
+      border: 1.5px solid var(--red-soft);
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+    }
+    .cf-strip-item { text-align: center; }
+    .cf-strip-lbl { font-size: .73rem; color: var(--gray-500); font-weight: 600; }
+    .cf-strip-val { font-size: 1.15rem; font-weight: 800; color: var(--gray-800); margin-top: 2px; }
+    .cf-strip-val.green { color: #28a745; }
+    .cf-strip-val.red   { color: #DC3545; }
+
+    /* Pie chart */
+    .pie-col {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 14px;
+    }
+    .pie-wrap { position: relative; width: 220px; height: 220px; }
+    .pie-svg  { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .pie-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      text-align: center; line-height: 1.3;
+    }
+    .pie-center-lbl { font-size: .73rem; color: var(--gray-500); font-weight: 600; }
+    .pie-center-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-800); }
+    .pie-center-sub { font-size: .76rem; color: var(--gray-500); margin-top: 2px; }
+
+    .pie-legend {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; width: 100%;
+    }
+    .pie-leg-item {
+      display: flex; align-items: center; gap: 8px; font-size: .82rem;
+    }
+    .pie-leg-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+    .pie-leg-name { color: var(--gray-700); flex: 1; }
+    .pie-leg-pct  { font-weight: 700; color: var(--gray-800); }
+
+    .pie-empty {
+      width: 220px; height: 220px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--gray-300); border: 2px dashed var(--gray-200); border-radius: 50%;
+    }
+    .pie-empty .pe-icon { font-size: 2.5rem; margin-bottom: 6px; }
+    .pie-empty p { font-size: .85rem; }
+
+    .cf-save-row {
+      margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    @media (max-width: 800px) {
+      .cf-grid { grid-template-columns: 1fr; }
+      .pie-wrap { margin: 0 auto; }
+    }
   </style>
 </head>
 <body>
@@ -427,34 +521,46 @@
 <!-- ══════════════════════════════════════════
      NAVBAR
 ══════════════════════════════════════════ -->
-<nav class="navbar">
-  <div class="navbar-inner">
-    <div class="navbar-brand">
-      <div class="navbar-logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <defs>
-            <linearGradient id="flg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#D0021B"/>
-              <stop offset="100%" stop-color="#9B0013"/>
-            </linearGradient>
-          </defs>
-          <rect width="32" height="32" rx="8" fill="url(#flg)"/>
-          <text x="16" y="22" text-anchor="middle" font-family="Sarabun,sans-serif" font-weight="800" font-size="14" fill="white">448</text>
-        </svg>
-      </div>
-      <div>
-        <div class="navbar-name">448 Wealth <span>Management Plan</span></div>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area"><div class="sb-brand">448</div><div class="sb-tagline">Wealth Management</div></div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item active" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div><div class="sb-profile-name" id="sb-name">Agent</div><div class="sb-profile-role">AIA · ดูโปรไฟล์</div></div>
       </div>
     </div>
-    <div class="navbar-actions">
-      <div id="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--red-primary);">?</div>
-      <span id="nav-name" style="font-size:.9rem;font-weight:600;"></span>
-      <button onclick="doLogout()" class="btn btn-outline" style="padding:6px 14px;font-size:.82rem;">ออกจากระบบ</button>
-    </div>
-  </div>
-</nav>
-
-<div class="page">
+  </aside>
+  <main class="app-main" style="overflow-y:auto;">
+<div><!-- financial content -->
 
   <!-- ══════════════════════════════════════════
        VIEW 1: CLIENT SELECTION
@@ -542,6 +648,83 @@
         </div>
       </div>
 
+      <!-- ═══ Cashflow Card (Phase 2.2) ═══ -->
+      <div class="cf-card">
+        <h3>💵 กระแสเงินสดต่อเดือน</h3>
+        <div class="cf-sub">บันทึกรายได้และรายจ่ายเพื่อใช้คำนวณอัตราส่วนการเงินและความสามารถในการออม</div>
+
+        <div class="cf-grid">
+          <!-- LEFT: Inputs -->
+          <div class="cf-input-col">
+            <div class="cf-input-row cf-income">
+              <div class="cf-row-label">
+                <span class="lb-name">💚 รายได้รวม</span>
+                <span class="lb-hint">เงินเดือน + รายได้อื่นๆ</span>
+              </div>
+              <input class="cf-row-input money-fmt" id="cf-income" inputmode="decimal" min="0" placeholder="0" oninput="updateCashflow()">
+            </div>
+            <div class="cf-input-row cf-fixed">
+              <div class="cf-row-label">
+                <span class="lb-name">🏠 รายจ่ายคงที่</span>
+                <span class="lb-hint">ค่าเช่า, ค่าน้ำ, ค่าไฟ, ฯลฯ</span>
+              </div>
+              <input class="cf-row-input money-fmt" id="cf-expFixed" inputmode="decimal" min="0" placeholder="0" oninput="updateCashflow()">
+            </div>
+            <div class="cf-input-row cf-variable">
+              <div class="cf-row-label">
+                <span class="lb-name">🛒 รายจ่ายผันแปร</span>
+                <span class="lb-hint">อาหาร, ช้อปปิ้ง, ท่องเที่ยว</span>
+              </div>
+              <input class="cf-row-input money-fmt" id="cf-expVariable" inputmode="decimal" min="0" placeholder="0" oninput="updateCashflow()">
+            </div>
+            <div class="cf-input-row cf-debt">
+              <div class="cf-row-label">
+                <span class="lb-name">💳 รายจ่ายผ่อนหนี้</span>
+                <span class="lb-hint">บัตรเครดิต, ผ่อนรถ/บ้าน</span>
+              </div>
+              <input class="cf-row-input money-fmt" id="cf-expDebt" inputmode="decimal" min="0" placeholder="0" oninput="updateCashflow()">
+            </div>
+            <div class="cf-input-row cf-savings">
+              <div class="cf-row-label">
+                <span class="lb-name">🪙 ค่าใช้จ่ายออม / ลงทุน</span>
+                <span class="lb-hint">ออม, RMF, SSF, กองทุน, ฯลฯ</span>
+              </div>
+              <input class="cf-row-input money-fmt" id="cf-expSavings" inputmode="decimal" min="0" placeholder="0" oninput="updateCashflow()">
+            </div>
+
+            <!-- Summary -->
+            <div class="cf-summary-strip">
+              <div class="cf-strip-item">
+                <div class="cf-strip-lbl">รายได้</div>
+                <div class="cf-strip-val green" id="cf-sum-income">฿ 0</div>
+              </div>
+              <div class="cf-strip-item">
+                <div class="cf-strip-lbl">รายจ่ายรวม</div>
+                <div class="cf-strip-val red" id="cf-sum-expense">฿ 0</div>
+              </div>
+              <div class="cf-strip-item">
+                <div class="cf-strip-lbl">เหลือใช้ต่อเดือน</div>
+                <div class="cf-strip-val" id="cf-sum-net">฿ 0</div>
+              </div>
+            </div>
+
+            <div class="cf-save-row">
+              <span style="flex:1;align-self:center;font-size:.78rem;color:var(--gray-400);">💡 บันทึกอัตโนมัติเมื่อเปลี่ยนแปลง</span>
+              <button class="btn btn-outline" onclick="resetCashflow()">↺ ล้างข้อมูล</button>
+              <button class="btn btn-primary" onclick="saveCashflow()">💾 บันทึก</button>
+            </div>
+          </div>
+
+          <!-- RIGHT: Pie chart -->
+          <div class="pie-col">
+            <div class="pie-wrap" id="pie-wrap">
+              <!-- Rendered by updateCashflow() -->
+            </div>
+            <div class="pie-legend" id="pie-legend"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Add goal form -->
       <div class="form-card">
         <h3>➕ เพิ่มเป้าหมายการเงิน</h3>
@@ -564,16 +747,16 @@
           </div>
           <div class="fg">
             <label>เงินเป้าหมาย (บาท) *</label>
-            <input id="g-target" type="number" placeholder="เช่น 150000" min="1">
+            <input id="g-target" class="money-fmt" inputmode="decimal" placeholder="เช่น 150000" min="1">
           </div>
           <div class="fg">
             <label>เงินที่มีอยู่แล้ว (บาท)</label>
-            <input id="g-current" type="number" placeholder="0" min="0" value="0">
+            <input id="g-current" class="money-fmt" inputmode="decimal" placeholder="0" min="0" value="0">
             <span class="hint">ใส่ 0 ถ้าเพิ่งเริ่มต้น</span>
           </div>
           <div class="fg">
             <label>เงินออมต่อเดือน (บาท)</label>
-            <input id="g-monthly" type="number" placeholder="เช่น 5000" min="0">
+            <input id="g-monthly" class="money-fmt" inputmode="decimal" placeholder="เช่น 5000" min="0">
           </div>
           <div class="fg">
             <label>วันที่ต้องการบรรลุเป้าหมาย</label>
@@ -624,7 +807,9 @@
       <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
     </div>
   </div>
-</div>
+</div><!-- end financial content -->
+  </main>
+</div><!-- end app-layout -->
 
 <script>
 /* ═══════════════════════════════════════════════
@@ -697,6 +882,7 @@ function showClientSelect() {
 
 function showClientMain(cid) {
   selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-select').style.display = 'none';
   document.getElementById('view-main').style.display   = '';
   renderMain();
@@ -1006,6 +1192,9 @@ function renderMain() {
   // Timeline chart
   renderTimelineChart(goals);
 
+  // Cashflow (Phase 2.2)
+  loadCashflow();
+
   // Goals grid
   const list = document.getElementById('goals-list');
   if (goals.length === 0) {
@@ -1073,9 +1262,9 @@ function renderMain() {
 function addGoal() {
   const name     = document.getElementById('g-name').value.trim();
   const category = document.getElementById('g-category').value;
-  const target   = parseFloat(document.getElementById('g-target').value)  || 0;
-  const current  = parseFloat(document.getElementById('g-current').value) || 0;
-  const monthly  = parseFloat(document.getElementById('g-monthly').value) || 0;
+  const target   = parseMoney(document.getElementById('g-target'));
+  const current  = parseMoney(document.getElementById('g-current'));
+  const monthly  = parseMoney(document.getElementById('g-monthly'));
   const deadline = document.getElementById('g-deadline').value;
   const err      = document.getElementById('g-error');
 
@@ -1204,14 +1393,190 @@ document.addEventListener('keydown', e => {
 });
 
 /* ═══════════════════════════════════════════════
+   CASHFLOW (Phase 2.2)
+═══════════════════════════════════════════════ */
+const CF_COLORS = {
+  expFixed:    { color: '#DC3545', label: 'รายจ่ายคงที่',   icon: '🏠' },
+  expVariable: { color: '#FF8C00', label: 'รายจ่ายผันแปร', icon: '🛒' },
+  expDebt:     { color: '#C0392B', label: 'ผ่อนหนี้',        icon: '💳' },
+  expSavings:  { color: '#0E76A8', label: 'ออม/ลงทุน',     icon: '🪙' },
+};
+
+function loadCashflow() {
+  const c = getCurrentClient();
+  if (!c) return;
+  const cf = c.cashflow || {};
+  document.getElementById('cf-income').value      = cf.income      || '';
+  document.getElementById('cf-expFixed').value    = cf.expFixed    || '';
+  document.getElementById('cf-expVariable').value = cf.expVariable || '';
+  document.getElementById('cf-expDebt').value     = cf.expDebt     || '';
+  document.getElementById('cf-expSavings').value  = cf.expSavings  || '';
+  updateCashflow();
+}
+
+function getCurrentClient() {
+  const cid = selectedClientId || localStorage.getItem('aia_selectedClient');
+  if (!cid) return null;
+  const u = getCurrentUser();
+  if (!u || !u.data || !u.data.clients) return null;
+  return u.data.clients.find(x => x.id === cid) || null;
+}
+
+function readCFInputs() {
+  return {
+    income:      parseMoney(document.getElementById('cf-income')),
+    expFixed:    parseMoney(document.getElementById('cf-expFixed')),
+    expVariable: parseMoney(document.getElementById('cf-expVariable')),
+    expDebt:     parseMoney(document.getElementById('cf-expDebt')),
+    expSavings:  parseMoney(document.getElementById('cf-expSavings')),
+  };
+}
+
+function updateCashflow() {
+  const cf = readCFInputs();
+  const totalExp = cf.expFixed + cf.expVariable + cf.expDebt + cf.expSavings;
+  const net = cf.income - totalExp;
+
+  const fmtTH = n => '฿' + Math.round(n).toLocaleString('th-TH');
+  document.getElementById('cf-sum-income').textContent  = fmtTH(cf.income);
+  document.getElementById('cf-sum-expense').textContent = fmtTH(totalExp);
+  const netEl = document.getElementById('cf-sum-net');
+  netEl.textContent = (net >= 0 ? '' : '') + fmtTH(net);
+  netEl.className = 'cf-strip-val ' + (net >= 0 ? 'green' : 'red');
+
+  renderPie(cf, totalExp);
+}
+
+function renderPie(cf, totalExp) {
+  const wrap = document.getElementById('pie-wrap');
+  const legend = document.getElementById('pie-legend');
+
+  if (totalExp <= 0) {
+    wrap.innerHTML = `<div class="pie-empty">
+      <div class="pe-icon">🥧</div>
+      <p>ยังไม่มีข้อมูลรายจ่าย</p>
+    </div>`;
+    legend.innerHTML = '';
+    return;
+  }
+
+  const items = ['expFixed', 'expVariable', 'expDebt', 'expSavings']
+    .map(k => ({ key: k, value: cf[k] || 0, ...CF_COLORS[k] }))
+    .filter(it => it.value > 0);
+
+  // Build SVG donut
+  let cumPct = 0;
+  const radius = 80;
+  const strokeW = 36;
+  const cx = 110, cy = 110;
+  let svg = `<svg class="pie-svg" viewBox="0 0 220 220">`;
+
+  if (items.length === 1) {
+    // Full circle
+    svg += `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${items[0].color}" stroke-width="${strokeW}"/>`;
+  } else {
+    items.forEach(it => {
+      const pct = it.value / totalExp;
+      const startAngle = cumPct * 2 * Math.PI;
+      const endAngle = (cumPct + pct) * 2 * Math.PI;
+      const x1 = cx + radius * Math.cos(startAngle);
+      const y1 = cy + radius * Math.sin(startAngle);
+      const x2 = cx + radius * Math.cos(endAngle);
+      const y2 = cy + radius * Math.sin(endAngle);
+      const largeArc = pct > 0.5 ? 1 : 0;
+      svg += `<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}"
+                    fill="none" stroke="${it.color}" stroke-width="${strokeW}"/>`;
+      cumPct += pct;
+    });
+  }
+  svg += `</svg>`;
+
+  wrap.innerHTML = svg + `<div class="pie-center">
+    <div class="pie-center-lbl">รายจ่ายรวม/เดือน</div>
+    <div class="pie-center-val">฿${Math.round(totalExp).toLocaleString('th-TH')}</div>
+    <div class="pie-center-sub">${cf.income > 0 ? Math.round(totalExp/cf.income*100) + '% ของรายได้' : ''}</div>
+  </div>`;
+
+  legend.innerHTML = items.map(it => {
+    const pct = (it.value / totalExp * 100).toFixed(1);
+    return `<div class="pie-leg-item">
+      <span class="pie-leg-dot" style="background:${it.color}"></span>
+      <span class="pie-leg-name">${it.icon} ${it.label}</span>
+      <span class="pie-leg-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function saveCashflow() {
+  const cid = selectedClientId;
+  if (!cid) { showToast('⚠️ ไม่พบลูกค้า', 'error'); return; }
+  const cf = readCFInputs();
+  updateCurrentUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === cid);
+    if (!c) return;
+    c.cashflow = cf;
+  });
+  showToast('✅ บันทึกกระแสเงินสดแล้ว', 'success');
+}
+
+function resetCashflow() {
+  if (!confirm('ล้างข้อมูลกระแสเงินสด?')) return;
+  ['cf-income','cf-expFixed','cf-expVariable','cf-expDebt','cf-expSavings'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  updateCashflow();
+  saveCashflow();
+}
+
+// Auto-save on blur (debounced)
+let cfSaveTimer;
+['cf-income','cf-expFixed','cf-expVariable','cf-expDebt','cf-expSavings'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('blur', () => {
+      clearTimeout(cfSaveTimer);
+      cfSaveTimer = setTimeout(saveCashflow, 100);
+    });
+  }
+});
+
+/* showToast helper if not exists */
+if (typeof showToast !== 'function') {
+  window.showToast = function(msg) {
+    let t = document.getElementById('toast-fin');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast-fin';
+      t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a2e;color:white;padding:11px 22px;border-radius:24px;font-size:.88rem;font-weight:600;z-index:9999;transition:transform .3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._tm);
+    t._tm = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(60px)'; }, 2000);
+  };
+}
+
+/* ═══════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════ */
 (function init() {
   const user = getCurrentUser();
 
   // Update navbar
-  document.getElementById('nav-avatar').textContent = (user.firstName || '?').charAt(0).toUpperCase();
-  document.getElementById('nav-name').textContent   = user.firstName || '';
+  const sbAv2 = document.getElementById('sb-avatar');
+  const sbNm2 = document.getElementById('sb-name');
+  if (sbNm2) sbNm2.textContent = (user.firstName||'') + ' ' + (user.lastName||'');
+  if (sbAv2) {
+    const photo = user.profile && user.profile.photo;
+    if (photo) {
+      sbAv2.style.backgroundImage = `url('${photo}')`;
+      sbAv2.classList.add('has-photo');
+      sbAv2.textContent = '';
+    } else {
+      sbAv2.textContent = (user.firstName || '?').charAt(0).toUpperCase();
+    }
+  }
 
   // Run migration
   ensureClientGoals(user);
@@ -1220,7 +1585,7 @@ document.addEventListener('keydown', e => {
   const urlParams    = new URLSearchParams(window.location.search);
   const urlPreselect = urlParams.get('client');
   const lsPreselect  = localStorage.getItem('aia_selectedClient');
-  localStorage.removeItem('aia_selectedClient');
+  // ไม่ลบ key — ให้ persist ข้ามหน้า ลูกค้าที่เลือกจะใช้ทั่วทั้งแอป
   const preselect    = urlPreselect || lsPreselect;
   const clients      = user.data.clients || [];
 
@@ -1230,6 +1595,7 @@ document.addEventListener('keydown', e => {
     showClientSelect();
   }
 })();
+
 </script>
 </body>
 </html>

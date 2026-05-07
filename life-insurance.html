@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — ประกันชีวิต</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; color: white; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Top section — debt + responsibility */
+    .li-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px;
+    }
+    .li-card {
+      background: white; border-radius: var(--radius); padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .li-card-title {
+      font-weight: 800; font-size: 1.05rem; color: var(--gray-800);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .li-card-title .li-ico {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: var(--red-soft); color: var(--red-primary);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+
+    .li-row {
+      display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center;
+      padding: 8px 0; border-bottom: 1px dashed var(--gray-100);
+    }
+    .li-row:last-child { border-bottom: none; }
+    .li-row-name {
+      padding: 7px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: .88rem; font-family: var(--font); background: var(--gray-100);
+    }
+    .li-row-amt {
+      padding: 7px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: .88rem; font-family: var(--font); text-align: right;
+    }
+    .li-row-amt:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 2px var(--red-soft); }
+    .li-row-unit { font-size: .78rem; color: var(--gray-500); padding-right: 4px; }
+    .li-row-del {
+      background: none; border: none; color: var(--gray-400); cursor: pointer;
+      padding: 4px 6px; font-size: .9rem; font-family: var(--font);
+    }
+    .li-row-del:hover { color: #c00; }
+
+    .li-add-row-btn {
+      width: 100%; padding: 8px; margin-top: 8px;
+      background: var(--red-soft); color: var(--red-primary);
+      border: 1.5px dashed var(--red-primary); border-radius: 8px;
+      font-family: var(--font); font-size: .85rem; font-weight: 700; cursor: pointer;
+      transition: all .15s;
+    }
+    .li-add-row-btn:hover { background: var(--red-primary); color: white; border-style: solid; }
+
+    .li-total-strip {
+      margin-top: 12px; padding: 12px 14px; border-radius: 10px;
+      background: linear-gradient(90deg, var(--red-soft), #FFF5F5);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .92rem;
+    }
+    .li-total-strip .total-lbl { font-weight: 700; color: var(--gray-700); }
+    .li-total-strip .total-val { font-weight: 800; color: var(--red-primary); font-size: 1.15rem; }
+
+    /* Combined summary */
+    .summary-box {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 24px 28px; margin-bottom: 22px;
+    }
+    .sb-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--gray-100); font-size: .95rem;
+    }
+    .sb-row:last-child { border-bottom: none; }
+    .sb-row .sb-lbl { color: var(--gray-700); font-weight: 600; }
+    .sb-row .sb-val { font-weight: 800; color: var(--gray-800); font-size: 1.1rem; }
+    .sb-row.highlight {
+      background: var(--red-soft); margin: 8px -28px -8px -28px; padding: 14px 28px;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .sb-row.highlight .sb-lbl { color: var(--red-dark); font-weight: 800; }
+    .sb-row.highlight .sb-val { color: var(--red-primary); font-size: 1.4rem; }
+    .sb-row .input-inline {
+      width: 200px; padding: 9px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-family: var(--font); font-size: .95rem; text-align: right;
+      font-weight: 800; color: var(--gray-800);
+    }
+    .sb-row .input-inline:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 2px var(--red-soft); }
+    .add-policy-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--red-primary); color: white; border-radius: 6px;
+      padding: 6px 10px; font-size: .78rem; text-decoration: none;
+      font-weight: 700; margin-left: 8px;
+    }
+    .add-policy-link:hover { background: var(--red-dark); }
+
+    /* Progress */
+    .progress-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 18px 22px; margin-bottom: 22px;
+    }
+    .progress-title {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .88rem; font-weight: 700; color: var(--gray-700); margin-bottom: 8px;
+    }
+    .progress-title .pct {
+      font-size: 1.2rem; font-weight: 800; color: var(--red-primary);
+    }
+    .progress-bar-wrap {
+      height: 18px; background: var(--gray-100); border-radius: 9px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #5cbb5c);
+      border-radius: 9px; transition: width .4s ease;
+    }
+    .progress-bar-fill.warn { background: linear-gradient(90deg, #FF8C00, #FFB347); }
+    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #FF6B6B); }
+
+    /* Existing policies preview */
+    .policies-preview {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 20px 22px; margin-bottom: 22px;
+    }
+    .pp-head {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+    }
+    .pp-head h3 { font-size: 1rem; font-weight: 800; }
+    .pp-list { display: flex; flex-direction: column; gap: 8px; }
+    .pp-item {
+      display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center;
+      padding: 10px 14px; background: var(--gray-100); border-radius: 8px;
+      font-size: .87rem;
+    }
+    .pp-icon { font-size: 1.1rem; width: 28px; text-align: center; }
+    .pp-name { font-weight: 700; color: var(--gray-800); }
+    .pp-meta { font-size: .76rem; color: var(--gray-500); }
+    .pp-cov  { font-weight: 800; color: var(--red-primary); white-space: nowrap; }
+    .pp-empty { padding: 18px; text-align: center; color: var(--gray-400); font-size: .88rem; }
+    .pp-empty a { color: var(--red-primary); font-weight: 700; }
+
+    /* No client */
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media(max-width:900px) {
+      .li-grid { grid-template-columns: 1fr; }
+      .li-row { grid-template-columns: 1fr 1fr auto; }
+      .sb-row { grid-template-columns: 1fr; gap: 6px; }
+      .sb-row .sb-val { text-align: right; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item active" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'" title="ดูโปรไฟล์">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>☂️ ปรับประกันชีวิต</h2>
+        <p>วิเคราะห์ทุนประกันชีวิตที่เหมาะสมจากหนี้สิน + ความรับผิดชอบ</p>
+      </div>
+      <div class="client-pick">
+        <label>👤</label>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+let selectedClientId = null;
+
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+function fmtBaht(n) { return '฿' + fmt(n); }
+
+/* ════════════════════════════════════════════
+   SCHEMA HELPERS
+═══════════════════════════════════════════ */
+function getLifeInputs() {
+  const c = getCurrent();
+  if (!c) return null;
+  if (!c.lifeInputs) c.lifeInputs = {};
+  // Defaults
+  if (!c.lifeInputs.debts) c.lifeInputs.debts = [
+    { id:'d-home', name:'🏠 บ้าน', amount:0, fixed:true },
+    { id:'d-car',  name:'🚗 รถยนต์', amount:0, fixed:true }
+  ];
+  if (!c.lifeInputs.responsibilities) c.lifeInputs.responsibilities = [
+    { id:'r-parents', name:'👴 บิดา มารดา', amount:0, fixed:true },
+    { id:'r-children', name:'👶 บุตร', amount:0, fixed:true }
+  ];
+  if (c.lifeInputs.liquidAssets == null) c.lifeInputs.liquidAssets = 0;
+  return c.lifeInputs;
+}
+
+function ensureLifeDefaults(li) {
+  if (!li.debts || !li.debts.length) {
+    li.debts = [
+      { id:'d-home', name:'🏠 บ้าน', amount:0, fixed:true },
+      { id:'d-car',  name:'🚗 รถยนต์', amount:0, fixed:true }
+    ];
+  }
+  if (!li.responsibilities || !li.responsibilities.length) {
+    li.responsibilities = [
+      { id:'r-parents', name:'👴 บิดา มารดา', amount:0, fixed:true },
+      { id:'r-children', name:'👶 บุตร', amount:0, fixed:true }
+    ];
+  }
+  if (li.liquidAssets == null) li.liquidAssets = 0;
+}
+
+function saveLifeInputs(modify) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.lifeInputs) c.lifeInputs = {};
+    ensureLifeDefaults(c.lifeInputs);
+    modify(c.lifeInputs);
+  });
+}
+
+// Get total life insurance coverage from existing policies
+function getCurrentLifeCoverage() {
+  const c = getCurrent();
+  if (!c || !c.policies) return 0;
+  // Sum lifeCoverage from policies of types that provide life insurance
+  const lifeTypes = ['ทุนชีวิต','ตลอดชีพ','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา','โรคร้ายแรง','PA','อุบัติเหตุ'];
+  return c.policies.reduce((s,p) => {
+    if (lifeTypes.includes(p.type)) {
+      return s + Number(p.lifeCoverage || p.coverage || 0);
+    }
+    return s;
+  }, 0);
+}
+
+function getCurrentLiquidAssets() {
+  // Auto-pull from client.assets where group is 'liquid'
+  const c = getCurrent();
+  if (!c || !c.assets) return 0;
+  const liquidTypes = ['deposit','bond'];
+  return c.assets.filter(a => liquidTypes.includes(a.type))
+                 .reduce((s,a) => s + Number(a.currentValue||0), 0);
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const li = getLifeInputs();
+  const totalDebt = li.debts.reduce((s,d) => s + Number(d.amount||0), 0);
+  const totalResp = li.responsibilities.reduce((s,r) => s + Number(r.amount||0), 0);
+  const totalNeed = totalDebt + totalResp;
+
+  const currentLifeCov = getCurrentLifeCoverage();
+  const currentLiquid  = li.liquidAssets > 0 ? Number(li.liquidAssets) : getCurrentLiquidAssets();
+  const totalHave = currentLifeCov + currentLiquid;
+  const gap = totalNeed - totalHave;
+  const pct = totalNeed > 0 ? Math.min(Math.round(totalHave / totalNeed * 100), 100) : 0;
+
+  // Get policy preview
+  const c = getCurrent();
+  const policies = (c && c.policies) || [];
+
+  wrap.innerHTML = `
+    <!-- Section 1 & 2: Debt + Responsibility -->
+    <div class="li-grid">
+
+      <!-- Debt -->
+      <div class="li-card">
+        <div class="li-card-title">
+          <div class="li-ico">💸</div>
+          <span>หนี้สิน</span>
+        </div>
+        <div id="debt-list">
+          ${li.debts.map(d => renderRow(d, 'debt')).join('')}
+        </div>
+        <div class="li-total-strip">
+          <span class="total-lbl">หนี้สินรวม</span>
+          <span class="total-val">${fmtBaht(totalDebt)}</span>
+        </div>
+        <button class="li-add-row-btn" onclick="addRow('debt')">＋ เพิ่มหนี้สิน</button>
+      </div>
+
+      <!-- Responsibility -->
+      <div class="li-card">
+        <div class="li-card-title">
+          <div class="li-ico">🤝</div>
+          <span>ความรับผิดชอบ</span>
+        </div>
+        <div id="resp-list">
+          ${li.responsibilities.map(r => renderRow(r, 'resp')).join('')}
+        </div>
+        <div class="li-total-strip">
+          <span class="total-lbl">ความรับผิดชอบรวม</span>
+          <span class="total-val">${fmtBaht(totalResp)}</span>
+        </div>
+        <button class="li-add-row-btn" onclick="addRow('resp')">＋ เพิ่มความรับผิดชอบ</button>
+      </div>
+
+    </div>
+
+    <!-- Section 3: Combined summary -->
+    <div class="summary-box">
+      <div class="sb-row">
+        <span class="sb-lbl">📊 หนี้สินและความรับผิดชอบรวม</span>
+        <span class="sb-val">${fmtBaht(totalNeed)}</span>
+      </div>
+      <div class="sb-row">
+        <span class="sb-lbl">
+          ☂️ ประกันชีวิตที่เตรียมไว้แล้ว
+          <a href="policies.html" class="add-policy-link">+ เพิ่มกรมธรรม์</a>
+        </span>
+        <span class="sb-val" style="color:#28a745;">${fmtBaht(currentLifeCov)}</span>
+      </div>
+      <div class="sb-row">
+        <span class="sb-lbl">💰 สินทรัพย์สภาพคล่องที่มี</span>
+        <span class="sb-val">
+          <input class="input-inline money-fmt" type="text" inputmode="decimal"
+            value="${currentLiquid}"
+            onchange="updateLiquid(parseMoney(this))"
+            title="ดึงจากเงินฝาก+ตราสารหนี้อัตโนมัติ — แก้เองได้">
+        </span>
+      </div>
+      <div class="sb-row highlight">
+        <span class="sb-lbl">${gap > 0 ? '⚠️ ควรจัดสรรเพิ่มอีก' : '✅ คุ้มครองพอแล้ว — ส่วนเกิน'}</span>
+        <span class="sb-val">${fmtBaht(Math.abs(gap))}</span>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="progress-title">
+        <span>🎯 ความเพียงพอของประกันชีวิต</span>
+        <span class="pct" style="color:${pct >= 100 ? '#28a745' : pct >= 50 ? '#FF8C00' : '#DC3545'}">${pct}%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill ${pct >= 100 ? '' : pct >= 50 ? 'warn' : 'bad'}" style="width:${pct}%"></div>
+      </div>
+    </div>
+
+    <!-- Existing policies preview -->
+    <div class="policies-preview">
+      <div class="pp-head">
+        <h3>📋 กรมธรรม์ของลูกค้า (${policies.length})</h3>
+        <a href="policies.html" style="color:var(--red-primary);font-weight:700;text-decoration:none;font-size:.85rem;">
+          จัดการ →
+        </a>
+      </div>
+      ${policies.length === 0
+        ? `<div class="pp-empty">📭 ยังไม่มีกรมธรรม์ — <a href="policies.html">เพิ่มกรมธรรม์</a></div>`
+        : `<div class="pp-list">${policies.slice(0, 5).map(p => renderPolicyItem(p)).join('')}</div>`
+      }
+    </div>
+  `;
+
+  refreshAllMoneyInputs();
+}
+
+function renderRow(item, kind) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  return `<div class="li-row" data-id="${item.id}">
+    ${item.fixed
+      ? `<div class="li-row-name">${item.name}</div>`
+      : `<input class="li-row-name" type="text" value="${(item.name||'').replace(/"/g,'&quot;')}" placeholder="ชื่อรายการ" onchange="updateItemName('${kind}','${item.id}',this.value)" style="background:white;">`
+    }
+    <input class="li-row-amt money-fmt" type="text" inputmode="decimal"
+      value="${item.amount||0}"
+      onchange="updateItemAmount('${kind}','${item.id}',parseMoney(this))"
+      placeholder="0">
+    ${item.fixed
+      ? '<span class="li-row-unit">บาท</span>'
+      : `<button class="li-row-del" onclick="deleteRow('${kind}','${item.id}')" title="ลบ">🗑️</button>`
+    }
+  </div>`;
+}
+
+function renderPolicyItem(p) {
+  const TYPE_ICONS = {
+    'ทุนชีวิต':'🛡️', 'ตลอดชีพ':'🛡️', 'สะสมทรัพย์':'💰', 'บำนาญ':'👴',
+    'Unit Linked':'🔗', 'สุขภาพ':'❤️', 'โรคร้ายแรง':'🏥',
+    'อุบัติเหตุ':'🚑', 'PA':'🚑', 'การศึกษา':'🎓',
+    'เกษียณ':'🌅', 'ลดหย่อนภาษี':'🧾', 'ลงทุน':'📈', 'ส่งมอบ':'🎁'
+  };
+  return `<div class="pp-item">
+    <div class="pp-icon">${TYPE_ICONS[p.type] || '📄'}</div>
+    <div>
+      <div class="pp-name">${(p.name || p.type || '—').replace(/</g,'&lt;')}</div>
+      <div class="pp-meta">${p.type || ''} ${p.company ? '· ' + p.company : ''}</div>
+    </div>
+    <div style="text-align:right;font-size:.78rem;color:var(--gray-500);">
+      เบี้ย/ปี<br><b style="color:var(--gray-800);font-size:.92rem;">${fmtBaht(p.premium||0)}</b>
+    </div>
+    <div class="pp-cov">${fmtBaht(p.lifeCoverage || p.coverage || 0)}</div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════
+   CRUD
+═══════════════════════════════════════════ */
+function addRow(kind) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  saveLifeInputs(li => {
+    if (!li[dataKey]) li[dataKey] = [];
+    li[dataKey].push({
+      id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      name: '',
+      amount: 0
+    });
+  });
+  render();
+}
+
+function deleteRow(kind, id) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  saveLifeInputs(li => {
+    if (!li[dataKey]) return;
+    li[dataKey] = li[dataKey].filter(x => x.id !== id);
+  });
+  render();
+}
+
+function updateItemName(kind, id, name) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  saveLifeInputs(li => {
+    if (!li[dataKey]) return;
+    const item = li[dataKey].find(x => x.id === id);
+    if (item) item.name = name;
+  });
+}
+
+function updateItemAmount(kind, id, amount) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  saveLifeInputs(li => {
+    if (!li[dataKey]) return;
+    const item = li[dataKey].find(x => x.id === id);
+    if (item) item.amount = Number(amount) || 0;
+  });
+  render();
+}
+
+function updateLiquid(amount) {
+  saveLifeInputs(li => { li.liquidAssets = Number(amount) || 0; });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   UTILS + INIT
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+})();
+</script>
+</body>
+</html>

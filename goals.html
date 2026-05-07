@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — เป้าหมายชีวิต</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; color: white; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Summary */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px;
+    }
+    .summary-card {
+      background: white; border-radius: var(--radius); padding: 18px 20px;
+      box-shadow: var(--shadow-sm); border-left: 3px solid var(--red-primary);
+    }
+    .summary-card.lc-blue   { border-left-color: #0E76A8; }
+    .summary-card.lc-green  { border-left-color: #28a745; }
+    .summary-card.lc-orange { border-left-color: #FF8C00; }
+    .sc-lbl { font-size: .77rem; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+    .sc-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-800); }
+    .sc-val.cost { color: var(--red-primary); }
+    .sc-val.green { color: #28a745; }
+    .sc-sub { font-size: .73rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* Filter chips */
+    .filter-bar {
+      background: white; border-radius: var(--radius); padding: 14px 20px;
+      box-shadow: var(--shadow-sm); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .filter-title { font-weight: 700; font-size: .92rem; color: var(--gray-800); }
+    .fchip {
+      padding: 5px 12px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: var(--gray-100); color: var(--gray-600);
+      cursor: pointer; transition: all .15s; font-family: var(--font);
+    }
+    .fchip.active { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-primary); }
+    .toolbar-spacer { flex: 1; }
+    .btn-add-goal {
+      background: var(--red-primary); color: white; border: none;
+      border-radius: 8px; padding: 8px 16px; font-size: .88rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+    }
+    .btn-add-goal:hover { background: var(--red-dark); }
+
+    /* Goal cards */
+    .goals-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 18px;
+    }
+    .goal-card {
+      background: white; border-radius: var(--radius); padding: 20px 22px;
+      box-shadow: var(--shadow-sm); border-top: 4px solid var(--red-primary);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .goal-card.t-home     { border-top-color: #E67E22; }
+    .goal-card.t-car      { border-top-color: #3498DB; }
+    .goal-card.t-shop     { border-top-color: #9B59B6; }
+    .goal-card.t-travel   { border-top-color: #1ABC9C; }
+    .goal-card.t-business { border-top-color: #F39C12; }
+    .goal-card.t-portfolio{ border-top-color: #28a745; }
+    .goal-card.t-emergency{ border-top-color: #E74C3C; }
+    .goal-card.t-retire   { border-top-color: #7B2FF7; }
+    .goal-card.t-other    { border-top-color: #7F8C8D; }
+    .goal-card.achieved   { background: #F0FFF4; }
+
+    .gc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .gc-title-wrap { flex: 1; min-width: 0; }
+    .gc-icon-name { display: flex; align-items: center; gap: 8px; }
+    .gc-icon { font-size: 1.5rem; }
+    .gc-name { font-weight: 800; font-size: 1.05rem; color: var(--gray-800); }
+    .gc-cat { font-size: .76rem; color: var(--gray-500); margin-top: 1px; }
+    .gc-actions { display: flex; gap: 4px; }
+    .gc-btn {
+      background: none; border: 1.5px solid var(--gray-200); border-radius: 6px;
+      padding: 5px 9px; cursor: pointer; font-size: .8rem; color: var(--gray-600);
+      font-family: var(--font); transition: all .15s;
+    }
+    .gc-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+    .gc-btn.del:hover { border-color: #c00; color: #c00; }
+
+    .gc-progress {
+      background: var(--gray-100); border-radius: 10px; height: 14px;
+      position: relative; overflow: hidden;
+    }
+    .gc-progress-fill {
+      height: 100%; background: linear-gradient(90deg, var(--red-primary), var(--red-dark));
+      transition: width .4s; border-radius: 10px;
+    }
+    .gc-progress-fill.green { background: linear-gradient(90deg, #28a745, #1B6E2F); }
+    .gc-progress-text {
+      display: flex; justify-content: space-between; font-size: .76rem;
+      color: var(--gray-600); margin-top: 4px;
+    }
+
+    .gc-amounts {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      padding: 10px 0; border-top: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100);
+    }
+    .gc-amount { padding: 6px 0; }
+    .gc-amount .amt-lbl { font-size: .73rem; color: var(--gray-500); }
+    .gc-amount .amt-val { font-size: 1.05rem; font-weight: 800; color: var(--gray-800); }
+
+    /* TVM box */
+    .tvm-box {
+      background: var(--red-soft); border-left: 3px solid var(--red-primary);
+      padding: 12px 14px; border-radius: 8px; font-size: .85rem;
+    }
+    .tvm-box.green { background: #E8F5E9; border-left-color: #28a745; }
+    .tvm-box.warn  { background: #FFF3E0; border-left-color: #FF8C00; }
+    .tvm-box .tvm-line { display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .tvm-box .tvm-line:last-child { margin-bottom: 0; }
+    .tvm-box .tvm-lbl { color: var(--gray-700); }
+    .tvm-box .tvm-val { font-weight: 800; color: var(--red-dark); }
+    .tvm-box.green .tvm-val { color: #1B6E2F; }
+    .tvm-box.warn  .tvm-val { color: #B96A00; }
+    .tvm-formula {
+      font-size: .73rem; color: var(--gray-500); margin-top: 6px; font-style: italic;
+      padding-top: 6px; border-top: 1px dashed rgba(0,0,0,.08);
+    }
+
+    .gc-footer-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .82rem; color: var(--gray-500);
+    }
+    .gc-deadline { display: flex; align-items: center; gap: 6px; }
+    .gc-status-pill {
+      padding: 3px 10px; border-radius: 14px; font-size: .73rem; font-weight: 700;
+    }
+    .pill-good { background: #E8F5E9; color: #28a745; }
+    .pill-warn { background: #FFF3E0; color: #FF8C00; }
+    .pill-bad  { background: #FEE2E2; color: #DC3545; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: var(--radius); width: 540px; max-width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: var(--radius) var(--radius) 0 0; position: sticky; top: 0;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+    .modal-body { padding: 22px; }
+    .modal-footer {
+      padding: 14px 22px; background: var(--gray-100);
+      border-radius: 0 0 var(--radius) var(--radius);
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label {
+      display: block; font-size: .82rem; font-weight: 600;
+      color: var(--gray-600); margin-bottom: 5px;
+    }
+    .form-row label .opt { color: var(--gray-400); font-weight: 400; font-size: .76rem; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; font-size: .92rem; font-family: var(--font); box-sizing: border-box;
+    }
+    .form-row input:focus, .form-row select:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .type-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+    }
+    .type-opt {
+      padding: 10px 6px; border: 2px solid var(--gray-200); border-radius: 8px;
+      text-align: center; cursor: pointer; font-size: .8rem; font-weight: 600;
+      color: var(--gray-600); transition: all .15s; line-height: 1.4;
+      font-family: var(--font); background: white;
+    }
+    .type-opt:hover { border-color: var(--red-primary); }
+    .type-opt.selected { border-color: var(--red-primary); background: var(--red-soft); color: var(--red-primary); }
+
+    .calc-preview {
+      background: linear-gradient(135deg, #FFF5F5, #FFEDF1);
+      border-radius: 10px; padding: 14px; margin-top: 14px;
+      border: 1.5px solid var(--red-soft);
+      font-size: .85rem;
+    }
+    .calc-preview h4 {
+      font-size: .82rem; font-weight: 700; color: var(--red-primary); margin-bottom: 8px;
+    }
+    .calc-row { display: flex; justify-content: space-between; padding: 4px 0; }
+    .calc-row.total { border-top: 1px dashed var(--red-mid); padding-top: 8px; margin-top: 4px; font-weight: 800; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: .88rem; font-weight: 600; z-index: 9999; transition: transform .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .no-client, .empty-goals {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon, .empty-goals .ec-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a, .empty-goals a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width:900px) { .summary-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:600px) {
+      .summary-grid { grid-template-columns: 1fr; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .type-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item active" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>🎯 เป้าหมายชีวิต</h2>
+        <p>วางแผนเป้าหมายต่างๆ พร้อม TVM Calculator คำนวณว่าออมพอหรือไม่</p>
+      </div>
+      <div class="client-pick">
+        <label>👤</label>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="goal-modal-title">เพิ่มเป้าหมาย</h3>
+      <button class="modal-close" onclick="closeGoalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>ประเภทเป้าหมาย *</label>
+        <div class="type-grid">
+          <button class="type-opt selected" data-type="home"      onclick="selectGoalType(this)">🏠<br>ซื้อบ้าน</button>
+          <button class="type-opt"          data-type="car"       onclick="selectGoalType(this)">🚗<br>ซื้อรถ</button>
+          <button class="type-opt"          data-type="travel"    onclick="selectGoalType(this)">✈️<br>ท่องเที่ยว</button>
+          <button class="type-opt"          data-type="shop"      onclick="selectGoalType(this)">🛍️<br>ช้อปปิ้ง</button>
+          <button class="type-opt"          data-type="business"  onclick="selectGoalType(this)">💼<br>ธุรกิจ</button>
+          <button class="type-opt"          data-type="portfolio" onclick="selectGoalType(this)">📈<br>พอร์ตลงทุน</button>
+          <button class="type-opt"          data-type="emergency" onclick="selectGoalType(this)">🛡️<br>กองทุนฉุกเฉิน</button>
+          <button class="type-opt"          data-type="retire"    onclick="selectGoalType(this)">👴<br>เกษียณ</button>
+          <button class="type-opt"          data-type="other"     onclick="selectGoalType(this)">📌<br>อื่นๆ</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>ชื่อเป้าหมาย *</label>
+        <input id="gf-name" type="text" placeholder="เช่น เก็บเงินดาวน์บ้าน">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>เงินเป้าหมาย (บาท) *</label>
+          <input id="gf-target" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updatePreview()">
+        </div>
+        <div class="form-row">
+          <label>มีเงินอยู่แล้ว (บาท)</label>
+          <input id="gf-current" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>ออมต่อเดือน (บาท)</label>
+          <input id="gf-monthly" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updatePreview()">
+        </div>
+        <div class="form-row">
+          <label>ผลตอบแทน/ปี (%)</label>
+          <input id="gf-return" type="number" step="0.1" placeholder="3.0" oninput="updatePreview()" value="3">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>วันที่ต้องการบรรลุ</label>
+        <input id="gf-deadline" type="date" oninput="updatePreview()">
+      </div>
+
+      <div class="form-row" style="margin-bottom:0">
+        <label>หมายเหตุ <span class="opt">— optional</span></label>
+        <input id="gf-note" type="text" placeholder="ข้อมูลเพิ่มเติม...">
+      </div>
+
+      <div class="calc-preview" id="calc-preview" style="display:none">
+        <h4>📊 TVM Calculator (Preview)</h4>
+        <div id="calc-preview-body"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeGoalModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveGoal()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+function getGoals() {
+  const c = getCurrent();
+  return (c && c.lifeGoals) ? c.lifeGoals : [];
+}
+
+const GOAL_TYPES = {
+  home:      { icon:'🏠', label:'ซื้อบ้าน',     cls:'t-home',      cat:'ครอบครัว/ที่อยู่อาศัย' },
+  car:       { icon:'🚗', label:'ซื้อรถ',       cls:'t-car',       cat:'ขนส่ง' },
+  travel:    { icon:'✈️', label:'ท่องเที่ยว',  cls:'t-travel',    cat:'ไลฟ์สไตล์' },
+  shop:      { icon:'🛍️', label:'ช้อปปิ้ง',    cls:'t-shop',      cat:'ไลฟ์สไตล์' },
+  business:  { icon:'💼', label:'ธุรกิจ',       cls:'t-business',  cat:'การลงทุน' },
+  portfolio: { icon:'📈', label:'พอร์ตลงทุน',  cls:'t-portfolio', cat:'การลงทุน' },
+  emergency: { icon:'🛡️', label:'กองทุนฉุกเฉิน',cls:'t-emergency',cat:'ความปลอดภัย' },
+  retire:    { icon:'👴', label:'เกษียณ',       cls:'t-retire',    cat:'อนาคต' },
+  other:     { icon:'📌', label:'อื่นๆ',        cls:'t-other',     cat:'ทั่วไป' },
+};
+
+let selectedClientId = null;
+let editingGoalId = null;
+let modalGoalType = 'home';
+let currentFilter = 'all';
+
+function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtShort(n) {
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+/* ════════════════════════════════════════════
+   TVM CALCULATIONS
+═══════════════════════════════════════════ */
+// FV = PV(1+r)^n + PMT × ((1+r)^n - 1)/r
+function calcFV(pv, rate, years, pmt) {
+  pv = Number(pv) || 0;
+  rate = (Number(rate) || 0) / 100;
+  years = Number(years) || 0;
+  pmt = Number(pmt) || 0;
+  if (years <= 0) return pv;
+  const factor = Math.pow(1 + rate, years);
+  if (rate === 0) return pv + pmt * 12 * years;
+  // PMT is monthly → convert to monthly compounding
+  const mRate = rate / 12;
+  const mFactor = Math.pow(1 + mRate, years * 12);
+  const annualFV = pv * factor;
+  const pmtFV = mRate === 0 ? pmt * 12 * years : pmt * (mFactor - 1) / mRate;
+  return annualFV + pmtFV;
+}
+
+// Required monthly PMT to reach FV given PV, rate, years
+function calcRequiredPMT(target, pv, rate, years) {
+  target = Number(target) || 0;
+  pv = Number(pv) || 0;
+  rate = (Number(rate) || 0) / 100;
+  years = Number(years) || 0;
+  if (years <= 0) return Math.max(target - pv, 0);
+  const mRate = rate / 12;
+  const months = years * 12;
+  const fvOfPV = pv * Math.pow(1 + mRate, months);
+  const remaining = target - fvOfPV;
+  if (remaining <= 0) return 0;
+  if (mRate === 0) return remaining / months;
+  return remaining * mRate / (Math.pow(1 + mRate, months) - 1);
+}
+
+function yearsTo(deadline) {
+  if (!deadline) return 0;
+  const dl = new Date(deadline);
+  const now = new Date();
+  return Math.max((dl - now) / (365.25 * 24 * 3600 * 1000), 0);
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const goals = getGoals();
+  const totalTarget   = goals.reduce((s,g) => s + Number(g.targetAmount||0), 0);
+  const totalCurrent  = goals.reduce((s,g) => s + Number(g.currentAmount||0), 0);
+  const totalMonthly  = goals.reduce((s,g) => s + Number(g.monthlyContribution||0), 0);
+  const achievedCount = goals.filter(g => {
+    const years = yearsTo(g.deadline);
+    const fv = calcFV(g.currentAmount, g.expectedReturn, years, g.monthlyContribution);
+    return fv >= Number(g.targetAmount||0);
+  }).length;
+
+  const filteredGoals = currentFilter === 'all'
+    ? goals
+    : currentFilter === 'achieved'
+      ? goals.filter(g => {
+          const years = yearsTo(g.deadline);
+          const fv = calcFV(g.currentAmount, g.expectedReturn, years, g.monthlyContribution);
+          return fv >= Number(g.targetAmount||0);
+        })
+    : currentFilter === 'risk'
+      ? goals.filter(g => {
+          const years = yearsTo(g.deadline);
+          const fv = calcFV(g.currentAmount, g.expectedReturn, years, g.monthlyContribution);
+          return fv < Number(g.targetAmount||0);
+        })
+    : goals.filter(g => g.type === currentFilter);
+
+  wrap.innerHTML = `
+    <!-- Summary -->
+    <div class="summary-grid">
+      <div class="summary-card lc-blue">
+        <div class="sc-lbl">🎯 เป้าหมายทั้งหมด</div>
+        <div class="sc-val">${goals.length}</div>
+        <div class="sc-sub">รายการ</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-lbl">💰 ยอดรวมที่ต้องการ</div>
+        <div class="sc-val cost">${fmtShort(totalTarget)}</div>
+        <div class="sc-sub">รวมทุกเป้าหมาย</div>
+      </div>
+      <div class="summary-card lc-green">
+        <div class="sc-lbl">✅ มีอยู่แล้ว</div>
+        <div class="sc-val green">${fmtShort(totalCurrent)}</div>
+        <div class="sc-sub">${totalTarget > 0 ? Math.round(totalCurrent/totalTarget*100) + '%' : '0%'} ของยอด</div>
+      </div>
+      <div class="summary-card lc-orange">
+        <div class="sc-lbl">📅 ออมต่อเดือนรวม</div>
+        <div class="sc-val">${fmtShort(totalMonthly)}</div>
+        <div class="sc-sub">${achievedCount}/${goals.length} เป้าหมายพร้อม</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <span class="filter-title">กรอง:</span>
+      <button class="fchip ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">📋 ทั้งหมด</button>
+      <button class="fchip ${currentFilter==='achieved'?'active':''}" onclick="setFilter('achieved')">✅ พร้อมแล้ว</button>
+      <button class="fchip ${currentFilter==='risk'?'active':''}" onclick="setFilter('risk')">⚠️ ยังไม่พอ</button>
+      <button class="fchip ${currentFilter==='home'?'active':''}" onclick="setFilter('home')">🏠 บ้าน</button>
+      <button class="fchip ${currentFilter==='car'?'active':''}" onclick="setFilter('car')">🚗 รถ</button>
+      <button class="fchip ${currentFilter==='retire'?'active':''}" onclick="setFilter('retire')">👴 เกษียณ</button>
+      <div class="toolbar-spacer"></div>
+      <button class="btn-add-goal" onclick="openGoalModal()">+ เพิ่มเป้าหมาย</button>
+    </div>
+
+    <!-- Goals -->
+    ${filteredGoals.length === 0
+      ? `<div class="empty-goals">
+          <div class="ec-icon">🎯</div>
+          <p style="font-size:1rem;color:var(--gray-700);font-weight:700;margin-bottom:6px;">
+            ${goals.length === 0 ? 'ยังไม่มีเป้าหมาย' : 'ไม่พบเป้าหมายในหมวดนี้'}
+          </p>
+          <p style="font-size:.88rem;">${goals.length === 0 ? 'กดปุ่ม "+ เพิ่มเป้าหมาย" เพื่อเริ่มวางแผน' : 'ลองเปลี่ยน filter ดูค่ะ'}</p>
+        </div>`
+      : `<div class="goals-grid">${filteredGoals.map(g => renderGoalCard(g)).join('')}</div>`
+    }
+  `;
+}
+
+function renderGoalCard(g) {
+  const t = GOAL_TYPES[g.type] || GOAL_TYPES.other;
+  const target = Number(g.targetAmount || 0);
+  const current = Number(g.currentAmount || 0);
+  const monthly = Number(g.monthlyContribution || 0);
+  const ret = Number(g.expectedReturn || 0);
+  const years = yearsTo(g.deadline);
+
+  const fv = calcFV(current, ret, years, monthly);
+  const reqMonthly = calcRequiredPMT(target, current, ret, years);
+  const surplus = fv - target;
+  const achieved = surplus >= 0;
+  const pct = target > 0 ? Math.min(Math.round(current / target * 100), 100) : 0;
+
+  // Status
+  let pillCls, pillText;
+  if (achieved) { pillCls = 'pill-good'; pillText = '✅ พอแน่นอน'; }
+  else if (fv >= target * 0.8) { pillCls = 'pill-warn'; pillText = '⚠️ เกือบพอ'; }
+  else { pillCls = 'pill-bad'; pillText = '⛔ ขาดมาก'; }
+
+  let tvmCls = achieved ? 'green' : (fv >= target * 0.8 ? 'warn' : '');
+
+  const deadlineStr = g.deadline
+    ? new Date(g.deadline).toLocaleDateString('th-TH-u-ca-gregory',{year:'numeric',month:'long',day:'numeric'})
+    : 'ไม่ระบุ';
+
+  return `<div class="goal-card ${t.cls} ${achieved ? 'achieved':''}">
+    <div class="gc-head">
+      <div class="gc-title-wrap">
+        <div class="gc-icon-name">
+          <span class="gc-icon">${t.icon}</span>
+          <span class="gc-name">${(g.name||t.label).replace(/</g,'&lt;')}</span>
+        </div>
+        <div class="gc-cat">${t.cat}${g.note ? ' · '+g.note.replace(/</g,'&lt;') : ''}</div>
+      </div>
+      <div class="gc-actions">
+        <button class="gc-btn" onclick="openGoalModal('${g.id}')" title="แก้ไข">✏️</button>
+        <button class="gc-btn del" onclick="deleteGoal('${g.id}')" title="ลบ">🗑️</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div>
+      <div class="gc-progress">
+        <div class="gc-progress-fill ${achieved?'green':''}" style="width:${pct}%"></div>
+      </div>
+      <div class="gc-progress-text">
+        <span>${fmt(current)}</span>
+        <span>${pct}%</span>
+        <span>${fmt(target)}</span>
+      </div>
+    </div>
+
+    <!-- Amounts -->
+    <div class="gc-amounts">
+      <div class="gc-amount">
+        <div class="amt-lbl">📅 ออม/เดือนปัจจุบัน</div>
+        <div class="amt-val">${fmt(monthly)}</div>
+      </div>
+      <div class="gc-amount">
+        <div class="amt-lbl">📈 ผลตอบแทน/ปี</div>
+        <div class="amt-val">${ret.toFixed(1)}%</div>
+      </div>
+    </div>
+
+    <!-- TVM -->
+    <div class="tvm-box ${tvmCls}">
+      <div class="tvm-line">
+        <span class="tvm-lbl">⏰ เวลาเหลือ</span>
+        <span class="tvm-val">${years > 0 ? years.toFixed(1) + ' ปี' : 'ครบกำหนดแล้ว'}</span>
+      </div>
+      <div class="tvm-line">
+        <span class="tvm-lbl">📊 FV ตามแผนปัจจุบัน</span>
+        <span class="tvm-val">${fmt(fv)}</span>
+      </div>
+      <div class="tvm-line">
+        <span class="tvm-lbl">${achieved ? '✅ ส่วนเกิน' : '⚠️ ขาดอีก'}</span>
+        <span class="tvm-val">${fmt(Math.abs(surplus))}</span>
+      </div>
+      ${!achieved && years > 0 ? `<div class="tvm-line">
+        <span class="tvm-lbl">💡 ต้องออม/เดือน</span>
+        <span class="tvm-val">${fmt(reqMonthly)}</span>
+      </div>` : ''}
+      <div class="tvm-formula">FV = ${fmtShort(current)}(1+${ret}%)<sup>${years.toFixed(1)}</sup> ${monthly > 0 ? '+ '+fmtShort(monthly)+'/ด.' : ''}</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="gc-footer-row">
+      <div class="gc-deadline">📅 ${deadlineStr}</div>
+      <span class="gc-status-pill ${pillCls}">${pillText}</span>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════
+   GOAL CRUD + Modal
+═══════════════════════════════════════════ */
+function openGoalModal(id) {
+  editingGoalId = id || null;
+  document.getElementById('goal-modal-title').textContent = id ? 'แก้ไขเป้าหมาย' : 'เพิ่มเป้าหมาย';
+  if (id) {
+    const g = getGoals().find(x => x.id === id);
+    if (g) {
+      selectGoalTypeByKey(g.type || 'other');
+      document.getElementById('gf-name').value     = g.name || '';
+      document.getElementById('gf-target').value   = g.targetAmount || '';
+      document.getElementById('gf-current').value  = g.currentAmount || '';
+      document.getElementById('gf-monthly').value  = g.monthlyContribution || '';
+      document.getElementById('gf-return').value   = g.expectedReturn || 3;
+      document.getElementById('gf-deadline').value = g.deadline || '';
+      document.getElementById('gf-note').value     = g.note || '';
+    }
+  } else {
+    selectGoalTypeByKey('home');
+    document.getElementById('gf-name').value = '';
+    document.getElementById('gf-target').value = '';
+    document.getElementById('gf-current').value = '';
+    document.getElementById('gf-monthly').value = '';
+    document.getElementById('gf-return').value = 3;
+    // Default deadline: 5 years from now
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 5);
+    document.getElementById('gf-deadline').value = d.toISOString().slice(0,10);
+    document.getElementById('gf-note').value = '';
+  }
+  updatePreview();
+  document.getElementById('goal-modal').classList.add('open');
+}
+
+function closeGoalModal() {
+  document.getElementById('goal-modal').classList.remove('open');
+  editingGoalId = null;
+}
+
+function selectGoalType(el) {
+  document.querySelectorAll('.type-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  modalGoalType = el.dataset.type;
+}
+
+function selectGoalTypeByKey(key) {
+  document.querySelectorAll('.type-opt').forEach(o => {
+    o.classList.toggle('selected', o.dataset.type === key);
+  });
+  modalGoalType = key;
+}
+
+function updatePreview() {
+  const target = parseMoney(document.getElementById('gf-target'));
+  const current = parseMoney(document.getElementById('gf-current'));
+  const monthly = parseMoney(document.getElementById('gf-monthly'));
+  const ret = Number(document.getElementById('gf-return').value || 0);
+  const deadline = document.getElementById('gf-deadline').value;
+
+  const previewEl = document.getElementById('calc-preview');
+  if (!target || !deadline) { previewEl.style.display = 'none'; return; }
+
+  const years = yearsTo(deadline);
+  const fv = calcFV(current, ret, years, monthly);
+  const reqMonthly = calcRequiredPMT(target, current, ret, years);
+  const surplus = fv - target;
+  const achieved = surplus >= 0;
+
+  document.getElementById('calc-preview-body').innerHTML = `
+    <div class="calc-row"><span>เวลาเหลือ:</span><span>${years.toFixed(1)} ปี</span></div>
+    <div class="calc-row"><span>FV ตามแผน:</span><span>${fmt(fv)}</span></div>
+    <div class="calc-row"><span>เป้าหมาย:</span><span>${fmt(target)}</span></div>
+    <div class="calc-row total">
+      <span>${achieved ? '✅ ส่วนเกิน' : '⚠️ ขาดอีก'}:</span>
+      <span style="color:${achieved ? '#28a745' : '#DC3545'}">${fmt(Math.abs(surplus))}</span>
+    </div>
+    ${!achieved && years > 0 ? `<div class="calc-row" style="margin-top:6px;color:var(--red-primary);font-weight:700;">
+      <span>💡 ควรออม/เดือน:</span><span>${fmt(reqMonthly)}</span>
+    </div>` : ''}
+  `;
+  previewEl.style.display = 'block';
+}
+
+function saveGoal() {
+  const name = document.getElementById('gf-name').value.trim();
+  const target = parseMoney(document.getElementById('gf-target'));
+  if (!name) { showToast('⚠️ กรุณาใส่ชื่อเป้าหมาย'); return; }
+  if (target <= 0) { showToast('⚠️ กรุณาใส่เงินเป้าหมาย'); return; }
+
+  const g = {
+    id:                  editingGoalId || ('g' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
+    type:                modalGoalType,
+    name,
+    targetAmount:        target,
+    currentAmount:       parseMoney(document.getElementById('gf-current')),
+    monthlyContribution: parseMoney(document.getElementById('gf-monthly')),
+    expectedReturn:      Number(document.getElementById('gf-return').value || 0),
+    deadline:            document.getElementById('gf-deadline').value,
+    note:                document.getElementById('gf-note').value.trim(),
+    createdAt:           editingGoalId ? undefined : new Date().toISOString(),
+  };
+
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.lifeGoals) c.lifeGoals = [];
+    if (editingGoalId) {
+      const idx = c.lifeGoals.findIndex(x => x.id === editingGoalId);
+      if (idx >= 0) { g.createdAt = c.lifeGoals[idx].createdAt; c.lifeGoals[idx] = g; }
+    } else {
+      c.lifeGoals.push(g);
+    }
+  });
+
+  closeGoalModal();
+  render();
+  showToast(editingGoalId ? '✅ อัปเดตแล้ว' : '✅ เพิ่มเป้าหมายแล้ว');
+}
+
+function deleteGoal(id) {
+  const g = getGoals().find(x => x.id === id);
+  if (!g) return;
+  if (!confirm(`ลบเป้าหมาย "${g.name}"?`)) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c && c.lifeGoals) c.lifeGoals = c.lifeGoals.filter(x => x.id !== id);
+  });
+  render();
+  showToast('🗑️ ลบแล้ว');
+}
+
+/* ════════════════════════════════════════════
+   UTILS + INIT
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+})();
+
+document.getElementById('goal-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeGoalModal();
+});
+</script>
+</body>
+</html>
