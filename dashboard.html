@@ -169,7 +169,10 @@
       background: var(--gray-200); color: var(--gray-600);
       font-weight: 800; font-size: 1rem;
       display: flex; align-items: center; justify-content: center;
-      transition: all .22s;
+      transition: all .22s; overflow: hidden;
+    }
+    .cp-avatar img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
     .client-pill.active .cp-avatar {
       background: var(--red-primary); color: white;
@@ -862,15 +865,22 @@ function renderClientStrip() {
     return;
   }
 
+  /* HTML escape — กัน XSS ในชื่อ */
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
   strip.innerHTML = clients.map(c => {
-    const initial    = (c.firstName || '?').charAt(0);
-    const fullName   = (c.firstName || '') + ' ' + (c.lastName || '');
+    const initial    = esc((c.firstName || '?').charAt(0));
+    const fullName   = ((c.firstName || '') + ' ' + (c.lastName || '')).trim();
     const pCount     = (c.policies || []).length;
     const isActive   = c.id === selectedClientId;
     const activeClass = isActive ? ' active' : '';
-    return `<div class="client-pill${activeClass}" onclick="selectClient('${c.id}')" title="${fullName.trim()}">
-      <div class="cp-avatar">${initial}</div>
-      <div class="cp-name">${c.firstName || '?'}</div>
+    /* ใช้ <img> ถ้ามีรูปลูกค้า — ตรงกับ clients.html / sidebar */
+    const avatarInner = c.photo ? `<img src="${esc(c.photo)}" alt="">` : initial;
+    return `<div class="client-pill${activeClass}" onclick="selectClient('${esc(c.id)}')" title="${esc(fullName)}">
+      <div class="cp-avatar">${avatarInner}</div>
+      <div class="cp-name">${esc(c.firstName || '?')}</div>
       <div class="cp-count">${pCount} กรมธรรม์</div>
     </div>`;
   }).join('');
@@ -1142,7 +1152,7 @@ function exportData() {
   const payload = {
     exportedAt : new Date().toISOString(),
     exportedBy : user.firstName + ' ' + user.lastName,
-    appVersion : '2.1',
+    appVersion : '2.2',  /* 2.2 — เพิ่ม Phase 3.6 (retirement) + Phase 4 (priority/portfolio/timeline/plan_summary) */
     // ─── ข้อมูลตัวแทนระดับบนสุด (firstName/lastName/email) ───
     // email ใช้สำหรับเทียบ identity ตอน import (ไม่ใช่ overwrite firebase auth)
     user       : {
