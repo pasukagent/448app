@@ -1,6 +1,7 @@
 /* sidebar-scroll.js
-   จำตำแหน่ง scroll ของ .app-sidebar ระหว่างหน้า เพื่อกันการ reset
-   เมื่อเปลี่ยนหน้าผ่านเมนู */
+   Shared UX utilities — โหลดในทุกหน้าที่มี sidebar
+   1. จำตำแหน่ง scroll ของ .app-sidebar ระหว่างหน้า
+   2. ป้องกัน mouse wheel เปลี่ยนค่าใน <input type="number"> โดยไม่ตั้งใจ */
 (function () {
   const KEY = 'aia_sidebar_scroll';
 
@@ -19,14 +20,23 @@
   function init() {
     restore();
     const sb = document.querySelector('.app-sidebar');
-    if (!sb) return;
-    /* save ตอนกดเมนู (กัน scroll หาย ถ้า browser ไม่ trigger beforeunload) */
-    sb.addEventListener('click', (e) => {
-      if (e.target.closest('.app-sb-item, .sb-profile-row')) save();
-    });
-    /* save ก่อนปิดหน้า — covers refresh, navigation, tab close */
+    if (sb) {
+      sb.addEventListener('click', (e) => {
+        if (e.target.closest('.app-sb-item, .sb-profile-row')) save();
+      });
+    }
     window.addEventListener('beforeunload', save);
     window.addEventListener('pagehide', save);
+
+    /* ป้องกัน wheel เปลี่ยนค่า number input ที่ focus อยู่
+       (browser default — scroll mouse บน number input ที่ focus = ค่าขึ้น/ลง)
+       แก้โดย blur input ทันทีเมื่อ wheel — ค่าไม่เปลี่ยน scroll ปกติ */
+    document.addEventListener('wheel', (e) => {
+      const el = document.activeElement;
+      if (el && el.tagName === 'INPUT' && el.type === 'number') {
+        el.blur();
+      }
+    }, { passive: true });
   }
 
   if (document.readyState === 'loading') {

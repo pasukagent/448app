@@ -86,7 +86,10 @@
       background: var(--red-mid); color: var(--red-dark);
       font-size: 1.1rem; font-weight: 800;
       display: flex; align-items: center; justify-content: center;
-      transition: all .18s;
+      transition: all .18s; overflow: hidden;
+    }
+    .cc-avatar img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
     .client-card.active .cc-avatar { background: var(--red-primary); color: white; }
     .cc-info { flex: 1; min-width: 0; }
@@ -149,9 +152,112 @@
     .profile-avatar-lg {
       width: 72px; height: 72px; border-radius: 50%;
       background: rgba(255,255,255,.25); border: 3px solid rgba(255,255,255,.5);
-      font-size: 2rem; font-weight: 800;
+      font-size: 2rem; font-weight: 800; color: white;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      flex-shrink: 0; cursor: pointer; position: relative;
+      overflow: hidden; transition: all .15s;
+    }
+    .profile-avatar-lg img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      border-radius: 50%;
+    }
+    .profile-avatar-lg:hover { border-color: white; transform: scale(1.05); }
+    .profile-avatar-lg::after {
+      content: '📷'; position: absolute; inset: 0;
+      background: rgba(0,0,0,.5); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.4rem; opacity: 0; transition: opacity .15s;
+      border-radius: 50%; color: white; pointer-events: none;
+    }
+    .profile-avatar-lg:hover::after { opacity: 1; }
+    .pf-photo-remove {
+      position: absolute; top: -4px; right: -4px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #DC3545; color: white; border: 2px solid white;
+      font-size: .85rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    .pf-photo-remove:hover { background: #B02030; }
+
+    /* Photo menu — เลือกระหว่างกล้อง / คลังภาพ */
+    .photo-menu {
+      position: fixed; z-index: 100;
+      background: white; border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.18);
+      padding: 8px; min-width: 200px;
+      display: none; flex-direction: column; gap: 2px;
+      animation: photo-menu-in .15s ease;
+    }
+    .photo-menu.open { display: flex; }
+    @keyframes photo-menu-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .photo-menu button {
+      padding: 10px 14px; background: white; border: none;
+      border-radius: 8px; font-family: var(--font);
+      font-size: .9rem; font-weight: 700; color: var(--gray-700);
+      cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 10px;
+      transition: all .12s;
+    }
+    .photo-menu button:hover {
+      background: var(--red-soft); color: var(--red-primary);
+    }
+    .photo-menu button.danger:hover {
+      background: #FEE2E2; color: #DC3545;
+    }
+    .photo-menu .pm-divider {
+      height: 1px; background: var(--gray-200); margin: 4px 6px;
+    }
+
+    /* Camera modal — ใช้ getUserMedia สำหรับ desktop + mobile */
+    .camera-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.88); z-index: 200;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .camera-overlay.open { display: flex; }
+    .camera-modal {
+      background: #1a1a1a; border-radius: 16px;
+      max-width: 560px; width: 100%;
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .camera-header {
+      color: white; font-weight: 800; font-size: 1.05rem;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 4px;
+    }
+    .camera-header button {
+      background: transparent; border: none; color: white;
+      font-size: 1.4rem; cursor: pointer; padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .camera-header button:hover { background: rgba(255,255,255,.1); }
+    #camera-video {
+      width: 100%; aspect-ratio: 4/3; background: black;
+      border-radius: 10px; object-fit: cover;
+      transform: scaleX(-1); /* mirror — ดูเป็นธรรมชาติแบบกระจก */
+    }
+    .camera-actions {
+      display: flex; gap: 10px; justify-content: center; padding: 0 4px;
+    }
+    .camera-actions button {
+      flex: 1; padding: 14px 20px; border: none;
+      font-family: var(--font); font-weight: 800;
+      border-radius: 10px; cursor: pointer; font-size: .95rem;
+      transition: all .15s;
+    }
+    .cam-cancel { background: #444; color: white; }
+    .cam-cancel:hover { background: #555; }
+    .cam-capture { background: var(--red-primary); color: white; }
+    .cam-capture:hover { background: var(--red-dark); }
+    .camera-error {
+      background: #FEE2E2; color: #B02030;
+      padding: 12px 14px; border-radius: 8px;
+      font-size: .85rem; line-height: 1.5; text-align: center;
     }
     .profile-hero-info { flex: 1; }
     .profile-hero-name { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
@@ -460,7 +566,16 @@
 
         <!-- Hero -->
         <div class="profile-hero">
-          <div class="profile-avatar-lg" id="p-avatar">?</div>
+          <div class="profile-avatar-lg" id="p-avatar" onclick="openPhotoMenu(event)" title="คลิกเพื่อเปลี่ยนรูป">?</div>
+          <!-- 2 hidden file inputs: camera + gallery
+               ใช้ off-screen positioning แทน display:none — เพราะบางเบราว์เซอร์
+               ไม่ยอม trigger click() บน input ที่ display:none โดยเฉพาะกล้อง -->
+          <input type="file" id="client-photo-camera" accept="image/*" capture="environment"
+            style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0;"
+            onchange="handleClientPhotoUpload(this)">
+          <input type="file" id="client-photo-gallery" accept="image/*"
+            style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0;"
+            onchange="handleClientPhotoUpload(this)">
           <div class="profile-hero-info">
             <div class="profile-hero-name" id="p-name">—</div>
             <div class="profile-hero-sub" id="p-sub">—</div>
@@ -468,6 +583,30 @@
           <div class="profile-hero-actions">
             <button class="btn-edit-client" onclick="toggleEditForm()">✏️ แก้ไข</button>
             <button class="btn-del-client"  onclick="deleteClient()">🗑</button>
+          </div>
+        </div>
+
+        <!-- Photo upload menu (popup) -->
+        <div class="photo-menu" id="photo-menu" onclick="event.stopPropagation()">
+          <button onclick="pickPhoto('camera')">📷 ถ่ายรูปใหม่</button>
+          <button onclick="pickPhoto('gallery')">🖼️ เลือกจากคลังภาพ</button>
+          <div class="pm-divider" id="pm-divider" style="display:none;"></div>
+          <button class="danger" id="pm-remove" onclick="removeClientPhoto(); closePhotoMenu();" style="display:none;">🗑️ ลบรูปออก</button>
+        </div>
+
+        <!-- Camera modal — ใช้ getUserMedia (รองรับ desktop + mobile) -->
+        <div class="camera-overlay" id="camera-modal" onclick="if(event.target===this)closeCameraModal()">
+          <div class="camera-modal">
+            <div class="camera-header">
+              <span>📷 ถ่ายรูปลูกค้า</span>
+              <button onclick="closeCameraModal()">✕</button>
+            </div>
+            <div id="camera-error" class="camera-error" style="display:none;"></div>
+            <video id="camera-video" autoplay playsinline muted></video>
+            <div class="camera-actions">
+              <button class="cam-cancel" onclick="closeCameraModal()">ยกเลิก</button>
+              <button class="cam-capture" onclick="capturePhoto()">📷 ถ่ายรูป</button>
+            </div>
           </div>
         </div>
 
@@ -675,6 +814,13 @@
 
   const TYPE_ICONS = { 'ชีวิต':'🛡️','สุขภาพ':'❤️','โรคร้ายแรง':'🏥','อุบัติเหตุ':'🚑','บำนาญ':'🏦','รถยนต์':'🚗','อื่นๆ':'📄' };
   function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+
+  /* HTML escape — กัน XSS ในชื่อ/ที่อยู่/หมายเหตุ/family name */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   function fmtShort(n) {
     return fmt(n);
   }
@@ -711,7 +857,7 @@
     const sel = document.getElementById(selId);
     const families = getFamilies();
     const opts = families.map(f =>
-      `<option value="${f.id}" ${f.id === currentFamilyId ? 'selected' : ''}>${f.name}</option>`
+      `<option value="${esc(f.id)}" ${f.id === currentFamilyId ? 'selected' : ''}>${esc(f.name)}</option>`
     ).join('');
     sel.innerHTML = `<option value="">— ไม่ระบุครอบครัว —</option>${opts}<option value="__new__">➕ สร้างครอบครัวใหม่...</option>`;
   }
@@ -724,31 +870,47 @@
     if (isNew) { newInput.value = ''; newInput.focus(); }
   }
 
-  function resolveFamilyId(prefix) {
+  /* ดึงข้อมูล family request — ไม่สร้างทันที (กัน orphan ถ้า save client fail)
+     return: { id, pending: { name } | null } */
+  function getFamilyRequest(prefix) {
     const sel      = document.getElementById(prefix + '-family');
     const newInput = document.getElementById(prefix + '-family-new');
     if (sel.value === '__new__') {
       const name = newInput.value.trim();
-      if (!name) return null;
-      const fid = 'f' + Date.now();
-      updateCurrentUser(u => {
-        if (!u.data.families) u.data.families = [];
-        u.data.families.push({ id: fid, name });
-      });
-      return fid;
+      if (!name) return { id: null, pending: null };
+      return { id: 'f' + Date.now(), pending: { name } };
     }
-    return sel.value || null;
+    return { id: sel.value || null, pending: null };
+  }
+  /* สร้าง family ใน updateUser callback เดียวกับการ save client (atomic) */
+  function applyFamilyRequest(u, req) {
+    if (req.pending) {
+      if (!u.data.families) u.data.families = [];
+      u.data.families.push({ id: req.id, name: req.pending.name });
+    }
+    return req.id;
+  }
+  /* compat — เก่าเรียก resolveFamilyId แล้วสร้างทันที (สำหรับโค้ดเก่าที่ยังใช้) */
+  function resolveFamilyId(prefix) {
+    const req = getFamilyRequest(prefix);
+    if (req.pending) {
+      updateCurrentUser(u => applyFamilyRequest(u, req));
+    }
+    return req.id;
   }
 
   // ── Render client list (grouped by family) ──
   function renderClientCard(c) {
     const pCount  = (c.policies||[]).length;
-    const initial = (c.firstName||'?').charAt(0).toUpperCase();
+    const initial = esc((c.firstName||'?').charAt(0).toUpperCase());
     const active  = c.id === selectedClientId ? 'active' : '';
-    return `<div class="client-card ${active}" onclick="showProfile('${c.id}')">
-      <div class="cc-avatar">${initial}</div>
+    /* ใช้ <img> tag (robust กว่า inline background-image กับ dataUrl ที่มี ; )
+       photo เป็น dataUrl ที่ generate เอง — แต่ใส่ esc เผื่อ ' หรือ " ใน URL */
+    const avatarInner = c.photo ? `<img src="${esc(c.photo)}" alt="">` : initial;
+    return `<div class="client-card ${active}" onclick="showProfile('${esc(c.id)}')">
+      <div class="cc-avatar">${avatarInner}</div>
       <div class="cc-info">
-        <div class="cc-name">${c.firstName}${c.lastName ? ' ' + c.lastName : ''}</div>
+        <div class="cc-name">${esc(c.firstName)}${c.lastName ? ' ' + esc(c.lastName) : ''}</div>
         <div class="cc-sub">${pCount} กรมธรรม์</div>
       </div>
       <div class="cc-badge">${pCount > 0 ? pCount + ' ฉบับ' : 'ยังไม่มี'}</div>
@@ -760,8 +922,9 @@
     const clients  = u.data.clients  || [];
     const families = u.data.families || [];
     const q = document.getElementById('search-input').value.trim().toLowerCase();
+    /* กัน undefined firstName ทำให้ "undefined" matches "und" */
     const filtered = clients.filter(c =>
-      (c.firstName + ' ' + (c.lastName||'')).toLowerCase().includes(q)
+      ((c.firstName||'') + ' ' + (c.lastName||'')).toLowerCase().includes(q)
     );
     const el = document.getElementById('client-list-el');
     if (filtered.length === 0) {
@@ -785,7 +948,7 @@
     families.forEach(f => {
       const members = familyMap[f.id] || [];
       if (members.length === 0) return;
-      html += `<div class="family-group-hdr"><span class="fgh-name">🏠 ${f.name}</span><div class="fgh-line"></div></div>`;
+      html += `<div class="family-group-hdr"><span class="fgh-name">🏠 ${esc(f.name)}</span><div class="fgh-line"></div></div>`;
       members.forEach(c => { html += renderClientCard(c); });
     });
     if (ungrouped.length > 0) {
@@ -826,9 +989,22 @@
     }
 
     const nicknamePart = client.nickname ? ` (${client.nickname})` : '';
-    document.getElementById('p-avatar').textContent     = initial;
+    /* Avatar — ใช้ <img> tag (consistent กับ list small avatar) */
+    const pAv = document.getElementById('p-avatar');
+    if (client.photo) {
+      pAv.innerHTML = `<img src="${client.photo}" alt="">
+        <button class="pf-photo-remove" onclick="event.stopPropagation(); removeClientPhoto();" title="ลบรูป">×</button>`;
+    } else {
+      pAv.innerHTML = initial;
+    }
     document.getElementById('p-name').textContent       = fullName + nicknamePart;
-    document.getElementById('p-sub').textContent        = familyTag + (client.gender || '') + (client.gender && ageStr ? ' · ' : '') + ageStr + (ageStr || client.gender ? ' · ' : '') + policies.length + ' กรมธรรม์';
+    /* p-sub — ประกอบจาก parts ที่มีค่า แล้ว join ด้วย ' · ' (ไม่มี leading separator) */
+    const subParts = [];
+    if (familyTag) subParts.push(familyTag.replace(/ · $/, '').trim());
+    if (client.gender) subParts.push(client.gender);
+    if (ageStr) subParts.push(ageStr);
+    subParts.push(policies.length + ' กรมธรรม์');
+    document.getElementById('p-sub').textContent = subParts.filter(Boolean).join(' · ');
     document.getElementById('p-stat-pol').textContent   = policies.length + ' ฉบับ';
     document.getElementById('p-stat-cov').textContent   = fmtShort(totalCoverage);
     document.getElementById('p-stat-prem').textContent  = fmtShort(totalPremium);
@@ -855,7 +1031,7 @@
     document.getElementById('p-info-card').style.display = hasAny ? '' : 'none';
     document.getElementById('p-info-grid').innerHTML = infoRows
       .filter(r => r.val)
-      .map(r => `<div class="info-row${r.full?' full':''}"><div class="info-lbl">${r.lbl}</div><div class="info-val">${r.val}</div></div>`)
+      .map(r => `<div class="info-row${r.full?' full':''}"><div class="info-lbl">${esc(r.lbl)}</div><div class="info-val">${esc(r.val)}</div></div>`)
       .join('');
 
     // Recent policies (last 4)
@@ -921,12 +1097,12 @@
       const dt = n.createdAt ? new Date(n.createdAt) : new Date();
       const dateStr = dt.toLocaleDateString('th-TH-u-ca-gregory', {year:'numeric', month:'short', day:'numeric'});
       const timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
-      const escaped = (n.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const escaped = esc(n.text);
       return `<div class="note-entry ${t.cls}">
         <div class="note-meta-row">
-          <span class="note-type-badge ${t.badge}">${t.icon} ${t.label}</span>
+          <span class="note-type-badge ${t.badge}">${t.icon} ${esc(t.label)}</span>
           <span class="note-time">${dateStr} · ${timeStr}</span>
-          <button class="note-del-btn" onclick="deleteNote('${n.id}')" title="ลบ">🗑️</button>
+          <button class="note-del-btn" onclick="deleteNote('${esc(n.id)}')" title="ลบ">🗑️</button>
         </div>
         <div class="note-text">${escaped}</div>
       </div>`;
@@ -976,6 +1152,219 @@
     window.location.href = feature === 'policies' ? 'policies.html' : 'financial.html';
   }
 
+  /* ════════════════════════════════════════════
+     CLIENT PHOTO UPLOAD — popup menu + camera/gallery + ลบ
+  ═══════════════════════════════════════════ */
+  function openPhotoMenu(e) {
+    if (!selectedClientId) return;
+    e.stopPropagation();
+    const menu = document.getElementById('photo-menu');
+    const av = document.getElementById('p-avatar');
+    const rect = av.getBoundingClientRect();
+    /* แสดง remove ถ้ามีรูป */
+    const c = (getCurrentUser().data.clients || []).find(x => x.id === selectedClientId);
+    const hasPhoto = c && c.photo;
+    document.getElementById('pm-remove').style.display = hasPhoto ? 'flex' : 'none';
+    document.getElementById('pm-divider').style.display = hasPhoto ? 'block' : 'none';
+    /* Position menu */
+    menu.classList.add('open');
+    menu.style.top  = (rect.bottom + 8) + 'px';
+    menu.style.left = rect.left + 'px';
+    /* Close on outside click — กัน leak: remove old listener ก่อน register ใหม่ */
+    document.removeEventListener('click', closePhotoMenu);
+    setTimeout(() => document.addEventListener('click', closePhotoMenu, { once: true }), 0);
+  }
+
+  function closePhotoMenu() {
+    document.getElementById('photo-menu').classList.remove('open');
+    document.removeEventListener('click', closePhotoMenu);
+  }
+
+  async function pickPhoto(source) {
+    closePhotoMenu();
+    if (source === 'camera') {
+      /* ใช้ getUserMedia (desktop + mobile) — capture attribute ไม่ทำงานบน desktop Chrome */
+      try {
+        await openCameraModal();
+        return;
+      } catch (err) {
+        console.warn('getUserMedia failed', err);
+        /* ถ้า camera modal เปิด error อยู่แล้ว (NotAllowedError, etc.) → ไม่ fallback
+           เพราะ user เห็น message อยู่แล้ว — ไม่ใช่ "ไม่รองรับ" */
+        const cameraModalOpen = document.getElementById('camera-modal').classList.contains('open');
+        if (cameraModalOpen) return;
+        /* ถ้า browser ไม่รองรับ getUserMedia เลย → fallback ไป file input (mobile) */
+        document.getElementById('client-photo-camera').click();
+      }
+    } else {
+      document.getElementById('client-photo-gallery').click();
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     CAMERA MODAL (getUserMedia) — รองรับ desktop notebook + mobile
+  ═══════════════════════════════════════════ */
+  let _cameraStream = null;
+
+  async function openCameraModal() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Browser ไม่รองรับ getUserMedia');
+    }
+    /* เคลียร์ error เดิม */
+    const errEl = document.getElementById('camera-error');
+    errEl.style.display = 'none';
+    errEl.textContent = '';
+
+    try {
+      /* ลองใช้กล้องหลัง (เหมาะกับถ่ายลูกค้า) ก่อน */
+      _cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      });
+    } catch (err1) {
+      /* notebook ไม่มีกล้องหลัง → fallback กล้องไหนก็ได้ */
+      try {
+        _cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      } catch (err2) {
+        /* แสดง error ใน modal */
+        document.getElementById('camera-modal').classList.add('open');
+        const msg = err2.name === 'NotAllowedError'
+          ? '❌ ไม่ได้รับอนุญาตให้ใช้กล้อง — กรุณาอนุญาตในการตั้งค่าบราวเซอร์'
+          : err2.name === 'NotFoundError'
+            ? '❌ ไม่พบกล้องในเครื่องนี้'
+            : '❌ เปิดกล้องไม่ได้: ' + err2.message;
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+        throw err2;
+      }
+    }
+    const video = document.getElementById('camera-video');
+    video.srcObject = _cameraStream;
+    document.getElementById('camera-modal').classList.add('open');
+  }
+
+  function closeCameraModal() {
+    if (_cameraStream) {
+      _cameraStream.getTracks().forEach(t => t.stop());
+      _cameraStream = null;
+    }
+    const video = document.getElementById('camera-video');
+    video.srcObject = null;
+    document.getElementById('camera-modal').classList.remove('open');
+  }
+
+  function capturePhoto() {
+    if (!_cameraStream || !selectedClientId) return;
+    const video = document.getElementById('camera-video');
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) { alert('⚠️ กล้องยังไม่พร้อม รอสักครู่'); return; }
+    /* Resize ≤ 300px JPEG q 0.82 */
+    const MAX = 300;
+    let w = vw, h = vh;
+    if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+    else       { w = Math.round(w * MAX / h); h = MAX; }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    /* Mirror video back ก่อน draw — เพื่อให้ภาพ output ไม่ mirror (เห็น preview เหมือนกระจก แต่ save ได้ภาพจริง) */
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+    try {
+      updateCurrentUser(u => {
+        const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+        if (c) c.photo = dataUrl;
+      });
+      closeCameraModal();
+      showProfile(selectedClientId);
+      renderList();
+    } catch (err) {
+      alert('❌ บันทึกรูปไม่สำเร็จ — พื้นที่ localStorage เต็ม');
+    }
+  }
+
+  function handleClientPhotoUpload(input) {
+    if (!selectedClientId) return;
+    const file = input.files[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('❌ กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)');
+      return;
+    }
+    /* จำกัด 5MB กัน HEIC/RAW ใหญ่เกินทำ browser freeze */
+    if (file.size > 5 * 1024 * 1024) {
+      alert('❌ ไฟล์ใหญ่เกิน 5MB กรุณาย่อรูปก่อนอัปโหลด');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => alert('❌ อ่านไฟล์ไม่ได้');
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => alert('❌ ไฟล์รูปเสีย');
+      img.onload = () => {
+        /* Resize ≤ 300px JPEG q 0.82 → ~30KB */
+        const MAX = 300;
+        let w = img.width, h = img.height;
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        savePhotoWithRetry(canvas);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* บันทึกรูปพร้อม retry + ลด quality ทีละขั้นถ้า quota เกิน
+     กัน data loss: ลองด้วย dataUrl เดิม → ถ้า fail → ลด quality → ถ้ายัง fail → ย่อขนาด */
+  function savePhotoWithRetry(canvas) {
+    if (!selectedClientId) return;
+    const qualities = [0.82, 0.6, 0.4];
+    const sizes = [1.0, 0.7, 0.5];
+    for (const sizeRatio of sizes) {
+      let resizedCanvas = canvas;
+      if (sizeRatio < 1.0) {
+        resizedCanvas = document.createElement('canvas');
+        resizedCanvas.width  = Math.round(canvas.width  * sizeRatio);
+        resizedCanvas.height = Math.round(canvas.height * sizeRatio);
+        resizedCanvas.getContext('2d').drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+      }
+      for (const q of qualities) {
+        const dataUrl = resizedCanvas.toDataURL('image/jpeg', q);
+        try {
+          updateCurrentUser(u => {
+            const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+            if (c) c.photo = dataUrl;
+          });
+          showProfile(selectedClientId);
+          renderList();
+          return; // success
+        } catch (err) {
+          /* QuotaExceededError — ลองอีกขนาด/คุณภาพ */
+          continue;
+        }
+      }
+    }
+    alert('❌ บันทึกรูปไม่สำเร็จ — พื้นที่ localStorage เต็ม\nลอง Export ข้อมูลเก่าออกก่อน');
+  }
+
+  function removeClientPhoto() {
+    if (!selectedClientId) return;
+    if (!confirm('ลบรูปลูกค้าคนนี้?')) return;
+    updateCurrentUser(u => {
+      const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+      if (c) delete c.photo;
+    });
+    showProfile(selectedClientId);
+    renderList();
+  }
+
   // ── Add client ──
   function toggleAddForm() {
     const f = document.getElementById('add-form-wrap');
@@ -983,6 +1372,7 @@
     if (open) {
       populateFamilySelect('af-family', null);
       document.getElementById('af-family-new').style.display = 'none';
+      document.getElementById('af-family-new').value = ''; // reset ค่าค้างจากครั้งก่อน
       document.getElementById('af-first').value = '';
       document.getElementById('af-last').value  = '';
       document.getElementById('af-first').focus();
@@ -993,9 +1383,17 @@
     const first = document.getElementById('af-first').value.trim();
     const last  = document.getElementById('af-last').value.trim();
     if (!first) { document.getElementById('af-first').focus(); return; }
-    const familyId = resolveFamilyId('af');
-    const newClient = { id: 'c' + Date.now(), firstName: first, lastName: last, familyId: familyId || null, policies: [], financialGoals: [] };
+    const famReq = getFamilyRequest('af');
+    /* init arrays ครบ — กัน lazy-init ตอน push ใน feature ต่างๆ */
+    const newClient = {
+      id: 'c' + Date.now(),
+      firstName: first, lastName: last,
+      familyId: famReq.id || null,
+      policies: [], financialGoals: [], notes: [],
+    };
+    /* atomic — สร้าง family + push client ใน updateUser เดียวกัน */
     updateCurrentUser(u => {
+      applyFamilyRequest(u, famReq);
       if (!u.data.clients) u.data.clients = [];
       u.data.clients.push(newClient);
     });
@@ -1013,8 +1411,40 @@
   }
 
   // ── Edit client ──
+  /* ตรวจว่า form แก้ไขมีการเปลี่ยนแปลงจาก client ปัจจุบันหรือไม่ */
+  function hasEditFormChanges() {
+    const u = getCurrentUser();
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return false;
+    const v = id => document.getElementById(id).value;
+    const same = (a, b) => String(a == null ? '' : a) === String(b == null ? '' : b);
+    return !(
+      same(v('ef-first'),    c.firstName) &&
+      same(v('ef-last'),     c.lastName) &&
+      same(v('ef-nickname'), c.nickname) &&
+      same(v('ef-idcard'),   c.idCard) &&
+      same(v('ef-dob'),      c.dob) &&
+      same(v('ef-gender'),   c.gender) &&
+      same(v('ef-weight'),   c.weight) &&
+      same(v('ef-height'),   c.height) &&
+      same(v('ef-phone'),    c.phone) &&
+      same(v('ef-email'),    c.email) &&
+      same(v('ef-job'),      c.job) &&
+      same(v('ef-position'), c.position) &&
+      same(v('ef-workplace'),c.workplace) &&
+      same(v('ef-income'),   c.income) &&
+      same(v('ef-address'),  c.address) &&
+      same(v('ef-work-address'), c.workAddress)
+    );
+  }
+
   function toggleEditForm() {
     const f    = document.getElementById('edit-form');
+    const isOpen = f.classList.contains('open');
+    /* ถ้ากำลังจะปิดฟอร์มและมีการแก้ไข — confirm กัน user คลิกผิด */
+    if (isOpen && hasEditFormChanges()) {
+      if (!confirm('ยังไม่ได้บันทึก — ปิดฟอร์มและทิ้งการเปลี่ยนแปลง?')) return;
+    }
     const open = f.classList.toggle('open');
     if (open) {
       const u      = getCurrentUser();
@@ -1054,27 +1484,43 @@
       alert('⚠️ เลขบัตรประชาชนต้องมี 13 หลัก (ปัจจุบัน ' + idCardDigits.length + ' หลัก)\nหรือเว้นว่างไว้ถ้ายังไม่ระบุ');
       return;
     }
-    const familyId = resolveFamilyId('ef');
+    /* Validate DOB ไม่ใช่อนาคต */
+    const dobVal = document.getElementById('ef-dob').value;
+    if (dobVal && new Date(dobVal) > new Date()) {
+      document.getElementById('ef-dob').focus();
+      alert('⚠️ วันเกิดไม่สามารถเป็นวันในอนาคตได้');
+      return;
+    }
+    /* helper — number ที่ยอมรับ 0 (ไม่ใช้ || null ที่ทำให้ 0 หาย) */
+    const numOrNull = (id) => {
+      const v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? null : v;
+    };
+    const famReq = getFamilyRequest('ef');
+    /* atomic — create family + update client ใน updateUser เดียวกัน
+       กัน orphan family ถ้า save client fail */
     updateCurrentUser(u => {
+      applyFamilyRequest(u, famReq);
       const c = (u.data.clients||[]).find(c => c.id === selectedClientId);
       if (c) {
         c.firstName   = first;
         c.lastName    = document.getElementById('ef-last').value.trim();
         c.nickname    = document.getElementById('ef-nickname').value.trim();
-        c.idCard      = idCardRaw;
-        c.dob         = document.getElementById('ef-dob').value;
+        /* normalize idCard เป็น digits-only เก็บ — display ค่อย format */
+        c.idCard      = idCardDigits || '';
+        c.dob         = dobVal;
         c.gender      = document.getElementById('ef-gender').value;
-        c.weight      = parseFloat(document.getElementById('ef-weight').value) || null;
-        c.height      = parseFloat(document.getElementById('ef-height').value) || null;
+        c.weight      = numOrNull('ef-weight');
+        c.height      = numOrNull('ef-height');
         c.phone       = document.getElementById('ef-phone').value.trim();
         c.email       = document.getElementById('ef-email').value.trim();
         c.job         = document.getElementById('ef-job').value.trim();
         c.position    = document.getElementById('ef-position').value.trim();
         c.workplace   = document.getElementById('ef-workplace').value.trim();
-        c.income      = parseFloat(document.getElementById('ef-income').value) || null;
+        c.income      = numOrNull('ef-income');
         c.address     = document.getElementById('ef-address').value.trim();
         c.workAddress = document.getElementById('ef-work-address').value.trim();
-        c.familyId    = familyId || null;
+        c.familyId    = famReq.id || null;
       }
     });
     toggleEditForm();
@@ -1088,9 +1534,19 @@
     const client = (u.data.clients||[]).find(c => c.id === selectedClientId);
     if (!client) return;
     const name = client.firstName + (client.lastName ? ' ' + client.lastName : '');
-    if (!confirm(`ลบลูกค้า "${name}" และกรมธรรม์ทั้งหมดออกใช่ไหม?`)) return;
+    if (!confirm(`ลบลูกค้า "${name}" และข้อมูลทั้งหมด (กรมธรรม์/นัดหมาย/งาน) ออกใช่ไหม?`)) return;
+    const cid = selectedClientId;
     updateCurrentUser(u => {
-      u.data.clients = (u.data.clients||[]).filter(c => c.id !== selectedClientId);
+      /* ลบลูกค้า */
+      u.data.clients = (u.data.clients||[]).filter(c => c.id !== cid);
+      /* cleanup orphan references — appointments, tasks ที่ผูกกับลูกค้านี้ */
+      if (Array.isArray(u.data.appointments)) {
+        u.data.appointments = u.data.appointments.filter(a => a.clientId !== cid);
+      }
+      if (Array.isArray(u.data.tasks)) {
+        u.data.tasks = u.data.tasks.filter(t => t.clientId !== cid);
+      }
+      /* aia_selectedClient อาจถูกตั้งค่าเป็น cid ใน localStorage — clear */
     });
     selectedClientId = null;
     localStorage.removeItem('aia_selectedClient');

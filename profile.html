@@ -233,6 +233,77 @@
     .lic-exp.warn { color: #E67E22; }
     .lic-exp.expired { color: #E74C3C; }
 
+    /* Photo menu — เลือกระหว่างกล้อง / คลังภาพ */
+    .photo-menu {
+      position: fixed; z-index: 100;
+      background: white; border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.18);
+      padding: 8px; min-width: 200px;
+      display: none; flex-direction: column; gap: 2px;
+      animation: photo-menu-in .15s ease;
+    }
+    .photo-menu.open { display: flex; }
+    @keyframes photo-menu-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .photo-menu button {
+      padding: 10px 14px; background: white; border: none;
+      border-radius: 8px; font-family: var(--font);
+      font-size: .9rem; font-weight: 700; color: var(--gray-700);
+      cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 10px;
+      transition: all .12s;
+    }
+    .photo-menu button:hover { background: var(--red-soft); color: var(--red-primary); }
+    .photo-menu button.danger:hover { background: #FEE2E2; color: #DC3545; }
+    .photo-menu .pm-divider { height: 1px; background: var(--gray-200); margin: 4px 6px; }
+
+    /* Camera modal */
+    .camera-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.88); z-index: 200;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .camera-overlay.open { display: flex; }
+    .camera-modal {
+      background: #1a1a1a; border-radius: 16px;
+      max-width: 560px; width: 100%;
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .camera-header {
+      color: white; font-weight: 800; font-size: 1.05rem;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 4px;
+    }
+    .camera-header button {
+      background: transparent; border: none; color: white;
+      font-size: 1.4rem; cursor: pointer; padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .camera-header button:hover { background: rgba(255,255,255,.1); }
+    #profile-camera-video {
+      width: 100%; aspect-ratio: 4/3; background: black;
+      border-radius: 10px; object-fit: cover;
+      transform: scaleX(-1); /* mirror = ดูเป็นกระจก */
+    }
+    .camera-actions { display: flex; gap: 10px; justify-content: center; padding: 0 4px; }
+    .camera-actions button {
+      flex: 1; padding: 14px 20px; border: none;
+      font-family: var(--font); font-weight: 800;
+      border-radius: 10px; cursor: pointer; font-size: .95rem;
+      transition: all .15s;
+    }
+    .cam-cancel { background: #444; color: white; }
+    .cam-cancel:hover { background: #555; }
+    .cam-capture { background: var(--red-primary); color: white; }
+    .cam-capture:hover { background: var(--red-dark); }
+    .camera-error {
+      background: #FEE2E2; color: #B02030;
+      padding: 12px 14px; border-radius: 8px;
+      font-size: .85rem; line-height: 1.5; text-align: center;
+    }
+
     /* QR section */
     .qr-section {
       display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
@@ -360,17 +431,42 @@
           <div class="agent-card">
             <div class="agent-card-header">
               <div class="agent-avatar-wrap">
-                <div class="agent-avatar" id="avatar-display" onclick="document.getElementById('photo-upload').click()" title="คลิกเพื่ออัปโหลดรูป">
+                <div class="agent-avatar" id="avatar-display" onclick="openProfilePhotoMenu(event)" title="คลิกเพื่อเปลี่ยนรูป">
                   <span id="avatar-initial">P</span>
                   <div class="avatar-overlay">📷 เปลี่ยนรูป</div>
                 </div>
-                <div class="avatar-edit-hint" id="avatar-edit-hint" onclick="handleAvatarHintClick(event)" title="อัปโหลดรูป">📷</div>
+                <div class="avatar-edit-hint" id="avatar-edit-hint" onclick="openProfilePhotoMenu(event)" title="อัปโหลดรูป">📷</div>
               </div>
-              <!-- hidden file input -->
-              <input type="file" id="photo-upload" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
-              <!-- Remove photo button (only visible when photo exists) -->
-              <div id="remove-photo-btn" style="display:none;margin-top:8px;">
-                <button onclick="removePhoto()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.72rem;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:var(--font);">🗑️ ลบรูป</button>
+              <!-- 2 hidden file inputs: camera + gallery (off-screen positioning ให้ click() ได้) -->
+              <input type="file" id="photo-upload-camera" accept="image/*" capture="user"
+                style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0;"
+                onchange="handlePhotoUpload(this)">
+              <input type="file" id="photo-upload-gallery" accept="image/*"
+                style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0;"
+                onchange="handlePhotoUpload(this)">
+
+              <!-- Photo menu popup -->
+              <div class="photo-menu" id="profile-photo-menu" onclick="event.stopPropagation()">
+                <button onclick="pickProfilePhoto('camera')">📷 ถ่ายรูปใหม่</button>
+                <button onclick="pickProfilePhoto('gallery')">🖼️ เลือกจากคลังภาพ</button>
+                <div class="pm-divider" id="pm-prof-divider" style="display:none;"></div>
+                <button class="danger" id="pm-prof-remove" onclick="removePhoto(); closeProfilePhotoMenu();" style="display:none;">🗑️ ลบรูปออก</button>
+              </div>
+
+              <!-- Camera modal — getUserMedia -->
+              <div class="camera-overlay" id="profile-camera-modal" onclick="if(event.target===this)closeProfileCameraModal()">
+                <div class="camera-modal">
+                  <div class="camera-header">
+                    <span>📷 ถ่ายรูปโปรไฟล์</span>
+                    <button onclick="closeProfileCameraModal()">✕</button>
+                  </div>
+                  <div id="profile-camera-error" class="camera-error" style="display:none;"></div>
+                  <video id="profile-camera-video" autoplay playsinline muted></video>
+                  <div class="camera-actions">
+                    <button class="cam-cancel" onclick="closeProfileCameraModal()">ยกเลิก</button>
+                    <button class="cam-capture" onclick="captureProfilePhoto()">📷 ถ่ายรูป</button>
+                  </div>
+                </div>
               </div>
               <div class="agent-card-name" id="card-name">Agent</div>
               <div class="agent-card-role" id="card-role">AIA · ตัวแทน</div>
@@ -619,7 +715,7 @@ function applyPhoto(photoUrl) {
 
 function handleAvatarHintClick(e) {
   e.stopPropagation();
-  document.getElementById('photo-upload').click();
+  openProfilePhotoMenu(e);
 }
 
 function removePhoto() {
@@ -627,6 +723,121 @@ function removePhoto() {
   updateUser(u => { if (u.profile) u.profile.photo = null; });
   applyPhoto(null);
   showToast('🗑️ ลบรูปโปรไฟล์แล้ว');
+}
+
+/* ════════════════════════════════════════════
+   PHOTO MENU — เลือกระหว่างกล้อง / คลังภาพ / ลบ
+═══════════════════════════════════════════ */
+function openProfilePhotoMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('profile-photo-menu');
+  const av = document.getElementById('avatar-display');
+  const rect = av.getBoundingClientRect();
+  /* แสดง remove ถ้ามีรูป */
+  const u = getCurrentUser();
+  const hasPhoto = u && u.profile && u.profile.photo;
+  document.getElementById('pm-prof-remove').style.display = hasPhoto ? 'flex' : 'none';
+  document.getElementById('pm-prof-divider').style.display = hasPhoto ? 'block' : 'none';
+  /* Position ใต้ avatar */
+  menu.classList.add('open');
+  menu.style.top  = (rect.bottom + 8) + 'px';
+  menu.style.left = rect.left + 'px';
+  setTimeout(() => document.addEventListener('click', closeProfilePhotoMenu, { once: true }), 0);
+}
+
+function closeProfilePhotoMenu() {
+  document.getElementById('profile-photo-menu').classList.remove('open');
+}
+
+async function pickProfilePhoto(source) {
+  closeProfilePhotoMenu();
+  if (source === 'camera') {
+    try {
+      await openProfileCameraModal();
+      return;
+    } catch (err) {
+      console.warn('getUserMedia failed, fallback to file input', err);
+      document.getElementById('photo-upload-camera').click();
+    }
+  } else {
+    document.getElementById('photo-upload-gallery').click();
+  }
+}
+
+/* ════════════════════════════════════════════
+   CAMERA MODAL — getUserMedia
+═══════════════════════════════════════════ */
+let _profileCameraStream = null;
+
+async function openProfileCameraModal() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('Browser ไม่รองรับ getUserMedia');
+  }
+  const errEl = document.getElementById('profile-camera-error');
+  errEl.style.display = 'none';
+  errEl.textContent = '';
+  try {
+    /* รูปโปรไฟล์ตัวเอง → ใช้กล้องหน้า */
+    _profileCameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'user' } },
+      audio: false,
+    });
+  } catch (err1) {
+    try {
+      _profileCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    } catch (err2) {
+      document.getElementById('profile-camera-modal').classList.add('open');
+      const msg = err2.name === 'NotAllowedError'
+        ? '❌ ไม่ได้รับอนุญาตให้ใช้กล้อง — กรุณาอนุญาตในการตั้งค่าบราวเซอร์'
+        : err2.name === 'NotFoundError'
+          ? '❌ ไม่พบกล้องในเครื่องนี้'
+          : '❌ เปิดกล้องไม่ได้: ' + err2.message;
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+      throw err2;
+    }
+  }
+  const video = document.getElementById('profile-camera-video');
+  video.srcObject = _profileCameraStream;
+  document.getElementById('profile-camera-modal').classList.add('open');
+}
+
+function closeProfileCameraModal() {
+  if (_profileCameraStream) {
+    _profileCameraStream.getTracks().forEach(t => t.stop());
+    _profileCameraStream = null;
+  }
+  const video = document.getElementById('profile-camera-video');
+  video.srcObject = null;
+  document.getElementById('profile-camera-modal').classList.remove('open');
+}
+
+function captureProfilePhoto() {
+  if (!_profileCameraStream) return;
+  const video = document.getElementById('profile-camera-video');
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if (!vw || !vh) { alert('⚠️ กล้องยังไม่พร้อม รอสักครู่'); return; }
+  /* Resize ≤ 300px JPEG q 0.82 */
+  const MAX = 300;
+  let w = vw, h = vh;
+  if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+  else       { w = Math.round(w * MAX / h); h = MAX; }
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  /* Mirror flip → save ภาพปกติ (preview เห็นแบบกระจก) */
+  ctx.translate(w, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, w, h);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+  try {
+    updateUser(u => { if (!u.profile) u.profile = {}; u.profile.photo = dataUrl; });
+    applyPhoto(dataUrl);
+    closeProfileCameraModal();
+    showToast('✅ ถ่ายรูปและบันทึกสำเร็จ');
+  } catch (err) {
+    alert('❌ บันทึกรูปไม่สำเร็จ — พื้นที่ localStorage เต็ม');
+  }
 }
 
 fbAuth.onAuthStateChanged(u => {
