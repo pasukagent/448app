@@ -4338,6 +4338,11 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ตัวแปรของ Phase 3.3 + 3.4 — ต้องประกาศก่อน init เพื่อกัน TDZ error
+   เมื่อ init เรียก showDetail → renderNeedsAnalysis ที่ใช้ตัวแปรเหล่านี้ */
+let needsCardOpen  = true;
+let healthCardOpen = true;
+
 // ─── INIT ───
 (function init() {
   // 1. Auth check
@@ -4380,8 +4385,9 @@ function showToast(msg) {
 
 /* ════════════════════════════════════════════════════════
    PHASE 3.3 — LIFE INSURANCE NEEDS ANALYSIS
+   needsCardOpen + healthCardOpen ย้ายไปประกาศก่อน init() ด้านบน
+   เพื่อกัน TDZ error เมื่อ init เรียก showDetail → renderNeedsAnalysis
 ══════════════════════════════════════════════════════ */
-let needsCardOpen = true;
 
 /* getCurrentClient ลบออก — ใช้เวอร์ชันที่ defined ที่บรรทัด ~1667 (ปลอดภัยกว่า — handle null user) */
 
@@ -4551,8 +4557,8 @@ function updateNeedsInput(field, value) {
 
 /* ════════════════════════════════════════════════════════
    PHASE 3.4 — HEALTH COVERAGE GAP ANALYSIS
+   healthCardOpen ย้ายไปประกาศก่อน init() ด้านบน
 ══════════════════════════════════════════════════════ */
-let healthCardOpen = true;
 
 // Hospital tiers (typical Thai healthcare costs)
 const HOSPITAL_TIERS = [
