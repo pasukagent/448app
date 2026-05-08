@@ -43,6 +43,7 @@ body {
   background: var(--gray-100);
   color: var(--gray-800);
   min-height: 100vh;
+  overflow-x: hidden; /* กัน horizontal scroll ทั้งหน้า — element ใน element ยังเลื่อนได้ */
 }
 
 a { text-decoration: none; color: inherit; }
@@ -442,8 +443,10 @@ footer span { color: var(--red-primary); font-weight: 700; }
 
 /* Main area */
 .app-main {
-  margin-left: 240px; flex: 1;
+  margin-left: 240px;
+  width: calc(100% - 240px); /* fix: ก่อนหน้านี้ flex:1 ทำให้กว้าง 100% + margin-left:240 → ล้นขวา 240px */
   display: flex; flex-direction: column; min-height: 100vh;
+  min-width: 0; /* allow content inside to shrink (กัน flex children ดัน width เกิน) */
 }
 
 /* Sticky topbar */
