@@ -25,6 +25,28 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
+    /* ─── FEATURE HERO (top strip — เหมือนหน้าอื่น) ─── */
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 32px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .feature-hero h2 { font-size: 1.4rem; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .8; font-size: .9rem; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
     /* ── Page header hero ── */
     .page-header-bar {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
@@ -574,12 +596,14 @@
   </aside>
   <main class="app-main" style="overflow-y:auto;">
     <!-- Top strip: client picker (consistent กับหน้าอื่น) -->
-    <div class="feature-hero" style="background:linear-gradient(135deg,var(--red-primary),var(--red-dark));color:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <div style="font-size:.92rem;font-weight:700;opacity:.95;">💰 วางแผนการเงิน</div>
-      <div class="client-pick" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:6px 8px 6px 14px;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>💰 วางแผนกระแสเงินสด</h2>
+        <p>ตั้งเป้าหมายและติดตามรายรับ-รายจ่ายของลูกค้าแต่ละคน</p>
+      </div>
+      <div class="client-pick">
         <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
-        <select id="client-select" onchange="onTopClientChange(this.value)"
-          style="background:rgba(255,255,255,.95);color:var(--gray-800);border:none;border-radius:8px;padding:7px 14px;font-family:var(--font);font-weight:700;font-size:.9rem;min-width:180px;cursor:pointer;"></select>
+        <select id="client-select" onchange="onTopClientChange(this.value)"></select>
       </div>
     </div>
 <div><!-- financial content -->
@@ -931,16 +955,15 @@ function populateTopClientSelect() {
     sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>';
     return;
   }
-  sel.innerHTML = '<option value="">— เลือกลูกค้า —</option>' +
-    clients.map(c => {
-      const fn = (c.firstName || '') + ' ' + (c.lastName || '');
-      const sel2 = c.id === selectedClientId ? 'selected' : '';
-      return `<option value="${c.id}" ${sel2}>${fn.trim() || '?'}</option>`;
-    }).join('');
+  sel.innerHTML = clients.map(c => {
+    const fn = ((c.firstName || '') + ' ' + (c.lastName || '')).trim();
+    const sel2 = c.id === selectedClientId ? 'selected' : '';
+    return `<option value="${c.id}" ${sel2}>${fn || '?'}</option>`;
+  }).join('');
 }
 
 function onTopClientChange(cid) {
-  if (!cid) { showClientSelect(); return; }
+  if (!cid) return;
   showClientMain(cid);
 }
 
