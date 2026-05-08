@@ -1,0 +1,44 @@
+/* sw.js — Service Worker
+   Strategy: Network-first
+   - ทุก request ดึงจาก network ก่อน (fresh เสมอ)
+   - ใช้ cache เฉพาะตอน offline (fallback)
+   ผลคือ: page reload ปกติ = ได้ของใหม่จาก server ทุกครั้ง
+   ไม่ต้องกด Ctrl+Shift+R เอง */
+
+self.addEventListener('install', (event) => {
+  /* Activate ทันทีเมื่อมี SW ใหม่ — ไม่ต้องรอแท็บปิดเปิดใหม่ */
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  /* ลบ cache เก่าทั้งหมดเมื่อ activate — กัน stale cache จาก SW เวอร์ชันก่อน
+     และ claim() ให้ SW ใหม่ควบคุม clients ที่เปิดอยู่ทันที */
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  /* Skip: non-GET, cross-origin (Firebase, fonts.googleapis, cdnjs, etc.) */
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  /* Network-first — ดึง fresh จาก server เสมอ
+     ถ้า network ล่ม → fallback ไป cache (offline mode) */
+  event.respondWith(
+    fetch(req, { cache: 'no-cache' })
+      .then(res => {
+        /* Cache copy สำหรับ offline fallback */
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open('aia-runtime-v1').then(cache => cache.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req))
+  );
+});

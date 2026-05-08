@@ -1,7 +1,30 @@
 /* sidebar-scroll.js
    Shared UX utilities — โหลดในทุกหน้าที่มี sidebar
    1. จำตำแหน่ง scroll ของ .app-sidebar ระหว่างหน้า
-   2. ป้องกัน mouse wheel เปลี่ยนค่าใน <input type="number"> โดยไม่ตั้งใจ */
+   2. ป้องกัน mouse wheel เปลี่ยนค่าใน <input type="number"> โดยไม่ตั้งใจ
+   3. Register Service Worker — auto cache busting (ไม่ต้องกด Ctrl+Shift+R) */
+
+/* Register Service Worker — network-first strategy */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      /* Force check update ทุกครั้งที่หน้าเปิด */
+      reg.update();
+      /* ถ้ามี update ใหม่ — บังคับ activate + reload ครั้งเดียว */
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'activated' && navigator.serviceWorker.controller) {
+            /* SW ใหม่ activate แล้ว — reload เพื่อให้ controller คุมหน้า */
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(() => { /* SW ไม่ support — ignore */ });
+  });
+}
+
 (function () {
   const KEY = 'aia_sidebar_scroll';
 
