@@ -1755,19 +1755,39 @@ function showDetail(cid) {
    Pattern เหมือน tax.html / retirement.html อื่นๆ — ไม่มี placeholder option */
 function populateTopClientSelect() {
   const sel = document.getElementById('client-select');
+  const av  = document.getElementById('cp-mini-avatar');
   if (!sel) return;
   const u = JSON.parse(localStorage.getItem('aia_users') || '[]')
     .find(x => x.id === localStorage.getItem('aia_currentUser'));
   const clients = (u && u.data && u.data.clients) || [];
   if (clients.length === 0) {
     sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>';
+    if (av) av.innerHTML = '👤';
     return;
+  }
+  /* บน LIST view (currentClientId = null) → default ไป localStorage หรือ client[0]
+     เพื่อให้ picker แสดงรูปกับชื่อลูกค้าเสมอ (เหมือน tax.html) */
+  let activeId = currentClientId;
+  if (!activeId) {
+    const stored = localStorage.getItem('aia_selectedClient');
+    activeId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
   }
   sel.innerHTML = clients.map(c => {
     const fn = ((c.firstName || '') + ' ' + (c.lastName || '')).trim();
-    const sel2 = c.id === currentClientId ? 'selected' : '';
+    const sel2 = c.id === activeId ? 'selected' : '';
     return `<option value="${c.id}" ${sel2}>${fn || '?'}</option>`;
   }).join('');
+  /* Update mini avatar ทันที — ไม่ต้องรอ setTimeout จาก sidebar-scroll.js */
+  if (av) {
+    const c = clients.find(x => x.id === activeId);
+    if (c && c.photo) {
+      av.innerHTML = `<img src="${c.photo}" alt="">`;
+    } else if (c) {
+      av.textContent = (c.firstName || '?').charAt(0).toUpperCase();
+    } else {
+      av.innerHTML = '👤';
+    }
+  }
 }
 
 function onTopClientChange(cid) {
