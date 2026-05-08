@@ -40,6 +40,28 @@ if ('serviceWorker' in navigator) {
     if (sb) sessionStorage.setItem(KEY, String(sb.scrollTop));
   }
 
+  /* แสดงรูปลูกค้าใน mini-avatar ของ client picker (ใช้ในทุกหน้า) */
+  function updateClientMiniAvatar() {
+    const av = document.getElementById('cp-mini-avatar');
+    const sel = document.getElementById('client-select');
+    if (!av) return;
+    const cid = sel ? sel.value : null;
+    if (!cid) { av.innerHTML = '👤'; return; }
+    try {
+      const uid = localStorage.getItem('aia_currentUser');
+      const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+      const u = users.find(x => x.id === uid);
+      const c = (u && u.data && u.data.clients || []).find(x => x.id === cid);
+      if (c && c.photo) {
+        av.innerHTML = `<img src="${c.photo}" alt="">`;
+      } else if (c) {
+        av.textContent = (c.firstName || '?').charAt(0).toUpperCase();
+      } else {
+        av.innerHTML = '👤';
+      }
+    } catch (e) { av.innerHTML = '👤'; }
+  }
+
   function init() {
     restore();
     const sb = document.querySelector('.app-sidebar');
@@ -60,6 +82,15 @@ if ('serviceWorker' in navigator) {
         el.blur();
       }
     }, { passive: true });
+
+    /* Mini avatar — รูปลูกค้าใน client picker */
+    const sel = document.getElementById('client-select');
+    if (sel) {
+      sel.addEventListener('change', updateClientMiniAvatar);
+      /* Initial render — page อาจ render select option ทีหลัง ใช้ delay สั้นๆ */
+      setTimeout(updateClientMiniAvatar, 100);
+      setTimeout(updateClientMiniAvatar, 500);
+    }
   }
 
   if (document.readyState === 'loading') {
