@@ -1748,11 +1748,10 @@ function showDetail(cid) {
   localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-list').style.display   = 'none';
   document.getElementById('view-detail').style.display = '';
-  /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
   populateTopClientSelect();
-  try { render(); }              catch (e) { console.error('render error:', e); }
-  try { renderNeedsAnalysis(); } catch (e) { console.error('renderNeedsAnalysis error:', e); }
-  try { renderHealthGap(); }     catch (e) { console.error('renderHealthGap error:', e); }
+  render();
+  renderNeedsAnalysis();
+  renderHealthGap();
 }
 
 /* Top-right client picker — sync กับ currentClientId
@@ -4384,10 +4383,7 @@ function showToast(msg) {
 ══════════════════════════════════════════════════════ */
 let needsCardOpen = true;
 
-function getCurrentClient() {
-  const u = getCurrentUser();
-  return (u.data.clients||[]).find(c => c.id === currentClientId) || null;
-}
+/* getCurrentClient ลบออก — ใช้เวอร์ชันที่ defined ที่บรรทัด ~1667 (ปลอดภัยกว่า — handle null user) */
 
 function fmtTH(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
 function fmtShortTH(n) {
@@ -4438,8 +4434,16 @@ function renderNeedsAnalysis() {
   const client = getCurrentClient();
   if (!client) { wrap.innerHTML = ''; return; }
 
-  const inputs = getNeedsInputs();
-  const result = computeLifeNeeds(client, inputs);
+  let inputs, result;
+  try {
+    inputs = getNeedsInputs();
+    result = computeLifeNeeds(client, inputs);
+    if (!inputs || !result) throw new Error('getNeedsInputs/computeLifeNeeds returned null');
+  } catch (err) {
+    console.error('renderNeedsAnalysis compute error:', err);
+    wrap.innerHTML = `<div class="needs-card"><div class="nc-header open"><div class="nc-title">🛡️ วิเคราะห์ความต้องการประกันชีวิต</div><div><span class="nc-summary ns-warn">⚠️ คำนวณไม่ได้</span></div></div></div>`;
+    return;
+  }
   const summaryClass = result.gap === 0 ? 'ns-good' : (result.haveTotal >= result.totalNeed * 0.7 ? 'ns-warn' : 'ns-bad');
   const summaryText = result.gap === 0
     ? '✅ ความคุ้มครองพอแล้ว'
@@ -4598,13 +4602,18 @@ function renderHealthGap() {
   const client = getCurrentClient();
   if (!client) { wrap.innerHTML = ''; return; }
 
-  const cov = getCurrentHealthCoverage(client);
-  const trustedTier = client.trustedHospitalTier || 2;
-
-  // Determine summary
-  const trustedTierData = HOSPITAL_TIERS[trustedTier - 1];
-  const ipdNeed = trustedTierData.ipdAvg;
-  const summaryGap = Math.max(ipdNeed - cov.totalIPD, 0);
+  let cov, trustedTier, trustedTierData, ipdNeed, summaryGap;
+  try {
+    cov = getCurrentHealthCoverage(client);
+    trustedTier = client.trustedHospitalTier || 2;
+    trustedTierData = HOSPITAL_TIERS[trustedTier - 1] || HOSPITAL_TIERS[1];
+    ipdNeed = trustedTierData.ipdAvg;
+    summaryGap = Math.max(ipdNeed - cov.totalIPD, 0);
+  } catch (err) {
+    console.error('renderHealthGap compute error:', err);
+    wrap.innerHTML = `<div class="health-gap-card"><div class="hgc-header open"><div class="hgc-title">❤️ วิเคราะห์ประกันสุขภาพ + เปรียบเทียบ รพ.</div><div><span class="hgc-summary ns-warn">⚠️ คำนวณไม่ได้</span></div></div></div>`;
+    return;
+  }
 
   const summaryClass = summaryGap === 0 ? 'ns-good' : (cov.totalIPD >= ipdNeed * 0.5 ? 'ns-warn' : 'ns-bad');
   const summaryText = summaryGap === 0
