@@ -4338,10 +4338,18 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ตัวแปรของ Phase 3.3 + 3.4 — ต้องประกาศก่อน init เพื่อกัน TDZ error
-   เมื่อ init เรียก showDetail → renderNeedsAnalysis ที่ใช้ตัวแปรเหล่านี้ */
+/* ตัวแปร/constants ของ Phase 3.3 + 3.4 — ต้องประกาศก่อน init เพื่อกัน TDZ error
+   เมื่อ init เรียก showDetail → renderNeedsAnalysis/renderHealthGap ใช้ตัวแปรเหล่านี้ */
 let needsCardOpen  = true;
 let healthCardOpen = true;
+
+// Hospital tiers (typical Thai healthcare costs)
+const HOSPITAL_TIERS = [
+  { tier:1, name:'🏥 รพ.รัฐ / รพ.ประกันสังคม', desc:'รักษาทั่วไป + ห้องสามัญ', dailyRoom: 1500, surgeryAvg: 50000, ipdAvg: 30000 },
+  { tier:2, name:'🏨 รพ.เอกชนทั่วไป',         desc:'เครือกลาง เช่น เกษมราษฎร์, พญาไท', dailyRoom: 3500, surgeryAvg: 150000, ipdAvg: 80000 },
+  { tier:3, name:'⭐ รพ.เอกชน Premium',        desc:'สมิติเวช, บำรุงราษฎร์, BNH', dailyRoom: 8000, surgeryAvg: 400000, ipdAvg: 200000 },
+  { tier:4, name:'🌐 รพ.อินเตอร์',             desc:'รักษาเฉพาะทาง / ต่างประเทศ', dailyRoom: 15000, surgeryAvg: 800000, ipdAvg: 500000 },
+];
 
 // ─── INIT ───
 (function init() {
@@ -4560,13 +4568,7 @@ function updateNeedsInput(field, value) {
    healthCardOpen ย้ายไปประกาศก่อน init() ด้านบน
 ══════════════════════════════════════════════════════ */
 
-// Hospital tiers (typical Thai healthcare costs)
-const HOSPITAL_TIERS = [
-  { tier:1, name:'🏥 รพ.รัฐ / รพ.ประกันสังคม', desc:'รักษาทั่วไป + ห้องสามัญ', dailyRoom: 1500, surgeryAvg: 50000, ipdAvg: 30000 },
-  { tier:2, name:'🏨 รพ.เอกชนทั่วไป',         desc:'เครือกลาง เช่น เกษมราษฎร์, พญาไท', dailyRoom: 3500, surgeryAvg: 150000, ipdAvg: 80000 },
-  { tier:3, name:'⭐ รพ.เอกชน Premium',        desc:'สมิติเวช, บำรุงราษฎร์, BNH', dailyRoom: 8000, surgeryAvg: 400000, ipdAvg: 200000 },
-  { tier:4, name:'🌐 รพ.อินเตอร์',             desc:'รักษาเฉพาะทาง / ต่างประเทศ', dailyRoom: 15000, surgeryAvg: 800000, ipdAvg: 500000 },
-];
+/* HOSPITAL_TIERS ย้ายไปประกาศก่อน init() ด้านบน — กัน TDZ error */
 
 function getCurrentHealthCoverage(client) {
   if (!client || !client.policies) return { totalIPD: 0, dailyRoom: 0, ciCoverage: 0 };
