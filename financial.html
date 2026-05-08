@@ -208,6 +208,10 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+    .cib-avatar img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
     .cib-name { font-weight: 700; font-size: 1.05rem; }
     .cib-meta {
@@ -569,6 +573,15 @@
     </div>
   </aside>
   <main class="app-main" style="overflow-y:auto;">
+    <!-- Top strip: client picker (consistent กับหน้าอื่น) -->
+    <div class="feature-hero" style="background:linear-gradient(135deg,var(--red-primary),var(--red-dark));color:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div style="font-size:.92rem;font-weight:700;opacity:.95;">💰 วางแผนการเงิน</div>
+      <div class="client-pick" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:6px 8px 6px 14px;">
+        <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
+        <select id="client-select" onchange="onTopClientChange(this.value)"
+          style="background:rgba(255,255,255,.95);color:var(--gray-800);border:none;border-radius:8px;padding:7px 14px;font-family:var(--font);font-weight:700;font-size:.9rem;min-width:180px;cursor:pointer;"></select>
+      </div>
+    </div>
 <div><!-- financial content -->
 
   <!-- ══════════════════════════════════════════
@@ -895,6 +908,7 @@ function showClientSelect() {
   document.getElementById('view-select').style.display = '';
   document.getElementById('view-main').style.display   = 'none';
   renderClientSelect();
+  populateTopClientSelect();
 }
 
 function showClientMain(cid) {
@@ -903,6 +917,31 @@ function showClientMain(cid) {
   document.getElementById('view-select').style.display = 'none';
   document.getElementById('view-main').style.display   = '';
   renderMain();
+  populateTopClientSelect();
+}
+
+/* Top-right client picker — sync กับ selectedClientId */
+function populateTopClientSelect() {
+  const sel = document.getElementById('client-select');
+  if (!sel) return;
+  const u = JSON.parse(localStorage.getItem('aia_users') || '[]')
+    .find(x => x.id === localStorage.getItem('aia_currentUser'));
+  const clients = (u && u.data && u.data.clients) || [];
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— เลือกลูกค้า —</option>' +
+    clients.map(c => {
+      const fn = (c.firstName || '') + ' ' + (c.lastName || '');
+      const sel2 = c.id === selectedClientId ? 'selected' : '';
+      return `<option value="${c.id}" ${sel2}>${fn.trim() || '?'}</option>`;
+    }).join('');
+}
+
+function onTopClientChange(cid) {
+  if (!cid) { showClientSelect(); return; }
+  showClientMain(cid);
 }
 
 /* ═══════════════════════════════════════════════
@@ -1195,8 +1234,13 @@ function renderMain() {
   document.getElementById('hs-target').textContent = fmt(totalTarget);
   document.getElementById('hs-avg').textContent    = avgPct + '%';
 
-  // Client info bar
-  document.getElementById('cib-avatar').textContent = initial;
+  // Client info bar — แสดงรูปถ้ามี
+  const cibAv = document.getElementById('cib-avatar');
+  if (c.photo) {
+    cibAv.innerHTML = `<img src="${c.photo}" alt="">`;
+  } else {
+    cibAv.textContent = initial;
+  }
   document.getElementById('cib-name').textContent   = fullName;
 
   const metaParts = [];
