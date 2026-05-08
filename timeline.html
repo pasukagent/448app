@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — Life Timeline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 22px;
+    }
+    .stat-card {
+      background: white; border-radius: var(--radius); padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-lbl { font-size: .76rem; color: var(--gray-500); font-weight: 700; margin-bottom: 4px; }
+    .stat-val { font-size: 1.3rem; font-weight: 800; color: var(--gray-800); }
+    .stat-sub { font-size: .76rem; color: var(--gray-500); margin-top: 2px; }
+
+    /* Timeline container */
+    .timeline-card {
+      background: white; border-radius: var(--radius); padding: 28px 30px;
+      box-shadow: var(--shadow-sm); margin-bottom: 22px;
+      overflow-x: auto;
+    }
+    .timeline-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--gray-800); }
+    .timeline-card .tc-sub { font-size: .85rem; color: var(--gray-500); margin-bottom: 24px; }
+
+    .timeline {
+      position: relative;
+      /* axis อยู่ที่ bottom: 60px จากขอบ .timeline เพื่อให้ทุก card อยู่ด้านบน */
+      padding-left: 150px; padding-right: 150px;
+      padding-top: var(--tl-pad-top, 200px);
+      padding-bottom: 80px;
+      min-width: 1100px;
+    }
+    .tl-axis {
+      position: absolute; left: 150px; right: 150px;
+      bottom: 60px; top: auto;
+      height: 4px;
+      background: linear-gradient(90deg, #28a745, #FFC107 50%, #DC3545);
+      border-radius: 2px;
+      transform: translateY(50%);
+    }
+    .tl-axis-label {
+      position: absolute; font-size: .76rem; color: var(--gray-500);
+      font-weight: 700; white-space: nowrap;
+    }
+    .tl-axis-label.now {
+      transform: translateX(-50%); bottom: 36px; top: auto; color: #1976D2;
+    }
+    .tl-axis-label.now::before { content: '📍 '; }
+    .tl-axis-label.start { left: 150px; bottom: 36px; top: auto; }
+    .tl-axis-label.end   { right: 150px; bottom: 36px; top: auto; }
+
+    /* Year markers — tick centered on axis, year text ใต้ axis (กัน icon ทับ) */
+    .tl-year-mark {
+      position: absolute; bottom: 60px; top: auto;
+      transform: translate(-50%, 50%);
+      width: 2px; height: 14px; background: var(--gray-300);
+    }
+    .tl-year-text {
+      position: absolute; bottom: 14px; top: auto;
+      transform: translateX(-50%);
+      font-size: .72rem; color: var(--gray-500); font-weight: 700;
+    }
+
+    /* Milestone markers — icon อยู่ที่ axis เสมอ (ทุก lane), card อยู่ด้านบน
+       Lane stacking ทำผ่าน line height ที่ยืดยาวขึ้น เพื่อดัน card ขึ้นไปสูงกว่า */
+    .tl-milestone {
+      position: absolute; transform: translateX(-50%);
+      cursor: default;
+      transition: transform .2s;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .tl-milestone:hover { transform: translateX(-50%) translateY(-2px); z-index: 10; }
+    /* element bottom = 41px เสมอ → icon center ที่ axis 60px */
+    .tl-milestone.above {
+      bottom: 41px;
+      top: auto;
+    }
+    /* Line ยาวขึ้นตาม lane เพื่อดัน card ให้สูงขึ้น (icon ยังคงอยู่ axis) */
+    .tl-milestone.above .tl-mark-line {
+      height: calc(12px + var(--lane, 0) * 110px);
+    }
+    .tl-mark-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: white; border: 3px solid var(--red-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; box-shadow: var(--shadow-sm);
+      margin: 0 auto;
+    }
+    .tl-mark-icon.t-child   { border-color: #F39C12; }
+    .tl-mark-icon.t-goal    { border-color: #1976D2; }
+    .tl-mark-icon.t-resp    { border-color: #DC3545; }
+    .tl-mark-icon.t-retire  { border-color: #28a745; }
+    .tl-mark-icon.t-current { background: #1976D2; border-color: #1976D2; }
+    .tl-mark-line {
+      width: 2px; height: 12px; background: var(--gray-300); margin: 0 auto;
+    }
+    .tl-milestone.above .tl-mark-line { margin-top: 2px; }
+    .tl-milestone.below .tl-mark-line { margin-bottom: 2px; }
+    .tl-mark-content {
+      background: white; border: 1.5px solid var(--gray-200);
+      border-radius: 8px; padding: 6px 10px; min-width: 100px; max-width: 140px;
+      font-size: .76rem; text-align: center; box-shadow: var(--shadow-sm);
+    }
+    .tl-mark-name { font-weight: 800; color: var(--gray-800); line-height: 1.2; margin-bottom: 2px; }
+    .tl-mark-year { color: var(--gray-500); font-size: .68rem; font-weight: 700; }
+    .tl-mark-amount { color: var(--red-primary); font-weight: 700; font-size: .72rem; margin-top: 2px; }
+
+    /* Multi-item group card */
+    .tl-mark-content.is-group { max-width: 180px; padding: 8px 10px; }
+    .tl-mark-content.is-group .tl-mark-year {
+      font-size: .68rem; padding-bottom: 4px; margin-bottom: 4px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .tl-group-item {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 0; font-size: .7rem; line-height: 1.25;
+    }
+    .tl-group-item + .tl-group-item { border-top: 1px dashed #F5F5F5; }
+    .tl-gi-icon { font-size: .9rem; flex-shrink: 0; }
+    .tl-gi-name { flex: 1; font-weight: 700; color: var(--gray-800); text-align: left; }
+    .tl-gi-amount { font-weight: 700; color: var(--red-primary); font-size: .65rem; }
+    .tl-gi-del {
+      background: transparent; border: none; color: #ccc;
+      cursor: pointer; font-size: 1rem; padding: 0 3px; line-height: 1;
+      flex-shrink: 0;
+    }
+    .tl-gi-del:hover { color: #DC3545; }
+    .tl-add-btn {
+      width: 100%; margin-top: 6px;
+      padding: 4px 6px; background: white;
+      border: 1px dashed var(--gray-300); color: var(--red-primary);
+      border-radius: 5px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .68rem;
+    }
+    .tl-add-btn:hover { background: var(--red-soft); border-color: var(--red-primary); }
+
+    /* Icon badge for groups with > 1 item */
+    .tl-mark-icon { position: relative; }
+    .tl-icon-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--red-primary); color: white;
+      font-size: .58rem; font-weight: 800;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid white; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    }
+
+    /* Legend */
+    .tl-legend {
+      display: flex; gap: 16px; flex-wrap: wrap; margin-top: 18px;
+      padding: 14px 18px; background: var(--gray-50); border-radius: 10px;
+    }
+    .tl-leg-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--gray-600); }
+    .tl-leg-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+
+    /* Milestone list (below timeline) */
+    .ms-card {
+      background: white; border-radius: var(--radius); padding: 22px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+    .ms-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; color: var(--gray-800); }
+    .ms-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .ms-item {
+      display: flex; gap: 12px; padding: 12px 14px;
+      background: var(--gray-50); border-radius: 8px; align-items: center;
+      border-left: 3px solid var(--gray-300);
+    }
+    .ms-item.t-child  { border-left-color: #F39C12; }
+    .ms-item.t-goal   { border-left-color: #1976D2; }
+    .ms-item.t-resp   { border-left-color: #DC3545; }
+    .ms-item.t-retire { border-left-color: #28a745; }
+    .ms-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .ms-info { flex: 1; min-width: 0; }
+    .ms-name { font-weight: 800; color: var(--gray-800); font-size: .9rem; margin-bottom: 2px; }
+    .ms-meta { font-size: .76rem; color: var(--gray-500); }
+    .ms-year { font-weight: 800; color: var(--red-primary); font-size: .85rem; }
+
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+
+    .no-data-tip {
+      background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+      border-left: 4px solid #F39C12; padding: 14px 22px; border-radius: var(--radius);
+      margin-bottom: 22px; font-size: .88rem; color: var(--gray-700); line-height: 1.6;
+    }
+    .no-data-tip b { color: #B7791F; }
+    .no-data-tip a { color: var(--red-primary); font-weight: 700; }
+
+    /* Toolbar — ช่วงอายุ + เพิ่ม milestone */
+    .tl-toolbar {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: white; border-radius: var(--radius); padding: 14px 22px;
+      box-shadow: var(--shadow-sm); margin-bottom: 18px;
+    }
+    .tl-range-grp {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .tl-range-grp label {
+      font-size: .85rem; color: var(--gray-600); font-weight: 700;
+    }
+    .tl-range-grp input[type=number] {
+      width: 70px; padding: 7px 10px;
+      border: 1.5px solid var(--gray-300); border-radius: 8px;
+      font-family: var(--font); font-size: .9rem; text-align: center;
+    }
+    .tl-range-grp input[type=number]:focus {
+      outline: none; border-color: var(--red-primary);
+      box-shadow: 0 0 0 2px var(--red-soft);
+    }
+    .tl-toolbar-spacer { flex: 1; }
+    .btn-add-ms {
+      padding: 9px 18px; background: var(--red-primary); color: white;
+      border: none; border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .88rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-add-ms:hover { background: var(--red-dark); }
+    .btn-reset-range {
+      padding: 7px 12px; background: white; border: 1.5px solid var(--gray-300);
+      color: var(--gray-600); border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .82rem;
+    }
+    .btn-reset-range:hover { color: var(--red-primary); border-color: var(--red-primary); }
+
+    /* Modal */
+    .ms-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 100; align-items: center; justify-content: center; padding: 20px;
+    }
+    .ms-overlay.open { display: flex; }
+    .ms-modal {
+      background: white; border-radius: 14px; max-width: 480px; width: 100%;
+      padding: 26px 28px; position: relative;
+    }
+    .ms-modal h3 { font-size: 1.15rem; font-weight: 800; color: var(--gray-800); margin-bottom: 14px; }
+    .ms-form-row { margin-bottom: 12px; }
+    .ms-form-row label {
+      display: block; font-size: .82rem; font-weight: 700;
+      color: var(--gray-600); margin-bottom: 4px;
+    }
+    .ms-form-row input,
+    .ms-form-row select,
+    .ms-form-row textarea {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-300);
+      border-radius: 8px; font-family: var(--font); font-size: .9rem;
+      box-sizing: border-box;
+    }
+    .ms-form-row input:focus,
+    .ms-form-row select:focus,
+    .ms-form-row textarea:focus {
+      outline: none; border-color: var(--red-primary);
+      box-shadow: 0 0 0 2px var(--red-soft);
+    }
+    .ms-form-2col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .ms-modal-actions {
+      display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end;
+    }
+    .ms-btn-cancel {
+      padding: 9px 18px; background: white; border: 1.5px solid var(--gray-300);
+      color: var(--gray-600); border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .88rem;
+    }
+    .ms-btn-save {
+      padding: 9px 18px; background: var(--red-primary); color: white;
+      border: none; border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .88rem;
+    }
+    .ms-btn-save:hover { background: var(--red-dark); }
+
+    /* Custom milestone styles */
+    .tl-mark-icon.t-custom { border-color: #8E44AD; }
+    .ms-item.t-custom { border-left-color: #8E44AD; }
+    .ms-item.is-custom .ms-info { padding-right: 8px; }
+    .ms-delete-btn {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--gray-400); font-size: 1rem; padding: 4px 8px;
+      transition: color .15s;
+    }
+    .ms-delete-btn:hover { color: #DC3545; }
+
+    /* Grouped list — items อายุเดียวกันอยู่ด้วยกัน */
+    .ms-age-section { margin-bottom: 14px; }
+    .ms-age-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap;
+      font-size: .92rem; font-weight: 800;
+      color: var(--red-primary);
+      padding: 10px 14px;
+      background: linear-gradient(135deg, var(--red-soft), white);
+      border: 1.5px solid var(--red-primary);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .ms-age-header-num { font-size: 1.1rem; }
+    .ms-age-header-count { font-size: .78rem; color: var(--gray-600); font-weight: 600; margin-left: 6px; }
+    .ms-age-header-add {
+      padding: 4px 12px;
+      background: white;
+      border: 1.5px solid var(--red-primary);
+      color: var(--red-primary);
+      border-radius: 6px;
+      font-size: .76rem; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+      transition: all .15s;
+    }
+    .ms-age-header-add:hover { background: var(--red-primary); color: white; }
+    .ms-age-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px;
+      padding: 12px 14px;
+      background: white;
+      border: 1.5px solid var(--gray-200);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item active" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>⏳ Life Timeline</h2>
+          <p>เส้นเวลาชีวิตจากอายุปัจจุบันไปจนถึงจุดสิ้นสุด พร้อม milestones สำคัญ</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Add/Edit Milestone Modal -->
+<div class="ms-overlay" id="ms-modal" onclick="if(event.target===this)closeMsModal()">
+  <div class="ms-modal">
+    <h3 id="ms-modal-title">➕ เพิ่ม Milestone</h3>
+    <div class="ms-form-row">
+      <label>ชื่อเหตุการณ์ *</label>
+      <input id="msf-name" type="text" placeholder="เช่น ซื้อบ้านหลังที่ 2">
+    </div>
+    <div class="ms-form-2col">
+      <div class="ms-form-row">
+        <label>อายุ (ปี) *</label>
+        <input id="msf-age" type="number" min="0" max="120" placeholder="เช่น 45">
+      </div>
+      <div class="ms-form-row">
+        <label>ไอคอน</label>
+        <select id="msf-icon">
+          <option value="🎯">🎯 ทั่วไป</option>
+          <option value="🏠">🏠 บ้าน</option>
+          <option value="🚗">🚗 รถ</option>
+          <option value="✈️">✈️ ท่องเที่ยว</option>
+          <option value="🎓">🎓 การศึกษา</option>
+          <option value="💼">💼 ธุรกิจ</option>
+          <option value="💍">💍 แต่งงาน</option>
+          <option value="👶">👶 ครอบครัว</option>
+          <option value="🏥">🏥 สุขภาพ</option>
+          <option value="🎉">🎉 งานสำคัญ</option>
+          <option value="📅">📅 อื่นๆ</option>
+        </select>
+      </div>
+    </div>
+    <div class="ms-form-row">
+      <label>จำนวนเงิน (บาท) <span style="color:var(--gray-400);font-weight:500;">— optional</span></label>
+      <input id="msf-amount" type="number" min="0" placeholder="0">
+    </div>
+    <div class="ms-form-row">
+      <label>หมายเหตุ <span style="color:var(--gray-400);font-weight:500;">— optional</span></label>
+      <input id="msf-note" type="text" placeholder="">
+    </div>
+    <div class="ms-modal-actions">
+      <button class="ms-btn-cancel" onclick="closeMsModal()">ยกเลิก</button>
+      <button class="ms-btn-save" onclick="saveCustomMs()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+function updateUser(modify) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(u => u.id === _uid);
+  if (idx === -1) return;
+  modify(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+
+let selectedClientId = null;
+let editingMsId = null;
+const DEFAULT_RETIREMENT_AGE = 60;
+const LIFE_EXPECTANCY = 85;
+const DEFAULT_RANGE_END = 85;
+
+/* อายุเกษียณ — sync ระหว่าง 2 schemas:
+   - client.retirementPlan.retireAge (canonical จาก retirement.html)
+   - client.retirementAge (legacy) */
+function getRetirementAge(client) {
+  if (!client) return DEFAULT_RETIREMENT_AGE;
+  if (client.retirementPlan && client.retirementPlan.retireAge != null) {
+    return Number(client.retirementPlan.retireAge);
+  }
+  if (client.retirementAge != null) return Number(client.retirementAge);
+  return DEFAULT_RETIREMENT_AGE;
+}
+function setRetirementAge(age) {
+  if (!selectedClientId) return;
+  const a = Number(age);
+  if (!a || a < 30 || a > 100) {
+    alert('⚠️ อายุเกษียณต้องอยู่ระหว่าง 30-100 ปี');
+    render();
+    return;
+  }
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    c.retirementAge = a;  // legacy
+    if (!c.retirementPlan) c.retirementPlan = {};
+    c.retirementPlan.retireAge = a;  // canonical → sync กับ retirement.html
+  });
+  render();
+}
+
+/* Life expectancy — sync จาก retirement.html ถ้ามี */
+function getLifeExpectancy(client) {
+  if (client && client.retirementPlan && client.retirementPlan.lifeExpectancy != null) {
+    return Number(client.retirementPlan.lifeExpectancy);
+  }
+  return LIFE_EXPECTANCY;
+}
+
+/* แก้ไขอายุเกษียณจากปุ่ม ✏️ ในรายการ milestones */
+function editRetireAge() {
+  const c = getCurrent();
+  if (!c) return;
+  const cur = getRetirementAge(c);
+  const v = prompt('🛋️ ตั้งอายุเกษียณใหม่ (30-100 ปี):', cur);
+  if (v === null) return; // cancel
+  setRetirementAge(v);
+}
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000000) return '฿' + (n/1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '฿' + Math.round(n/1000) + 'K';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+function ageNow(dob) {
+  if (!dob) return null;
+  const diff = new Date() - new Date(dob);
+  return diff / (365.25*24*3600*1000);
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ════════════════════════════════════════════
+   COMPUTE MILESTONES
+═══════════════════════════════════════════ */
+function computeMilestones(client) {
+  const items = [];
+  const currentAge = ageNow(client.dob) || 0;
+  const currentYear = new Date().getFullYear();
+
+  /* บุตร — เกิด, เข้าโรงเรียน, จบมหาวิทยาลัย */
+  (client.children || []).forEach(ch => {
+    const dob = ch.dob || ch.birthdate;
+    if (!dob) return;
+    const childAge = ageNow(dob);
+    if (childAge == null) return;
+    const childName = ch.name || 'บุตร';
+    /* parent's age when child reaches each milestone */
+    const ageDiff = currentAge - childAge;
+    /* primary school (age 6) */
+    items.push({
+      type: 'child',
+      icon: '🏫',
+      name: `${escapeHtml(childName)} เข้า ป.1`,
+      parentAge: ageDiff + 6,
+      year: currentYear + (6 - childAge),
+      meta: 'อายุบุตร 6 ปี',
+    });
+    /* university (age 18) */
+    items.push({
+      type: 'child',
+      icon: '🎓',
+      name: `${escapeHtml(childName)} เข้ามหา\'ลัย`,
+      parentAge: ageDiff + 18,
+      year: currentYear + (18 - childAge),
+      meta: 'อายุบุตร 18 ปี',
+    });
+    /* university grad (age 22) */
+    items.push({
+      type: 'child',
+      icon: '🎉',
+      name: `${escapeHtml(childName)} จบ ป.ตรี`,
+      parentAge: ageDiff + 22,
+      year: currentYear + (22 - childAge),
+      meta: 'อายุบุตร 22 ปี',
+    });
+  });
+
+  /* Life goals (deadline → year + parent age) */
+  (client.lifeGoals || []).forEach(g => {
+    if (!g.deadline) return;
+    const dl = new Date(g.deadline);
+    const year = dl.getFullYear();
+    const yearsFromNow = (dl - new Date()) / (365.25*24*3600*1000);
+    const parentAge = currentAge + yearsFromNow;
+    items.push({
+      type: 'goal',
+      icon: g.type === 'home' ? '🏠' : g.type === 'car' ? '🚗' :
+            g.type === 'travel' ? '✈️' : g.type === 'business' ? '💼' :
+            g.type === 'retire' ? '👴' : '🎯',
+      name: escapeHtml(g.name || 'เป้าหมาย'),
+      parentAge,
+      year,
+      amount: g.targetAmount,
+      meta: 'เป้าหมายชีวิต',
+    });
+  });
+
+  /* หนี้สินที่ต้องผ่อนหมด (จาก client.liabilities) */
+  (client.liabilities || []).forEach(l => {
+    if (!l.endDate && !l.term) return;
+    let endYear, parentAge;
+    if (l.endDate) {
+      endYear = new Date(l.endDate).getFullYear();
+      parentAge = currentAge + (new Date(l.endDate) - new Date()) / (365.25*24*3600*1000);
+    } else if (l.term) {
+      endYear = currentYear + Number(l.term);
+      parentAge = currentAge + Number(l.term);
+    }
+    if (endYear) {
+      items.push({
+        type: 'resp',
+        icon: l.type === 'mortgage' ? '🏠' : '💸',
+        name: 'ผ่อน ' + escapeHtml(l.name || l.type || 'หนี้สิน') + ' หมด',
+        parentAge,
+        year: endYear,
+        meta: 'หนี้สินครบกำหนด',
+      });
+    }
+  });
+
+  /* เกษียณ — ใช้อายุที่ผู้ใช้กำหนดได้ */
+  const retireAge = getRetirementAge(client);
+  items.push({
+    type: 'retire',
+    icon: '🛋️',
+    name: 'เกษียณ',
+    parentAge: retireAge,
+    year: currentYear + (retireAge - currentAge),
+    meta: `อายุ ${retireAge} ปี`,
+  });
+
+  /* Custom milestones — user-added */
+  (client.timelineMilestones || []).forEach(m => {
+    const age = Number(m.age || 0);
+    items.push({
+      type: 'custom',
+      icon: m.icon || '🎯',
+      name: escapeHtml(m.name || 'Milestone'),
+      parentAge: age,
+      year: currentYear + (age - currentAge),
+      amount: m.amount,
+      meta: m.note ? escapeHtml(m.note) : 'กำหนดเอง',
+      isCustom: true,
+      customId: m.id,
+    });
+  });
+
+  /* sort by parentAge */
+  return items.sort((a,b) => a.parentAge - b.parentAge);
+}
+
+/* ════════════════════════════════════════════
+   AGE RANGE — บันทึกใน client.timelineRange
+═══════════════════════════════════════════ */
+function getRange(client, currentAge) {
+  const r = (client && client.timelineRange) || {};
+  /* default end ใช้ lifeExpectancy จาก retirement.html ถ้ามี */
+  const defaultEnd = getLifeExpectancy(client);
+  const start = r.start != null ? Number(r.start) : Math.floor(currentAge);
+  const end   = r.end   != null ? Number(r.end)   : defaultEnd;
+  return { start, end: Math.max(end, start + 1) };
+}
+
+function setRange(start, end) {
+  if (!selectedClientId) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    c.timelineRange = { start: Number(start), end: Number(end) };
+  });
+  render();
+}
+
+function resetRange() {
+  if (!selectedClientId) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    delete c.timelineRange;
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   CUSTOM MILESTONE CRUD
+═══════════════════════════════════════════ */
+function openMsModal(id, prefillAge) {
+  editingMsId = id || null;
+  document.getElementById('ms-modal-title').textContent = id ? '✏️ แก้ไข Milestone' : '➕ เพิ่ม Milestone';
+  if (id) {
+    const c = getCurrent();
+    const ms = (c.timelineMilestones || []).find(m => m.id === id);
+    if (ms) {
+      document.getElementById('msf-name').value   = ms.name || '';
+      document.getElementById('msf-age').value    = ms.age || '';
+      document.getElementById('msf-icon').value   = ms.icon || '🎯';
+      document.getElementById('msf-amount').value = ms.amount || '';
+      document.getElementById('msf-note').value   = ms.note || '';
+    }
+  } else {
+    document.getElementById('msf-name').value   = '';
+    /* pre-fill age ถ้าเรียกจากปุ่ม "+ เพิ่มที่อายุนี้" ของ group card */
+    document.getElementById('msf-age').value    = (prefillAge != null) ? prefillAge : '';
+    document.getElementById('msf-icon').value   = '🎯';
+    document.getElementById('msf-amount').value = '';
+    document.getElementById('msf-note').value   = '';
+  }
+  document.getElementById('ms-modal').classList.add('open');
+  setTimeout(() => document.getElementById('msf-name').focus(), 50);
+}
+
+function closeMsModal() {
+  document.getElementById('ms-modal').classList.remove('open');
+  editingMsId = null;
+}
+
+function saveCustomMs() {
+  const name = document.getElementById('msf-name').value.trim();
+  const age  = Number(document.getElementById('msf-age').value || 0);
+  if (!name) { alert('⚠️ กรุณาใส่ชื่อเหตุการณ์'); return; }
+  if (age <= 0 || age > 120) { alert('⚠️ อายุต้องอยู่ระหว่าง 1-120 ปี'); return; }
+  const ms = {
+    id:     editingMsId || ('ms' + Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
+    name,
+    age,
+    icon:   document.getElementById('msf-icon').value || '🎯',
+    amount: Number(document.getElementById('msf-amount').value || 0) || null,
+    note:   document.getElementById('msf-note').value.trim(),
+  };
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.timelineMilestones) c.timelineMilestones = [];
+    if (editingMsId) {
+      const idx = c.timelineMilestones.findIndex(m => m.id === editingMsId);
+      if (idx >= 0) c.timelineMilestones[idx] = ms;
+    } else {
+      c.timelineMilestones.push(ms);
+    }
+  });
+  closeMsModal();
+  render();
+}
+
+function deleteCustomMs(id) {
+  const c = getCurrent();
+  const ms = (c.timelineMilestones || []).find(m => m.id === id);
+  if (!ms) return;
+  if (!confirm(`ลบ Milestone "${ms.name}"?`)) return;
+  updateUser(u => {
+    const cl = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (cl && cl.timelineMilestones) {
+      cl.timelineMilestones = cl.timelineMilestones.filter(m => m.id !== id);
+    }
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const client = getCurrent();
+  const currentAge = ageNow(client.dob);
+
+  if (currentAge == null) {
+    wrap.innerHTML = `
+      <div class="no-data-tip">
+        ⚠️ <b>ยังไม่ได้กรอกวันเกิด</b> ของลูกค้าคนนี้ —
+        Timeline ต้องใช้วันเกิดเพื่อคำนวณอายุปัจจุบัน
+        <a href="clients.html">ไปกรอกข้อมูล →</a>
+      </div>
+    `;
+    return;
+  }
+
+  const range = getRange(client, currentAge);
+  const retireAge = getRetirementAge(client);
+  const milestones = computeMilestones(client);
+  const yearsLeft = range.end - currentAge;
+  const yearsToRetire = Math.max(retireAge - currentAge, 0);
+  const upcomingCount = milestones.filter(m => m.parentAge > currentAge).length;
+  const customCount   = milestones.filter(m => m.isCustom).length;
+
+  wrap.innerHTML = `
+    <!-- Toolbar: ช่วงอายุ + อายุเกษียณ + ปุ่มเพิ่ม -->
+    <div class="tl-toolbar">
+      <div class="tl-range-grp">
+        <label>📐 ช่วงอายุ:</label>
+        <input type="number" id="range-start" min="0" max="120" value="${range.start}"
+          onchange="onRangeChange()" title="อายุเริ่มต้น">
+        <span style="color:var(--gray-400);">→</span>
+        <input type="number" id="range-end" min="1" max="120" value="${range.end}"
+          onchange="onRangeChange()" title="อายุสิ้นสุด">
+        <span style="font-size:.78rem;color:var(--gray-400);">ปี</span>
+        ${(client.timelineRange) ? '<button class="btn-reset-range" onclick="resetRange()" title="กลับไปใช้ default">↺ รีเซ็ต</button>' : ''}
+      </div>
+      <div class="tl-range-grp" style="border-left:1.5px solid var(--gray-200);padding-left:14px;">
+        <label>🛋️ อายุเกษียณ:</label>
+        <input type="number" id="retire-age" min="30" max="100" value="${retireAge}"
+          onchange="setRetirementAge(this.value)" title="อายุที่ต้องการเกษียณ">
+        <span style="font-size:.78rem;color:var(--gray-400);">ปี</span>
+      </div>
+      <div class="tl-toolbar-spacer"></div>
+      <button class="btn-add-ms" onclick="openMsModal()">➕ เพิ่ม Milestone</button>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-lbl">📅 อายุปัจจุบัน</div>
+        <div class="stat-val">${currentAge.toFixed(0)} ปี</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">⏳ ปีถึงเกษียณ</div>
+        <div class="stat-val">${yearsToRetire.toFixed(0)} ปี</div>
+        <div class="stat-sub">เป้าเกษียณ ${retireAge} ปี</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">🎯 Milestones</div>
+        <div class="stat-val">${upcomingCount}</div>
+        <div class="stat-sub">${customCount > 0 ? customCount + ' เพิ่มเอง' : 'รอดำเนินการ'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">🌅 ปีคงเหลือ</div>
+        <div class="stat-val">${yearsLeft.toFixed(0)} ปี</div>
+        <div class="stat-sub">ดูถึงอายุ ${range.end}</div>
+      </div>
+    </div>
+
+    <div class="timeline-card">
+      <h3>📍 Life Timeline (อายุ ${range.start} → ${range.end})</h3>
+      <p class="tc-sub">milestones ทั้งหมด ${milestones.length} จุด · เกษียณในอีก ${yearsToRetire.toFixed(0)} ปี</p>
+      ${renderTimeline(currentAge, milestones, range)}
+      <div class="tl-legend">
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1976D2;background:#1976D2;"></span> ปัจจุบัน</div>
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#F39C12;"></span> บุตร</div>
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1976D2;"></span> เป้าหมาย</div>
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#DC3545;"></span> หนี้สิน</div>
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#28a745;"></span> เกษียณ</div>
+        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#8E44AD;"></span> เพิ่มเอง</div>
+      </div>
+    </div>
+
+    <div class="ms-card">
+      <h3>📋 รายการ Milestones (จัดกลุ่มตามอายุ)</h3>
+      ${milestones.length === 0
+        ? '<p style="color:var(--gray-500);text-align:center;padding:20px;">ยังไม่มี milestones — ลองเพิ่มเป้าหมายชีวิต/บุตร หรือกด "➕ เพิ่ม Milestone"</p>'
+        : (() => {
+            /* Group by อายุ (rounded) — เรียงจากน้อย → มาก */
+            const ageGroupsMap = new Map();
+            milestones.forEach(m => {
+              const age = Math.round(m.parentAge);
+              if (!ageGroupsMap.has(age)) ageGroupsMap.set(age, []);
+              ageGroupsMap.get(age).push(m);
+            });
+            const sortedAgeGroups = Array.from(ageGroupsMap.entries())
+              .sort((a, b) => a[0] - b[0])
+              .map(([age, items]) => ({ age, items }));
+
+            return sortedAgeGroups.map(grp => `
+              <div class="ms-age-section">
+                <div class="ms-age-header">
+                  <div>
+                    <span class="ms-age-header-num">⏰ อายุ ${grp.age} ปี</span>
+                    ${grp.items.length > 1 ? `<span class="ms-age-header-count">${grp.items.length} รายการ</span>` : ''}
+                  </div>
+                  <button class="ms-age-header-add" onclick="openMsModal(null,${grp.age})">＋ เพิ่มที่อายุนี้</button>
+                </div>
+                <div class="ms-age-items">
+                  ${grp.items.map(m => `
+                    <div class="ms-item t-${m.type} ${m.isCustom?'is-custom':''}">
+                      <span class="ms-icon">${m.icon}</span>
+                      <div class="ms-info">
+                        <div class="ms-name">${m.name}</div>
+                        <div class="ms-meta">${m.meta}${m.amount ? ' · ' + fmt(m.amount) : ''}</div>
+                      </div>
+                      ${m.isCustom ? `
+                        <button class="ms-delete-btn" onclick="openMsModal('${m.customId}')" title="แก้ไข">✏️</button>
+                        <button class="ms-delete-btn" onclick="deleteCustomMs('${m.customId}')" title="ลบ">🗑️</button>
+                      ` : m.type === 'retire' ? `
+                        <button class="ms-delete-btn" onclick="editRetireAge()" title="แก้ไขอายุเกษียณ">✏️</button>
+                      ` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('');
+          })()
+      }
+    </div>
+  `;
+}
+
+function onRangeChange() {
+  const s = Number(document.getElementById('range-start').value);
+  const e = Number(document.getElementById('range-end').value);
+  if (e <= s) {
+    alert('⚠️ อายุสิ้นสุดต้องมากกว่าอายุเริ่มต้น');
+    render();
+    return;
+  }
+  setRange(s, e);
+}
+
+function renderTimeline(currentAge, milestones, rangeOpt) {
+  /* Timeline range: ใช้ user-defined range ถ้ามี ไม่งั้น default */
+  const startAge = rangeOpt ? rangeOpt.start : Math.floor(currentAge);
+  const endAge   = rangeOpt ? rangeOpt.end   : LIFE_EXPECTANCY;
+  const range = endAge - startAge;
+
+  /* Position helper: 0% = startAge, 100% = endAge */
+  const pos = (age) => Math.max(0, Math.min(100, ((age - startAge) / range) * 100));
+
+  /* Helper: แปลง p (0-100) เป็น CSS left ที่อิงกับ axis area (ระหว่าง padding 150px ทั้ง 2 ข้าง)
+     ทำให้ year markers, milestones, now marker, axis labels ทั้งหมดอยู่บน scale เดียวกัน */
+  const leftStyle = (p) => `calc(150px + ${p} * (100% - 300px) / 100)`;
+
+  /* Year markers every 5 years */
+  let yearMarks = '';
+  for (let y = Math.ceil(startAge / 5) * 5; y <= endAge; y += 5) {
+    const p = pos(y);
+    yearMarks += `<div class="tl-year-mark" style="left:${leftStyle(p)}"></div>`;
+    yearMarks += `<div class="tl-year-text" style="left:${leftStyle(p)}">${y}</div>`;
+  }
+
+  /* Group milestones by อายุ (rounded) — items อายุเดียวกัน = card เดียว */
+  const ageMap = new Map();
+  milestones.forEach(m => {
+    const age = Math.round(m.parentAge);
+    if (!ageMap.has(age)) ageMap.set(age, []);
+    ageMap.get(age).push(m);
+  });
+  const groups = Array.from(ageMap.entries())
+    .map(([age, items]) => ({
+      age: Number(age),
+      pos: pos(Number(age)),
+      items: items.sort((a,b) => (a.isCustom?1:0) - (b.isCustom?1:0)), // custom ลงท้าย
+    }))
+    .filter(g => g.pos >= 0 && g.pos <= 100)
+    .sort((a,b) => a.age - b.age);
+
+  /* Lane-based collision avoidance — ทุก group อยู่ด้านบน axis (above) */
+  const MIN_DIST_PCT = 14;
+  const lanesAbove = [];
+  const placedGroups = groups.map(g => {
+    let lane = 0;
+    while (lane < lanesAbove.length && lanesAbove[lane].some(pp => Math.abs(pp - g.pos) < MIN_DIST_PCT)) {
+      lane++;
+    }
+    if (lane >= lanesAbove.length) lanesAbove.push([]);
+    lanesAbove[lane].push(g.pos);
+    return { ...g, side: 'above', lane };
+  });
+
+  /* Padding-top เผื่อ lane stacking + multi-item card height
+     Base 200px (สำหรับ lane 0) + lane * 110 + extra 22px ต่อ item ใน multi-item card */
+  const maxItems = Math.max(1, ...placedGroups.map(g => g.items.length));
+  const padTop = 200 + (lanesAbove.length > 1 ? (lanesAbove.length - 1) * 110 : 0) + (maxItems > 1 ? (maxItems - 1) * 22 : 0);
+
+  /* Current age marker — anchor จาก bottom เหมือน milestone อื่นๆ */
+  const nowMarker = `
+    <div class="tl-milestone above" style="left:${leftStyle(pos(currentAge))};">
+      <div class="tl-mark-content" style="border-color:#1976D2;background:#E3F2FD;">
+        <div class="tl-mark-name" style="color:#1976D2;">ปัจจุบัน</div>
+        <div class="tl-mark-year">อายุ ${currentAge.toFixed(0)} ปี</div>
+      </div>
+      <div class="tl-mark-line"></div>
+      <div class="tl-mark-icon t-current" style="color:white;">📍</div>
+    </div>
+  `;
+
+  /* Helpers สำหรับ render group */
+  function fmtShort(n) {
+    if (Math.abs(n) >= 1000000) return '฿' + (n/1000000).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1000) return '฿' + Math.round(n/1000) + 'K';
+    return '฿' + Math.round(n);
+  }
+
+  function renderGroupIcon(g) {
+    const first = g.items[0];
+    return `<div class="tl-mark-icon t-${first.type}">
+      ${first.icon}
+      ${g.items.length > 1 ? `<span class="tl-icon-badge">${g.items.length}</span>` : ''}
+    </div>`;
+  }
+
+  function renderGroupCard(g) {
+    if (g.items.length === 1) {
+      const m = g.items[0];
+      return `<div class="tl-mark-content">
+        <div class="tl-mark-name">${m.name}</div>
+        <div class="tl-mark-year">อายุ ${g.age} ปี</div>
+        ${m.amount ? `<div class="tl-mark-amount">${fmt(m.amount)}</div>` : ''}
+        <button class="tl-add-btn" onclick="openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
+      </div>`;
+    }
+    /* Multi-item — list ทั้งหมดในการ์ดเดียว */
+    return `<div class="tl-mark-content is-group">
+      <div class="tl-mark-year">อายุ ${g.age} ปี (${g.items.length} รายการ)</div>
+      ${g.items.map(it => `
+        <div class="tl-group-item">
+          <span class="tl-gi-icon">${it.icon}</span>
+          <span class="tl-gi-name">${it.name}</span>
+          ${it.amount ? `<span class="tl-gi-amount">${fmtShort(it.amount)}</span>` : ''}
+          ${it.isCustom ? `<button class="tl-gi-del" onclick="deleteCustomMs('${it.customId}')" title="ลบ">×</button>` : ''}
+        </div>
+      `).join('')}
+      <button class="tl-add-btn" onclick="openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
+    </div>`;
+  }
+
+  /* ทุก group แสดงด้านบน axis: order = content (top) → line → icon (bottom = axis) */
+  const msMarkers = placedGroups.map(g => `
+    <div class="tl-milestone above" style="left:${leftStyle(g.pos)}; --lane:${g.lane};">
+      ${renderGroupCard(g)}
+      <div class="tl-mark-line"></div>
+      ${renderGroupIcon(g)}
+    </div>
+  `).join('');
+
+  return `
+    <div class="timeline" style="--tl-pad-top:${padTop}px;">
+      <div class="tl-axis"></div>
+      <div class="tl-axis-label start">${startAge} ปี</div>
+      <div class="tl-axis-label end">${endAge} ปี</div>
+      ${yearMarks}
+      ${nowMarker}
+      ${msMarkers}
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

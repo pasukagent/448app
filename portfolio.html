@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — พอร์ตแนะนำ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Portfolio grid */
+    .pf-grid {
+      display: grid; grid-template-columns: 1fr; gap: 18px;
+    }
+    .pf-card {
+      background: white; border-radius: var(--radius); padding: 22px;
+      box-shadow: var(--shadow-sm);
+      display: grid; grid-template-columns: 180px 1fr auto; gap: 22px; align-items: center;
+      border-left: 5px solid var(--gray-200);
+      transition: all .2s;
+    }
+    .pf-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .pf-card.selected {
+      border-left-color: var(--red-primary);
+      background: linear-gradient(135deg, #FFF8F8, white);
+    }
+
+    /* Donut chart container */
+    .pf-donut-wrap {
+      position: relative; width: 160px; height: 160px;
+      flex-shrink: 0; margin: 0 auto;
+    }
+    .pf-donut-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .pf-donut-center {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      pointer-events: none;
+    }
+    .pf-donut-name {
+      font-weight: 800; font-size: .85rem; line-height: 1.15;
+      color: var(--gray-800); padding: 0 24px;
+    }
+    .pf-donut-tag {
+      font-size: .68rem; color: var(--gray-500); font-weight: 700;
+      margin-top: 2px; letter-spacing: .04em;
+    }
+
+    /* Allocations + description */
+    .pf-info { min-width: 0; }
+    .pf-allocations {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 18px; margin-bottom: 12px;
+    }
+    .pf-alloc-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .85rem; color: var(--gray-700);
+    }
+    .pf-alloc-dot {
+      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    }
+    .pf-alloc-name { flex: 1; }
+    .pf-alloc-pct { font-weight: 800; color: var(--gray-800); margin-left: auto; }
+    .pf-desc {
+      font-size: .85rem; color: var(--gray-600); line-height: 1.6;
+      padding: 12px 14px; background: var(--gray-50);
+      border-radius: 8px; border-left: 3px solid var(--gray-200);
+    }
+
+    /* Action button */
+    .pf-action {
+      display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 130px;
+    }
+    .pf-select-btn {
+      padding: 12px 18px; border: 2px solid var(--red-primary);
+      background: white; color: var(--red-primary);
+      border-radius: 10px; cursor: pointer; font-family: var(--font);
+      font-weight: 800; font-size: .88rem; transition: all .15s;
+      white-space: nowrap;
+    }
+    .pf-select-btn:hover { background: var(--red-soft); }
+    .pf-select-btn.active {
+      background: var(--red-primary); color: white;
+    }
+    .pf-select-btn.active:hover { background: var(--red-dark); }
+    .pf-tag {
+      display: inline-block; padding: 4px 10px; border-radius: 12px;
+      font-size: .72rem; font-weight: 800; text-align: center;
+      letter-spacing: .04em;
+    }
+    .pf-tag.passive    { background: #E8F5E9; color: #28a745; }
+    .pf-tag.balanced   { background: #E3F2FD; color: #1976D2; }
+    .pf-tag.income     { background: #FFF3E0; color: #F57C00; }
+    .pf-tag.growth     { background: #FEE2E2; color: #DC3545; }
+    .pf-tag.tactical   { background: #F3E5F5; color: #8E44AD; }
+    .pf-tag.diversified{ background: #E0F7FA; color: #00838F; }
+
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+
+    .selected-banner {
+      background: linear-gradient(135deg, var(--red-soft), #FFFCFC);
+      border: 1.5px solid var(--red-primary); border-radius: var(--radius);
+      padding: 14px 22px; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .selected-banner .sb-ico { font-size: 1.6rem; }
+    .selected-banner .sb-text { flex: 1; min-width: 200px; font-size: .9rem; color: var(--gray-700); }
+    .selected-banner .sb-text b { color: var(--red-primary); }
+    .selected-banner .sb-clear {
+      padding: 6px 12px; border: 1.5px solid var(--gray-300); background: white;
+      color: var(--gray-600); border-radius: 6px; font-size: .82rem; cursor: pointer;
+      font-family: var(--font); font-weight: 700;
+    }
+    .selected-banner .sb-clear:hover { color: #DC3545; border-color: #DC3545; }
+
+    @media (max-width: 900px) {
+      .pf-card { grid-template-columns: 1fr; gap: 14px; }
+      .pf-action { flex-direction: row; justify-content: center; flex-wrap: wrap; min-width: unset; }
+      .pf-allocations { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item active" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>📈 พอร์ตแนะนำ</h2>
+          <p>6 กลยุทธ์การลงทุนที่ปรับตามเป้าหมายและความเสี่ยงที่ยอมรับได้</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+function updateUser(modify) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(u => u.id === _uid);
+  if (idx === -1) return;
+  modify(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+
+let selectedClientId = null;
+
+/* ════════════════════════════════════════════
+   6 PORTFOLIOS — ตาม Image 13 reference
+═══════════════════════════════════════════ */
+const ASSET_COLORS = {
+  equity:    '#1B4F8C',  // ตราสารทุน (หุ้น) — น้ำเงินเข้ม
+  bond:      '#28a745',  // ตราสารหนี้ — เขียว
+  commodity: '#F39C12',  // สินค้าโภคภัณฑ์ — ทอง/ส้ม
+  reits:     '#DC3545',  // อสังหาฯ REITs — แดง
+  mixed:     '#8E44AD',  // กองทุนรวมแบบผสม — ม่วง
+};
+
+const PORTFOLIOS = [
+  {
+    key: 'passive',
+    name: 'ทุกสภาวะ Passive',
+    tag: 'PASSIVE',
+    tagCls: 'passive',
+    allocations: [
+      { type:'equity',    name:'ตราสารทุน (หุ้น)',  pct:25 },
+      { type:'commodity', name:'สินค้าโภคภัณฑ์',     pct:50 },
+      { type:'bond',      name:'ตราสารหนี้',         pct:25 },
+    ],
+    desc: 'พอร์ตกองทุนพร้อมลุยทุกสภาวะตลาด จัดพอร์ตโดยใช้ FVMR Framework คือด้าน Fundamental, Valuation, Momentum และ Risk โดยมุ่งหวังที่จะเพิ่มพูนและปกป้องความมั่งคั่งระยะยาวผ่านการกระจายความเสี่ยงอย่างมีประสิทธิภาพ เน้นการลงทุนแบบ Passive เพื่อเน้นสะท้อนผลตอบแทนเมื่อเทียบกับตลาด มีการปรับพอร์ตปีละ 2-4 ครั้ง',
+  },
+  {
+    key: 'balanced',
+    name: 'กระจายความเสี่ยง เติบโต',
+    tag: 'BALANCED',
+    tagCls: 'balanced',
+    allocations: [
+      { type:'equity',    name:'ตราสารทุน (หุ้น)',  pct:45 },
+      { type:'bond',      name:'ตราสารหนี้',         pct:30 },
+      { type:'reits',     name:'อสังหาฯ REITs',      pct:15 },
+      { type:'commodity', name:'สินค้าโภคภัณฑ์',     pct:10 },
+    ],
+    desc: 'พอร์ตการลงทุนจากแนวคิด Black-Litterman Model ที่ผสมผสานข้อมูลสินทรัพย์ทั่วโลกในอดีตเข้ากับมุมมองในอนาคตจากทีมงานมืออาชีพ ลงทุนในหุ้นทั่วโลก กองทุนอสังหาฯ ตราสารหนี้ และทองคำ มีระบบปรับสมดุลพอร์ตเพื่อสร้างผลตอบแทนสะสมมูลค่าให้เงินต้นเติบโต 6-8% ต่อปีในระยะยาว (ไม่ใช่การการันตี)',
+  },
+  {
+    key: 'retire-income',
+    name: 'กระแสเงินสดช่วงเกษียณ ผันผวนต่ำ',
+    tag: 'INCOME',
+    tagCls: 'income',
+    allocations: [
+      { type:'mixed', name:'กองทุนรวมแบบผสม', pct:45 },
+      { type:'bond',  name:'ตราสารหนี้',       pct:40 },
+      { type:'reits', name:'อสังหาฯ REITs',    pct:15 },
+    ],
+    desc: 'พอร์ตการลงทุนสำหรับวัยเกษียณ ก่อนต่อยอดการลงทุนไปยังพอร์ตอื่นๆ มีเป้าหมายสร้างกระแสเงินสดสม่ำเสมอ ในรูปแบบของการจ่ายปันผล หรือ การรับซื้อคืนอัตโนมัติ (Auto Redeem) เฉลี่ย 3-4% ต่อปี พร้อมด้วยนโยบายการควบคุมความผันผวนแบบเข้มงวด ด้วยการตั้งเป้าขาดทุนสูงสุดน้อยกว่า 5% เพื่อให้มั่นใจได้ว่า เงินลงทุนนั้นจะสามารถใช้ได้นานที่สุดหลังเกษียณ',
+  },
+  {
+    key: 'cashflow-growth',
+    name: 'กระแสเงินสด เงินต้นเติบโต ระยะยาว',
+    tag: 'GROWTH',
+    tagCls: 'growth',
+    allocations: [
+      { type:'mixed',  name:'กองทุนรวมแบบผสม', pct:45 },
+      { type:'bond',   name:'ตราสารหนี้',       pct:25 },
+      { type:'reits',  name:'อสังหาฯ REITs',    pct:20 },
+      { type:'equity', name:'ตราสารทุน (หุ้น)', pct:10 },
+    ],
+    desc: 'พอร์ตการลงทุนที่เน้นการสร้างกระแสเงินสดสม่ำเสมอ ในรูปแบบของการจ่ายปันผล หรือ การรับซื้อคืนอัตโนมัติ (Auto Redeem) เฉลี่ย 3-5% ต่อปี พร้อมคาดหวังเงินต้นเติบโตเฉลี่ย 1-2% ต่อปีในระยะยาว (ไม่ใช่การการันตี) ผ่านนโยบายการลงทุนที่ครอบคลุมสินทรัพย์ที่สามารถสร้างกระแสเงินสดได้ทั่วโลก และมีสัดส่วนการลงทุนในหุ้นได้ระหว่าง 0-60% เพื่อให้มั่นใจได้ว่าจะมีโอกาสเป็นไปตามเป้าหมายมากที่สุด',
+  },
+  {
+    key: 'tactical',
+    name: 'ทุกสภาวะ ชนะตลาด Tactical',
+    tag: 'TACTICAL',
+    tagCls: 'tactical',
+    allocations: [
+      { type:'equity',    name:'ตราสารทุน (หุ้น)',  pct:73 },
+      { type:'commodity', name:'สินค้าโภคภัณฑ์',     pct:25 },
+      { type:'bond',      name:'ตราสารหนี้',         pct:2  },
+    ],
+    desc: 'มุ่งเน้นสร้างผลตอบแทนส่วนเพิ่มในระยะยาว ทั้งในสภาวะตลาดหุ้นทั้งขาขึ้นและขาลง ผ่านการวางกลยุทธ์ลงทุนในกลุ่มสินทรัพย์ กลุ่มอุตสาหกรรม ภูมิภาค และ ธีม ตามแต่สภาวะตลาด (Tactical Allocation)',
+  },
+  {
+    key: 'diversified-growth',
+    name: 'เน้นเติบโต หลากหลาย ยืดหยุ่นสูง',
+    tag: 'DIVERSIFIED',
+    tagCls: 'diversified',
+    allocations: [
+      { type:'equity',    name:'ตราสารทุน (หุ้น)',  pct:45 },
+      { type:'bond',      name:'ตราสารหนี้',         pct:40 },
+      { type:'reits',     name:'อสังหาฯ REITs',      pct:10 },
+      { type:'commodity', name:'สินค้าโภคภัณฑ์',     pct:5  },
+    ],
+    desc: 'พอร์ตการลงทุนเพื่อการสะสมมูลค่าที่เน้นการเติบโตของเงินลงทุน ด้วยนโยบายการลงทุนที่ครอบคลุมสามารถลงทุนได้ทุกสินทรัพย์ทั่วโลก พร้อมด้วยความยืดหยุ่นที่สามารถแนะนำปรับพอร์ตการลงทุนส่วนของหุ้นได้ 0-100% ให้เหมาะสมสถานการณ์อยู่เสมอ เพื่อรับโอกาสสร้างผลตอบแทนในระยะยาวเฉลี่ย 8% ต่อปี หรือ เงินต้นเติบโต 2 เท่าใน 9 ปี (ไม่ใช่การการันตี)',
+  },
+];
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const client = getCurrent();
+  const selectedKey = client && client.recommendedPortfolio;
+  const selectedPf = PORTFOLIOS.find(p => p.key === selectedKey);
+
+  let html = '';
+  /* Banner ถ้ามีพอร์ตที่เลือกไว้แล้ว */
+  if (selectedPf) {
+    html += `
+      <div class="selected-banner">
+        <span class="sb-ico">⭐</span>
+        <div class="sb-text">
+          พอร์ตที่เลือกให้ลูกค้าคนนี้: <b>${selectedPf.name}</b>
+        </div>
+        <button class="sb-clear" onclick="clearSelection()">🗑️ ยกเลิก</button>
+      </div>
+    `;
+  }
+
+  html += '<div class="pf-grid">' + PORTFOLIOS.map(pf => renderPortfolio(pf, selectedKey)).join('') + '</div>';
+  wrap.innerHTML = html;
+}
+
+function renderPortfolio(pf, selectedKey) {
+  const isSelected = pf.key === selectedKey;
+  const donut = renderDonut(pf.allocations, pf.name, pf.tag);
+  return `
+    <div class="pf-card ${isSelected ? 'selected':''}">
+      <div class="pf-donut-wrap">${donut}</div>
+      <div class="pf-info">
+        <div class="pf-allocations">
+          ${pf.allocations.map(a => `
+            <div class="pf-alloc-item">
+              <span class="pf-alloc-dot" style="background:${ASSET_COLORS[a.type]}"></span>
+              <span class="pf-alloc-name">${a.name}</span>
+              <span class="pf-alloc-pct">${a.pct}%</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="pf-desc">${pf.desc}</div>
+      </div>
+      <div class="pf-action">
+        <span class="pf-tag ${pf.tagCls}">${pf.tag}</span>
+        <button class="pf-select-btn ${isSelected?'active':''}" onclick="selectPortfolio('${pf.key}')">
+          ${isSelected ? '✓ เลือกแล้ว' : 'เลือกพอร์ตนี้'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDonut(allocations, name, tag) {
+  const size = 160, r = 60, cx = size/2, cy = size/2, stroke = 26;
+  const C = 2 * Math.PI * r;
+  let offset = 0;
+  const segments = allocations.map(a => {
+    const len = (a.pct / 100) * C;
+    const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+      stroke="${ASSET_COLORS[a.type]}" stroke-width="${stroke}"
+      stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-offset}"/>`;
+    offset += len;
+    return seg;
+  }).join('');
+  return `
+    <svg viewBox="0 0 ${size} ${size}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#F0F0F0" stroke-width="${stroke}"/>
+      ${segments}
+    </svg>
+    <div class="pf-donut-center">
+      <div class="pf-donut-name">${name}</div>
+    </div>
+  `;
+}
+
+function selectPortfolio(key) {
+  if (!selectedClientId) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c) {
+      c.recommendedPortfolio = key;
+      c.recommendedAt = new Date().toISOString();
+    }
+  });
+  render();
+  /* Scroll to top to show banner */
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearSelection() {
+  if (!selectedClientId) return;
+  if (!confirm('ยกเลิกพอร์ตที่เลือกไว้?')) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c) {
+      delete c.recommendedPortfolio;
+      delete c.recommendedAt;
+    }
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

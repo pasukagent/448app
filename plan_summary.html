@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — สรุปแผน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Main layout */
+    .summary-layout {
+      display: grid; grid-template-columns: 480px 1fr; gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .summary-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Radar chart card */
+    .radar-card {
+      background: white; border-radius: var(--radius); padding: 30px 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 480px;
+    }
+    .radar-svg { max-width: 100%; height: auto; }
+
+    /* Progress bars card */
+    .progress-card {
+      background: white; border-radius: var(--radius); padding: 24px 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .progress-row {
+      display: grid; grid-template-columns: 130px 1fr 80px 130px; gap: 14px;
+      align-items: center; padding: 14px 0; border-bottom: 1px dashed var(--gray-100);
+    }
+    .progress-row:last-child { border-bottom: none; }
+    .pr-label {
+      font-weight: 800; font-size: 1rem; color: var(--gray-800);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pr-bar-wrap {
+      height: 14px; background: var(--gray-100); border-radius: 8px; overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.05);
+    }
+    .pr-bar-fill {
+      height: 100%; background: var(--red-primary); border-radius: 8px;
+      transition: width .35s; min-width: 4px;
+    }
+    .pr-bar-fill.s-good { background: #28a745; }
+    .pr-bar-fill.s-med  { background: #F39C12; }
+    .pr-bar-fill.s-bad  { background: #DC3545; }
+    .pr-pct {
+      font-weight: 800; color: var(--red-primary); text-align: right; font-size: .95rem;
+    }
+    .pr-pct.s-good { color: #28a745; }
+    .pr-pct.s-med  { color: #F39C12; }
+    .pr-pct.s-bad  { color: #DC3545; }
+    .pr-amount {
+      text-align: right; font-size: .92rem; color: var(--gray-700); font-weight: 700;
+    }
+
+    /* Pyramid button */
+    .pyramid-btn {
+      margin-top: 24px; width: 100%;
+      padding: 14px 22px; background: linear-gradient(135deg, #FFD180, #FFA726);
+      color: white; border: none; border-radius: 12px;
+      font-family: var(--font); font-weight: 800; font-size: .95rem;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .pyramid-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,167,38,.3); }
+
+    /* Pyramid modal */
+    .pyramid-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 100; align-items: center; justify-content: center; padding: 20px;
+    }
+    .pyramid-overlay.open { display: flex; }
+    .pyramid-modal {
+      background: white; border-radius: 18px; max-width: 580px; width: 100%;
+      max-height: 92vh; overflow-y: auto;
+      padding: 30px 32px; position: relative;
+    }
+    .pyramid-modal h3 { font-size: 1.3rem; font-weight: 800; color: var(--gray-800); margin-bottom: 4px; text-align: center; }
+    .pyramid-modal .pm-subtitle {
+      text-align: center; color: var(--gray-500); font-size: .88rem; margin-bottom: 20px;
+    }
+    .pyramid-close {
+      position: absolute; top: 14px; right: 18px;
+      background: var(--gray-100); border: none; width: 36px; height: 36px;
+      border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pyramid-close:hover { background: var(--gray-200); }
+
+    /* Pyramid layers */
+    .pyramid-stack {
+      display: flex; flex-direction: column; gap: 6px;
+      margin: 24px auto; max-width: 480px;
+    }
+    .py-layer {
+      padding: 16px 20px; border-radius: 10px; color: white;
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 700;
+    }
+    .py-layer.layer-1 { width: 50%;  background: linear-gradient(135deg,#FF6B6B,#DC3545); align-self: center; }
+    .py-layer.layer-2 { width: 70%;  background: linear-gradient(135deg,#FFB74D,#F39C12); align-self: center; }
+    .py-layer.layer-3 { width: 85%;  background: linear-gradient(135deg,#64B5F6,#1976D2); align-self: center; }
+    .py-layer.layer-4 { width: 100%; background: linear-gradient(135deg,#81C784,#28a745); align-self: center; }
+    .py-layer-icon { font-size: 1.4rem; }
+    .py-layer-text { flex: 1; padding-left: 12px; }
+    .py-layer-name { font-size: .92rem; }
+    .py-layer-desc { font-size: .76rem; font-weight: 500; opacity: .92; margin-top: 2px; }
+    .py-layer-status { font-size: 1.4rem; }
+
+    .py-legend {
+      background: var(--gray-50); padding: 14px 18px; border-radius: 10px;
+      font-size: .82rem; color: var(--gray-600); line-height: 1.6;
+    }
+    .py-legend b { color: var(--gray-800); }
+
+    /* Status pill on top */
+    .status-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .status-card {
+      background: white; border-radius: var(--radius); padding: 14px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sc-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .sc-info { flex: 1; min-width: 0; }
+    .sc-lbl { font-size: .76rem; color: var(--gray-500); font-weight: 700; }
+    .sc-val { font-size: .98rem; color: var(--gray-800); font-weight: 800; }
+    .sc-val.green { color: #28a745; }
+    .sc-val.orange{ color: #F39C12; }
+    .sc-val.red   { color: #DC3545; }
+
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item active" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>📋 สรุปแผน</h2>
+          <p>ภาพรวมความครบถ้วนของแผนการเงินทั้ง 5 ด้าน</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Pyramid Modal -->
+<div class="pyramid-overlay" id="pyramid-modal" onclick="if(event.target===this)closePyramid()">
+  <div class="pyramid-modal">
+    <button class="pyramid-close" onclick="closePyramid()">✕</button>
+    <h3>🔺 Financial Pyramid</h3>
+    <div class="pm-subtitle">โครงสร้างทางการเงินที่มั่นคง 4 ชั้น</div>
+    <div id="pyramid-stack-container"></div>
+    <div class="py-legend">
+      <b>หลักการ:</b> ฐานพีระมิดต้องแน่นก่อน — มีสภาพคล่อง + ป้องกันความเสี่ยง — แล้วจึงเดินหน้าออม + ลงทุน
+      ตามลำดับ ห้ามข้ามชั้น
+    </div>
+  </div>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+let selectedClientId = null;
+
+function fmt(n) {
+  if (!isFinite(n)) return '—';
+  if (Math.abs(n) >= 1000000) return '฿' + (n/1000000).toFixed(2) + 'M';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+function fmtPct(n) {
+  if (!isFinite(n)) return '—';
+  return n.toFixed(1) + '%';
+}
+
+/* ════════════════════════════════════════════
+   COMPUTE — 5 หมวดของ Plan Summary
+   คำนวณ % completion จากข้อมูลจริง
+═══════════════════════════════════════════ */
+const CATEGORIES = [
+  { key: 'retire',     icon: '🛋️', name: 'เกษียณ',        angle: -90 },
+  { key: 'education',  icon: '🎓', name: 'การศึกษาบุตร',   angle: -18 },
+  { key: 'lifeIns',    icon: '☂️', name: 'ความคุ้มครอง',   angle:  54 },
+  { key: 'healthIns',  icon: '⚕️', name: 'ประกันสุขภาพ',   angle: 126 },
+  { key: 'tax',        icon: '✂️', name: 'ภาษี',           angle: 198 },
+];
+
+function computeSummary(client) {
+  if (!client) return null;
+  const monthlyIncome = client.cashflow && Number(client.cashflow.income) ||
+    (Number(client.income) ? Number(client.income) / 12 : 0);
+  const annualIncome = monthlyIncome * 12;
+  const monthlyExp = client.cashflow
+    ? (Number(client.cashflow.expFixed||0) + Number(client.cashflow.expVariable||0) + Number(client.cashflow.expDebt||0))
+    : 0;
+
+  /* 1. RETIREMENT */
+  let retireAge = 30;
+  if (client.dob) {
+    const age = (new Date() - new Date(client.dob)) / (365.25*24*3600*1000);
+    retireAge = Math.max(60 - age, 1);
+  }
+  const retireTarget = annualIncome * 0.7 * 25;
+  const retireAssets = (client.assets||[])
+    .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type))
+    .reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const retireFV = retireAssets * Math.pow(1.05, retireAge);
+  const retirePct = retireTarget > 0 ? Math.min(retireFV / retireTarget * 100, 100) : 0;
+  const retireGap = Math.max(retireTarget - retireFV, 0);
+
+  /* 2. EDUCATION */
+  const children = client.children || [];
+  let eduTarget = 0, eduSavings = 0;
+  children.forEach(ch => {
+    const lvIdx = { economy:0, medium:1, premium:2 }[ch.level||'medium'] || 1;
+    eduTarget  += [800000, 1500000, 3000000][lvIdx] || 1500000;
+    eduSavings += Number(ch.eduSavings || 0);
+  });
+  const eduPct = eduTarget > 0 ? Math.min(eduSavings / eduTarget * 100, 100) : 0;
+  const eduGap = Math.max(eduTarget - eduSavings, 0);
+
+  /* 3. LIFE INSURANCE COVERAGE */
+  const li = client.lifeInputs || {};
+  const lifeNeed = (li.debts||[]).reduce((s,d) => s + Number(d.amount||0), 0)
+                + (li.responsibilities||[]).reduce((s,r) => s + Number(r.amount||0), 0);
+  const lifeTypes = ['ทุนชีวิต','ตลอดชีพ','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา'];
+  const lifeCov = (client.policies||[])
+    .filter(p => lifeTypes.includes(p.type))
+    .reduce((s,p) => s + Number(p.lifeCoverage || p.coverage || 0), 0);
+  const lifePct = lifeNeed > 0 ? Math.min(lifeCov / lifeNeed * 100, 100) : (lifeCov > 0 ? 100 : 0);
+  const lifeGap = Math.max(lifeNeed - lifeCov, 0);
+
+  /* 4. HEALTH INSURANCE */
+  const policies = client.policies || [];
+  const medicalCov = policies
+    .flatMap(p => Array.isArray(p.riders) ? p.riders : [])
+    .filter(r => r.type === 'medical')
+    .reduce((s,r) => s + Number(r.sumAssured||0), 0);
+  const legacyHealth = policies
+    .filter(p => !Array.isArray(p.riders) || !p.riders.length)
+    .reduce((s,p) => s + Number(p.riderHealthCov||0), 0);
+  const healthHave = medicalCov + legacyHealth;
+  const healthTarget = 8000;  // ค่าห้อง/วัน
+  /* % = ratio of cov / target × scale (ใช้ทุนรวมเป็นค่า display) */
+  const totalHealthCov = healthHave * 365; // ประมาณว่า X บาท/วัน × 365 = total annual cov
+  const healthPct = healthTarget > 0 ? Math.min(healthHave / healthTarget * 100, 100) : 0;
+
+  /* 5. TAX (ใช้ savings จาก deduction ปัจจุบัน) */
+  const ti = client.taxInputs || {};
+  const taxTotalDeduct = Number(ti.lifeIns||0) + Number(ti.healthIns||0) + Number(ti.parentIns||0) +
+                         Number(ti.annuity||0) + Number(ti.pvd||0) + Number(ti.rmf||0) + Number(ti.ssf||0);
+  /* Max possible = 100K + 25K + 15K + 200K + 500K + 500K + 200K = 1,540K */
+  const TAX_MAX = 1000000;  // ใช้ 1M เป็น benchmark ปานกลาง (ทั่วไปใช้ไม่ครบขนาด)
+  const taxPct = Math.min(taxTotalDeduct / TAX_MAX * 100, 100);
+
+  return {
+    retire:    { pct: retirePct, target: retireTarget, have: retireFV, gap: retireGap },
+    education: { pct: eduPct,    target: eduTarget,    have: eduSavings, gap: eduGap },
+    lifeIns:   { pct: lifePct,   target: lifeNeed,     have: lifeCov,    gap: lifeGap },
+    healthIns: { pct: healthPct, target: healthTarget, have: healthHave, gap: Math.max(healthTarget - healthHave, 0) },
+    tax:       { pct: taxPct,    target: TAX_MAX,      have: taxTotalDeduct, gap: 0 },
+  };
+}
+
+function statusOf(pct) {
+  if (!isFinite(pct) || pct === null) return 'no-data';
+  if (pct >= 80) return 'good';
+  if (pct >= 40) return 'med';
+  return 'bad';
+}
+
+/* ════════════════════════════════════════════
+   PYRAMID — Phase 4.5
+═══════════════════════════════════════════ */
+function computePyramid(client, summary) {
+  if (!client) return null;
+  /* Layer 1 (top): Risk Mgmt — ประกันชีวิต+สุขภาพ
+     Layer 2: เงินออม/ลงทุน — เกษียณ+การศึกษา
+     Layer 3: สภาพคล่อง — กองทุนฉุกเฉิน
+     Layer 4 (base): ภาษี — optimize */
+  const monthlyExp = client.cashflow
+    ? (Number(client.cashflow.expFixed||0) + Number(client.cashflow.expVariable||0) + Number(client.cashflow.expDebt||0))
+    : 0;
+  const liquidAssets = (client.assets||[])
+    .filter(a => ['cash','deposit','bond'].includes(a.type))
+    .reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const emerTarget = monthlyExp * 6;
+  const emerOk = emerTarget > 0 ? liquidAssets >= emerTarget : false;
+
+  return [
+    {
+      layer: 1, title: 'ลงทุนเสริมความมั่งคั่ง',
+      desc: 'พอร์ตหุ้น/กองทุน/อสังหาฯ เพื่อเงินต้นเติบโต',
+      icon: '📈',
+      ok: summary.retire.pct >= 50,
+    },
+    {
+      layer: 2, title: 'ออมเพื่อเป้าหมาย',
+      desc: 'เกษียณ + การศึกษาบุตร + เป้าหมายชีวิต',
+      icon: '💰',
+      ok: summary.retire.pct >= 30 || summary.education.pct >= 30,
+    },
+    {
+      layer: 3, title: 'การจัดการความเสี่ยง',
+      desc: 'ประกันชีวิต + ประกันสุขภาพ ครอบคลุม',
+      icon: '🛡️',
+      ok: summary.lifeIns.pct >= 50 && summary.healthIns.pct >= 50,
+    },
+    {
+      layer: 4, title: 'สภาพคล่อง',
+      desc: 'กองทุนฉุกเฉิน 6 เท่าของรายจ่าย',
+      icon: '💧',
+      ok: emerOk,
+    },
+  ];
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const client = getCurrent();
+  const summary = computeSummary(client);
+  if (!summary) { wrap.innerHTML = '<div class="no-client">ไม่พบข้อมูลลูกค้า</div>'; return; }
+
+  /* avg score (ไม่นับ no-data) */
+  const validPcts = CATEGORIES.map(c => summary[c.key].pct).filter(p => isFinite(p));
+  const avgScore = validPcts.length > 0 ? validPcts.reduce((s,p) => s+p, 0) / validPcts.length : 0;
+  const overallStatus = statusOf(avgScore);
+
+  wrap.innerHTML = `
+    <div class="status-strip">
+      <div class="status-card">
+        <div class="sc-icon">🎯</div>
+        <div class="sc-info">
+          <div class="sc-lbl">คะแนนรวม</div>
+          <div class="sc-val ${overallStatus === 'good' ? 'green' : overallStatus === 'med' ? 'orange' : 'red'}">${avgScore.toFixed(0)}/100</div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="sc-icon">${avgScore >= 80 ? '🌟' : avgScore >= 40 ? '⭐' : '⚠️'}</div>
+        <div class="sc-info">
+          <div class="sc-lbl">สถานะแผน</div>
+          <div class="sc-val">${avgScore >= 80 ? 'ดีมาก' : avgScore >= 40 ? 'ปานกลาง' : 'ต้องปรับปรุง'}</div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="sc-icon">✅</div>
+        <div class="sc-info">
+          <div class="sc-lbl">ครบถ้วน</div>
+          <div class="sc-val">${CATEGORIES.filter(c => summary[c.key].pct >= 80).length}/${CATEGORIES.length} หมวด</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-layout">
+      <!-- LEFT: Pentagon Radar -->
+      <div class="radar-card">
+        ${renderRadar(summary)}
+      </div>
+
+      <!-- RIGHT: Progress bars -->
+      <div class="progress-card">
+        ${CATEGORIES.map(cat => renderProgressRow(cat, summary[cat.key])).join('')}
+        <button class="pyramid-btn" onclick="openPyramid()">
+          <span style="font-size:1.4rem;">🔺</span>
+          <span>ดู Financial Pyramid (4 ชั้น)</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderProgressRow(cat, data) {
+  const status = statusOf(data.pct);
+  const pctText = isFinite(data.pct) ? data.pct.toFixed(2) + '%' : '—';
+  const amount  = isFinite(data.gap) && data.gap > 0
+    ? fmt(data.gap)
+    : (data.have > 0 ? fmt(data.have) : '—');
+  return `
+    <div class="progress-row">
+      <div class="pr-label">${cat.icon} ${cat.name}</div>
+      <div class="pr-bar-wrap">
+        <div class="pr-bar-fill s-${status}" style="width:${Math.max(Math.min(data.pct, 100), 0)}%"></div>
+      </div>
+      <div class="pr-pct s-${status}">${pctText}</div>
+      <div class="pr-amount">${amount}</div>
+    </div>
+  `;
+}
+
+function renderRadar(summary) {
+  const size = 420, cx = size/2, cy = size/2, R = 150;
+  const levels = 5;
+  /* Background grid (5 levels of pentagons) */
+  let grid = '';
+  for (let i = 1; i <= levels; i++) {
+    const r = R * (i/levels);
+    const points = CATEGORIES.map(cat => {
+      const rad = cat.angle * Math.PI / 180;
+      return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)].join(',');
+    }).join(' ');
+    grid += `<polygon points="${points}" fill="none" stroke="#E0E7FF" stroke-width="1.5" />`;
+  }
+  /* Axis lines */
+  let axes = '';
+  CATEGORIES.forEach(cat => {
+    const rad = cat.angle * Math.PI / 180;
+    axes += `<line x1="${cx}" y1="${cy}" x2="${cx + R*Math.cos(rad)}" y2="${cy + R*Math.sin(rad)}" stroke="#E0E7FF" stroke-width="1.5"/>`;
+  });
+  /* Data polygon */
+  const dataPoints = CATEGORIES.map(cat => {
+    const pct = summary[cat.key].pct || 0;
+    const r = R * Math.min(pct, 100) / 100;
+    const rad = cat.angle * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)].join(',');
+  }).join(' ');
+  /* Labels (icons at outer points) */
+  let labels = '';
+  CATEGORIES.forEach(cat => {
+    const rad = cat.angle * Math.PI / 180;
+    const lr = R + 26;
+    const lx = cx + lr * Math.cos(rad);
+    const ly = cy + lr * Math.sin(rad);
+    labels += `
+      <circle cx="${lx}" cy="${ly}" r="22" fill="white" stroke="#1B4F8C" stroke-width="2"/>
+      <text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="20">${cat.icon}</text>
+    `;
+  });
+  return `
+    <svg class="radar-svg" viewBox="0 0 ${size} ${size}" width="420" height="420">
+      ${grid}
+      ${axes}
+      <polygon points="${dataPoints}" fill="rgba(255,167,38,0.4)" stroke="#F39C12" stroke-width="2.5"/>
+      ${labels}
+    </svg>
+  `;
+}
+
+/* ════════════════════════════════════════════
+   PYRAMID MODAL — Phase 4.5
+═══════════════════════════════════════════ */
+function openPyramid() {
+  const client = getCurrent();
+  const summary = computeSummary(client);
+  if (!summary) return;
+  const layers = computePyramid(client, summary);
+  /* Render bottom→top in stack (base = layer 4 first in DOM = top of stack visually inverted)
+     But we want pyramid shape with smallest on top, so render layer 1 → layer 4 sequentially,
+     using width % to make pyramid shape */
+  const html = layers.map(l => `
+    <div class="py-layer layer-${l.layer}">
+      <span class="py-layer-icon">${l.icon}</span>
+      <div class="py-layer-text">
+        <div class="py-layer-name">${l.title}</div>
+        <div class="py-layer-desc">${l.desc}</div>
+      </div>
+      <span class="py-layer-status">${l.ok ? '✅' : '❌'}</span>
+    </div>
+  `).join('');
+  document.getElementById('pyramid-stack-container').innerHTML =
+    '<div class="pyramid-stack">' + html + '</div>';
+  document.getElementById('pyramid-modal').classList.add('open');
+}
+
+function closePyramid() {
+  document.getElementById('pyramid-modal').classList.remove('open');
+}
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

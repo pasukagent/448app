@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — วางแผนเกษียณ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    .ret-layout {
+      display: grid; grid-template-columns: 360px 1fr; gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .ret-layout { grid-template-columns: 1fr; } }
+
+    /* Inputs card (left) */
+    .ret-inputs {
+      background: white; border-radius: var(--radius); padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .ret-inputs h3 {
+      font-size: 1rem; font-weight: 800; color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+    .ret-input-row { margin-bottom: 14px; }
+    .ret-input-row:last-child { margin-bottom: 0; }
+    .ret-input-row label {
+      display: block; font-size: .82rem; font-weight: 700;
+      color: var(--gray-600); margin-bottom: 5px;
+    }
+    .ret-input-row label .hint {
+      font-size: .72rem; font-weight: 500; color: var(--gray-400); margin-left: 4px;
+    }
+    .ret-input-row input {
+      width: 100%; padding: 9px 12px;
+      border: 1.5px solid var(--gray-300); border-radius: 8px;
+      font-family: var(--font); font-size: .92rem;
+      box-sizing: border-box;
+    }
+    .ret-input-row input:focus {
+      outline: none; border-color: var(--red-primary);
+      box-shadow: 0 0 0 2px var(--red-soft);
+    }
+    .ret-input-row input[readonly] {
+      background: var(--gray-50); color: var(--gray-600); cursor: not-allowed;
+    }
+    .ret-input-2col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .ret-divider {
+      border-top: 1px dashed var(--gray-200);
+      margin: 16px 0; padding-top: 14px;
+    }
+
+    /* Right side stats + chart */
+    .ret-results { display: flex; flex-direction: column; gap: 18px; }
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: white; border-radius: var(--radius); padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--red-primary);
+    }
+    .stat-card.target { border-left-color: #1976D2; }
+    .stat-card.have   { border-left-color: #28a745; }
+    .stat-card.gap    { border-left-color: #DC3545; }
+    .stat-card.gap.is-ok { border-left-color: #28a745; }
+    .stat-card.monthly { border-left-color: #F39C12; }
+    .stat-lbl { font-size: .76rem; color: var(--gray-500); font-weight: 700; }
+    .stat-val { font-size: 1.25rem; font-weight: 800; color: var(--gray-800); margin-top: 3px; }
+    .stat-val.green { color: #28a745; }
+    .stat-val.red   { color: #DC3545; }
+    .stat-sub { font-size: .72rem; color: var(--gray-500); margin-top: 3px; }
+
+    /* Chart card */
+    .chart-card {
+      background: white; border-radius: var(--radius); padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-card h3 {
+      font-size: 1rem; font-weight: 800; color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+    .chart-card .ch-sub { font-size: .82rem; color: var(--gray-500); margin-bottom: 14px; }
+
+    .chart-svg {
+      width: 100%; max-width: 100%; height: 320px;
+      overflow: visible;
+    }
+
+    .chart-legend {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      margin-top: 14px; padding: 12px 16px;
+      background: var(--gray-50); border-radius: 8px;
+    }
+    .leg-item { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--gray-700); }
+    .leg-line { width: 22px; height: 3px; border-radius: 2px; }
+    .leg-dot  { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Year table */
+    .year-table-wrap {
+      background: white; border-radius: var(--radius); padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .year-table-wrap h3 {
+      font-size: 1rem; font-weight: 800; color: var(--gray-800);
+      margin-bottom: 14px;
+    }
+    .year-table {
+      width: 100%; border-collapse: collapse; font-size: .85rem;
+    }
+    .year-table th {
+      background: var(--gray-100); color: var(--gray-700);
+      padding: 8px 10px; text-align: right; font-weight: 700; font-size: .78rem;
+      border-bottom: 1.5px solid var(--gray-200);
+    }
+    .year-table th:first-child,
+    .year-table td:first-child { text-align: left; }
+    .year-table td {
+      padding: 7px 10px; border-bottom: 1px solid var(--gray-100);
+      text-align: right; font-weight: 600; color: var(--gray-700);
+    }
+    .year-table tr.is-retire {
+      background: linear-gradient(90deg, #FFF8E1, white);
+      font-weight: 800; color: var(--red-primary);
+    }
+    .year-table tr.is-retire td { color: var(--red-primary); }
+    .year-table .toggle-table {
+      margin-top: 12px; padding: 8px 14px;
+      background: white; border: 1.5px solid var(--gray-300);
+      color: var(--gray-700); border-radius: 8px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      font-family: var(--font);
+    }
+    .year-table .toggle-table:hover { border-color: var(--red-primary); color: var(--red-primary); }
+
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+
+    .auto-fill-info {
+      background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+      border-left: 4px solid #28a745; padding: 12px 16px;
+      border-radius: 8px; margin-bottom: 18px;
+      font-size: .85rem; color: var(--gray-700); line-height: 1.55;
+    }
+    .auto-fill-info b { color: #1B5E20; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+      <div class="app-sb-item active" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>🛋️ วางแผนเกษียณ</h2>
+          <p>คำนวณเงินที่ต้องเก็บ + ออม/เดือน เพื่อใช้จ่ายอย่างสบายหลังเกษียณ</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+function updateUser(modify) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(u => u.id === _uid);
+  if (idx === -1) return;
+  modify(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+
+let selectedClientId = null;
+let showFullTable = false;
+
+const DEFAULT_PLAN = {
+  retireAge: 60,
+  lifeExpectancy: 85,
+  incomePctAfterRetire: 70,
+  inflationRate: 3,
+  expectedReturn: 5,
+  monthlyContribution: 0, // จะ pre-fill จาก current contributions ถ้ามี
+};
+
+function fmt(n) {
+  if (!isFinite(n)) return '—';
+  if (Math.abs(n) >= 1000000) return '฿' + (n/1000000).toFixed(2) + 'M';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+function fmtFull(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+
+function ageNow(dob) {
+  if (!dob) return null;
+  const diff = new Date() - new Date(dob);
+  return diff / (365.25*24*3600*1000);
+}
+
+/* ════════════════════════════════════════════
+   PLAN MANAGEMENT
+═══════════════════════════════════════════ */
+function getPlan(client) {
+  const saved = (client && client.retirementPlan) || {};
+  /* ใช้ retirementAge จาก timeline.html ถ้ามี (เก่า) */
+  const retireAge = saved.retireAge != null ? saved.retireAge :
+    (client && client.retirementAge ? Number(client.retirementAge) : DEFAULT_PLAN.retireAge);
+  return {
+    retireAge:            Number(retireAge),
+    lifeExpectancy:       Number(saved.lifeExpectancy ?? DEFAULT_PLAN.lifeExpectancy),
+    incomePctAfterRetire: Number(saved.incomePctAfterRetire ?? DEFAULT_PLAN.incomePctAfterRetire),
+    inflationRate:        Number(saved.inflationRate ?? DEFAULT_PLAN.inflationRate),
+    expectedReturn:       Number(saved.expectedReturn ?? DEFAULT_PLAN.expectedReturn),
+    monthlyContribution:  Number(saved.monthlyContribution ?? DEFAULT_PLAN.monthlyContribution),
+  };
+}
+
+function savePlanField(field, value) {
+  if (!selectedClientId) return;
+  const v = Number(value);
+  if (!isFinite(v) || v < 0) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.retirementPlan) c.retirementPlan = {};
+    c.retirementPlan[field] = v;
+    /* sync retireAge กับ timeline.html (legacy field) */
+    if (field === 'retireAge') c.retirementAge = v;
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   AUTO-DERIVE values from client data
+═══════════════════════════════════════════ */
+function getDerivedData(client) {
+  /* annual income */
+  const annualIncome = Number(client.income) ||
+    (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
+  /* current retirement savings = PVD + RMF + SSF + ThaiESG */
+  const retireAssets = (client.assets || [])
+    .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type));
+  const currentSavings = retireAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  /* current monthly contribution rate (จาก contribution field ของ assets) */
+  const currentMonthlyContrib = retireAssets
+    .reduce((s,a) => s + Number(a.contribution||0), 0) / 12; // contribution คืนค่ารายปี
+  return { annualIncome, currentSavings, currentMonthlyContrib, retireAssets };
+}
+
+/* ════════════════════════════════════════════
+   CALCULATIONS
+═══════════════════════════════════════════ */
+function calculate(plan, derived, currentAge) {
+  const yearsToRetire = Math.max(plan.retireAge - currentAge, 0);
+  const yearsAfterRetire = Math.max(plan.lifeExpectancy - plan.retireAge, 1);
+
+  /* Annual need at retirement (ปรับ inflation) */
+  const annualNeedNow = derived.annualIncome * (plan.incomePctAfterRetire / 100);
+  const annualNeedAtRetire = annualNeedNow * Math.pow(1 + plan.inflationRate/100, yearsToRetire);
+
+  /* Real return rate (ผลตอบแทนหลังหักเงินเฟ้อ) */
+  const realRate = (1 + plan.expectedReturn/100) / (1 + plan.inflationRate/100) - 1;
+
+  /* Target corpus at retirement (PV of annuity ที่ต้องจ่ายต่อปี) */
+  let targetCorpus;
+  if (Math.abs(realRate) < 0.0001) {
+    targetCorpus = annualNeedAtRetire * yearsAfterRetire;
+  } else {
+    targetCorpus = annualNeedAtRetire * (1 - Math.pow(1 + realRate, -yearsAfterRetire)) / realRate;
+  }
+
+  /* FV of current savings + monthly contribution at retirement */
+  const r = plan.expectedReturn / 100;
+  const fvCurrent = derived.currentSavings * Math.pow(1 + r, yearsToRetire);
+  const monthly = plan.monthlyContribution || 0;
+  const annualContrib = monthly * 12;
+  let fvContrib = 0;
+  if (yearsToRetire > 0) {
+    if (Math.abs(r) < 0.0001) {
+      fvContrib = annualContrib * yearsToRetire;
+    } else {
+      fvContrib = annualContrib * (Math.pow(1 + r, yearsToRetire) - 1) / r;
+    }
+  }
+  const fvTotal = fvCurrent + fvContrib;
+  const gap = Math.max(targetCorpus - fvTotal, 0);
+
+  /* Required monthly contribution to close gap */
+  let requiredMonthly = 0;
+  if (gap > 0 && yearsToRetire > 0) {
+    if (Math.abs(r) < 0.0001) {
+      requiredMonthly = gap / (yearsToRetire * 12);
+    } else {
+      const fvFactor = (Math.pow(1 + r, yearsToRetire) - 1) / r;
+      requiredMonthly = (gap / fvFactor) / 12;
+    }
+  }
+
+  /* Year-by-year accumulation */
+  const yearlyData = [];
+  for (let y = 0; y <= yearsToRetire; y++) {
+    const fv = derived.currentSavings * Math.pow(1 + r, y) +
+               (annualContrib > 0 ? annualContrib * (Math.abs(r) < 0.0001 ? y : (Math.pow(1+r, y) - 1)/r) : 0);
+    yearlyData.push({
+      year: y,
+      age: Math.floor(currentAge) + y,
+      fv,
+      isRetire: y === Math.floor(yearsToRetire),
+    });
+  }
+
+  return {
+    yearsToRetire, yearsAfterRetire,
+    annualNeedNow, annualNeedAtRetire,
+    realRate, targetCorpus,
+    fvCurrent, fvContrib, fvTotal,
+    gap, requiredMonthly,
+    yearlyData,
+  };
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const client = getCurrent();
+  const currentAge = ageNow(client.dob);
+  if (currentAge == null) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">⚠️</div>
+      <p><b>ยังไม่ได้กรอกวันเกิด</b> ของลูกค้าคนนี้<br>
+      <a href="clients.html">ไปกรอกข้อมูล →</a></p>
+    </div>`;
+    return;
+  }
+
+  const plan = getPlan(client);
+  const derived = getDerivedData(client);
+  const calc = calculate(plan, derived, currentAge);
+
+  /* Auto-fill monthly contribution ถ้าผู้ใช้ยังไม่ได้แก้ */
+  const showAutoFill = derived.currentMonthlyContrib > 0 && plan.monthlyContribution === 0;
+
+  wrap.innerHTML = `
+    ${derived.annualIncome === 0 ? `
+      <div class="auto-fill-info" style="background:#FFF3E0;border-left-color:#F39C12;">
+        ⚠️ <b>ยังไม่ได้กรอกรายได้</b> — ไปที่
+        <a href="clients.html">หน้าลูกค้า</a> หรือ
+        <a href="financial.html">กระแสเงินสด</a> เพื่อกรอกรายได้ก่อน
+      </div>
+    ` : ''}
+    ${showAutoFill ? `
+      <div class="auto-fill-info">
+        ✨ ดึงเงินออมต่อเดือน <b>${fmt(derived.currentMonthlyContrib)}</b>/เดือน จาก PVD/RMF/SSF/ThaiESG ในหน้าสินทรัพย์
+        <a href="javascript:void(0)" onclick="savePlanField('monthlyContribution',${derived.currentMonthlyContrib})">→ ใช้ค่านี้</a>
+      </div>
+    ` : ''}
+
+    <div class="ret-layout">
+      <!-- Inputs -->
+      <div class="ret-inputs">
+        <h3>⚙️ ตั้งค่าการวางแผน</h3>
+
+        <div class="ret-input-row">
+          <label>📅 อายุปัจจุบัน <span class="hint">(จากวันเกิด)</span></label>
+          <input type="number" value="${currentAge.toFixed(0)}" readonly>
+        </div>
+
+        <div class="ret-input-2col">
+          <div class="ret-input-row">
+            <label>🛋️ อายุเกษียณ</label>
+            <input type="number" min="30" max="100" value="${plan.retireAge}"
+              onchange="savePlanField('retireAge', this.value)">
+          </div>
+          <div class="ret-input-row">
+            <label>🌅 อายุขัย <span class="hint">เป้าหมาย</span></label>
+            <input type="number" min="50" max="120" value="${plan.lifeExpectancy}"
+              onchange="savePlanField('lifeExpectancy', this.value)">
+          </div>
+        </div>
+
+        <div class="ret-input-row">
+          <label>💰 % รายได้ที่ต้องการหลังเกษียณ <span class="hint">(แนะนำ 70%)</span></label>
+          <input type="number" min="30" max="120" step="5" value="${plan.incomePctAfterRetire}"
+            onchange="savePlanField('incomePctAfterRetire', this.value)">
+        </div>
+
+        <div class="ret-divider"></div>
+
+        <div class="ret-input-2col">
+          <div class="ret-input-row">
+            <label>📈 ผลตอบแทนคาดหวัง %</label>
+            <input type="number" min="0" max="20" step="0.5" value="${plan.expectedReturn}"
+              onchange="savePlanField('expectedReturn', this.value)">
+          </div>
+          <div class="ret-input-row">
+            <label>🔥 อัตราเงินเฟ้อ %</label>
+            <input type="number" min="0" max="15" step="0.5" value="${plan.inflationRate}"
+              onchange="savePlanField('inflationRate', this.value)">
+          </div>
+        </div>
+
+        <div class="ret-divider"></div>
+
+        <div class="ret-input-row">
+          <label>💵 รายได้ปัจจุบัน/ปี <span class="hint">(จากข้อมูลลูกค้า)</span></label>
+          <input type="number" value="${derived.annualIncome}" readonly>
+        </div>
+
+        <div class="ret-input-row">
+          <label>💎 เงินเก็บเพื่อเกษียณตอนนี้ <span class="hint">(PVD/RMF/SSF/ThaiESG)</span></label>
+          <input type="number" value="${derived.currentSavings}" readonly>
+        </div>
+
+        <div class="ret-input-row">
+          <label>📅 ออมต่อเดือน (ปัจจุบัน)</label>
+          <input type="number" min="0" value="${plan.monthlyContribution}"
+            onchange="savePlanField('monthlyContribution', this.value)">
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="ret-results">
+        <div class="stats-strip">
+          <div class="stat-card target">
+            <div class="stat-lbl">🎯 เป้าหมายเงินก้อน</div>
+            <div class="stat-val">${fmt(calc.targetCorpus)}</div>
+            <div class="stat-sub">เพื่อใช้ ${calc.yearsAfterRetire.toFixed(0)} ปี หลังเกษียณ</div>
+          </div>
+          <div class="stat-card have">
+            <div class="stat-lbl">💎 จะมีตอนเกษียณ</div>
+            <div class="stat-val">${fmt(calc.fvTotal)}</div>
+            <div class="stat-sub">FV ของเงินที่มี + ออมตามแผน</div>
+          </div>
+          <div class="stat-card gap ${calc.gap === 0 ? 'is-ok':''}">
+            <div class="stat-lbl">${calc.gap === 0 ? '✅ ครบ' : '⚠️ ขาดอีก'}</div>
+            <div class="stat-val ${calc.gap === 0 ? 'green':'red'}">${calc.gap === 0 ? fmt(calc.fvTotal - calc.targetCorpus) + ' (เกิน)' : fmt(calc.gap)}</div>
+            <div class="stat-sub">${calc.gap === 0 ? 'ตามเป้าแล้ว!' : 'ต้องเพิ่ม'}</div>
+          </div>
+          <div class="stat-card monthly">
+            <div class="stat-lbl">💪 ต้องออม/เดือน</div>
+            <div class="stat-val">${fmt(calc.requiredMonthly + (plan.monthlyContribution || 0))}</div>
+            <div class="stat-sub">${plan.monthlyContribution > 0 ? 'รวมที่ออมอยู่ ' + fmt(plan.monthlyContribution) : 'ปัจจุบันยังไม่ออม'}</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-card">
+          <h3>📈 กราฟการสะสมเงินจนถึงเกษียณ</h3>
+          <p class="ch-sub">${calc.yearsToRetire.toFixed(0)} ปี · เริ่มจาก ${fmt(derived.currentSavings)} → ${fmt(calc.fvTotal)}</p>
+          ${renderChart(calc, plan.retireAge)}
+          <div class="chart-legend">
+            <div class="leg-item"><span class="leg-line" style="background:#28a745;"></span> เงินสะสมตามแผน</div>
+            <div class="leg-item"><span class="leg-line" style="background:#DC3545;border-style:dashed;border-top:2px dashed #DC3545;background:transparent;"></span> เป้าหมาย ${fmt(calc.targetCorpus)}</div>
+            <div class="leg-item"><span class="leg-dot" style="background:#1976D2;"></span> ปีเกษียณ</div>
+          </div>
+        </div>
+
+        <!-- Year table -->
+        <div class="year-table-wrap">
+          <h3>📋 ตารางการสะสมเงินรายปี</h3>
+          ${renderYearTable(calc, currentAge)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderChart(calc, retireAge) {
+  const data = calc.yearlyData;
+  if (data.length < 2) return '<p style="color:var(--gray-500);text-align:center;padding:20px;">กรอกข้อมูลเพื่อดูกราฟ</p>';
+
+  const W = 720, H = 280, padL = 60, padR = 20, padT = 20, padB = 40;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+
+  const maxFV = Math.max(calc.targetCorpus, ...data.map(d => d.fv)) * 1.1;
+  const xs = (i) => padL + (i / (data.length - 1)) * innerW;
+  const ys = (v) => padT + innerH - (v / maxFV) * innerH;
+
+  /* Path */
+  const pathD = data.map((d, i) => `${i===0?'M':'L'} ${xs(i)} ${ys(d.fv)}`).join(' ');
+  /* Area fill (under line) */
+  const areaD = pathD + ` L ${xs(data.length-1)} ${ys(0)} L ${xs(0)} ${ys(0)} Z`;
+
+  /* Y-axis labels */
+  const yLabels = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const v = maxFV * f;
+    const y = padT + innerH - f * innerH;
+    return `<text x="${padL - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="#999">${fmt(v)}</text>
+            <line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#eee" stroke-width="1"/>`;
+  }).join('');
+
+  /* X-axis labels (every ~5 years) */
+  const xStep = Math.max(1, Math.floor(data.length / 6));
+  const xLabels = data.filter((_,i) => i % xStep === 0 || i === data.length - 1).map((d, idx) => {
+    const i = data.indexOf(d);
+    return `<text x="${xs(i)}" y="${H - 12}" text-anchor="middle" font-size="10" fill="#666">${d.age}</text>`;
+  }).join('');
+
+  /* Target line */
+  const targetY = ys(calc.targetCorpus);
+  const targetLine = `<line x1="${padL}" y1="${targetY}" x2="${W - padR}" y2="${targetY}"
+    stroke="#DC3545" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+
+  /* Retire dot */
+  const lastIdx = data.length - 1;
+  const retireDot = `<circle cx="${xs(lastIdx)}" cy="${ys(data[lastIdx].fv)}" r="6"
+    fill="#1976D2" stroke="white" stroke-width="2"/>`;
+
+  return `
+    <svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+      ${yLabels}
+      ${xLabels}
+      <path d="${areaD}" fill="rgba(40,167,69,0.15)"/>
+      <path d="${pathD}" fill="none" stroke="#28a745" stroke-width="2.5"/>
+      ${targetLine}
+      ${retireDot}
+      <text x="${W/2}" y="${H - 2}" text-anchor="middle" font-size="11" font-weight="700" fill="#666">อายุ (ปี)</text>
+    </svg>
+  `;
+}
+
+function renderYearTable(calc, currentAge) {
+  const data = calc.yearlyData;
+  /* แสดงทุก 5 ปี + ปีสุดท้าย ถ้า showFullTable = false */
+  const filtered = showFullTable
+    ? data
+    : data.filter((d, i) => i === 0 || i === data.length - 1 || (currentAge + i) % 5 === 0 || d.isRetire);
+
+  return `
+    <table class="year-table">
+      <thead>
+        <tr>
+          <th>ปีที่</th>
+          <th>อายุ</th>
+          <th>เงินสะสม</th>
+          <th>+ ผลตอบแทน</th>
+          <th>+ ออมเข้า</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map((d, i) => {
+          const prev = i === 0 ? null : filtered[i-1];
+          const growth = prev ? (d.fv - prev.fv) : 0;
+          return `
+            <tr class="${d.isRetire ? 'is-retire':''}">
+              <td>${d.year} ${d.isRetire ? '🏁' : ''}</td>
+              <td>${d.age}</td>
+              <td>${fmtFull(d.fv)}</td>
+              <td>${prev ? fmtFull(growth) : '—'}</td>
+              <td>${prev ? fmtFull((d.year - prev.year) * 12) : '—'}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    <button class="toggle-table" onclick="toggleTable()">
+      ${showFullTable ? '▲ ย่อตาราง (ทุก 5 ปี)' : '▼ ดูทุกปี'}
+    </button>
+  `;
+}
+
+function toggleTable() {
+  showFullTable = !showFullTable;
+  render();
+}
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

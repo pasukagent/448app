@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — ลำดับความสำคัญ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+    }
+    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* Summary strip */
+    .summary-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 22px;
+    }
+    .ss-card {
+      background: white; border-radius: var(--radius); padding: 18px 22px;
+      box-shadow: var(--shadow-sm); border-left: 4px solid var(--red-primary);
+    }
+    .ss-card.surplus { border-left-color: #28a745; }
+    .ss-card.deficit { border-left-color: #DC3545; }
+    .ss-lbl { font-size: .82rem; color: var(--gray-500); margin-bottom: 4px; font-weight: 700; }
+    .ss-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-800); }
+    .ss-val.green { color: #28a745; }
+    .ss-val.red   { color: #DC3545; }
+    .ss-sub { font-size: .76rem; color: var(--gray-500); margin-top: 3px; }
+
+    /* Priority cards */
+    /* Table-like layout — แต่ละ priority อยู่บรรทัดเดียว เปรียบเทียบง่าย */
+    .pri-grid {
+      display: flex; flex-direction: column; gap: 8px;
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 8px;
+    }
+    /* Header row */
+    .pri-head {
+      display: grid;
+      grid-template-columns: 56px 1.2fr 1fr 240px 130px;
+      gap: 14px; align-items: center;
+      padding: 10px 16px; font-size: .76rem; font-weight: 800;
+      color: var(--gray-500); letter-spacing: .04em;
+      border-bottom: 1.5px solid var(--gray-200);
+    }
+    .pri-head .col-r { text-align: right; }
+    .pri-head .col-c { text-align: center; }
+
+    .pri-card {
+      display: grid;
+      grid-template-columns: 56px 1.2fr 1fr 240px 130px;
+      gap: 14px; align-items: center;
+      padding: 10px 12px;
+      border-left: 4px solid var(--gray-200);
+      border-radius: 8px;
+      background: white;
+      transition: all .15s;
+    }
+    .pri-card:hover { background: var(--gray-50); }
+    .pri-card.w-high { border-left-color: #DC3545; }
+    .pri-card.w-med  { border-left-color: #F39C12; }
+    .pri-card.w-low  { border-left-color: #28a745; }
+
+    .pri-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--red-soft); display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .pri-name-col { min-width: 0; }
+    .pri-name { font-weight: 800; font-size: .92rem; color: var(--gray-800); line-height: 1.2; }
+    .pri-desc { font-size: .72rem; color: var(--gray-500); margin-top: 2px; }
+    .pri-status-col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .pri-status { font-size: .82rem; font-weight: 700; }
+    .pri-status.gap { color: #DC3545; }
+    .pri-status.ok  { color: #28a745; }
+    .pri-status.no-data { color: var(--gray-400); }
+    .pri-detail { font-size: .7rem; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .pri-weight-row {
+      display: flex; gap: 3px; background: var(--gray-100);
+      border-radius: 7px; padding: 3px;
+    }
+    .pri-weight-btn {
+      flex: 1; padding: 6px 4px; border: none; background: transparent;
+      cursor: pointer; font-family: var(--font); font-weight: 700; font-size: .72rem;
+      color: var(--gray-600); border-radius: 5px; transition: all .15s;
+      letter-spacing: .02em;
+    }
+    .pri-weight-btn.active.w-high { background: #DC3545; color: white; }
+    .pri-weight-btn.active.w-med  { background: #F39C12; color: white; }
+    .pri-weight-btn.active.w-low  { background: #28a745; color: white; }
+    .pri-weight-btn:hover:not(.active) { background: white; color: var(--gray-800); }
+
+    .pri-monthly {
+      text-align: right; padding: 6px 10px;
+      background: var(--gray-50); border-radius: 6px;
+      border: 1px solid var(--gray-200);
+    }
+    .pri-monthly-lbl { font-size: .65rem; color: var(--gray-500); font-weight: 600; }
+    .pri-monthly-val { font-size: .95rem; font-weight: 800; color: var(--red-primary); }
+
+    /* Distribution bar */
+    .dist-card {
+      background: white; border-radius: var(--radius); padding: 22px;
+      box-shadow: var(--shadow-sm); margin-top: 22px;
+    }
+    .dist-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; color: var(--gray-800); }
+    .dist-bar {
+      display: flex; height: 28px; border-radius: 8px; overflow: hidden;
+      background: var(--gray-100); margin-bottom: 14px; box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+    }
+    .dist-segment {
+      transition: flex .25s; min-width: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: .76rem;
+      overflow: hidden; white-space: nowrap;
+    }
+    .dist-legend {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
+    }
+    .dist-leg-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      background: var(--gray-50); border-radius: 8px; font-size: .85rem;
+    }
+    .dist-leg-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+    .dist-leg-name { flex: 1; color: var(--gray-700); font-weight: 600; }
+    .dist-leg-val { font-weight: 800; color: var(--gray-800); }
+
+    /* No-data state */
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+
+    /* Tip box */
+    .tip-card {
+      background: linear-gradient(135deg, #FFF8E1, #FFFCF0);
+      border-left: 4px solid #F39C12; padding: 16px 22px; border-radius: var(--radius);
+      margin-bottom: 22px; font-size: .9rem; color: var(--gray-700); line-height: 1.6;
+    }
+    .tip-card b { color: #B7791F; }
+
+    @media (max-width: 768px) {
+      .pri-card { grid-template-columns: 1fr; gap: 12px; }
+      .pri-control { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item active" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>🎯 ลำดับความสำคัญ</h2>
+          <p>จัดอันดับเป้าหมายการเงิน + แนะนำการกระจายเงินออม/ลงทุนต่อเดือน</p>
+        </div>
+        <div class="client-pick">
+          <label>👤</label>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+function updateUser(modify) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(u => u.id === _uid);
+  if (idx === -1) return;
+  modify(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+
+let selectedClientId = null;
+
+function fmt(n) { return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtShort(n) {
+  if (n >= 1000000) return '฿' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return '฿' + Math.round(n/1000) + 'K';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+/* ════════════════════════════════════════════
+   7 PRIORITIES — definition + auto-calc functions
+═══════════════════════════════════════════ */
+const PRIORITIES = [
+  {
+    key: 'emergency',
+    icon: '🚨',
+    name: 'กองทุนฉุกเฉิน',
+    desc: '3-6 เท่าของรายจ่าย/เดือน เป็นเงินฝากสภาพคล่อง',
+    color: '#DC3545',
+    defaultWeight: 'high',
+  },
+  {
+    key: 'lifeIns',
+    icon: '☂️',
+    name: 'ประกันชีวิต',
+    desc: 'ทุนคุ้มครองครอบคลุมหนี้สิน + ความรับผิดชอบ',
+    color: '#9B59B6',
+    defaultWeight: 'high',
+  },
+  {
+    key: 'healthIns',
+    icon: '⚕️',
+    name: 'ประกันสุขภาพ',
+    desc: 'ป้องกันค่ารักษาที่ทำลายเงินออม',
+    color: '#3498DB',
+    defaultWeight: 'high',
+  },
+  {
+    key: 'retirement',
+    icon: '👴',
+    name: 'การเกษียณ',
+    desc: 'เป้าหมายเงินเกษียณ ฿' + 'ตามรายได้',
+    color: '#16A085',
+    defaultWeight: 'med',
+  },
+  {
+    key: 'education',
+    icon: '🎓',
+    name: 'การศึกษาบุตร',
+    desc: 'ค่าเล่าเรียนของบุตรในอนาคต',
+    color: '#F39C12',
+    defaultWeight: 'med',
+  },
+  {
+    key: 'goals',
+    icon: '🎯',
+    name: 'เป้าหมายชีวิต',
+    desc: 'บ้าน/รถ/ท่องเที่ยว/ธุรกิจ/อื่นๆ',
+    color: '#E67E22',
+    defaultWeight: 'low',
+  },
+  {
+    key: 'wealth',
+    icon: '📈',
+    name: 'ลงทุนเสริมความมั่งคั่ง',
+    desc: 'ลงทุนระยะยาวเพื่อเงินต้นเติบโต',
+    color: '#27AE60',
+    defaultWeight: 'low',
+  },
+];
+
+const WEIGHT_VALUES = { high: 3, med: 2, low: 1 };
+
+/* คำนวณ "เงินที่ต้องลงทุน/เดือน" ของแต่ละ priority จากข้อมูลลูกค้าจริง */
+function computePriorityNeed(client, key) {
+  if (!client) return { gap: 0, monthly: 0, status: 'no-data', detail: '' };
+
+  const monthlyIncome = client.cashflow && Number(client.cashflow.income) ||
+    (Number(client.income) ? Number(client.income) / 12 : 0);
+  const monthlyExp    = client.cashflow
+    ? (Number(client.cashflow.expFixed||0) + Number(client.cashflow.expVariable||0) + Number(client.cashflow.expDebt||0))
+    : monthlyIncome * 0.7;
+
+  switch (key) {
+    case 'emergency': {
+      /* gap = 6 เท่าของรายจ่าย - liquid assets */
+      const target = monthlyExp * 6;
+      const liquidAssets = (client.assets || []).filter(a => ['cash','deposit','bond'].includes(a.type))
+        .reduce((s,a) => s + Number(a.currentValue||0), 0);
+      const gap = Math.max(target - liquidAssets, 0);
+      /* ออม 12 เดือนจนเต็ม */
+      const monthly = gap > 0 ? gap / 12 : 0;
+      return {
+        gap, monthly,
+        status: gap > 0 ? 'gap' : 'ok',
+        detail: `เป้าหมาย ${fmtShort(target)} · มี ${fmtShort(liquidAssets)}`,
+      };
+    }
+    case 'lifeIns': {
+      /* ใช้ DIME หรือ simple จาก lifeInputs */
+      const li = client.lifeInputs || {};
+      const debts = (li.debts || []).reduce((s,d) => s + Number(d.amount||0), 0);
+      const resp  = (li.responsibilities || []).reduce((s,r) => s + Number(r.amount||0), 0);
+      const need  = li.method === 'dime' ? null : (debts + resp);
+      const lifeTypes = ['ทุนชีวิต','ตลอดชีพ','สะสมทรัพย์','บำนาญ','Unit Linked','การศึกษา'];
+      const currentCov = (client.policies || [])
+        .filter(p => lifeTypes.includes(p.type))
+        .reduce((s,p) => s + Number(p.lifeCoverage || p.coverage || 0), 0);
+      const target = need || (Number(client.income||monthlyIncome*12) * 10); // fallback: 10× annual income
+      const gap = Math.max(target - currentCov, 0);
+      /* เบี้ย ≈ 1.5% ของทุน/ปี → /12 เดือน */
+      const monthly = gap > 0 ? gap * 0.015 / 12 : 0;
+      return {
+        gap, monthly,
+        status: gap > 0 ? 'gap' : 'ok',
+        detail: `ต้องการ ${fmtShort(target)} · มี ${fmtShort(currentCov)}`,
+      };
+    }
+    case 'healthIns': {
+      /* gap จาก rider medical */
+      const policies = client.policies || [];
+      const medicalCov = policies.flatMap(p => Array.isArray(p.riders) ? p.riders : [])
+        .filter(r => r.type === 'medical')
+        .reduce((s,r) => s + Number(r.sumAssured||0), 0);
+      const legacyHealth = policies
+        .filter(p => !Array.isArray(p.riders) || !p.riders.length)
+        .reduce((s,p) => s + Number(p.riderHealthCov||0), 0);
+      const have = medicalCov + legacyHealth;
+      /* ค่าห้องเป้าหมายตามตลาด ฿4,000-15,000/วัน — ใช้ค่ากลาง ฿8,000 */
+      const target = 8000;
+      const gap = Math.max(target - have, 0);
+      const monthly = gap > 0 ? 1500 : 0; // เบี้ยสุขภาพประมาณ ฿1,500/เดือนสำหรับคุ้มครองทั่วไป
+      return {
+        gap, monthly,
+        status: gap > 0 ? 'gap' : 'ok',
+        detail: `ค่าห้องเป้าหมาย ฿${target}/วัน · มี ฿${have}/วัน`,
+      };
+    }
+    case 'retirement': {
+      /* คำนวณคร่าว: ต้องการ 70% ของรายได้สุดท้าย × 25 ปีหลังเกษียณ
+         ใช้ FV ของ assets ที่มี (PVD/RMF/SSF) เป็นฐาน */
+      const annualIncome = Number(client.income) || monthlyIncome * 12;
+      let yearsToRetire = 30;
+      if (client.dob) {
+        const age = (new Date() - new Date(client.dob)) / (365.25*24*3600*1000);
+        yearsToRetire = Math.max(60 - age, 1);
+      }
+      const targetCorpus = annualIncome * 0.7 * 25;
+      const currentRetire = (client.assets||[])
+        .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type))
+        .reduce((s,a) => s + Number(a.currentValue||0), 0);
+      /* FV ของเงินที่มี (return 5%/ปี) */
+      const fvCurrent = currentRetire * Math.pow(1.05, yearsToRetire);
+      const gap = Math.max(targetCorpus - fvCurrent, 0);
+      /* ออม/เดือน เพื่อปิด gap (ต้องเติบโต 5%/ปี) */
+      const r = 0.05/12, n = yearsToRetire*12;
+      const monthly = gap > 0 && n > 0
+        ? gap * r / (Math.pow(1+r, n) - 1)
+        : 0;
+      return {
+        gap, monthly,
+        status: gap > 0 ? 'gap' : 'ok',
+        detail: `เป้าหมาย ${fmtShort(targetCorpus)} · เหลือ ${yearsToRetire.toFixed(0)} ปี`,
+      };
+    }
+    case 'education': {
+      const children = client.children || [];
+      if (children.length === 0) return { gap: 0, monthly: 0, status: 'no-data', detail: 'ยังไม่มีบุตร' };
+      /* ใช้ค่าเฉลี่ย 1.5M/คน เป็น default */
+      const totalNeed = children.reduce((s, ch) => {
+        const lvIdx = { economy:0, medium:1, premium:2 }[ch.level||'medium'] || 1;
+        const avgCost = [800000, 1500000, 3000000][lvIdx] || 1500000;
+        const sav = Number(ch.eduSavings||0);
+        return s + Math.max(avgCost - sav, 0);
+      }, 0);
+      const monthly = children.length > 0 && totalNeed > 0
+        ? totalNeed / (15 * 12) // เฉลี่ย 15 ปีก่อนเรียนจบ
+        : 0;
+      return {
+        gap: totalNeed, monthly,
+        status: totalNeed > 0 ? 'gap' : 'ok',
+        detail: `${children.length} คน`,
+      };
+    }
+    case 'goals': {
+      const goals = client.lifeGoals || [];
+      if (goals.length === 0) return { gap: 0, monthly: 0, status: 'no-data', detail: 'ยังไม่มีเป้าหมาย' };
+      const totalMonthly = goals.reduce((s,g) => s + Number(g.monthlyContribution||0), 0);
+      const totalGap = goals.reduce((s,g) => {
+        const target = Number(g.targetAmount||0);
+        const cur = Number(g.currentSaved!=null?g.currentSaved:g.currentAmount||0);
+        return s + Math.max(target - cur, 0);
+      }, 0);
+      return {
+        gap: totalGap, monthly: totalMonthly,
+        status: totalGap > 0 ? 'gap' : 'ok',
+        detail: `${goals.length} เป้าหมาย`,
+      };
+    }
+    case 'wealth': {
+      /* ส่วนเหลือจากรายได้ - รายจ่าย - savings ที่อื่น = wealth investment */
+      const surplus = Math.max(monthlyIncome - monthlyExp, 0);
+      /* แนะนำให้ลงทุน 10-20% ของรายได้ */
+      const monthly = monthlyIncome * 0.10;
+      return {
+        gap: 0, monthly,
+        status: 'ok',
+        detail: `แนะนำ 10% ของรายได้ ${fmtShort(monthlyIncome)}/เดือน`,
+      };
+    }
+  }
+  return { gap: 0, monthly: 0, status: 'no-data', detail: '' };
+}
+
+/* ════════════════════════════════════════════
+   STATE + RENDER
+═══════════════════════════════════════════ */
+function getPriorities(client) {
+  const saved = (client && client.priorities) || {};
+  const out = {};
+  PRIORITIES.forEach(p => {
+    out[p.key] = saved[p.key] || p.defaultWeight;
+  });
+  return out;
+}
+
+function setWeight(key, weight) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.priorities) c.priorities = {};
+    c.priorities[key] = weight;
+  });
+  render();
+}
+
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const client = getCurrent();
+  if (!client) { wrap.innerHTML = '<div class="no-client">ไม่พบข้อมูลลูกค้า</div>'; return; }
+
+  const weights = getPriorities(client);
+  /* คำนวณ ideal monthly + actual distribution */
+  const items = PRIORITIES.map(p => {
+    const need = computePriorityNeed(client, p.key);
+    const w = weights[p.key];
+    return { ...p, ...need, weight: w, weightVal: WEIGHT_VALUES[w] };
+  });
+
+  /* รายได้ - รายจ่าย = surplus available/เดือน */
+  const cf = client.cashflow || {};
+  const monthlyIncome = Number(cf.income||0);
+  const monthlyExp    = Number(cf.expFixed||0) + Number(cf.expVariable||0) + Number(cf.expDebt||0);
+  const surplus       = Math.max(monthlyIncome - monthlyExp, 0);
+
+  /* รวม monthly ตาม ideal (ทุก priority ที่มี gap) */
+  const totalIdealMonthly = items.reduce((s,i) => s + (i.monthly || 0), 0);
+
+  /* คำนวณ allocation: ถ้า surplus < ideal → distribute by weight
+     ถ้า surplus >= ideal → ทุกคนได้ครบ + เหลือแบ่งกันตาม weight (extra) */
+  let allocation = {};
+  if (totalIdealMonthly === 0) {
+    items.forEach(i => allocation[i.key] = 0);
+  } else if (surplus >= totalIdealMonthly) {
+    /* enough — give each its ideal */
+    items.forEach(i => allocation[i.key] = i.monthly);
+  } else {
+    /* not enough — distribute by weight × ideal */
+    const totalWeightedNeed = items.reduce((s,i) => s + (i.monthly * i.weightVal), 0);
+    items.forEach(i => {
+      allocation[i.key] = totalWeightedNeed > 0
+        ? (i.monthly * i.weightVal / totalWeightedNeed) * surplus
+        : 0;
+    });
+  }
+
+  const totalAlloc = Object.values(allocation).reduce((s,v) => s+v, 0);
+  const fundedPct = totalIdealMonthly > 0 ? Math.min(totalAlloc/totalIdealMonthly*100, 100) : 0;
+  const surplusOk = surplus >= totalIdealMonthly;
+
+  /* Render */
+  wrap.innerHTML = `
+    <div class="tip-card">
+      💡 <b>วิธีใช้:</b> ปรับน้ำหนัก HIGH/MEDIUM/LOW ให้แต่ละเป้าหมาย
+      ระบบจะแนะนำการกระจายเงินออม/เดือนตามความสำคัญ
+      หากเงินเหลือไม่พอจ่ายทุกเป้าหมาย จะแบ่งให้เป้าหมายที่สำคัญกว่าก่อน
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+      <div class="ss-card">
+        <div class="ss-lbl">💰 รายได้/เดือน</div>
+        <div class="ss-val">${fmt(monthlyIncome)}</div>
+      </div>
+      <div class="ss-card">
+        <div class="ss-lbl">🛒 รายจ่ายจำเป็น/เดือน</div>
+        <div class="ss-val">${fmt(monthlyExp)}</div>
+        <div class="ss-sub">คงที่+ผันแปร+ผ่อน</div>
+      </div>
+      <div class="ss-card ${surplusOk ? 'surplus':'deficit'}">
+        <div class="ss-lbl">💵 เงินที่ออม/ลงทุนได้</div>
+        <div class="ss-val ${surplusOk?'green':'red'}">${fmt(surplus)}</div>
+        <div class="ss-sub">${monthlyIncome > 0 ? Math.round(surplus/monthlyIncome*100) : 0}% ของรายได้</div>
+      </div>
+      <div class="ss-card ${surplusOk ? 'surplus':'deficit'}">
+        <div class="ss-lbl">🎯 เป้าหมายต้องการ/เดือน</div>
+        <div class="ss-val">${fmt(totalIdealMonthly)}</div>
+        <div class="ss-sub">${surplusOk ? '✅ พอ' : '⚠️ ขาด '+fmt(totalIdealMonthly-surplus)}</div>
+      </div>
+    </div>
+
+    <!-- Priority cards (table-like layout) -->
+    <div class="pri-grid">
+      <div class="pri-head">
+        <div></div>
+        <div>เป้าหมาย</div>
+        <div>สถานะ</div>
+        <div class="col-c">ความสำคัญ</div>
+        <div class="col-r">แนะนำ/เดือน</div>
+      </div>
+      ${items.map(i => renderPriorityCard(i, allocation[i.key])).join('')}
+    </div>
+
+    <!-- Distribution -->
+    <div class="dist-card">
+      <h3>📊 การกระจายเงินออม/ลงทุน/เดือน (แนะนำ)</h3>
+      ${totalAlloc > 0 ? renderDistribution(items, allocation, totalAlloc) : '<p style="color:var(--gray-500);text-align:center;padding:20px;">ยังไม่มีเป้าหมายที่ต้องการเงินออม</p>'}
+    </div>
+  `;
+}
+
+function renderPriorityCard(p, alloc) {
+  const wCls = `w-${p.weight}`;
+  const statusText = p.status === 'ok'
+    ? `<span class="pri-status ok">✅ เพียงพอแล้ว</span>`
+    : p.status === 'gap'
+      ? `<span class="pri-status gap">⚠️ ขาด ${fmtShort(p.gap)}</span>`
+      : `<span class="pri-status no-data">— ยังไม่มีข้อมูล</span>`;
+
+  return `
+    <div class="pri-card ${wCls}">
+      <div class="pri-icon" style="background:${p.color}22;" title="${p.desc}">${p.icon}</div>
+      <div class="pri-name-col">
+        <div class="pri-name">${p.name}</div>
+        <div class="pri-desc">${p.desc}</div>
+      </div>
+      <div class="pri-status-col">
+        ${statusText}
+        ${p.detail ? `<div class="pri-detail">${p.detail}</div>` : ''}
+      </div>
+      <div class="pri-weight-row">
+        <button class="pri-weight-btn w-high ${p.weight==='high'?'active':''}" onclick="setWeight('${p.key}','high')">HIGH</button>
+        <button class="pri-weight-btn w-med ${p.weight==='med'?'active':''}" onclick="setWeight('${p.key}','med')">MEDIUM</button>
+        <button class="pri-weight-btn w-low ${p.weight==='low'?'active':''}" onclick="setWeight('${p.key}','low')">LOW</button>
+      </div>
+      <div class="pri-monthly">
+        <div class="pri-monthly-lbl">แนะนำ/เดือน</div>
+        <div class="pri-monthly-val">${fmt(alloc || 0)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDistribution(items, allocation, totalAlloc) {
+  const segments = items
+    .filter(i => allocation[i.key] > 0)
+    .map(i => {
+      const pct = (allocation[i.key] / totalAlloc * 100);
+      return { ...i, alloc: allocation[i.key], pct };
+    });
+
+  return `
+    <div class="dist-bar">
+      ${segments.map(s => `
+        <div class="dist-segment" style="background:${s.color};flex:${s.pct};" title="${s.name}: ${fmt(s.alloc)} (${s.pct.toFixed(1)}%)">
+          ${s.pct >= 8 ? s.pct.toFixed(0)+'%' : ''}
+        </div>
+      `).join('')}
+    </div>
+    <div class="dist-legend">
+      ${segments.map(s => `
+        <div class="dist-leg-item">
+          <span class="dist-leg-dot" style="background:${s.color}"></span>
+          <span class="dist-leg-name">${s.icon} ${s.name}</span>
+          <span class="dist-leg-val">${fmt(s.alloc)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else {
+      sbAv.textContent = initial;
+    }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>
