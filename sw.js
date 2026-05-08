@@ -4,7 +4,7 @@
    - ใช้ cache เฉพาะตอน offline (fallback)
    ผลคือ: page reload ปกติ = ได้ของใหม่จาก server ทุกครั้ง
    ไม่ต้องกด Ctrl+Shift+R เอง */
-const SW_VERSION = 'v3-2026-05-08';
+const SW_VERSION = 'v4-2026-05-09';
 
 self.addEventListener('install', (event) => {
   /* Activate ทันทีเมื่อมี SW ใหม่ — ไม่ต้องรอแท็บปิดเปิดใหม่ */
