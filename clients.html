@@ -149,12 +149,16 @@
       color: white; display: flex; align-items: flex-start; gap: 20px;
       position: relative;
     }
+    /* wrapper ที่ไม่มี overflow:hidden — เพื่อให้ปุ่มลบลอยออกนอกวงกลมได้ */
+    .profile-avatar-wrap {
+      position: relative; flex-shrink: 0;
+    }
     .profile-avatar-lg {
       width: 72px; height: 72px; border-radius: 50%;
       background: rgba(255,255,255,.25); border: 3px solid rgba(255,255,255,.5);
       font-size: 2rem; font-weight: 800; color: white;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; cursor: pointer; position: relative;
+      cursor: pointer; position: relative;
       overflow: hidden; transition: all .15s;
     }
     .profile-avatar-lg img {
@@ -171,14 +175,15 @@
     }
     .profile-avatar-lg:hover::after { opacity: 1; }
     .pf-photo-remove {
-      position: absolute; top: -4px; right: -4px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: #DC3545; color: white; border: 2px solid white;
-      font-size: .85rem; font-weight: 800; cursor: pointer;
+      position: absolute; top: -8px; right: -8px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #DC3545; color: white; border: 2.5px solid white;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+      box-shadow: 0 3px 10px rgba(0,0,0,.4);
+      z-index: 5; line-height: 1;
     }
-    .pf-photo-remove:hover { background: #B02030; }
+    .pf-photo-remove:hover { background: #B02030; transform: scale(1.1); }
 
     /* Photo menu — เลือกระหว่างกล้อง / คลังภาพ */
     .photo-menu {
@@ -566,7 +571,9 @@
 
         <!-- Hero -->
         <div class="profile-hero">
-          <div class="profile-avatar-lg" id="p-avatar" onclick="openPhotoMenu(event)" title="คลิกเพื่อเปลี่ยนรูป">?</div>
+          <div class="profile-avatar-wrap" id="p-avatar-wrap">
+            <div class="profile-avatar-lg" id="p-avatar" onclick="openPhotoMenu(event)" title="คลิกเพื่อเปลี่ยนรูป">?</div>
+          </div>
           <!-- 2 hidden file inputs: camera + gallery
                ใช้ off-screen positioning แทน display:none — เพราะบางเบราว์เซอร์
                ไม่ยอม trigger click() บน input ที่ display:none โดยเฉพาะกล้อง -->
@@ -989,13 +996,21 @@
     }
 
     const nicknamePart = client.nickname ? ` (${client.nickname})` : '';
-    /* Avatar — ใช้ <img> tag (consistent กับ list small avatar) */
-    const pAv = document.getElementById('p-avatar');
+    /* Avatar — ใช้ <img> tag (consistent กับ list small avatar)
+       ปุ่มลบรูปอยู่ใน .profile-avatar-wrap (sibling ของ avatar)
+       ไม่อยู่ใน avatar เพราะ overflow:hidden จะ clip ปุ่ม */
+    const pAv     = document.getElementById('p-avatar');
+    const pAvWrap = document.getElementById('p-avatar-wrap');
     if (client.photo) {
-      pAv.innerHTML = `<img src="${client.photo}" alt="">
-        <button class="pf-photo-remove" onclick="event.stopPropagation(); removeClientPhoto();" title="ลบรูป">×</button>`;
+      pAv.innerHTML = `<img src="${client.photo}" alt="">`;
+      if (!pAvWrap.querySelector('.pf-photo-remove')) {
+        pAvWrap.insertAdjacentHTML('beforeend',
+          `<button class="pf-photo-remove" onclick="event.stopPropagation(); removeClientPhoto();" title="ลบรูป">×</button>`);
+      }
     } else {
       pAv.innerHTML = initial;
+      const oldBtn = pAvWrap.querySelector('.pf-photo-remove');
+      if (oldBtn) oldBtn.remove();
     }
     document.getElementById('p-name').textContent       = fullName + nicknamePart;
     /* p-sub — ประกอบจาก parts ที่มีค่า แล้ว join ด้วย ' · ' (ไม่มี leading separator) */
