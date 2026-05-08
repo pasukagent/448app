@@ -1,9 +1,10 @@
-/* sw.js — Service Worker
-   Strategy: Network-first
-   - ทุก request ดึงจาก network ก่อน (fresh เสมอ)
+/* sw.js — Service Worker (version 2)
+   Strategy: Network-first with cache: 'reload'
+   - ทุก request ดึงจาก network ก่อน (force bypass HTTP cache เลย)
    - ใช้ cache เฉพาะตอน offline (fallback)
    ผลคือ: page reload ปกติ = ได้ของใหม่จาก server ทุกครั้ง
    ไม่ต้องกด Ctrl+Shift+R เอง */
+const SW_VERSION = 'v2-2026-05-08';
 
 self.addEventListener('install', (event) => {
   /* Activate ทันทีเมื่อมี SW ใหม่ — ไม่ต้องรอแท็บปิดเปิดใหม่ */
@@ -27,15 +28,14 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  /* Network-first — ดึง fresh จาก server เสมอ
+  /* Network-first with cache: 'reload' — bypass HTTP cache ทั้งหมด
      ถ้า network ล่ม → fallback ไป cache (offline mode) */
   event.respondWith(
-    fetch(req, { cache: 'no-cache' })
+    fetch(req, { cache: 'reload' })
       .then(res => {
-        /* Cache copy สำหรับ offline fallback */
         if (res.ok) {
           const copy = res.clone();
-          caches.open('aia-runtime-v1').then(cache => cache.put(req, copy));
+          caches.open('aia-runtime-v2').then(cache => cache.put(req, copy));
         }
         return res;
       })
