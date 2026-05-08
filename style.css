@@ -38,12 +38,14 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { overflow-x: hidden; max-width: 100vw; }
 body {
   font-family: var(--font);
   background: var(--gray-100);
   color: var(--gray-800);
   min-height: 100vh;
-  overflow-x: hidden; /* กัน horizontal scroll ทั้งหน้า — element ใน element ยังเลื่อนได้ */
+  overflow-x: hidden; max-width: 100vw;
+  /* กัน horizontal scroll ทั้งหน้า — element ใน element ยังเลื่อนได้ */
 }
 
 a { text-decoration: none; color: inherit; }
@@ -371,6 +373,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 ════════════════════════════════════════════════ */
 .app-layout {
   display: flex; min-height: 100vh; background: #FAFAFA;
+  overflow-x: hidden; max-width: 100vw;
 }
 
 /* Sidebar */
@@ -444,9 +447,10 @@ footer span { color: var(--red-primary); font-weight: 700; }
 /* Main area */
 .app-main {
   margin-left: 240px;
-  width: calc(100% - 240px); /* fix: ก่อนหน้านี้ flex:1 ทำให้กว้าง 100% + margin-left:240 → ล้นขวา 240px */
+  width: calc(100vw - 240px); /* ใช้ 100vw แทน 100% เพื่อ exact viewport (กัน parent padding คำนวณผิด) */
+  max-width: calc(100vw - 240px);
   display: flex; flex-direction: column; min-height: 100vh;
-  min-width: 0; /* allow content inside to shrink (กัน flex children ดัน width เกิน) */
+  min-width: 0; overflow-x: hidden; /* clip ทุกอย่างที่ล้น */
 }
 
 /* Sticky topbar */
