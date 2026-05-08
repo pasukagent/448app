@@ -86,7 +86,9 @@
       background: var(--red-primary); color: white;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.2rem; font-weight: 800; flex-shrink: 0;
+      overflow: hidden;
     }
+    .client-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .client-name { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 3px; }
     .client-age-badge {
       display: inline-flex; align-items: center; gap: 4px;
@@ -1736,8 +1738,9 @@ function showList() {
   currentClientId = null;
   document.getElementById('view-list').style.display   = '';
   document.getElementById('view-detail').style.display = 'none';
-  renderClientList();
+  /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
   populateTopClientSelect();
+  try { renderClientList(); } catch (e) { console.error('renderClientList error:', e); }
 }
 
 function showDetail(cid) {
@@ -1745,10 +1748,11 @@ function showDetail(cid) {
   localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-list').style.display   = 'none';
   document.getElementById('view-detail').style.display = '';
-  render();
-  renderNeedsAnalysis();
-  renderHealthGap();
+  /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
   populateTopClientSelect();
+  try { render(); }              catch (e) { console.error('render error:', e); }
+  try { renderNeedsAnalysis(); } catch (e) { console.error('renderNeedsAnalysis error:', e); }
+  try { renderHealthGap(); }     catch (e) { console.error('renderHealthGap error:', e); }
 }
 
 /* Top-right client picker — sync กับ currentClientId
@@ -1837,10 +1841,11 @@ function renderClientList(filter) {
     const ageBadge      = [agePart, genderPart].filter(Boolean).join(' · ');
     const birthdatePart = c.birthdate ? `<span>🎂 ${fmtDate(c.birthdate)}</span>` : '';
 
+    const avatarInner = c.photo ? `<img src="${c.photo}" alt="">` : initials;
     html += `
       <div class="client-card" onclick="showDetail('${c.id}')">
         <div class="client-card-top">
-          <div class="client-avatar">${initials}</div>
+          <div class="client-avatar">${avatarInner}</div>
           <div style="flex:1;min-width:0;">
             <div class="client-name">${c.firstName} ${c.lastName}</div>
             ${ageBadge ? `<span class="client-age-badge">${ageBadge}</span>` : ''}
@@ -1850,7 +1855,7 @@ function renderClientList(filter) {
           ${birthdatePart}
           ${c.phone ? `<span>📞 ${c.phone}</span>` : ''}
           ${c.occupation ? `<span>💼 ${c.occupation}</span>` : ''}
-          ${c.income ? `<span>💵 ${fmt(c.income)}/เดือน</span>` : ''}
+          ${c.income ? `<span>💵 ${fmt(c.income)}/ปี</span>` : ''}
         </div>
         <div class="client-divider"></div>
         <div class="client-stats">

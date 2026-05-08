@@ -175,7 +175,9 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      overflow: hidden;
     }
+    .client-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .client-card-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
     .client-card-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .badge {
@@ -931,8 +933,9 @@ function showClientSelect() {
   if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
   document.getElementById('view-select').style.display = '';
   document.getElementById('view-main').style.display   = 'none';
-  renderClientSelect();
+  /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
   populateTopClientSelect();
+  try { renderClientSelect(); } catch (e) { console.error('renderClientSelect error:', e); }
 }
 
 function showClientMain(cid) {
@@ -940,8 +943,9 @@ function showClientMain(cid) {
   localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-select').style.display = 'none';
   document.getElementById('view-main').style.display   = '';
-  renderMain();
+  /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
   populateTopClientSelect();
+  try { renderMain(); } catch (e) { console.error('renderMain error:', e); }
 }
 
 /* Top-right client picker — sync กับ selectedClientId
@@ -1078,9 +1082,10 @@ function renderClientSelect() {
     const genderLabel = c.gender === 'male' ? 'ชาย' : c.gender === 'female' ? 'หญิง' : (c.gender || '');
     const initial     = (c.firstName || '?').charAt(0).toUpperCase();
 
+    const avatarInner = c.photo ? `<img src="${c.photo}" alt="">` : initial;
     return `<div class="client-card" onclick="showClientMain('${c.id}')">
       <div class="client-card-top">
-        <div class="client-avatar">${initial}</div>
+        <div class="client-avatar">${avatarInner}</div>
         <div style="flex:1;min-width:0;">
           <div class="client-card-name">${c.firstName} ${c.lastName}</div>
           <div class="client-card-badges">
@@ -1279,8 +1284,8 @@ function renderMain() {
 
   // Client info bar — แสดงรูปถ้ามี
   const cibAv = document.getElementById('cib-avatar');
-  if (c.photo) {
-    cibAv.innerHTML = `<img src="${c.photo}" alt="">`;
+  if (client.photo) {
+    cibAv.innerHTML = `<img src="${client.photo}" alt="">`;
   } else {
     cibAv.textContent = initial;
   }
@@ -1290,7 +1295,7 @@ function renderMain() {
   if (age != null)        metaParts.push(`<span>🎂 อายุ ${age} ปี</span>`);
   if (client.phone)       metaParts.push(`<span>📞 ${client.phone}</span>`);
   if (client.occupation)  metaParts.push(`<span>💼 ${client.occupation}</span>`);
-  if (client.income)      metaParts.push(`<span>💵 รายได้ ${Number(client.income).toLocaleString('th-TH')} บาท/เดือน</span>`);
+  if (client.income)      metaParts.push(`<span>💵 รายได้ ${Number(client.income).toLocaleString('th-TH')} บาท/ปี</span>`);
   document.getElementById('cib-meta').innerHTML = metaParts.join('');
 
   // Timeline chart
