@@ -735,12 +735,16 @@ function setMethod(m) {
 }
 
 /* ดึงข้อมูลจากงบการเงิน — รวม:
-   1. client.liabilities → li.debts (หลีกเลี่ยง duplicate ตามชื่อ)
+   1. client.liabilities → li.debts
+      • type='home' → REPLACE แถวคงที่ d-home (รวมหนี้บ้านทุกก้อน)
+      • type='car'  → REPLACE แถวคงที่ d-car  (รวมหนี้รถทุกก้อน)
+      • type อื่น   → เพิ่มแถวใหม่ (skip ถ้าชื่อซ้ำ)
    2. client.assets liquid group → li.liquidAssets (cash + deposit + bond) */
 function importLiabilities() {
   const c = getCurrent();
   if (!c) return;
-  const liabsCount = (c.liabilities || []).length;
+  const liabs      = c.liabilities || [];
+  const liabsCount = liabs.length;
   const liquidVal  = getCurrentLiquidAssets();
 
   if (liabsCount === 0 && liquidVal === 0) {
@@ -748,38 +752,56 @@ function importLiabilities() {
     return;
   }
 
-  /* แสดง summary ของสิ่งที่จะ import ก่อน confirm */
   const previewParts = [];
   if (liabsCount > 0) previewParts.push(`${liabsCount} หนี้สิน`);
   if (liquidVal > 0)  previewParts.push(`สินทรัพย์สภาพคล่อง ${fmtBaht(liquidVal)}`);
   if (!confirm(`ดึงข้อมูล: ${previewParts.join(' + ')}?`)) return;
 
   let importedDebts = 0;
+  let homeSum = 0, carSum = 0;
+
   saveLifeInputs(li => {
-    /* 1. Liabilities → debts (skip ถ้าชื่อซ้ำ) */
-    if (liabsCount > 0) {
-      if (!li.debts) li.debts = [];
-      const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
-      c.liabilities.forEach(l => {
-        const name = (l.name || l.type || 'หนี้สิน').trim();
-        if (existingNames.has(name.toLowerCase())) return;
-        li.debts.push({
-          id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
-          name,
-          amount: Number(l.principal || l.balance || 0),
-        });
-        importedDebts++;
+    if (!li.debts) li.debts = [];
+    const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
+
+    liabs.forEach(l => {
+      const principal = Number(l.principal || l.balance || 0);
+      /* บ้าน → รวมเข้า d-home */
+      if (l.type === 'home') { homeSum += principal; return; }
+      /* รถ → รวมเข้า d-car */
+      if (l.type === 'car')  { carSum  += principal; return; }
+      /* type อื่น → แถวใหม่ */
+      const name = (l.name || l.type || 'หนี้สิน').trim();
+      if (existingNames.has(name.toLowerCase())) return;
+      li.debts.push({
+        id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        name,
+        amount: principal,
       });
+      existingNames.add(name.toLowerCase());
+      importedDebts++;
+    });
+
+    /* REPLACE d-home / d-car ถ้ามีหนี้ประเภทนั้น (idempotent — กดซ้ำไม่ทบ) */
+    if (homeSum > 0) {
+      const homeRow = li.debts.find(d => d.id === 'd-home');
+      if (homeRow) homeRow.amount = homeSum;
     }
-    /* 2. Liquid assets → override (แก้ทับ value เดิม) */
+    if (carSum > 0) {
+      const carRow = li.debts.find(d => d.id === 'd-car');
+      if (carRow) carRow.amount = carSum;
+    }
+
+    /* Liquid assets — override */
     li.liquidAssets = liquidVal;
   });
   render();
 
   const summary = [];
-  if (importedDebts > 0)  summary.push(`${importedDebts} หนี้สิน`);
-  if (liquidVal > 0)       summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
-  if (importedDebts === 0 && liabsCount > 0) summary.push('(ไม่มีหนี้ใหม่ — ชื่อซ้ำทั้งหมด)');
+  if (homeSum > 0)        summary.push(`บ้าน ${fmtBaht(homeSum)}`);
+  if (carSum > 0)         summary.push(`รถ ${fmtBaht(carSum)}`);
+  if (importedDebts > 0)  summary.push(`${importedDebts} หนี้อื่น`);
+  if (liquidVal > 0)      summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
   showToast(`✅ ดึงข้อมูลเรียบร้อย${summary.length ? ' — ' + summary.join(' + ') : ''}`);
 }
 
