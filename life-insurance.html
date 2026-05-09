@@ -565,14 +565,14 @@ function render() {
         <span style="color:#666;font-size:.82rem;">D: ${fmtBaht(dime.debt)} · I: ${fmtBaht(dime.income)} · E: ${fmtBaht(dime.education)} · <b>รวม ${fmtBaht(dime.total)}</b></span>
       </div>` : ''}
 
-    <!-- Section 1 & 2: Debt + Responsibility -->
-    <div class="li-grid">
+    <!-- Section 1 & 2: Debt + Responsibility — fade ใน DIME mode (ไม่ใช้ใน formula) -->
+    <div class="li-grid" style="${method === 'dime' ? 'opacity:.55;' : ''}">
 
       <!-- Debt -->
-      <div class="li-card">
+      <div class="li-card" title="${method === 'dime' ? 'DIME mode ใช้หนี้สินจากงบการเงินอัตโนมัติ — ช่องนี้ใช้กับ Simple mode' : ''}">
         <div class="li-card-title">
           <div class="li-ico">💸</div>
-          <span>หนี้สิน</span>
+          <span>หนี้สิน${method === 'dime' ? ' <small style="font-weight:400;color:var(--gray-500);font-size:.72rem;">(ใช้กับ Simple)</small>' : ''}</span>
           <button onclick="importLiabilities()" style="margin-left:auto;padding:4px 10px;border:1px solid var(--gray-300);background:white;border-radius:5px;font-size:.78rem;cursor:pointer;font-family:var(--font);" title="ดึงหนี้สิน + สินทรัพย์สภาพคล่องจากงบการเงิน">📥 ดึงจากงบการเงิน</button>
         </div>
         <div id="debt-list">
@@ -586,10 +586,10 @@ function render() {
       </div>
 
       <!-- Responsibility -->
-      <div class="li-card">
+      <div class="li-card" title="${method === 'dime' ? 'DIME mode คำนวณการศึกษาบุตร (E) จากหน้าการศึกษาบุตรอัตโนมัติ — ช่องนี้ใช้กับ Simple mode' : ''}">
         <div class="li-card-title">
           <div class="li-ico">🤝</div>
-          <span>ความรับผิดชอบ</span>
+          <span>ความรับผิดชอบ${method === 'dime' ? ' <small style="font-weight:400;color:var(--gray-500);font-size:.72rem;">(ใช้กับ Simple)</small>' : ''}</span>
         </div>
         <div id="resp-list">
           ${li.responsibilities.map(r => renderRow(r, 'resp')).join('')}
@@ -620,9 +620,16 @@ function render() {
     <!-- Section 3: Combined summary -->
     <div class="summary-box">
       <div class="sb-row">
-        <span class="sb-lbl">📊 หนี้สินและความรับผิดชอบรวม</span>
+        <span class="sb-lbl">${method === 'dime'
+          ? '🎯 ทุนประกันที่ควรมี (DIME D+I+E)'
+          : '📊 หนี้สินและความรับผิดชอบรวม'}</span>
         <span class="sb-val">${fmtBaht(totalNeed)}</span>
       </div>
+      ${method === 'dime' ? `<div class="sb-row" style="font-size:.78rem;color:var(--gray-500);padding:6px 0 8px;border-bottom:1px solid var(--gray-100);">
+        <span style="grid-column:1/-1;font-style:italic;">
+          💡 ช่อง "หนี้สิน + ความรับผิดชอบ" ด้านบนเป็นโหมด Simple — ใน DIME ใช้ค่าอัตโนมัติจากงบการเงิน/ลูกค้า/หน้าการศึกษาบุตร
+        </span>
+      </div>` : ''}
       <div class="sb-row">
         <span class="sb-lbl">
           ☂️ ประกันชีวิตที่เตรียมไว้แล้ว
