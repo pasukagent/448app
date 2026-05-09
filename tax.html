@@ -1465,14 +1465,20 @@
     return { lifePrem, healthPrem, annuityPrem };
   }
 
+  /* normalize contribution → ค่ารายปี เสมอ (รองรับ contribFreq='monthly') */
+  function annualContrib(a) {
+    const v = Number(a.contribution || 0);
+    return a.contribFreq === 'monthly' ? v * 12 : v;
+  }
+
   function refreshInsuranceFromPolicies() {
     const client = getCurrentClient();
     if (!client) { showToast('⚠️ ยังไม่มีลูกค้า'); return; }
     const ins = computeInsurancePremiumsFromPolicies(client.policies || []);
     const assets = client.assets || [];
-    const pvdContrib     = assets.filter(a => a.type==='pvd').reduce((s,a)=>s+Number(a.contribution||0),0);
-    const rmfContrib     = assets.filter(a => a.type==='rmf').reduce((s,a)=>s+Number(a.contribution||0),0);
-    const ssfContrib     = assets.filter(a => a.type==='ssf').reduce((s,a)=>s+Number(a.contribution||0),0);
+    const pvdContrib     = assets.filter(a => a.type==='pvd').reduce((s,a)=>s+annualContrib(a),0);
+    const rmfContrib     = assets.filter(a => a.type==='rmf').reduce((s,a)=>s+annualContrib(a),0);
+    const ssfContrib     = assets.filter(a => a.type==='ssf').reduce((s,a)=>s+annualContrib(a),0);
 
     document.getElementById('d-life-ins').value   = Math.min(ins.lifePrem, 100000);
     document.getElementById('d-health-ins').value = Math.min(ins.healthPrem, 25000);
@@ -1571,11 +1577,11 @@
     document.getElementById('d-parent-ins').value = ti.parentIns != null ? ti.parentIns : 0;
     document.getElementById('d-annuity').value    = ti.annuity   != null ? ti.annuity   : Math.min(annuityPrem, 200000);
 
-    // 4) Investment deductions — auto-fill from this client's assets
-    const pvdContrib     = assets.filter(a => a.type==='pvd').reduce((s,a)=>s+Number(a.contribution||0),0);
-    const rmfContrib     = assets.filter(a => a.type==='rmf').reduce((s,a)=>s+Number(a.contribution||0),0);
-    const ssfContrib     = assets.filter(a => a.type==='ssf').reduce((s,a)=>s+Number(a.contribution||0),0);
-    const thaiesgContrib = assets.filter(a => a.type==='thaiesg').reduce((s,a)=>s+Number(a.contribution||0),0);
+    // 4) Investment deductions — auto-fill from this client's assets (normalize contribFreq)
+    const pvdContrib     = assets.filter(a => a.type==='pvd').reduce((s,a)=>s+annualContrib(a),0);
+    const rmfContrib     = assets.filter(a => a.type==='rmf').reduce((s,a)=>s+annualContrib(a),0);
+    const ssfContrib     = assets.filter(a => a.type==='ssf').reduce((s,a)=>s+annualContrib(a),0);
+    const thaiesgContrib = assets.filter(a => a.type==='thaiesg').reduce((s,a)=>s+annualContrib(a),0);
     document.getElementById('d-pvd').value = ti.pvd != null ? ti.pvd : pvdContrib;
     document.getElementById('d-rmf').value = ti.rmf != null ? ti.rmf : rmfContrib;
     document.getElementById('d-ssf').value = ti.ssf != null ? ti.ssf : ssfContrib;

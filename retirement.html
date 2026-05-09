@@ -342,6 +342,12 @@ function savePlanField(field, value) {
 /* ════════════════════════════════════════════
    AUTO-DERIVE values from client data
 ═══════════════════════════════════════════ */
+/* normalize contribution → ค่ารายปี เสมอ (รองรับ contribFreq='monthly') */
+function annualContrib(a) {
+  const v = Number(a.contribution || 0);
+  return a.contribFreq === 'monthly' ? v * 12 : v;
+}
+
 function getDerivedData(client) {
   /* annual income */
   const annualIncome = Number(client.income) ||
@@ -350,9 +356,9 @@ function getDerivedData(client) {
   const retireAssets = (client.assets || [])
     .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type));
   const currentSavings = retireAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
-  /* current monthly contribution rate (จาก contribution field ของ assets) */
+  /* current monthly contribution rate — normalize contribFreq ก่อนแล้ว ÷ 12 */
   const currentMonthlyContrib = retireAssets
-    .reduce((s,a) => s + Number(a.contribution||0), 0) / 12; // contribution คืนค่ารายปี
+    .reduce((s,a) => s + annualContrib(a), 0) / 12;
   return { annualIncome, currentSavings, currentMonthlyContrib, retireAssets };
 }
 

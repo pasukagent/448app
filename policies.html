@@ -2448,10 +2448,15 @@ function computePolicyTaxBreakdown(policies, client) {
     (client && client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
   const assets = (client && client.assets) || [];
 
-  const pvdContrib     = assets.filter(a => a.type === 'pvd').reduce((s,a) => s + Number(a.contribution||0), 0);
-  const rmfContrib     = assets.filter(a => a.type === 'rmf').reduce((s,a) => s + Number(a.contribution||0), 0);
-  const ssfContrib     = assets.filter(a => a.type === 'ssf').reduce((s,a) => s + Number(a.contribution||0), 0);
-  const thaiesgContrib = assets.filter(a => a.type === 'thaiesg').reduce((s,a) => s + Number(a.contribution||0), 0);
+  /* normalize contribution → ค่ารายปี เสมอ (รองรับ contribFreq='monthly') */
+  const annualContrib = (a) => {
+    const v = Number(a.contribution || 0);
+    return a.contribFreq === 'monthly' ? v * 12 : v;
+  };
+  const pvdContrib     = assets.filter(a => a.type === 'pvd').reduce((s,a) => s + annualContrib(a), 0);
+  const rmfContrib     = assets.filter(a => a.type === 'rmf').reduce((s,a) => s + annualContrib(a), 0);
+  const ssfContrib     = assets.filter(a => a.type === 'ssf').reduce((s,a) => s + annualContrib(a), 0);
+  const thaiesgContrib = assets.filter(a => a.type === 'thaiesg').reduce((s,a) => s + annualContrib(a), 0);
 
   // เพดานแต่ละกองทุน (ใช้ % รายได้ถ้ามี)
   const incomeBased15 = annualIncome > 0 ? annualIncome * 0.15 : Infinity;
