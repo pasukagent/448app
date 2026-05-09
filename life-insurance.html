@@ -734,12 +734,17 @@ function setMethod(m) {
   render();
 }
 
-/* ดึงข้อมูลจากงบการเงิน — รวม:
+/* ดึงข้อมูลจากงบการเงิน — TRUE SYNC (2-way ตรงกับ networth ทุกครั้ง):
    1. client.liabilities → li.debts
-      • type='home' → REPLACE แถวคงที่ d-home (รวมหนี้บ้านทุกก้อน)
-      • type='car'  → REPLACE แถวคงที่ d-car  (รวมหนี้รถทุกก้อน)
-      • type อื่น   → เพิ่มแถวใหม่ (skip ถ้าชื่อซ้ำ)
-   2. client.assets liquid group → li.liquidAssets (cash + deposit + bond) */
+      • type='home' → REPLACE แถวคงที่ d-home (รวมหนี้บ้าน — รวม 0)
+      • type='car'  → REPLACE แถวคงที่ d-car  (รวมหนี้รถ — รวม 0)
+      • type อื่น   → upsert ตาม liabilityId tag
+        - ใหม่ → push พร้อม liabilityId tag
+        - เก่า → update ชื่อ + amount
+        - ลบใน networth → ลบออกที่นี่ด้วย (ผ่าน filter)
+   2. client.assets liquid group → li.liquidAssets (sync ค่าล่าสุด)
+
+   Manual rows ที่ user เพิ่มเอง (ไม่มี liabilityId) — preserved ไม่ถูกแตะ */
 function importLiabilities() {
   const c = getCurrent();
   if (!c) return;
@@ -755,54 +760,77 @@ function importLiabilities() {
   const previewParts = [];
   if (liabsCount > 0) previewParts.push(`${liabsCount} หนี้สิน`);
   if (liquidVal > 0)  previewParts.push(`สินทรัพย์สภาพคล่อง ${fmtBaht(liquidVal)}`);
-  if (!confirm(`ดึงข้อมูล: ${previewParts.join(' + ')}?`)) return;
+  if (!confirm(`Sync ข้อมูล: ${previewParts.join(' + ')}?\n(หนี้ที่ถูกลบในงบการเงินจะถูกลบที่นี่ด้วย)`)) return;
 
-  let importedDebts = 0;
+  let addedDebts = 0, updatedDebts = 0, removedDebts = 0;
   let homeSum = 0, carSum = 0;
 
   saveLifeInputs(li => {
     if (!li.debts) li.debts = [];
-    const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
+    const currentLiabIds = new Set(liabs.map(l => l.id).filter(Boolean));
 
-    liabs.forEach(l => {
-      const principal = Number(l.principal || l.balance || 0);
-      /* บ้าน → รวมเข้า d-home */
-      if (l.type === 'home') { homeSum += principal; return; }
-      /* รถ → รวมเข้า d-car */
-      if (l.type === 'car')  { carSum  += principal; return; }
-      /* type อื่น → แถวใหม่ */
-      const name = (l.name || l.type || 'หนี้สิน').trim();
-      if (existingNames.has(name.toLowerCase())) return;
-      li.debts.push({
-        id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
-        name,
-        amount: principal,
+    /* 1. Backward compat: tag legacy rows (ที่ import ก่อน upgrade) ตามชื่อ
+       ให้รอบนี้รู้จักว่า row ไหนมาจาก liability ไหน */
+    li.debts.forEach(d => {
+      if (d.fixed || d.liabilityId) return;
+      const matched = liabs.find(l => {
+        if (l.type === 'home' || l.type === 'car') return false; // fixed mapping
+        const lname = (l.name || l.type || 'หนี้สิน').trim().toLowerCase();
+        return (d.name||'').trim().toLowerCase() === lname;
       });
-      existingNames.add(name.toLowerCase());
-      importedDebts++;
+      if (matched) d.liabilityId = matched.id;
     });
 
-    /* REPLACE d-home / d-car ถ้ามีหนี้ประเภทนั้น (idempotent — กดซ้ำไม่ทบ) */
-    if (homeSum > 0) {
-      const homeRow = li.debts.find(d => d.id === 'd-home');
-      if (homeRow) homeRow.amount = homeSum;
-    }
-    if (carSum > 0) {
-      const carRow = li.debts.find(d => d.id === 'd-car');
-      if (carRow) carRow.amount = carSum;
-    }
+    /* 2. ลบแถวที่ tagged แต่ liability ไม่อยู่ใน networth แล้ว */
+    li.debts = li.debts.filter(d => {
+      if (d.fixed) return true;
+      if (!d.liabilityId) return true;            /* manual row — keep */
+      if (currentLiabIds.has(d.liabilityId)) return true;
+      removedDebts++;
+      return false;
+    });
 
-    /* Liquid assets — override */
+    /* 3. Upsert แต่ละ liability → debts */
+    liabs.forEach(l => {
+      const principal = Number(l.principal || l.balance || 0);
+      if (l.type === 'home') { homeSum += principal; return; }
+      if (l.type === 'car')  { carSum  += principal; return; }
+      const name = (l.name || l.type || 'หนี้สิน').trim();
+      const existing = li.debts.find(d => d.liabilityId === l.id);
+      if (existing) {
+        existing.name   = name;
+        existing.amount = principal;
+        updatedDebts++;
+      } else {
+        li.debts.push({
+          id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+          name,
+          amount: principal,
+          liabilityId: l.id,
+        });
+        addedDebts++;
+      }
+    });
+
+    /* 4. REPLACE d-home / d-car ทุกครั้ง (รวม 0 — sync ลบ) */
+    const homeRow = li.debts.find(d => d.id === 'd-home');
+    if (homeRow) homeRow.amount = homeSum;
+    const carRow = li.debts.find(d => d.id === 'd-car');
+    if (carRow) carRow.amount = carSum;
+
+    /* 5. Liquid assets — override ทุกครั้ง */
     li.liquidAssets = liquidVal;
   });
   render();
 
   const summary = [];
-  if (homeSum > 0)        summary.push(`บ้าน ${fmtBaht(homeSum)}`);
-  if (carSum > 0)         summary.push(`รถ ${fmtBaht(carSum)}`);
-  if (importedDebts > 0)  summary.push(`${importedDebts} หนี้อื่น`);
-  if (liquidVal > 0)      summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
-  showToast(`✅ ดึงข้อมูลเรียบร้อย${summary.length ? ' — ' + summary.join(' + ') : ''}`);
+  if (addedDebts > 0)    summary.push(`+${addedDebts} หนี้ใหม่`);
+  if (updatedDebts > 0)  summary.push(`อัปเดต ${updatedDebts}`);
+  if (removedDebts > 0)  summary.push(`ลบ ${removedDebts}`);
+  if (homeSum > 0)       summary.push(`บ้าน ${fmtBaht(homeSum)}`);
+  if (carSum > 0)        summary.push(`รถ ${fmtBaht(carSum)}`);
+  if (liquidVal > 0)     summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
+  showToast(`✅ Sync เรียบร้อย${summary.length ? ' — ' + summary.join(' · ') : ''}`);
 }
 
 function deleteRow(kind, id) {
