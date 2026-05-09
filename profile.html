@@ -285,8 +285,15 @@
     #profile-camera-video {
       width: 100%; aspect-ratio: 4/3; background: black;
       border-radius: 10px; object-fit: cover;
-      transform: scaleX(-1); /* mirror = ดูเป็นกระจก */
     }
+    /* Mirror เฉพาะกล้องหน้า (selfie) — กล้องหลังไม่ mirror */
+    #profile-camera-video.mirror { transform: scaleX(-1); }
+    .cam-switch {
+      background: rgba(255,255,255,.15) !important;
+      color: white !important;
+      font-size: 1.3rem !important;
+    }
+    .cam-switch:hover { background: rgba(255,255,255,.25) !important; }
     .camera-actions { display: flex; gap: 10px; justify-content: center; padding: 0 4px; }
     .camera-actions button {
       flex: 1; padding: 14px 20px; border: none;
@@ -453,12 +460,16 @@
                 <button class="danger" id="pm-prof-remove" onclick="removePhoto(); closeProfilePhotoMenu();" style="display:none;">🗑️ ลบรูปออก</button>
               </div>
 
-              <!-- Camera modal — getUserMedia -->
+              <!-- Camera modal — getUserMedia
+                   ปุ่ม 🔄 สลับกล้อง = หน้า/หลัง (เหมาะกับ iPad ที่มี 2 กล้อง) -->
               <div class="camera-overlay" id="profile-camera-modal" onclick="if(event.target===this)closeProfileCameraModal()">
                 <div class="camera-modal">
                   <div class="camera-header">
                     <span>📷 ถ่ายรูปโปรไฟล์</span>
-                    <button onclick="closeProfileCameraModal()">✕</button>
+                    <div style="display:flex;gap:6px;">
+                      <button class="cam-switch" id="prof-cam-switch-btn" onclick="switchProfileCamera()" title="สลับกล้องหน้า/หลัง" style="display:none;">🔄</button>
+                      <button onclick="closeProfileCameraModal()">✕</button>
+                    </div>
                   </div>
                   <div id="profile-camera-error" class="camera-error" style="display:none;"></div>
                   <video id="profile-camera-video" autoplay playsinline muted></video>
@@ -765,9 +776,37 @@ async function pickProfilePhoto(source) {
 }
 
 /* ════════════════════════════════════════════
-   CAMERA MODAL — getUserMedia
+   CAMERA MODAL — getUserMedia (รองรับ iPad: สลับกล้องหน้า/หลังได้)
+   _profileCameraFacing: 'user' = กล้องหน้า (default — selfie), 'environment' = กล้องหลัง
 ═══════════════════════════════════════════ */
 let _profileCameraStream = null;
+let _profileCameraFacing = 'user';
+
+async function startProfileStream(facing) {
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: facing } },
+      audio: false,
+    });
+  } catch {
+    return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  }
+}
+
+async function detectProfileMultiCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return false;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    return cams.length >= 2;
+  } catch { return false; }
+}
+
+function applyProfileMirror() {
+  const video = document.getElementById('profile-camera-video');
+  if (_profileCameraFacing === 'user') video.classList.add('mirror');
+  else                                  video.classList.remove('mirror');
+}
 
 async function openProfileCameraModal() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -776,30 +815,49 @@ async function openProfileCameraModal() {
   const errEl = document.getElementById('profile-camera-error');
   errEl.style.display = 'none';
   errEl.textContent = '';
+
+  _profileCameraFacing = 'user'; // default = กล้องหน้า (selfie)
   try {
-    /* รูปโปรไฟล์ตัวเอง → ใช้กล้องหน้า */
-    _profileCameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'user' } },
-      audio: false,
-    });
-  } catch (err1) {
-    try {
-      _profileCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    } catch (err2) {
-      document.getElementById('profile-camera-modal').classList.add('open');
-      const msg = err2.name === 'NotAllowedError'
-        ? '❌ ไม่ได้รับอนุญาตให้ใช้กล้อง — กรุณาอนุญาตในการตั้งค่าบราวเซอร์'
-        : err2.name === 'NotFoundError'
-          ? '❌ ไม่พบกล้องในเครื่องนี้'
-          : '❌ เปิดกล้องไม่ได้: ' + err2.message;
-      errEl.textContent = msg;
-      errEl.style.display = 'block';
-      throw err2;
-    }
+    _profileCameraStream = await startProfileStream(_profileCameraFacing);
+  } catch (err) {
+    document.getElementById('profile-camera-modal').classList.add('open');
+    const msg = err.name === 'NotAllowedError'
+      ? '❌ ไม่ได้รับอนุญาตให้ใช้กล้อง — กรุณาอนุญาตในการตั้งค่าบราวเซอร์'
+      : err.name === 'NotFoundError'
+        ? '❌ ไม่พบกล้องในเครื่องนี้'
+        : '❌ เปิดกล้องไม่ได้: ' + err.message;
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+    throw err;
   }
   const video = document.getElementById('profile-camera-video');
   video.srcObject = _profileCameraStream;
+  applyProfileMirror();
   document.getElementById('profile-camera-modal').classList.add('open');
+
+  /* แสดงปุ่มสลับเฉพาะถ้ามีกล้องหลายตัว (iPad/มือถือ) */
+  const switchBtn = document.getElementById('prof-cam-switch-btn');
+  if (switchBtn) {
+    const hasMulti = await detectProfileMultiCamera();
+    switchBtn.style.display = hasMulti ? '' : 'none';
+  }
+}
+
+async function switchProfileCamera() {
+  if (!_profileCameraStream) return;
+  _profileCameraStream.getTracks().forEach(t => t.stop());
+  _profileCameraStream = null;
+  _profileCameraFacing = (_profileCameraFacing === 'user') ? 'environment' : 'user';
+  try {
+    _profileCameraStream = await startProfileStream(_profileCameraFacing);
+    const video = document.getElementById('profile-camera-video');
+    video.srcObject = _profileCameraStream;
+    applyProfileMirror();
+  } catch (err) {
+    const errEl = document.getElementById('profile-camera-error');
+    errEl.textContent = '❌ สลับกล้องไม่ได้: ' + err.message;
+    errEl.style.display = 'block';
+  }
 }
 
 function closeProfileCameraModal() {
@@ -809,6 +867,7 @@ function closeProfileCameraModal() {
   }
   const video = document.getElementById('profile-camera-video');
   video.srcObject = null;
+  video.classList.remove('mirror');
   document.getElementById('profile-camera-modal').classList.remove('open');
 }
 
@@ -825,9 +884,12 @@ function captureProfilePhoto() {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
-  /* Mirror flip → save ภาพปกติ (preview เห็นแบบกระจก) */
-  ctx.translate(w, 0);
-  ctx.scale(-1, 1);
+  /* กล้องหน้า: video ถูก mirror display อยู่ — un-mirror canvas เพื่อ save ภาพจริง
+     กล้องหลัง: video ไม่ mirror — draw ตรงๆ */
+  if (_profileCameraFacing === 'user') {
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+  }
   ctx.drawImage(video, 0, 0, w, h);
   const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
   try {
