@@ -44,7 +44,12 @@
   window.initMoneyInput = initMoneyInput;
 
   function refreshAllMoneyInputs() {
-    document.querySelectorAll('input.money-fmt').forEach(initMoneyInput);
+    /* init ครั้งแรก + re-format ทุก input ที่มี value
+       (กันกรณี code set .value ตามหลัง init แล้วต้องการให้ format ใหม่) */
+    document.querySelectorAll('input.money-fmt').forEach(el => {
+      initMoneyInput(el);
+      if (el.value !== '' && el.value != null) formatMoneyInput(el);
+    });
   }
   window.refreshAllMoneyInputs = refreshAllMoneyInputs;
 

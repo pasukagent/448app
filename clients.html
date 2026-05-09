@@ -708,7 +708,7 @@
             </div>
             <div class="edit-form-group">
               <label>รายได้ต่อปี (บาท)</label>
-              <input id="ef-income" type="number" placeholder="0" min="0">
+              <input id="ef-income" class="money-fmt" inputmode="decimal" placeholder="0" min="0">
             </div>
           </div>
           <div class="edit-form-row">
@@ -1498,6 +1498,12 @@
     if (!c) return false;
     const v = id => document.getElementById(id).value;
     const same = (a, b) => String(a == null ? '' : a) === String(b == null ? '' : b);
+    /* sameNum — เทียบเลข ignore comma formatting ของ money-fmt input */
+    const sameNum = (a, b) => {
+      const na = a === '' || a == null ? null : Number(String(a).replace(/[^\d.-]/g, ''));
+      const nb = b === '' || b == null ? null : Number(b);
+      return (na == null && nb == null) || na === nb;
+    };
     return !(
       same(v('ef-first'),    c.firstName) &&
       same(v('ef-last'),     c.lastName) &&
@@ -1512,7 +1518,7 @@
       same(v('ef-job'),      c.job) &&
       same(v('ef-position'), c.position) &&
       same(v('ef-workplace'),c.workplace) &&
-      same(v('ef-income'),   c.income) &&
+      sameNum(v('ef-income'), c.income) &&
       same(v('ef-address'),  c.address) &&
       same(v('ef-work-address'), c.workAddress)
     );
@@ -1543,7 +1549,9 @@
         document.getElementById('ef-job').value          = client.job         || '';
         document.getElementById('ef-position').value     = client.position    || '';
         document.getElementById('ef-workplace').value    = client.workplace   || '';
-        document.getElementById('ef-income').value       = client.income      || '';
+        const efIncomeEl = document.getElementById('ef-income');
+        efIncomeEl.value = client.income || '';
+        if (window.formatMoneyInput) window.formatMoneyInput(efIncomeEl);
         document.getElementById('ef-address').value      = client.address     || '';
         document.getElementById('ef-work-address').value = client.workAddress || '';
         populateFamilySelect('ef-family', client.familyId || null);
@@ -1571,9 +1579,12 @@
       alert('⚠️ วันเกิดไม่สามารถเป็นวันในอนาคตได้');
       return;
     }
-    /* helper — number ที่ยอมรับ 0 (ไม่ใช้ || null ที่ทำให้ 0 หาย) */
+    /* helper — number ที่ยอมรับ 0 (ไม่ใช้ || null ที่ทำให้ 0 หาย)
+       strip non-numeric ก่อน parse — รองรับ money-fmt ที่มี comma */
     const numOrNull = (id) => {
-      const v = parseFloat(document.getElementById(id).value);
+      const raw = String(document.getElementById(id).value || '').replace(/[^\d.-]/g, '');
+      if (raw === '') return null;
+      const v = parseFloat(raw);
       return isNaN(v) ? null : v;
     };
     const famReq = getFamilyRequest('ef');

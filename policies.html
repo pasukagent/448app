@@ -4228,7 +4228,9 @@ function openEditClientModal(cid) {
   document.getElementById('cm-phone').value     = client.phone     || '';
   document.getElementById('cm-email').value     = client.email     || '';
   document.getElementById('cm-job').value       = client.job || client.occupation || '';
-  document.getElementById('cm-income').value    = client.income    || '';
+  const cmIncomeEl = document.getElementById('cm-income');
+  cmIncomeEl.value = client.income || '';
+  if (window.formatMoneyInput) window.formatMoneyInput(cmIncomeEl);
   document.getElementById('cm-address').value   = client.address   || '';
   document.getElementById('cm-error').style.display = 'none';
   populateCmFamilySelect(client.familyId || null);
