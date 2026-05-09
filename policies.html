@@ -4412,25 +4412,109 @@ function fmtShortTH(n) {
   return '฿' + Math.round(n).toLocaleString('th-TH');
 }
 
+/* ════════════════════════════════════════════
+   HELPERS — sync ข้อมูลกับหน้า education / assets
+═══════════════════════════════════════════ */
+
+/* Cache age ตาม dob ต่อ session — กันค่ากระเพื่อมทุก render */
+const _NA_AGE_CACHE = new Map();
+function _naAgeNow(dobStr) {
+  if (!dobStr) return null;
+  if (_NA_AGE_CACHE.has(dobStr)) return _NA_AGE_CACHE.get(dobStr);
+  const bd = new Date(dobStr);
+  if (isNaN(bd)) { _NA_AGE_CACHE.set(dobStr, null); return null; }
+  const today = new Date();
+  const age = (today - bd) / (365.25 * 24 * 3600 * 1000);
+  const stable = age < 0 ? 0 : age;
+  _NA_AGE_CACHE.set(dobStr, stable);
+  return stable;
+}
+
+/* Education FV per child — replicate computeChildPlan.totalFuture จาก education.html */
+const _NA_EDU_STAGES = [
+  { key:'kinder',   startAge:3,  years:3 },
+  { key:'primary',  startAge:6,  years:6 },
+  { key:'mid',      startAge:12, years:3 },
+  { key:'high',     startAge:15, years:3 },
+  { key:'bachelor', startAge:18, years:4 },
+  { key:'master',   startAge:22, years:2, optional:'master' },
+  { key:'phd',      startAge:24, years:4, optional:'phd' },
+];
+const _NA_EDU_COST = {
+  kinder:   [ 30000,  80000, 250000],
+  primary:  [ 25000, 100000, 350000],
+  mid:      [ 30000, 120000, 400000],
+  high:     [ 35000, 150000, 450000],
+  bachelor: [ 60000, 200000, 800000],
+  master:   [120000, 300000,1500000],
+  phd:      [200000, 500000,2500000],
+};
+const _NA_LVL_IDX = { economy:0, medium:1, premium:2 };
+
+function _naChildEduFuture(child) {
+  const age = _naAgeNow(child.dob || child.birthdate);
+  const level = child.level || 'medium';
+  const lvIdx = _NA_LVL_IDX[level] != null ? _NA_LVL_IDX[level] : 1;
+  /* fallback ถ้าไม่มี dob — ใช้ avg ของ level */
+  if (age == null) return [800000, 1500000, 3000000][lvIdx] || 1500000;
+  const includeMaster = !!child.includeMaster;
+  const includePhd    = !!child.includePhd;
+  const customCosts   = child.customCosts || {};
+  const inflPct       = child.inflationRate != null ? Number(child.inflationRate) : 5;
+  const INFL = inflPct / 100;
+  let totalFuture = 0;
+  _NA_EDU_STAGES.forEach(s => {
+    if (s.optional === 'master' && !includeMaster) return;
+    if (s.optional === 'phd'    && !includePhd)    return;
+    const custKey = `${s.key}_${level}`;
+    const baseAnnual = customCosts[custKey] != null ? Number(customCosts[custKey]) : _NA_EDU_COST[s.key][lvIdx];
+    const startAge = s.startAge, endAge = startAge + s.years;
+    let yearsLeft = age >= endAge ? 0 : (age < startAge ? s.years : endAge - age);
+    yearsLeft = Math.max(yearsLeft, 0);
+    if (yearsLeft > 0) {
+      const yearOfStart = Math.max(startAge - age, 0);
+      for (let i = 0; i < Math.ceil(yearsLeft); i++) {
+        const yearFromNow = yearOfStart + i;
+        const partial = Math.min(1, yearsLeft - i);
+        totalFuture += baseAnnual * Math.pow(1 + INFL, yearFromNow) * partial;
+      }
+    }
+  });
+  return totalFuture;
+}
+
+/* Liquid assets sum จาก client.assets (cash + deposit + bond) */
+function _naLiquidAssets(client) {
+  if (!client || !client.assets) return 0;
+  const liquidTypes = ['cash','deposit','bond'];
+  return client.assets.filter(a => liquidTypes.includes(a.type))
+                      .reduce((s,a) => s + Number(a.currentValue||0), 0);
+}
+
 function getNeedsInputs() {
   const c = getCurrentClient();
   if (!c) return null;
   const n = c.needsInputs || {};
 
-  // Auto-defaults from existing client data
+  /* Auto-defaults — sync จากข้อมูลที่ user กรอกในหน้าอื่น */
   const totalDebt = (c.liabilities || []).reduce((s,l) => s + Number(l.principal||0), 0);
   const annualIncome = Number(c.income) || (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
-  const childrenCount = (c.children || []).length;
-  const eduPerChild = 2500000; // baseline estimate
+  /* ปีที่ดูแล: 60 - อายุปัจจุบัน — fallback 10 ถ้าไม่มี dob */
+  const cachedAge = _naAgeNow(c.dob);
+  const yearsToRetire = cachedAge != null ? Math.max(Math.round(60 - cachedAge), 1) : 10;
+  /* การศึกษาบุตร: ค่าใช้จ่ายรวม FV จากหน้าการศึกษาบุตร (replicate computeChildPlan) */
+  const eduTotal = (c.children || []).reduce((s, ch) => s + _naChildEduFuture(ch), 0);
+  /* สินทรัพย์มี: liquid (cash + deposit + bond) จากหน้าสินทรัพย์ */
+  const liquidVal = _naLiquidAssets(c);
 
   return {
-    debt:     n.debt     != null ? n.debt     : totalDebt,
-    income:   n.income   != null ? n.income   : annualIncome,
-    incomeYears: n.incomeYears != null ? n.incomeYears : 10,
-    edu:      n.edu      != null ? n.edu      : (childrenCount * eduPerChild),
-    final:    n.final    != null ? n.final    : 500000,
-    haveLife: n.haveLife != null ? n.haveLife : 0,
-    haveAssets: n.haveAssets != null ? n.haveAssets : 0,
+    debt:        n.debt        != null ? n.debt        : totalDebt,
+    income:      n.income      != null ? n.income      : annualIncome,
+    incomeYears: n.incomeYears != null ? n.incomeYears : yearsToRetire,
+    edu:         n.edu         != null ? n.edu         : eduTotal,
+    final:       n.final       != null ? n.final       : 500000,
+    haveLife:    n.haveLife    != null ? n.haveLife    : 0,
+    haveAssets:  n.haveAssets  != null ? n.haveAssets  : liquidVal,
   };
 }
 
@@ -4510,7 +4594,7 @@ function renderNeedsAnalysis() {
           <div class="nc-row cat-edu">
             <div class="nc-row-label">
               <span class="nc-row-name">🎓 ค่าการศึกษาบุตร</span>
-              <span class="nc-row-hint">${(client.children || []).length} คน × ~2,500,000/คน (ปรับได้)</span>
+              <span class="nc-row-hint">${(client.children || []).length} คน — sync จาก "💸 ค่าใช้จ่ายรวม (FV)" หน้าการศึกษาบุตร (ปรับได้)</span>
             </div>
             <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.edu}" onchange="updateNeedsInput('edu',parseMoney(this))">
           </div>
@@ -4524,7 +4608,7 @@ function renderNeedsAnalysis() {
           <div class="nc-row cat-have">
             <div class="nc-row-label">
               <span class="nc-row-name">💰 สินทรัพย์ + ทุนประกันชีวิตที่มีแล้ว</span>
-              <span class="nc-row-hint">รวมจาก policies (${fmtTH(result.currentLifeCoverage)}) + เพิ่มเติม</span>
+              <span class="nc-row-hint">ทุนประกันจาก policies (${fmtTH(result.currentLifeCoverage)}) + ช่องนี้ sync สินทรัพย์สภาพคล่อง (cash + เงินฝาก + ตราสารหนี้) จากหน้าสินทรัพย์ (ปรับได้)</span>
             </div>
             <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.haveAssets}" onchange="updateNeedsInput('haveAssets',parseMoney(this))" placeholder="สินทรัพย์อื่น">
           </div>
