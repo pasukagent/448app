@@ -178,6 +178,24 @@
     .form-row input:focus, .form-row select:focus { outline: none; border-color: var(--red-primary); }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+    /* Loan preview panel */
+    .loan-preview {
+      background: var(--red-soft); border-radius: 10px; padding: 14px 16px;
+      margin: 4px 0 14px; border-left: 3px solid var(--red-primary);
+    }
+    .lp-title { font-size: .82rem; font-weight: 800; color: var(--red-primary); margin-bottom: 10px; }
+    .lp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+    .lp-item { display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+      font-size: .82rem; color: var(--gray-700); }
+    .lp-lbl { color: var(--gray-600); }
+    .lp-val { font-weight: 800; color: var(--gray-800); font-variant-numeric: tabular-nums; }
+    .lp-warn {
+      margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+      background: #FFF3E0; border-left: 3px solid #FF8C00; color: #8B5A00;
+      font-size: .8rem; line-height: 1.5;
+    }
+    .lp-warn.severe { background: #FEE2E2; border-left-color: #DC3545; color: #B02030; }
+
     .calc-info {
       background: var(--red-soft); border-radius: 8px; padding: 10px 14px;
       font-size: .82rem; color: var(--red-dark); margin-top: 6px;
@@ -315,23 +333,35 @@
       <div class="form-grid-2">
         <div class="form-row">
           <label>ยอดหนี้คงเหลือ (บาท) *</label>
-          <input id="lf-principal" class="money-fmt" inputmode="decimal" min="0" placeholder="0">
+          <input id="lf-principal" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateLoanPreview()">
         </div>
         <div class="form-row">
           <label>ดอกเบี้ย/ปี (%)</label>
-          <input id="lf-rate" type="number" step="0.01" placeholder="0.00">
+          <input id="lf-rate" type="number" step="0.01" placeholder="0.00" oninput="updateLoanPreview()">
         </div>
       </div>
       <div class="form-grid-2">
         <div class="form-row">
           <label>ผ่อนต่อเดือน (บาท)</label>
-          <input id="lf-monthly" class="money-fmt" inputmode="decimal" min="0" placeholder="0">
+          <input id="lf-monthly" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateLoanPreview()">
         </div>
         <div class="form-row">
           <label>เหลืออีก (เดือน)</label>
-          <input id="lf-months" type="number" min="0" placeholder="0">
+          <input id="lf-months" type="number" min="0" placeholder="0" oninput="updateLoanPreview()">
         </div>
       </div>
+
+      <!-- Loan preview — คำนวณดอกเบี้ยรวม + เตือนตัวเลขไม่สอดคล้อง -->
+      <div id="loan-preview" class="loan-preview" style="display:none;">
+        <div class="lp-title">📊 สรุปสัญญาเงินกู้</div>
+        <div class="lp-grid">
+          <div class="lp-item"><span class="lp-lbl">ผ่อนรวมตลอดสัญญา</span><span class="lp-val" id="lp-total">฿0</span></div>
+          <div class="lp-item"><span class="lp-lbl">ดอกเบี้ยรวม</span><span class="lp-val" id="lp-interest">฿0</span></div>
+          <div class="lp-item"><span class="lp-lbl">ผ่อนตามทฤษฎี (ที่ดอกเบี้ยนี้)</span><span class="lp-val" id="lp-theoretical">—</span></div>
+        </div>
+        <div id="lp-warn" class="lp-warn" style="display:none;"></div>
+      </div>
+
       <div class="form-row">
         <label>หมายเหตุ</label>
         <input id="lf-note" type="text" placeholder="ข้อมูลเพิ่มเติม...">
@@ -622,11 +652,91 @@ function openLiabModal(id) {
     document.getElementById('lf-note').value = '';
   }
   document.getElementById('liab-modal').classList.add('open');
+  updateLoanPreview();
 }
 
 function closeLiabModal() {
   document.getElementById('liab-modal').classList.remove('open');
   editingLiabId = null;
+  document.getElementById('loan-preview').style.display = 'none';
+}
+
+/* ════════════════════════════════════════════
+   LOAN PREVIEW — คำนวณดอกเบี้ยรวม + เตือนตัวเลขไม่สอดคล้อง
+   เรียกทุกครั้งที่ user แก้ field ในฟอร์มหนี้สิน
+═══════════════════════════════════════════ */
+function updateLoanPreview() {
+  const p = parseMoney(document.getElementById('lf-principal'));
+  const r = Number(document.getElementById('lf-rate').value || 0);
+  const m = parseMoney(document.getElementById('lf-monthly'));
+  const n = Number(document.getElementById('lf-months').value || 0);
+
+  const preview = document.getElementById('loan-preview');
+  /* ต้องมีอย่างน้อย ผ่อน/เดือน + เหลืออีก ถึงคำนวณได้ */
+  if (m <= 0 || n <= 0) {
+    preview.style.display = 'none';
+    return;
+  }
+  preview.style.display = 'block';
+
+  const totalPayment  = m * n;
+  const totalInterest = totalPayment - p;
+
+  document.getElementById('lp-total').textContent    = fmt(totalPayment);
+  document.getElementById('lp-interest').textContent = totalInterest > 0 ? fmt(totalInterest) : '—';
+
+  /* ผ่อนตามทฤษฎี — Amortization formula: M = P × r_m / (1 − (1+r_m)^−n) */
+  let theoretical = null;
+  const theoEl = document.getElementById('lp-theoretical');
+  if (p > 0 && n > 0) {
+    if (r > 0) {
+      const r_m = r / 100 / 12;
+      theoretical = p * r_m / (1 - Math.pow(1 + r_m, -n));
+      theoEl.textContent = fmt(theoretical) + '/เดือน';
+    } else {
+      theoretical = p / n;
+      theoEl.textContent = fmt(theoretical) + '/เดือน (ไม่มีดอกเบี้ย)';
+    }
+  } else {
+    theoEl.textContent = '— (กรอกยอดหนี้เพื่อดู)';
+  }
+
+  /* Warnings */
+  const warnings = [];
+  let severe = false;
+
+  /* ตรวจ 1: ผ่อนรวมน้อยกว่ายอดหนี้ → หนี้ไม่หมดแน่ๆ */
+  if (p > 0 && totalPayment < p) {
+    warnings.push(`⛔ ผ่อนรวมตลอดสัญญา (${fmt(totalPayment)}) <b>น้อยกว่า</b>ยอดหนี้คงเหลือ (${fmt(p)}) — ตัวเลขไม่สอดคล้อง หนี้จะไม่หมด`);
+    severe = true;
+  }
+
+  /* ตรวจ 2: ผ่อน/เดือน ต่ำกว่าดอกเบี้ย/เดือน → หนี้เพิ่มขึ้น */
+  if (p > 0 && r > 0) {
+    const monthlyInterest = p * r / 100 / 12;
+    if (m < monthlyInterest) {
+      warnings.push(`⚠️ ผ่อน/เดือน (${fmt(m)}) ต่ำกว่าดอกเบี้ย/เดือน (${fmt(monthlyInterest)}) — หนี้จะ<b>เพิ่มขึ้น</b>เรื่อยๆ`);
+      severe = true;
+    }
+  }
+
+  /* ตรวจ 3: ผ่อนจริง vs ทฤษฎี ต่างกัน > 10% */
+  if (theoretical && theoretical > 0) {
+    const diffPct = (m - theoretical) / theoretical * 100;
+    if (Math.abs(diffPct) > 10) {
+      const dir = diffPct > 0 ? 'สูงกว่า' : 'ต่ำกว่า';
+      warnings.push(`💡 ผ่อนจริง${dir}ทฤษฎี ${Math.abs(diffPct).toFixed(1)}% — อาจเป็นเพราะอัตราดอกเบี้ยลอยตัว หรือเงื่อนไขพิเศษของสัญญา`);
+    }
+  }
+
+  const warnEl = document.getElementById('lp-warn');
+  if (warnings.length > 0) {
+    warnEl.innerHTML = warnings.join('<br>');
+    warnEl.classList.toggle('severe', severe);
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
 }
 
 function saveLiab() {
