@@ -919,7 +919,65 @@ fbAuth.onAuthStateChanged(user => {
   if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
 });
 
+/* ═══════════════════════════════════════════════
+   MIGRATION: financialGoals (legacy) → lifeGoals (unified)
+   - User ที่เปิด goals.html ก่อน financial.html จะได้ migrate ที่นี่
+═══════════════════════════════════════════════ */
+const _CAT_TO_TYPE = {
+  'กองทุนฉุกเฉิน': 'emergency', 'เกษียณ': 'retire',
+  'บ้าน': 'home', 'ท่องเที่ยว': 'travel',
+  'การศึกษา': 'other', 'สุขภาพ': 'other', 'อื่นๆ': 'other',
+};
+function migrateFinancialToLife(client) {
+  if (!client.financialGoals || client.financialGoals.length === 0) {
+    if (client.financialGoals) delete client.financialGoals;
+    return false;
+  }
+  if (!client.lifeGoals) client.lifeGoals = [];
+  const existing = new Set(client.lifeGoals.map(g => (g.name || '').trim()));
+  client.financialGoals.forEach(fg => {
+    const nm = (fg.name || '').trim();
+    if (!nm || existing.has(nm)) return;
+    client.lifeGoals.push({
+      id: 'mig' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      type: _CAT_TO_TYPE[fg.category] || 'other',
+      name: nm,
+      targetAmount:        Number(fg.target  || 0),
+      currentSaved:        Number(fg.current || 0),
+      currentAmount:       Number(fg.current || 0),
+      monthlyContribution: Number(fg.monthly || 0),
+      expectedReturn: 0, inflationRate: 0,
+      deadline: fg.deadline || '', note: 'นำเข้าจาก กระแสเงินสด',
+      createdAt: fg.createdAt || new Date().toISOString(),
+    });
+    existing.add(nm);
+  });
+  delete client.financialGoals;
+  return true;
+}
+function ensureGoalsMigrated() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u || !u.data) return;
+  let changed = false;
+  /* (1) legacy: user-level financialGoals → clients[0] */
+  if (u.data.financialGoals && u.data.financialGoals.length > 0
+      && (u.data.clients || []).length > 0) {
+    const first = u.data.clients[0];
+    if (!first.financialGoals) first.financialGoals = [];
+    first.financialGoals.push(...u.data.financialGoals);
+    delete u.data.financialGoals;
+    changed = true;
+  }
+  /* (2) per-client migrate */
+  (u.data.clients || []).forEach(c => {
+    if (migrateFinancialToLife(c)) changed = true;
+  });
+  if (changed) localStorage.setItem('aia_users', JSON.stringify(users));
+}
+
 (function init() {
+  ensureGoalsMigrated();
   initSidebar();
   initClientSelect();
   render();

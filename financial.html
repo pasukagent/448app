@@ -22,8 +22,6 @@
     });
     const fbAuth = firebase.auth();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
     /* ─── FEATURE HERO (top strip — เหมือนหน้าอื่น) ─── */
     .feature-hero {
@@ -665,23 +663,23 @@
         <button class="btn-back" onclick="showClientSelect()">← รายชื่อลูกค้า</button>
         <h2 id="main-hero-name" style="font-size:1.4rem;">—</h2>
       </div>
-      <!-- Summary pills -->
+      <!-- Summary pills — cashflow stats (รายเดือน) -->
       <div class="hero-pills">
         <div class="hero-pill">
-          <div class="lbl">เป้าหมาย</div>
-          <strong id="hs-goals">0</strong>
+          <div class="lbl">รายได้/เดือน</div>
+          <strong id="hs-cf-income">฿ 0</strong>
         </div>
         <div class="hero-pill">
-          <div class="lbl">เงินสะสมรวม</div>
-          <strong id="hs-saved">฿ 0</strong>
+          <div class="lbl">รายจ่ายรวม/เดือน</div>
+          <strong id="hs-cf-expense">฿ 0</strong>
         </div>
         <div class="hero-pill">
-          <div class="lbl">เป้าหมายรวม</div>
-          <strong id="hs-target">฿ 0</strong>
+          <div class="lbl">เหลือใช้ต่อเดือน</div>
+          <strong id="hs-cf-remain">฿ 0</strong>
         </div>
         <div class="hero-pill">
-          <div class="lbl">ความคืบหน้า</div>
-          <strong id="hs-avg">0%</strong>
+          <div class="lbl">เป้าหมายชีวิต</div>
+          <strong id="hs-life-goals">0 รายการ</strong>
         </div>
       </div>
     </div>
@@ -773,89 +771,24 @@
         </div>
       </div>
 
-      <!-- Add goal form -->
-      <div class="form-card">
-        <h3>➕ เพิ่มเป้าหมายการเงิน</h3>
-        <div class="form-grid">
-          <div class="fg">
-            <label>ชื่อเป้าหมาย *</label>
-            <input id="g-name" type="text" placeholder="เช่น กองทุนฉุกเฉิน 3 เดือน">
+      <!-- Link to goals.html — เป้าหมายชีวิต (unified) -->
+      <div class="goals-link-card" id="goals-link-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;background:white;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px 24px;">
+          <div style="flex:1;min-width:240px;">
+            <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">🎯 จัดการเป้าหมายชีวิต</h3>
+            <p style="font-size:.88rem;color:var(--gray-600);" id="goals-link-summary">เพิ่ม / แก้ไขเป้าหมายชีวิต พร้อมคำนวณ TVM (เงินเฟ้อ + ผลตอบแทน)</p>
           </div>
-          <div class="fg">
-            <label>ประเภทเป้าหมาย</label>
-            <select id="g-category">
-              <option value="กองทุนฉุกเฉิน">🏦 กองทุนฉุกเฉิน</option>
-              <option value="เกษียณ">👴 แผนเกษียณ</option>
-              <option value="สุขภาพ">❤️ ค่ารักษาพยาบาล</option>
-              <option value="ท่องเที่ยว">✈️ ท่องเที่ยว</option>
-              <option value="บ้าน">🏠 ซื้อบ้าน</option>
-              <option value="การศึกษา">🎓 การศึกษา</option>
-              <option value="อื่นๆ">📌 อื่นๆ</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>เงินเป้าหมาย (บาท) *</label>
-            <input id="g-target" class="money-fmt" inputmode="decimal" placeholder="เช่น 150000" min="1">
-          </div>
-          <div class="fg">
-            <label>เงินที่มีอยู่แล้ว (บาท)</label>
-            <input id="g-current" class="money-fmt" inputmode="decimal" placeholder="0" min="0" value="0">
-            <span class="hint">ใส่ 0 ถ้าเพิ่งเริ่มต้น</span>
-          </div>
-          <div class="fg">
-            <label>เงินออมต่อเดือน (บาท)</label>
-            <input id="g-monthly" class="money-fmt" inputmode="decimal" placeholder="เช่น 5000" min="0">
-          </div>
-          <div class="fg">
-            <label>วันที่ต้องการบรรลุเป้าหมาย</label>
-            <input id="g-deadline" type="date">
-          </div>
-        </div>
-        <div id="g-error" style="display:none;margin-top:12px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;"></div>
-        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="addGoal()">💾 บันทึกเป้าหมาย</button>
-          <button class="btn btn-outline" onclick="clearGoalForm()">ล้างข้อมูล</button>
+          <a id="goals-link-btn" class="btn btn-primary" style="text-decoration:none;padding:10px 22px;font-size:.92rem;white-space:nowrap;" href="goals.html">
+            ไปหน้าเป้าหมายชีวิต →
+          </a>
         </div>
       </div>
-
-      <!-- Timeline Chart -->
-      <div class="timeline-card" id="timeline-card" style="display:none;">
-        <div class="timeline-card-header">
-          <h3>📅 ช่วงเวลาแผนการเงินทั้งหมด</h3>
-          <span class="timeline-note">เส้นแดง = วันนี้</span>
-        </div>
-        <div class="timeline-canvas-wrap">
-          <canvas id="timeline-canvas"></canvas>
-        </div>
-      </div>
-
-      <!-- Goals list -->
-      <div class="goals-section-header">
-        <h3>เป้าหมายการเงิน</h3>
-      </div>
-      <div class="goals-grid" id="goals-list"></div>
     </div>
   </div>
 
 </div><!-- /.page -->
 
-<!-- ══════════════════════════════════════════
-     ADD SAVING MODAL
-══════════════════════════════════════════ -->
-<div class="modal-overlay" id="saving-modal">
-  <div class="modal">
-    <h4>💰 เพิ่มเงินออม</h4>
-    <p class="modal-subtitle" id="modal-goal-name"></p>
-    <div class="fg">
-      <label>จำนวนเงิน (บาท) *</label>
-      <input id="modal-amount" type="number" placeholder="ใส่จำนวนเงิน" min="1">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="confirmAddSaving()">เพิ่มเงินออม</button>
-      <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
-    </div>
-  </div>
-</div><!-- end financial content -->
+<!-- end financial content -->
   </main>
 </div><!-- end app-layout -->
 
@@ -888,28 +821,69 @@ function updateCurrentUser(fn) {
 }
 
 /* ═══════════════════════════════════════════════
-   MIGRATION: move user.data.financialGoals → clients[0].financialGoals
+   MIGRATION: financialGoals (legacy) → lifeGoals (unified)
+   - ทำ 2 ขั้น: (1) move user.data.financialGoals → clients[0]
+                (2) แต่ละ client: financialGoals → lifeGoals
+   - จุดประสงค์: เลิก financialGoals — ทุกเป้าหมายอยู่ที่ lifeGoals (goals.html)
 ═══════════════════════════════════════════════ */
+const _CAT_TO_TYPE = {
+  'กองทุนฉุกเฉิน': 'emergency',
+  'เกษียณ':         'retire',
+  'บ้าน':           'home',
+  'ท่องเที่ยว':     'travel',
+  'การศึกษา':       'other',
+  'สุขภาพ':         'other',
+  'อื่นๆ':          'other',
+};
+
+function migrateFinancialToLife(client) {
+  if (!client.financialGoals || client.financialGoals.length === 0) {
+    /* ไม่มี financialGoals — ลบ key ว่างถ้ามี */
+    if (client.financialGoals) delete client.financialGoals;
+    return false;
+  }
+  if (!client.lifeGoals) client.lifeGoals = [];
+  const existingNames = new Set(client.lifeGoals.map(g => (g.name || '').trim()));
+  const newId = () => 'mig' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  client.financialGoals.forEach(fg => {
+    const nm = (fg.name || '').trim();
+    if (!nm || existingNames.has(nm)) return; /* กัน dup */
+    client.lifeGoals.push({
+      id: newId(),
+      type: _CAT_TO_TYPE[fg.category] || 'other',
+      name: nm,
+      targetAmount:        Number(fg.target  || 0),
+      currentSaved:        Number(fg.current || 0),
+      currentAmount:       Number(fg.current || 0),
+      monthlyContribution: Number(fg.monthly || 0),
+      expectedReturn:      0,
+      inflationRate:       0,
+      deadline:            fg.deadline || '',
+      note:                'นำเข้าจาก กระแสเงินสด',
+      createdAt:           fg.createdAt || new Date().toISOString(),
+    });
+    existingNames.add(nm);
+  });
+  delete client.financialGoals;
+  return true;
+}
+
 function ensureClientGoals(user) {
   if (!user.data.clients) return;
-  if (
-    user.data.financialGoals &&
-    user.data.financialGoals.length > 0 &&
-    user.data.clients.length > 0
-  ) {
+  /* (1) legacy: user-level financialGoals → clients[0].financialGoals */
+  if (user.data.financialGoals && user.data.financialGoals.length > 0
+      && user.data.clients.length > 0) {
     const first = user.data.clients[0];
-    if (!first.financialGoals || first.financialGoals.length === 0) {
-      /* client[0] ยังว่าง → ย้ายของเก่ามาแล้วลบ */
-      first.financialGoals = user.data.financialGoals;
-      delete user.data.financialGoals;
-    } else {
-      /* client[0] มี goals อยู่แล้ว → merge แบบ avoid duplicate (ใช้ id ถ้ามี) ก่อนลบ
-         กัน silent data loss ของ legacy goals */
-      const existingIds = new Set(first.financialGoals.map(g => g.id).filter(Boolean));
-      const toAdd = user.data.financialGoals.filter(g => !g.id || !existingIds.has(g.id));
-      if (toAdd.length > 0) first.financialGoals.push(...toAdd);
-      delete user.data.financialGoals;
-    }
+    if (!first.financialGoals) first.financialGoals = [];
+    first.financialGoals.push(...user.data.financialGoals);
+    delete user.data.financialGoals;
+  }
+  /* (2) ทุก client: financialGoals → lifeGoals */
+  let changed = false;
+  (user.data.clients || []).forEach(c => {
+    if (migrateFinancialToLife(c)) changed = true;
+  });
+  if (changed || user.data.financialGoals === undefined) {
     const all = getUsers();
     const i   = all.findIndex(u => u.id === uid);
     if (i !== -1) { all[i] = user; saveUsers(all); }
@@ -919,18 +893,10 @@ function ensureClientGoals(user) {
 /* ═══════════════════════════════════════════════
    TWO-VIEW SPA STATE
 ═══════════════════════════════════════════════ */
-let selectedClientId   = null;
-let timelineChartInst  = null;
-
-const GOAL_COLORS = [
-  '#D0021B','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
-];
-let activeGoalIdx    = -1;
+let selectedClientId = null;
 
 function showClientSelect() {
   selectedClientId = null;
-  // Destroy timeline chart when leaving detail view
-  if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
   document.getElementById('view-select').style.display = '';
   document.getElementById('view-main').style.display   = 'none';
   /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
@@ -1010,16 +976,6 @@ function updateSelectedClient(fn) {
 /* ═══════════════════════════════════════════════
    FORMAT HELPERS
 ═══════════════════════════════════════════════ */
-const catIcons = {
-  'กองทุนฉุกเฉิน': '🏦',
-  'เกษียณ':        '👴',
-  'สุขภาพ':        '❤️',
-  'ท่องเที่ยว':    '✈️',
-  'บ้าน':          '🏠',
-  'การศึกษา':      '🎓',
-  'อื่นๆ':         '📌'
-};
-
 function fmt(n) {
   return '฿\u00A0' + (n || 0).toLocaleString('th-TH');
 }
@@ -1076,8 +1032,8 @@ function renderClientSelect() {
   }
 
   grid.innerHTML = filtered.map(c => {
-    const goals       = c.financialGoals || [];
-    const totalTarget = goals.reduce((s, g) => s + (g.target || 0), 0);
+    const goals       = c.lifeGoals || [];
+    const totalTarget = goals.reduce((s, g) => s + Number(g.targetAmount || 0), 0);
     const age         = c.age || calculateAge(c.dob || c.birthdate);
     const genderLabel = c.gender === 'male' ? 'ชาย' : c.gender === 'female' ? 'หญิง' : (c.gender || '');
     const initial     = (c.firstName || '?').charAt(0).toUpperCase();
@@ -1113,160 +1069,15 @@ function renderClientSelect() {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════════
-   TIMELINE CHART
-═══════════════════════════════════════════════ */
-function renderTimelineChart(goals) {
-  const card = document.getElementById('timeline-card');
-  const withDL = goals.filter(g => g.deadline && g.createdAt);
-
-  if (withDL.length === 0) {
-    card.style.display = 'none';
-    if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
-    return;
-  }
-  card.style.display = 'block';
-
-  // Destroy old instance
-  if (timelineChartInst) { timelineChartInst.destroy(); timelineChartInst = null; }
-
-  // Build datasets — one bar per goal (floating bar: [start, end])
-  const datasets = withDL.map((g, i) => {
-    const start = new Date(g.createdAt);
-    const end   = new Date(g.deadline);
-    const color = GOAL_COLORS[i % GOAL_COLORS.length];
-    const pct   = Math.min(Math.round(((g.current || 0) / (g.target || 1)) * 100), 100);
-    return {
-      label: g.name,
-      data: [{ x: [start, end], y: g.name }],
-      backgroundColor: color + 'CC',
-      borderColor: color,
-      borderWidth: 2,
-      borderRadius: 5,
-      borderSkipped: false,
-      pct,          // custom for tooltip
-      target: g.target,
-      current: g.current || 0,
-    };
-  });
-
-  // X-axis range with padding
-  const allStarts = withDL.map(g => new Date(g.createdAt).getTime());
-  const allEnds   = withDL.map(g => new Date(g.deadline).getTime());
-  const xMin = new Date(Math.min(...allStarts));
-  const xMax = new Date(Math.max(...allEnds));
-  xMin.setMonth(xMin.getMonth() - 1);
-  xMax.setMonth(xMax.getMonth() + 2);
-
-  // Dynamic canvas height
-  const canvasEl = document.getElementById('timeline-canvas');
-  canvasEl.style.height = Math.max(180, withDL.length * 54 + 70) + 'px';
-
-  // Today-line plugin
-  const todayLinePlugin = {
-    id: 'todayLine',
-    afterDraw(chart) {
-      const { ctx, chartArea, scales } = chart;
-      const tx = scales.x.getPixelForValue(new Date());
-      if (tx < chartArea.left || tx > chartArea.right) return;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(tx, chartArea.top);
-      ctx.lineTo(tx, chartArea.bottom);
-      ctx.strokeStyle = '#D0021B';
-      ctx.lineWidth   = 2;
-      ctx.setLineDash([5, 3]);
-      ctx.stroke();
-      ctx.fillStyle = '#D0021B';
-      ctx.font = 'bold 10px Sarabun, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('วันนี้', tx + 4, chartArea.top + 12);
-      ctx.restore();
-    }
-  };
-
-  const ctx = canvasEl.getContext('2d');
-  timelineChartInst = new Chart(ctx, {
-    type: 'bar',
-    data: { datasets },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'bottom',
-          labels: {
-            font: { family: 'Sarabun', size: 11 },
-            padding: 14,
-            usePointStyle: true,
-            pointStyleWidth: 10,
-          }
-        },
-        tooltip: {
-          callbacks: {
-            title: ctx => ctx[0].dataset.label,
-            label: ctx => {
-              const ds  = ctx.dataset;
-              const [s, e] = ctx.raw.x;
-              const fmtD = d => new Date(d).toLocaleDateString('th-TH-u-ca-gregory', { day:'numeric', month:'short', year:'numeric' });
-              return [
-                `เริ่ม: ${fmtD(s)}`,
-                `สิ้นสุด: ${fmtD(e)}`,
-                `เป้าหมาย: ฿${(ds.target||0).toLocaleString('th-TH')}`,
-                `ออมแล้ว: ฿${(ds.current||0).toLocaleString('th-TH')} (${ds.pct}%)`,
-              ];
-            }
-          },
-          titleFont: { family: 'Sarabun', size: 12, weight: 'bold' },
-          bodyFont:  { family: 'Sarabun', size: 11 },
-          padding: 12,
-          boxPadding: 4,
-        }
-      },
-      scales: {
-        x: {
-          type: 'time',
-          min: xMin,
-          max: xMax,
-          time: {
-            unit: 'month',
-            displayFormats: { month: 'MMM yy' },
-          },
-          ticks: {
-            font: { family: 'Sarabun', size: 10 },
-            color: '#9E9E9E',
-            maxRotation: 0,
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-        },
-        y: {
-          ticks: {
-            font: { family: 'Sarabun', size: 11 },
-            color: '#424242',
-          },
-          grid: { display: false },
-        }
-      }
-    },
-    plugins: [todayLinePlugin],
-  });
-}
+/* TIMELINE CHART ลบออก — เป้าหมายย้ายไป goals.html (มี timeline ของ lifeGoals แยกที่ timeline.html) */
 
 /* ═══════════════════════════════════════════════
    VIEW 2: RENDER MAIN (financial planning for a client)
+   เป้าหมายย้ายไป goals.html — หน้านี้โฟกัส cashflow + summary pills
 ═══════════════════════════════════════════════ */
 function renderMain() {
   const client = getSelectedClient();
   if (!client) { showClientSelect(); return; }
-
-  const goals       = client.financialGoals || [];
-  const totalSaved  = goals.reduce((s, g) => s + (g.current || 0), 0);
-  const totalTarget = goals.reduce((s, g) => s + (g.target  || 0), 0);
-  const avgPct      = goals.length
-    ? Math.round(goals.reduce((s, g) => s + Math.min(((g.current || 0) / (g.target || 1)) * 100, 100), 0) / goals.length)
-    : 0;
 
   const fullName = `${client.firstName} ${client.lastName}`;
   const initial  = (client.firstName || '?').charAt(0).toUpperCase();
@@ -1275,12 +1086,6 @@ function renderMain() {
   // Breadcrumb & hero
   document.getElementById('main-client-name').textContent = fullName;
   document.getElementById('main-hero-name').textContent   = fullName;
-
-  // Summary pills
-  document.getElementById('hs-goals').textContent  = goals.length + ' รายการ';
-  document.getElementById('hs-saved').textContent  = fmt(totalSaved);
-  document.getElementById('hs-target').textContent = fmt(totalTarget);
-  document.getElementById('hs-avg').textContent    = avgPct + '%';
 
   // Client info bar — แสดงรูปถ้ามี
   const cibAv = document.getElementById('cib-avatar');
@@ -1298,183 +1103,34 @@ function renderMain() {
   if (client.income)      metaParts.push(`<span>💵 รายได้ ${Number(client.income).toLocaleString('th-TH')} บาท/ปี</span>`);
   document.getElementById('cib-meta').innerHTML = metaParts.join('');
 
-  // Timeline chart
-  renderTimelineChart(goals);
-
   // Cashflow (Phase 2.2)
   loadCashflow();
 
-  // Goals grid
-  const list = document.getElementById('goals-list');
-  if (goals.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="es-icon">📊</div>
-      <h3>ยังไม่มีเป้าหมาย</h3>
-      <p>เพิ่มเป้าหมายการเงินด้านบนเพื่อเริ่มต้นวางแผน</p>
-    </div>`;
-    return;
+  // Hero pills — cashflow stats
+  const cf       = client.cashflow || {};
+  const cfIncome = Number(cf.income     || 0);
+  const cfTotalExpense = Number(cf.expFixed || 0) + Number(cf.expVariable || 0)
+                       + Number(cf.expDebt || 0) + Number(cf.expSavings || 0);
+  const cfRemain = cfIncome - cfTotalExpense;
+  document.getElementById('hs-cf-income').textContent  = fmt(cfIncome);
+  document.getElementById('hs-cf-expense').textContent = fmt(cfTotalExpense);
+  document.getElementById('hs-cf-remain').textContent  = fmt(cfRemain);
+
+  // Goals link card — แสดงสรุป lifeGoals + lก ลิงก์ไป goals.html
+  const lg = client.lifeGoals || [];
+  document.getElementById('hs-life-goals').textContent = lg.length + ' รายการ';
+  const goalsBtn = document.getElementById('goals-link-btn');
+  if (goalsBtn) goalsBtn.href = 'goals.html?client=' + encodeURIComponent(client.id);
+  const goalsSummary = document.getElementById('goals-link-summary');
+  if (goalsSummary) {
+    if (lg.length === 0) {
+      goalsSummary.textContent = 'ยังไม่มีเป้าหมาย — กดเพิ่มเป้าหมายชีวิตพร้อมคำนวณ TVM (เงินเฟ้อ + ผลตอบแทน)';
+    } else {
+      const totalTgt = lg.reduce((s,g) => s + Number(g.targetAmount || 0), 0);
+      const totalCur = lg.reduce((s,g) => s + Number(g.currentSaved || g.currentAmount || 0), 0);
+      goalsSummary.textContent = `${lg.length} เป้าหมาย — สะสม ${fmt(totalCur)} / เป้า ${fmt(totalTgt)}`;
+    }
   }
-
-  list.innerHTML = goals.map((g, i) => {
-    const current   = g.current || 0;
-    const target    = g.target  || 1;
-    const pct       = Math.min(Math.round((current / target) * 100), 100);
-    const remain    = Math.max(target - current, 0);
-    const monthly   = g.monthly || 0;
-    const monthsLeft = monthly > 0 ? Math.ceil(remain / monthly) : null;
-    const icon      = catIcons[g.category] || '📌';
-
-    return `<div class="goal-card">
-      <div class="goal-header">
-        <div class="goal-icon-name">
-          <span class="goal-ico">${icon}</span>
-          <div>
-            <div class="goal-name">${escHtml(g.name)}</div>
-            <div class="goal-category">${escHtml(g.category)}</div>
-          </div>
-        </div>
-        <button class="goal-del" onclick="deleteGoal(${i})" title="ลบเป้าหมาย">✕</button>
-      </div>
-      <div class="goal-amounts">
-        <div class="goal-current">${fmt(current)}</div>
-        <div class="goal-target-lbl">จากเป้า ${fmt(target)}</div>
-      </div>
-      <div class="goal-prog-bar">
-        <div class="goal-prog-fill" style="width:${pct}%"></div>
-      </div>
-      <div class="goal-prog-row">
-        <span>ความคืบหน้า</span>
-        <span class="goal-prog-pct">${pct}%</span>
-      </div>
-      <div class="goal-footer">
-        <div>
-          <div class="lbl">ยังขาดอยู่</div>
-          <div class="val">${fmt(remain)}</div>
-        </div>
-        ${monthsLeft != null ? `<div>
-          <div class="lbl">อีกประมาณ</div>
-          <div class="val">${monthsLeft} เดือน</div>
-        </div>` : ''}
-        ${g.deadline ? `<div>
-          <div class="lbl">เป้าหมาย</div>
-          <div class="val">${fmtDate(g.deadline)}</div>
-        </div>` : ''}
-      </div>
-      <button class="add-saving-btn" onclick="openModal(${i})">+ เพิ่มเงินออม</button>
-    </div>`;
-  }).join('');
-}
-
-/* ═══════════════════════════════════════════════
-   ADD / DELETE GOALS
-═══════════════════════════════════════════════ */
-function addGoal() {
-  const name     = document.getElementById('g-name').value.trim();
-  const category = document.getElementById('g-category').value;
-  const target   = parseMoney(document.getElementById('g-target'));
-  const current  = parseMoney(document.getElementById('g-current'));
-  const monthly  = parseMoney(document.getElementById('g-monthly'));
-  const deadline = document.getElementById('g-deadline').value;
-  const err      = document.getElementById('g-error');
-
-  if (!name) {
-    err.textContent = 'กรุณากรอกชื่อเป้าหมาย';
-    err.style.display = 'block';
-    return;
-  }
-  if (target <= 0) {
-    err.textContent = 'กรุณากรอกเงินเป้าหมายให้มากกว่า 0';
-    err.style.display = 'block';
-    return;
-  }
-  err.style.display = 'none';
-
-  updateSelectedClient(cl => {
-    if (!cl.financialGoals) cl.financialGoals = [];
-    cl.financialGoals.push({ name, category, target, current, monthly, deadline, createdAt: new Date().toISOString() });
-  });
-
-  // Log activity on user
-  updateCurrentUser(u => {
-    if (!u.data.activities) u.data.activities = [];
-    const client = (u.data.clients || []).find(c => c.id === selectedClientId);
-    const who    = client ? `${client.firstName} ${client.lastName}` : 'ลูกค้า';
-    u.data.activities.unshift({
-      icon:  '📊',
-      title: `เพิ่มเป้าหมาย "${name}" ให้ ${who}`,
-      time:  'วันนี้ เวลา ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
-    });
-    if (u.data.activities.length > 50) u.data.activities.length = 50;
-  });
-
-  clearGoalForm();
-  renderMain();
-}
-
-function deleteGoal(i) {
-  if (!confirm('ยืนยันลบเป้าหมายนี้?')) return;
-  updateSelectedClient(cl => {
-    if (cl.financialGoals) cl.financialGoals.splice(i, 1);
-  });
-  renderMain();
-}
-
-/* ═══════════════════════════════════════════════
-   ADD SAVING MODAL
-═══════════════════════════════════════════════ */
-function openModal(i) {
-  activeGoalIdx = i;
-  const client = getSelectedClient();
-  const goals  = client ? (client.financialGoals || []) : [];
-  const g      = goals[i];
-  document.getElementById('modal-goal-name').textContent = g ? `เป้าหมาย: ${g.name}` : '';
-  document.getElementById('modal-amount').value = '';
-  document.getElementById('saving-modal').classList.add('open');
-  setTimeout(() => document.getElementById('modal-amount').focus(), 80);
-}
-
-function closeModal() {
-  document.getElementById('saving-modal').classList.remove('open');
-  activeGoalIdx = -1;
-}
-
-function confirmAddSaving() {
-  const amount = parseFloat(document.getElementById('modal-amount').value) || 0;
-  if (amount <= 0) { alert('กรุณากรอกจำนวนเงินให้มากกว่า 0'); return; }
-
-  updateSelectedClient(cl => {
-    const g = (cl.financialGoals || [])[activeGoalIdx];
-    if (g) g.current = (g.current || 0) + amount;
-  });
-
-  updateCurrentUser(u => {
-    if (!u.data.activities) u.data.activities = [];
-    const client = (u.data.clients || []).find(c => c.id === selectedClientId);
-    const goals  = client ? (client.financialGoals || []) : [];
-    const g      = goals[activeGoalIdx];
-    const who    = client ? `${client.firstName} ${client.lastName}` : 'ลูกค้า';
-    u.data.activities.unshift({
-      icon:  '💰',
-      title: `ออมเงิน ${fmt(amount)}${g ? ' — ' + g.name : ''} (${who})`,
-      time:  'วันนี้ เวลา ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
-    });
-    if (u.data.activities.length > 50) u.data.activities.length = 50;
-  });
-
-  closeModal();
-  renderMain();
-}
-
-/* ═══════════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════════ */
-function clearGoalForm() {
-  ['g-name', 'g-target', 'g-monthly', 'g-deadline'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('g-current').value = '0';
-  document.getElementById('g-category').selectedIndex = 0;
-  document.getElementById('g-error').style.display = 'none';
 }
 
 function escHtml(str) {
