@@ -333,8 +333,8 @@
           <span class="opt">— ถ้าใส่เพิ่มสม่ำเสมอ</span>
         </label>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input id="f-contribution" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateFV()" style="flex:1;">
-          <select id="f-contrib-freq" onchange="updateFV()" style="padding:9px 10px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font);font-size:.9rem;background:white;flex-shrink:0;">
+          <input id="f-contribution" class="money-fmt" inputmode="decimal" min="0" placeholder="0" oninput="updateFV()" style="flex:1;min-width:0;">
+          <select id="f-contrib-freq" onchange="updateFV()" style="width:auto;flex-shrink:0;padding:9px 10px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font);font-size:.9rem;background:white;">
             <option value="annual">ต่อปี</option>
             <option value="monthly">ต่อเดือน</option>
           </select>
