@@ -499,7 +499,7 @@ function render() {
         <div class="li-card-title">
           <div class="li-ico">💸</div>
           <span>หนี้สิน</span>
-          <button onclick="importLiabilities()" style="margin-left:auto;padding:4px 10px;border:1px solid var(--gray-300);background:white;border-radius:5px;font-size:.78rem;cursor:pointer;font-family:var(--font);" title="ดึงจาก client.liabilities">📥 ดึงจากงบการเงิน</button>
+          <button onclick="importLiabilities()" style="margin-left:auto;padding:4px 10px;border:1px solid var(--gray-300);background:white;border-radius:5px;font-size:.78rem;cursor:pointer;font-family:var(--font);" title="ดึงหนี้สิน + สินทรัพย์สภาพคล่องจากงบการเงิน">📥 ดึงจากงบการเงิน</button>
         </div>
         <div id="debt-list">
           ${li.debts.map(d => renderRow(d, 'debt')).join('')}
@@ -660,30 +660,53 @@ function setMethod(m) {
   render();
 }
 
-/* ดึงหนี้สินจาก client.liabilities มาใส่ในส่วน "หนี้สิน" ของหน้านี้
-   หลีกเลี่ยง duplicate โดยเช็คชื่อ */
+/* ดึงข้อมูลจากงบการเงิน — รวม:
+   1. client.liabilities → li.debts (หลีกเลี่ยง duplicate ตามชื่อ)
+   2. client.assets liquid group → li.liquidAssets (cash + deposit + bond) */
 function importLiabilities() {
   const c = getCurrent();
-  if (!c || !c.liabilities || c.liabilities.length === 0) {
-    showToast('⚠️ ยังไม่มีหนี้สินใน "งบการเงิน"');
+  if (!c) return;
+  const liabsCount = (c.liabilities || []).length;
+  const liquidVal  = getCurrentLiquidAssets();
+
+  if (liabsCount === 0 && liquidVal === 0) {
+    showToast('⚠️ ยังไม่มีข้อมูลใน "งบการเงิน" หรือ "สินทรัพย์"');
     return;
   }
-  if (!confirm(`ดึง ${c.liabilities.length} รายการจากงบการเงินมาใส่ที่นี่?`)) return;
+
+  /* แสดง summary ของสิ่งที่จะ import ก่อน confirm */
+  const previewParts = [];
+  if (liabsCount > 0) previewParts.push(`${liabsCount} หนี้สิน`);
+  if (liquidVal > 0)  previewParts.push(`สินทรัพย์สภาพคล่อง ${fmtBaht(liquidVal)}`);
+  if (!confirm(`ดึงข้อมูล: ${previewParts.join(' + ')}?`)) return;
+
+  let importedDebts = 0;
   saveLifeInputs(li => {
-    if (!li.debts) li.debts = [];
-    const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
-    c.liabilities.forEach(l => {
-      const name = (l.name || l.type || 'หนี้สิน').trim();
-      if (existingNames.has(name.toLowerCase())) return;
-      li.debts.push({
-        id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
-        name,
-        amount: Number(l.principal || l.balance || 0),
+    /* 1. Liabilities → debts (skip ถ้าชื่อซ้ำ) */
+    if (liabsCount > 0) {
+      if (!li.debts) li.debts = [];
+      const existingNames = new Set(li.debts.map(d => (d.name||'').trim().toLowerCase()));
+      c.liabilities.forEach(l => {
+        const name = (l.name || l.type || 'หนี้สิน').trim();
+        if (existingNames.has(name.toLowerCase())) return;
+        li.debts.push({
+          id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+          name,
+          amount: Number(l.principal || l.balance || 0),
+        });
+        importedDebts++;
       });
-    });
+    }
+    /* 2. Liquid assets → override (แก้ทับ value เดิม) */
+    li.liquidAssets = liquidVal;
   });
   render();
-  showToast('✅ ดึงหนี้สินเข้ามาแล้ว');
+
+  const summary = [];
+  if (importedDebts > 0)  summary.push(`${importedDebts} หนี้สิน`);
+  if (liquidVal > 0)       summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
+  if (importedDebts === 0 && liabsCount > 0) summary.push('(ไม่มีหนี้ใหม่ — ชื่อซ้ำทั้งหมด)');
+  showToast(`✅ ดึงข้อมูลเรียบร้อย${summary.length ? ' — ' + summary.join(' + ') : ''}`);
 }
 
 function deleteRow(kind, id) {
