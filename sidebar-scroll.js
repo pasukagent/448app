@@ -4,8 +4,11 @@
    2. ป้องกัน mouse wheel เปลี่ยนค่าใน <input type="number"> โดยไม่ตั้งใจ
    3. Register Service Worker — auto cache busting (ไม่ต้องกด Ctrl+Shift+R) */
 
-/* Register Service Worker — network-first strategy */
-if ('serviceWorker' in navigator) {
+/* Register Service Worker — network-first strategy
+   ข้าม SW เมื่อโหลดผ่าน file:// (double-click เปิดไฟล์) — browser security ห้าม
+   หรือเมื่อ origin เป็น null (sandboxed iframe) */
+if ('serviceWorker' in navigator
+    && (location.protocol === 'https:' || location.protocol === 'http:')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       /* Force check update ทุกครั้งที่หน้าเปิด */
@@ -21,7 +24,7 @@ if ('serviceWorker' in navigator) {
           }
         });
       });
-    }).catch(() => { /* SW ไม่ support — ignore */ });
+    }).catch(() => { /* SW register ล้มเหลว — ignore */ });
   });
 }
 
