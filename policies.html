@@ -4502,9 +4502,11 @@ function getNeedsInputs() {
   /* Auto-defaults — sync จากข้อมูลที่ user กรอกในหน้าอื่น */
   const totalDebt = (c.liabilities || []).reduce((s,l) => s + Number(l.principal||0), 0);
   const annualIncome = Number(c.income) || (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
-  /* ปีที่ดูแล: 60 - อายุปัจจุบัน — fallback 10 ถ้าไม่มี dob */
+  /* ปีที่ดูแล: 60 - อายุปัจจุบัน (fractional) — ตรงกับสูตร DIME I ใน life-insurance.html
+     fallback 10 ถ้าไม่มี dob — round ทศนิยม 1 ตำแหน่งเพื่อแสดงสะอาด */
   const cachedAge = _naAgeNow(c.dob);
-  const yearsToRetire = cachedAge != null ? Math.max(Math.round(60 - cachedAge), 1) : 10;
+  const yearsRaw  = cachedAge != null ? Math.max(60 - cachedAge, 1) : 10;
+  const yearsToRetire = Math.round(yearsRaw * 10) / 10;
   /* การศึกษาบุตร: ค่าใช้จ่ายรวม FV จากหน้าการศึกษาบุตร (replicate computeChildPlan) */
   const eduTotal = (c.children || []).reduce((s, ch) => s + _naChildEduFuture(ch), 0);
   /* สินทรัพย์มี: liquid (cash + deposit + bond) จากหน้าสินทรัพย์ */
@@ -4590,7 +4592,7 @@ function renderNeedsAnalysis() {
             <div style="display:flex;gap:6px;">
               <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.income}" onchange="updateNeedsInput('income',parseMoney(this))" placeholder="รายได้/ปี" style="width:100px;">
               <span style="align-self:center;color:var(--gray-500);">×</span>
-              <input type="number" min="0" max="30" value="${inputs.incomeYears}" onchange="updateNeedsInput('incomeYears',Number(this.value))" style="width:50px;" title="จำนวนปี">
+              <input type="number" min="0" max="60" step="0.1" value="${Number(inputs.incomeYears).toFixed(1)}" onchange="updateNeedsInput('incomeYears',Number(this.value))" style="width:75px;" title="จำนวนปีถึงเกษียณ (60 − อายุปัจจุบัน)">
               <span style="align-self:center;color:var(--gray-500);font-size:.8rem;">ปี</span>
             </div>
           </div>
