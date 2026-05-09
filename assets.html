@@ -292,19 +292,25 @@
         <div class="form-row">
           <label>ประเภทสินทรัพย์ *</label>
           <select id="f-type" onchange="onTypeChange()">
-            <option value="cash">💵 เงินสด</option>
-            <option value="deposit">💰 เงินฝาก</option>
-            <option value="bond">📜 ตราสารหนี้</option>
-            <option value="pvd">🏢 PVD (กองทุนสำรองเลี้ยงชีพ)</option>
-            <option value="rmf">🌱 RMF</option>
-            <option value="ltf">📈 LTF</option>
-            <option value="ssf">🌿 SSF</option>
-            <option value="thaiesg">🌍 ThaiESG</option>
-            <option value="mutual">🏦 กองทุนรวม</option>
-            <option value="unitlinked">🔗 Unit Linked</option>
-            <option value="realestate">🏠 อสังหาริมทรัพย์</option>
-            <option value="stock">📊 หุ้น</option>
-            <option value="other">📦 อื่นๆ</option>
+            <optgroup label="💧 สินทรัพย์สภาพคล่อง">
+              <option value="cash">💵 เงินสด</option>
+              <option value="deposit">💰 เงินฝาก</option>
+              <option value="bond">📜 ตราสารหนี้</option>
+            </optgroup>
+            <optgroup label="📈 สินทรัพย์เพื่อการลงทุน">
+              <option value="pvd">🏢 PVD (กองทุนสำรองเลี้ยงชีพ)</option>
+              <option value="rmf">🌱 RMF</option>
+              <option value="ltf">📈 LTF</option>
+              <option value="ssf">🌿 SSF</option>
+              <option value="thaiesg">🌍 ThaiESG</option>
+              <option value="mutual">🏦 กองทุนรวม</option>
+              <option value="unitlinked">🔗 Unit Linked</option>
+              <option value="stock">📊 หุ้น</option>
+            </optgroup>
+            <optgroup label="🏠 สินทรัพย์ใช้ส่วนตัว">
+              <option value="realestate">🏠 อสังหาริมทรัพย์</option>
+              <option value="other">📦 อื่นๆ</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-row">
