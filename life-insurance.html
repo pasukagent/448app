@@ -414,15 +414,17 @@ const EDU_COST_TABLE = {
 const EDU_LEVEL_IDX = { economy:0, medium:1, premium:2 };
 const EDU_DEFAULT_INFLATION = 5;
 
+/* ตรงกับ ageNow() ใน education.html — คืนค่า age เป็นทศนิยม (5.4 ปี ไม่ใช่ 5)
+   เพราะ yearsLeft ขึ้นกับ age อย่างละเอียด — ใช้ integer จะทำ totalFuture ผิด */
 function _ageNow(dobStr) {
   if (!dobStr) return null;
-  const dob = new Date(dobStr);
-  if (isNaN(dob)) return null;
+  const bd = new Date(dobStr);
+  if (isNaN(bd)) return null;
   const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-  return age;
+  const diff = today - bd;
+  const age = diff / (365.25 * 24 * 3600 * 1000);
+  /* กัน dob ในอนาคต → 0 (ตรงกับ education.html) */
+  return age < 0 ? 0 : age;
 }
 
 /* คำนวณ totalFuture (FV) ของลูก 1 คน — ตรงกับ computeChildPlan ใน education.html */
