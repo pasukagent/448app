@@ -100,6 +100,25 @@
     .li-total-strip .total-lbl { font-weight: 700; color: var(--gray-700); }
     .li-total-strip .total-val { font-weight: 800; color: var(--red-primary); font-size: 1.15rem; }
 
+    /* Validation panel — 3 levels: warn, hint, ok */
+    .validation-panel {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 14px 18px; margin-bottom: 18px;
+      border-left: 4px solid var(--gray-400);
+    }
+    .vp-title { font-weight: 800; font-size: .9rem; color: var(--gray-700); margin-bottom: 10px; }
+    .vp-row {
+      display: flex; gap: 8px; padding: 8px 12px; border-radius: 8px;
+      margin-bottom: 6px; font-size: .85rem; line-height: 1.5;
+    }
+    .vp-row:last-child { margin-bottom: 0; }
+    .vp-warn { background: #FFF3E0; color: #8B5A00; border-left: 3px solid #FF8C00; }
+    .vp-hint { background: #E3F2FD; color: #0D47A1; border-left: 3px solid #2196F3; }
+    .vp-ok   { background: #E8F5E9; color: #1B5E20; border-left: 3px solid #28a745; }
+    .vp-icon { flex-shrink: 0; }
+    .vp-msg a { color: inherit; font-weight: 700; text-decoration: underline; }
+    .vp-msg b { font-weight: 800; }
+
     /* Combined summary */
     .summary-box {
       background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
@@ -510,6 +529,20 @@ function render() {
 
     </div>
 
+    <!-- Validation Panel — block / warn / hint / ok -->
+    ${(() => {
+      const issues = getValidations();
+      if (issues.length === 0) return '';
+      const iconMap = { warn: '⚠️', hint: '💡', ok: '✅' };
+      return `<div class="validation-panel">
+        <div class="vp-title">✅ ตรวจสอบข้อมูล</div>
+        ${issues.map(i => `<div class="vp-row vp-${i.level}">
+          <span class="vp-icon">${iconMap[i.level] || '•'}</span>
+          <span class="vp-msg">${i.msg}</span>
+        </div>`).join('')}
+      </div>`;
+    })()}
+
     <!-- Section 3: Combined summary -->
     <div class="summary-box">
       <div class="sb-row">
@@ -671,18 +704,141 @@ function updateItemName(kind, id, name) {
   });
 }
 
+/* ════════════════════════════════════════════
+   VALIDATION — 3 levels: BLOCK / WARN / HINT
+═══════════════════════════════════════════ */
+const MAX_AMOUNT = 999_999_999; // 1 พันล้าน
+
+/* BLOCK: clamp ค่าให้อยู่ใน [0, MAX_AMOUNT] — เด้ง toast ถ้าเกิน */
+function clampAmount(amount, label) {
+  const v = Number(amount) || 0;
+  if (v < 0) {
+    showToast(`⛔ "${label}" ติดลบไม่ได้ — ใช้ 0 แทน`);
+    return 0;
+  }
+  if (v > MAX_AMOUNT) {
+    showToast(`⛔ "${label}" เกิน ${MAX_AMOUNT.toLocaleString('th-TH')} — ใช้ค่าสูงสุด`);
+    return MAX_AMOUNT;
+  }
+  return v;
+}
+
+/* WARN/HINT: ตรวจ context ทั้งหน้า → array ของ {level, msg}
+   level: 'warn' (สีส้ม) | 'hint' (สีฟ้า) | 'ok' (สีเขียว) */
+function getValidations() {
+  const li = getLifeInputs();
+  const c  = getCurrent();
+  const issues = [];
+  if (!li || !c) return issues;
+
+  const totalDebt = li.debts.reduce((s,d) => s + Number(d.amount||0), 0);
+  const totalResp = li.responsibilities.reduce((s,r) => s + Number(r.amount||0), 0);
+  const method    = li.method || 'simple';
+  const dime      = getDIMENeed();
+  const totalNeed = method === 'dime' ? dime.total : (totalDebt + totalResp);
+  const annualIncome = Number(c.income) ||
+    (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
+  const liquidAssets = (li.liquidAssets != null && li.liquidAssets !== '')
+    ? Number(li.liquidAssets) : getCurrentLiquidAssets();
+
+  /* WARN: DIME mode + ขาด dob */
+  if (method === 'dime' && !c.dob) {
+    issues.push({
+      level: 'warn',
+      msg: '<b>ลูกค้านี้ยังไม่มีวันเกิด</b> — DIME I ใช้ default 25 ปีถึงเกษียณ <a href="clients.html">ไปเพิ่มวันเกิด →</a>'
+    });
+  }
+
+  /* WARN: DIME mode + ไม่มีรายได้ */
+  if (method === 'dime' && annualIncome === 0) {
+    issues.push({
+      level: 'warn',
+      msg: '<b>ลูกค้านี้ยังไม่ได้ระบุรายได้</b> — DIME I = 0 (สูตรหลักหายไป) <a href="clients.html">ไปเพิ่มรายได้ →</a>'
+    });
+  }
+
+  /* WARN: ทุนต้องการ = 0 */
+  if (totalNeed === 0) {
+    issues.push({
+      level: 'warn',
+      msg: 'ทุนประกันที่ต้องการ = <b>0</b> — ลูกค้าอาจไม่ต้องการประกันชีวิต หรือยังกรอกข้อมูลไม่ครบ'
+    });
+  }
+
+  /* WARN: ทุนต้องการเกิน 50× รายได้ปี (ไม่ make sense) */
+  if (annualIncome > 0 && totalNeed > annualIncome * 50) {
+    const ratio = (totalNeed / annualIncome).toFixed(0);
+    issues.push({
+      level: 'warn',
+      msg: `ทุนประกันที่ต้องการเกิน <b>${ratio} เท่า</b>ของรายได้/ปี — ตรวจสอบอีกที (ทั่วไป 5-10 เท่า)`
+    });
+  }
+
+  /* HINT: ค่าดูแลพ่อแม่ default = 0 */
+  const parentRow = li.responsibilities.find(r => r.id === 'r-parents');
+  if (parentRow && Number(parentRow.amount||0) === 0 && method === 'simple') {
+    issues.push({
+      level: 'hint',
+      msg: 'ทั่วไป <b>ค่าดูแลพ่อแม่</b> ≈ ฿4,800,000 (20,000/เดือน × 20 ปี)'
+    });
+  }
+
+  /* HINT: ค่าเลี้ยงบุตร default = 0 และมีบุตร */
+  const childRow = li.responsibilities.find(r => r.id === 'r-children');
+  const childCount = (c.children || []).length;
+  if (childRow && Number(childRow.amount||0) === 0 && childCount > 0 && method === 'simple') {
+    const total = childCount * 1500000;
+    issues.push({
+      level: 'hint',
+      msg: `ทั่วไป <b>ค่าเลี้ยงบุตร</b> ≈ ฿1,500,000/คน. ลูกค้านี้มี ${childCount} คน → ~${fmtBaht(total)}`
+    });
+  }
+
+  /* HINT: สินทรัพย์สภาพคล่อง ≥ ทุนต้องการ */
+  if (totalNeed > 0 && liquidAssets >= totalNeed) {
+    issues.push({
+      level: 'hint',
+      msg: `สินทรัพย์สภาพคล่อง (${fmtBaht(liquidAssets)}) <b>มากพอ</b>ครอบคลุม need — ลูกค้าอาจไม่ต้องการประกันชีวิตเพิ่ม`
+    });
+  }
+
+  /* HINT: 5-10× annual income guideline (ถ้าทุนต้องการต่ำผิดปกติ) */
+  if (annualIncome > 0 && totalNeed > 0 && totalNeed < annualIncome * 3) {
+    const recommendLow  = annualIncome * 5;
+    const recommendHigh = annualIncome * 10;
+    issues.push({
+      level: 'hint',
+      msg: `ทั่วไปทุนประกันชีวิตควร = <b>5-10 เท่า</b>ของรายได้/ปี (~${fmtBaht(recommendLow)} - ${fmtBaht(recommendHigh)})`
+    });
+  }
+
+  /* OK: ทุนเพียงพอ */
+  const currentLifeCov = getCurrentLifeCoverage();
+  const totalHave = currentLifeCov + liquidAssets;
+  if (totalNeed > 0 && totalHave >= totalNeed) {
+    issues.push({
+      level: 'ok',
+      msg: `✅ ความคุ้มครองเพียงพอแล้ว — มี ${fmtBaht(totalHave)} ครอบคลุม need ${fmtBaht(totalNeed)}`
+    });
+  }
+
+  return issues;
+}
+
 function updateItemAmount(kind, id, amount) {
   const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
   saveLifeInputs(li => {
     if (!li[dataKey]) return;
     const item = li[dataKey].find(x => x.id === id);
-    if (item) item.amount = Number(amount) || 0;
+    if (item) {
+      item.amount = clampAmount(amount, item.name || 'รายการ');
+    }
   });
   render();
 }
 
 function updateLiquid(amount) {
-  saveLifeInputs(li => { li.liquidAssets = Number(amount) || 0; });
+  saveLifeInputs(li => { li.liquidAssets = clampAmount(amount, 'สินทรัพย์สภาพคล่อง'); });
   render();
 }
 
