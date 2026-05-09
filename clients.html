@@ -1550,8 +1550,26 @@
         document.getElementById('ef-position').value     = client.position    || '';
         document.getElementById('ef-workplace').value    = client.workplace   || '';
         const efIncomeEl = document.getElementById('ef-income');
+        /* Force type=text + class=money-fmt + inputmode runtime — กันกรณี HTML cached เก่ามี type=number */
+        if (efIncomeEl.type === 'number') efIncomeEl.type = 'text';
+        if (!efIncomeEl.classList.contains('money-fmt')) efIncomeEl.classList.add('money-fmt');
+        efIncomeEl.setAttribute('inputmode', 'decimal');
         efIncomeEl.value = client.income || '';
-        if (window.formatMoneyInput) window.formatMoneyInput(efIncomeEl);
+        /* Format with commas — inline (กันกรณี money-input.js ไม่โหลด/cached เก่า) */
+        const fmtMoneyEl = (el) => {
+          if (!el || !el.value) return;
+          const raw = String(el.value).replace(/[^\d.-]/g, '');
+          if (!raw) return;
+          const [intPart, decPart] = raw.split('.');
+          const intFmt = (intPart || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          el.value = decPart != null ? intFmt + '.' + decPart : intFmt;
+        };
+        fmtMoneyEl(efIncomeEl);
+        /* Bind input listener (idempotent — กันซ้ำ) */
+        if (!efIncomeEl._fmtBound) {
+          efIncomeEl._fmtBound = true;
+          efIncomeEl.addEventListener('input', () => fmtMoneyEl(efIncomeEl));
+        }
         document.getElementById('ef-address').value      = client.address     || '';
         document.getElementById('ef-work-address').value = client.workAddress || '';
         populateFamilySelect('ef-family', client.familyId || null);
