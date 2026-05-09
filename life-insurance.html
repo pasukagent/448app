@@ -762,7 +762,7 @@ function importLiabilities() {
   if (liquidVal > 0)  previewParts.push(`สินทรัพย์สภาพคล่อง ${fmtBaht(liquidVal)}`);
   if (!confirm(`Sync ข้อมูล: ${previewParts.join(' + ')}?\n(หนี้ที่ถูกลบในงบการเงินจะถูกลบที่นี่ด้วย)`)) return;
 
-  let addedDebts = 0, updatedDebts = 0, removedDebts = 0;
+  let addedDebts = 0, updatedDebts = 0, removedDebts = 0, cleanedDebts = 0;
   let homeSum = 0, carSum = 0;
 
   saveLifeInputs(li => {
@@ -818,7 +818,18 @@ function importLiabilities() {
     const carRow = li.debts.find(d => d.id === 'd-car');
     if (carRow) carRow.amount = carSum;
 
-    /* 5. Liquid assets — override ทุกครั้ง */
+    /* 5. ล้างแถวว่าง (ไม่มีชื่อ + amount=0) — กันช่องว่างคั่นกลางลิสต์
+       Fixed rows ผ่านเสมอ — แถว non-fixed ที่ไม่มีทั้งชื่อและจำนวน = ล้างทิ้ง */
+    const beforeClean = li.debts.length;
+    li.debts = li.debts.filter(d => {
+      if (d.fixed) return true;
+      const hasName   = (d.name || '').trim().length > 0;
+      const hasAmount = Number(d.amount || 0) > 0;
+      return hasName || hasAmount;
+    });
+    cleanedDebts = beforeClean - li.debts.length;
+
+    /* 6. Liquid assets — override ทุกครั้ง */
     li.liquidAssets = liquidVal;
   });
   render();
@@ -827,6 +838,7 @@ function importLiabilities() {
   if (addedDebts > 0)    summary.push(`+${addedDebts} หนี้ใหม่`);
   if (updatedDebts > 0)  summary.push(`อัปเดต ${updatedDebts}`);
   if (removedDebts > 0)  summary.push(`ลบ ${removedDebts}`);
+  if (cleanedDebts > 0)  summary.push(`ล้างแถวว่าง ${cleanedDebts}`);
   if (homeSum > 0)       summary.push(`บ้าน ${fmtBaht(homeSum)}`);
   if (carSum > 0)        summary.push(`รถ ${fmtBaht(carSum)}`);
   if (liquidVal > 0)     summary.push(`สภาพคล่อง ${fmtBaht(liquidVal)}`);
