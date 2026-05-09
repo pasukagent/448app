@@ -960,8 +960,9 @@ function updateDashboard() {
 
     nameEl.textContent = (client.firstName || '') + ' ' + (client.lastName || '');
 
-    const agePart = client.age ? client.age + ' ปี' : (client.birthdate ? calcAge(client.birthdate) + ' ปี' : '');
-    const occPart = client.occupation || '';
+    const dobVal  = client.dob || client.birthdate;
+    const agePart = client.age ? client.age + ' ปี' : (dobVal ? calcAge(dobVal) + ' ปี' : '');
+    const occPart = client.job || client.occupation || '';
     subEl.textContent = [agePart, occPart].filter(Boolean).join(' · ');
   } else {
     avatarEl.textContent = '?';

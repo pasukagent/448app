@@ -605,7 +605,7 @@
       </div>
       <div class="client-pick">
         <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
-        <select id="client-select" onchange="onTopClientChange(this.value)"></select>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
       </div>
     </div>
 <div><!-- financial content -->
@@ -934,7 +934,7 @@ function showClientSelect() {
   document.getElementById('view-select').style.display = '';
   document.getElementById('view-main').style.display   = 'none';
   /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
-  populateTopClientSelect();
+  initClientSelect();
   try { renderClientSelect(); } catch (e) { console.error('renderClientSelect error:', e); }
 }
 
@@ -944,13 +944,13 @@ function showClientMain(cid) {
   document.getElementById('view-select').style.display = 'none';
   document.getElementById('view-main').style.display   = '';
   /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
-  populateTopClientSelect();
+  initClientSelect();
   try { renderMain(); } catch (e) { console.error('renderMain error:', e); }
 }
 
 /* Top-right client picker — sync กับ selectedClientId
    Pattern เหมือน tax.html / retirement.html — ไม่มี placeholder, เรนเดอร์ mini avatar ทันที */
-function populateTopClientSelect() {
+function initClientSelect() {
   const sel = document.getElementById('client-select');
   const av  = document.getElementById('cp-mini-avatar');
   if (!sel) return;
@@ -986,7 +986,7 @@ function populateTopClientSelect() {
   }
 }
 
-function onTopClientChange(cid) {
+function onClientChange(cid) {
   if (!cid) return;
   showClientMain(cid);
 }
@@ -1064,8 +1064,8 @@ function renderClientSelect() {
   const filtered = query
     ? clients.filter(c =>
         (c.firstName + ' ' + c.lastName).toLowerCase().includes(query) ||
-        (c.phone       || '').toLowerCase().includes(query) ||
-        (c.occupation  || '').toLowerCase().includes(query)
+        (c.phone || '').toLowerCase().includes(query) ||
+        (c.job || c.occupation || '').toLowerCase().includes(query)
       )
     : clients;
 
@@ -1078,7 +1078,7 @@ function renderClientSelect() {
   grid.innerHTML = filtered.map(c => {
     const goals       = c.financialGoals || [];
     const totalTarget = goals.reduce((s, g) => s + (g.target || 0), 0);
-    const age         = c.age || calculateAge(c.birthdate);
+    const age         = c.age || calculateAge(c.dob || c.birthdate);
     const genderLabel = c.gender === 'male' ? 'ชาย' : c.gender === 'female' ? 'หญิง' : (c.gender || '');
     const initial     = (c.firstName || '?').charAt(0).toUpperCase();
 
@@ -1096,7 +1096,7 @@ function renderClientSelect() {
       </div>
       <div class="client-card-meta">
         ${c.phone      ? `<span>📞 ${c.phone}</span>`      : ''}
-        ${c.occupation ? `<span>💼 ${c.occupation}</span>` : ''}
+        ${(c.job || c.occupation) ? `<span>💼 ${c.job || c.occupation}</span>` : ''}
       </div>
       <hr class="client-card-divider">
       <div class="client-card-stats">
@@ -1270,7 +1270,7 @@ function renderMain() {
 
   const fullName = `${client.firstName} ${client.lastName}`;
   const initial  = (client.firstName || '?').charAt(0).toUpperCase();
-  const age      = client.age || calculateAge(client.birthdate);
+  const age      = client.age || calculateAge(client.dob || client.birthdate);
 
   // Breadcrumb & hero
   document.getElementById('main-client-name').textContent = fullName;
@@ -1294,7 +1294,7 @@ function renderMain() {
   const metaParts = [];
   if (age != null)        metaParts.push(`<span>🎂 อายุ ${age} ปี</span>`);
   if (client.phone)       metaParts.push(`<span>📞 ${client.phone}</span>`);
-  if (client.occupation)  metaParts.push(`<span>💼 ${client.occupation}</span>`);
+  if (client.job || client.occupation) metaParts.push(`<span>💼 ${client.job || client.occupation}</span>`);
   if (client.income)      metaParts.push(`<span>💵 รายได้ ${Number(client.income).toLocaleString('th-TH')} บาท/ปี</span>`);
   document.getElementById('cib-meta').innerHTML = metaParts.join('');
 

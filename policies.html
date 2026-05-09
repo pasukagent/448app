@@ -892,7 +892,7 @@
       </div>
       <div class="client-pick">
         <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
-        <select id="client-select" onchange="onTopClientChange(this.value)"></select>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
       </div>
     </div>
 <div style="padding-top:0;"><!-- policies content -->
@@ -1739,7 +1739,7 @@ function showList() {
   document.getElementById('view-list').style.display   = '';
   document.getElementById('view-detail').style.display = 'none';
   /* picker ก่อน — กันไม่ให้ render error ทำ picker ว่าง */
-  populateTopClientSelect();
+  initClientSelect();
   try { renderClientList(); } catch (e) { console.error('renderClientList error:', e); }
 }
 
@@ -1748,7 +1748,7 @@ function showDetail(cid) {
   localStorage.setItem('aia_selectedClient', cid);
   document.getElementById('view-list').style.display   = 'none';
   document.getElementById('view-detail').style.display = '';
-  populateTopClientSelect();
+  initClientSelect();
   render();
   renderNeedsAnalysis();
   renderHealthGap();
@@ -1756,7 +1756,7 @@ function showDetail(cid) {
 
 /* Top-right client picker — sync กับ currentClientId
    Pattern เหมือน tax.html / retirement.html อื่นๆ — ไม่มี placeholder option */
-function populateTopClientSelect() {
+function initClientSelect() {
   const sel = document.getElementById('client-select');
   const av  = document.getElementById('cp-mini-avatar');
   if (!sel) return;
@@ -1793,7 +1793,7 @@ function populateTopClientSelect() {
   }
 }
 
-function onTopClientChange(cid) {
+function onClientChange(cid) {
   if (!cid) return;
   showDetail(cid);
 }
@@ -1834,11 +1834,12 @@ function renderClientList(filter) {
     const totalCoverage = policies.reduce((s,p) => s + primaryCovOf(p), 0);
     const totalPremium  = policies.reduce((s,p) => s + (p.premium||0),  0);
     const initials      = (c.firstName || '?').charAt(0).toUpperCase();
-    const displayAge    = c.birthdate ? calculateAge(c.birthdate) : (c.age || '');
+    const dobVal        = c.dob || c.birthdate;
+    const displayAge    = dobVal ? calculateAge(dobVal) : (c.age || '');
     const agePart       = displayAge ? displayAge + ' ปี' : '';
     const genderPart    = c.gender || '';
     const ageBadge      = [agePart, genderPart].filter(Boolean).join(' · ');
-    const birthdatePart = c.birthdate ? `<span>🎂 ${fmtDate(c.birthdate)}</span>` : '';
+    const birthdatePart = dobVal ? `<span>🎂 ${fmtDate(dobVal)}</span>` : '';
 
     const avatarInner = c.photo ? `<img src="${c.photo}" alt="">` : initials;
     html += `
