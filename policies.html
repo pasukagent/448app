@@ -4359,6 +4359,29 @@ const HOSPITAL_TIERS = [
   { tier:4, name:'🌐 รพ.อินเตอร์',             desc:'รักษาเฉพาะทาง / ต่างประเทศ', dailyRoom: 15000, surgeryAvg: 800000, ipdAvg: 500000 },
 ];
 
+/* Needs Analysis (Phase 3.3) — constants ต้องประกาศก่อน init
+   เพราะ init → showDetail → renderNeedsAnalysis → getNeedsInputs → _naAgeNow ฯลฯ */
+const _NA_AGE_CACHE = new Map();
+const _NA_EDU_STAGES = [
+  { key:'kinder',   startAge:3,  years:3 },
+  { key:'primary',  startAge:6,  years:6 },
+  { key:'mid',      startAge:12, years:3 },
+  { key:'high',     startAge:15, years:3 },
+  { key:'bachelor', startAge:18, years:4 },
+  { key:'master',   startAge:22, years:2, optional:'master' },
+  { key:'phd',      startAge:24, years:4, optional:'phd' },
+];
+const _NA_EDU_COST = {
+  kinder:   [ 30000,  80000, 250000],
+  primary:  [ 25000, 100000, 350000],
+  mid:      [ 30000, 120000, 400000],
+  high:     [ 35000, 150000, 450000],
+  bachelor: [ 60000, 200000, 800000],
+  master:   [120000, 300000,1500000],
+  phd:      [200000, 500000,2500000],
+};
+const _NA_LVL_IDX = { economy:0, medium:1, premium:2 };
+
 // ─── INIT ───
 (function init() {
   // 1. Auth check
@@ -4414,10 +4437,10 @@ function fmtShortTH(n) {
 
 /* ════════════════════════════════════════════
    HELPERS — sync ข้อมูลกับหน้า education / assets
+   (constants _NA_* ย้ายไปประกาศก่อน init แล้ว — กัน TDZ)
 ═══════════════════════════════════════════ */
 
 /* Cache age ตาม dob ต่อ session — กันค่ากระเพื่อมทุก render */
-const _NA_AGE_CACHE = new Map();
 function _naAgeNow(dobStr) {
   if (!dobStr) return null;
   if (_NA_AGE_CACHE.has(dobStr)) return _NA_AGE_CACHE.get(dobStr);
@@ -4431,26 +4454,6 @@ function _naAgeNow(dobStr) {
 }
 
 /* Education FV per child — replicate computeChildPlan.totalFuture จาก education.html */
-const _NA_EDU_STAGES = [
-  { key:'kinder',   startAge:3,  years:3 },
-  { key:'primary',  startAge:6,  years:6 },
-  { key:'mid',      startAge:12, years:3 },
-  { key:'high',     startAge:15, years:3 },
-  { key:'bachelor', startAge:18, years:4 },
-  { key:'master',   startAge:22, years:2, optional:'master' },
-  { key:'phd',      startAge:24, years:4, optional:'phd' },
-];
-const _NA_EDU_COST = {
-  kinder:   [ 30000,  80000, 250000],
-  primary:  [ 25000, 100000, 350000],
-  mid:      [ 30000, 120000, 400000],
-  high:     [ 35000, 150000, 450000],
-  bachelor: [ 60000, 200000, 800000],
-  master:   [120000, 300000,1500000],
-  phd:      [200000, 500000,2500000],
-};
-const _NA_LVL_IDX = { economy:0, medium:1, premium:2 };
-
 function _naChildEduFuture(child) {
   const age = _naAgeNow(child.dob || child.birthdate);
   const level = child.level || 'medium';
