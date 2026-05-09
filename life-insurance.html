@@ -389,8 +389,86 @@ function getCurrentLiquidAssets() {
                  .reduce((s,a) => s + Number(a.currentValue||0), 0);
 }
 
+/* ════════════════════════════════════════════
+   EDUCATION COST — replicate จาก education.html เพื่อให้ DIME E ตรงกัน
+   ค่าจาก "💸 ค่าใช้จ่ายรวม (FV)" ในหน้าการศึกษาบุตร = totalFuture
+═══════════════════════════════════════════ */
+const EDU_STAGES = [
+  { key:'kinder',   startAge:3,  years:3 },
+  { key:'primary',  startAge:6,  years:6 },
+  { key:'mid',      startAge:12, years:3 },
+  { key:'high',     startAge:15, years:3 },
+  { key:'bachelor', startAge:18, years:4 },
+  { key:'master',   startAge:22, years:2, optional:'master' },
+  { key:'phd',      startAge:24, years:4, optional:'phd' },
+];
+const EDU_COST_TABLE = {
+  kinder:   [ 30000,  80000, 250000],
+  primary:  [ 25000, 100000, 350000],
+  mid:      [ 30000, 120000, 400000],
+  high:     [ 35000, 150000, 450000],
+  bachelor: [ 60000, 200000, 800000],
+  master:   [120000, 300000,1500000],
+  phd:      [200000, 500000,2500000],
+};
+const EDU_LEVEL_IDX = { economy:0, medium:1, premium:2 };
+const EDU_DEFAULT_INFLATION = 5;
+
+function _ageNow(dobStr) {
+  if (!dobStr) return null;
+  const dob = new Date(dobStr);
+  if (isNaN(dob)) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+/* คำนวณ totalFuture (FV) ของลูก 1 คน — ตรงกับ computeChildPlan ใน education.html */
+function getChildEducationFuture(child) {
+  const age = _ageNow(child.dob || child.birthdate);
+  const level = child.level || 'medium';
+  const lvIdx = EDU_LEVEL_IDX[level] != null ? EDU_LEVEL_IDX[level] : 1;
+
+  /* fallback ถ้าไม่มี dob — ใช้ค่าเฉลี่ยรวมตาม level */
+  if (age == null) return [800000, 1500000, 3000000][lvIdx] || 1500000;
+
+  const includeMaster = !!child.includeMaster;
+  const includePhd    = !!child.includePhd;
+  const customCosts   = child.customCosts || {};
+  const inflationPct  = child.inflationRate != null ? Number(child.inflationRate) : EDU_DEFAULT_INFLATION;
+  const INFLATION     = inflationPct / 100;
+
+  let totalFuture = 0;
+  EDU_STAGES.forEach(s => {
+    if (s.optional === 'master' && !includeMaster) return;
+    if (s.optional === 'phd'    && !includePhd)    return;
+    const custKey = `${s.key}_${level}`;
+    const baseAnnualCost = customCosts[custKey] != null
+      ? Number(customCosts[custKey])
+      : EDU_COST_TABLE[s.key][lvIdx];
+    const startAge = s.startAge;
+    const endAge   = startAge + s.years;
+    let yearsLeft = 0;
+    if (age >= endAge)        yearsLeft = 0;
+    else if (age < startAge)  yearsLeft = s.years;
+    else                       yearsLeft = endAge - age;
+    yearsLeft = Math.max(yearsLeft, 0);
+    if (yearsLeft > 0) {
+      const yearOfStart = Math.max(startAge - age, 0);
+      for (let i = 0; i < Math.ceil(yearsLeft); i++) {
+        const yearFromNow = yearOfStart + i;
+        const partialYear = Math.min(1, yearsLeft - i);
+        totalFuture += baseAnnualCost * Math.pow(1 + INFLATION, yearFromNow) * partialYear;
+      }
+    }
+  });
+  return totalFuture;
+}
+
 /* DIME method: Debt + Income × years to retirement + Mortgage + Education
-   ดึง education gap จากหน้า education.html (ถ้ามี children) */
+   E ใช้ totalFuture (ค่าใช้จ่ายรวม FV) ตรงกับหน้า education.html */
 function getDIMENeed() {
   const c = getCurrent();
   if (!c) return { debt: 0, income: 0, education: 0, total: 0 };
@@ -405,16 +483,10 @@ function getDIMENeed() {
     yearsToRetire = Math.max(60 - age, 1);
   }
   const income = annualIncome * yearsToRetire;
-  /* E: education gap (ถ้ามี children) — รวม totalFuture - eduSavings */
+  /* E: ค่าใช้จ่ายรวม (FV) ของลูกทุกคน — ตรงกับ "💸 ค่าใช้จ่ายรวม (FV)" ในหน้าการศึกษาบุตร */
   let education = 0;
   if (c.children && c.children.length > 0) {
-    education = c.children.reduce((s, ch) => {
-      const lvIdx = { economy: 0, medium: 1, premium: 2 }[ch.level || 'medium'] || 1;
-      const eduSav = Number(ch.eduSavings || 0);
-      /* คำนวณคร่าว ๆ — ใช้ค่าเฉลี่ยตาม level (ไม่ต้อง replicate stage logic) */
-      const avgCost = [800000, 1500000, 3000000][lvIdx] || 1500000;
-      return s + Math.max(avgCost - eduSav, 0);
-    }, 0);
+    education = c.children.reduce((s, ch) => s + getChildEducationFuture(ch), 0);
   }
   return { debt, income, education, total: debt + income + education };
 }
