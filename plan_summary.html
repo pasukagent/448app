@@ -65,7 +65,7 @@
       box-shadow: var(--shadow-sm);
     }
     .progress-row {
-      display: grid; grid-template-columns: 130px 1fr 80px 130px; gap: 14px;
+      display: grid; grid-template-columns: 140px 1fr 70px 200px; gap: 14px;
       align-items: center; padding: 14px 0; border-bottom: 1px dashed var(--gray-100);
     }
     .progress-row:last-child { border-bottom: none; }
@@ -85,13 +85,22 @@
     .pr-bar-fill.s-med  { background: #F39C12; }
     .pr-bar-fill.s-bad  { background: #DC3545; }
     .pr-pct {
-      font-weight: 800; color: var(--red-primary); text-align: right; font-size: .95rem;
+      font-weight: 800; color: var(--red-primary); text-align: right; font-size: 1rem;
     }
     .pr-pct.s-good { color: #28a745; }
     .pr-pct.s-med  { color: #F39C12; }
     .pr-pct.s-bad  { color: #DC3545; }
     .pr-amount {
-      text-align: right; font-size: .92rem; color: var(--gray-700); font-weight: 700;
+      text-align: right; font-size: .82rem; line-height: 1.4;
+      display: flex; flex-direction: column; gap: 1px;
+    }
+    .pra-have   { color: var(--gray-700); font-weight: 700; }
+    .pra-target { color: var(--gray-500); font-size: .74rem; }
+    .pra-gap    { color: #DC3545; font-weight: 800; font-size: .82rem; }
+    .pra-ok     { color: #28a745; font-weight: 800; font-size: .82rem; }
+    @media (max-width: 720px) {
+      .progress-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 0; }
+      .pr-amount { text-align: left; flex-direction: row; flex-wrap: wrap; gap: 8px; }
     }
 
     /* Pyramid button */
@@ -680,10 +689,17 @@ function render() {
 
 function renderProgressRow(cat, data) {
   const status = statusOf(data.pct);
-  const pctText = isFinite(data.pct) ? data.pct.toFixed(2) + '%' : '—';
-  const amount  = isFinite(data.gap) && data.gap > 0
-    ? fmt(data.gap)
-    : (data.have > 0 ? fmt(data.have) : '—');
+  const pctText = isFinite(data.pct) ? data.pct.toFixed(1) + '%' : '—';
+  const hasData = data.target > 0 || data.have > 0;
+  const amountHtml = !hasData
+    ? `<span class="pra-target">— ยังไม่มีข้อมูล</span>`
+    : `
+      <span class="pra-have">มี ${fmt(data.have)}</span>
+      <span class="pra-target">ต้องการ ${fmt(data.target)}</span>
+      ${data.gap > 0
+        ? `<span class="pra-gap">ขาดอีก ${fmt(data.gap)}</span>`
+        : `<span class="pra-ok">✓ ครบแล้ว</span>`}
+    `;
   return `
     <div class="progress-row">
       <div class="pr-label">${cat.icon} ${cat.name}</div>
@@ -691,7 +707,7 @@ function renderProgressRow(cat, data) {
         <div class="pr-bar-fill s-${status}" style="width:${Math.max(Math.min(data.pct, 100), 0)}%"></div>
       </div>
       <div class="pr-pct s-${status}">${pctText}</div>
-      <div class="pr-amount">${amount}</div>
+      <div class="pr-amount">${amountHtml}</div>
     </div>
   `;
 }
