@@ -453,7 +453,7 @@ function _psHealthCalc(client) {
   return { target: ipdNeed, have: totalIPD, gap: Math.max(ipdNeed - totalIPD, 0) };
 }
 
-/* === TAX — proper income-based caps (match tax.html caps) === */
+/* === TAX — proper income-based caps (match tax.html + policies.html caps) === */
 function _psTaxCalc(client) {
   const ti = client.taxInputs || {};
   const annualIncome = Number(client.income) ||
@@ -469,7 +469,14 @@ function _psTaxCalc(client) {
     pvd:       Math.min(500000, incomeBased15),           /* PVD ≤ 15% × รายได้, max 500K */
     rmf:       Math.min(500000, incomeBased30),           /* RMF ≤ 30% × รายได้, max 500K */
     ssf:       Math.min(200000, incomeBased30),           /* SSF ≤ 30% × รายได้, max 200K */
+    thaiesg:   Math.min(300000, incomeBased30),           /* ThaiESG ≤ 30% × รายได้, max 300K */
   };
+  /* ThaiESG ดึงจาก client.assets (type='thaiesg') — tax.html ยังไม่มี input field
+     ใช้ ti.thaiesg ถ้ามี, ไม่งั้น fallback assets */
+  const thaiesgFromAssets = (client.assets || [])
+    .filter(a => a.type === 'thaiesg')
+    .reduce((s,a) => s + _psAnnualContrib(a), 0);
+  const thaiesgAmt = ti.thaiesg != null ? Number(ti.thaiesg) : thaiesgFromAssets;
   /* have = sum ของ deduction จริง (capped) */
   const have = Math.min(Number(ti.lifeIns||0), caps.lifeIns)
              + Math.min(Number(ti.healthIns||0), caps.healthIns)
@@ -477,7 +484,8 @@ function _psTaxCalc(client) {
              + Math.min(Number(ti.annuity||0), caps.annuity)
              + Math.min(Number(ti.pvd||0), caps.pvd)
              + Math.min(Number(ti.rmf||0), caps.rmf)
-             + Math.min(Number(ti.ssf||0), caps.ssf);
+             + Math.min(Number(ti.ssf||0), caps.ssf)
+             + Math.min(thaiesgAmt, caps.thaiesg);
   /* target = available cap ทั้งหมด (ใช้ได้เต็มที่) */
   const target = Object.values(caps).reduce((s,v) => s + (isFinite(v) ? v : 0), 0);
   return { target, have, gap: Math.max(target - have, 0) };
