@@ -4535,7 +4535,20 @@ function getNeedsInputs() {
     final:       n.final       != null ? n.final       : 500000,
     haveLife:    n.haveLife    != null ? n.haveLife    : 0,
     haveAssets:  n.haveAssets  != null ? n.haveAssets  : liquidVal,
+    /* Meta สำหรับ UI — ค่า auto จากอายุเกษียณ + อายุเกษียณ */
+    _yearsAuto:  yearsToRetire,
+    _retireAge:  retireAge,
   };
+}
+
+/* Reset incomeYears = ลบ n.incomeYears ให้กลับไปใช้ default (retireAge - age) */
+function resetIncomeYears() {
+  updateCurrentUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === currentClientId);
+    if (!c || !c.needsInputs) return;
+    delete c.needsInputs.incomeYears;
+  });
+  renderNeedsAnalysis();
 }
 
 function computeLifeNeeds(client, inputs) {
@@ -4602,12 +4615,17 @@ function renderNeedsAnalysis() {
           <div class="nc-row cat-income">
             <div class="nc-row-label">
               <span class="nc-row-name">💼 รายได้ต่อปี × จำนวนปีที่ดูแล</span>
-              <span class="nc-row-hint">ทดแทนรายได้ให้ครอบครัว</span>
+              <span class="nc-row-hint">ทดแทนรายได้ให้ครอบครัว · ปีที่ดูแล = อายุเกษียณ <b>${inputs._retireAge}</b> − อายุปัจจุบัน · <a href="retirement.html" style="color:var(--red-primary);">แก้อายุเกษียณ</a>${
+                /* ถ้าค่า saved ไม่ตรง auto → แสดง reset link */
+                Math.abs(Number(inputs.incomeYears) - inputs._yearsAuto) > 0.05
+                  ? ` · <a href="javascript:void(0)" onclick="resetIncomeYears()" style="color:#FF8C00;">🔄 sync ค่า ${inputs._yearsAuto.toFixed(1)} ปี</a>`
+                  : ''
+              }</span>
             </div>
             <div style="display:flex;gap:6px;">
               <input class="money-fmt" inputmode="decimal" min="0" value="${inputs.income}" onchange="updateNeedsInput('income',parseMoney(this))" placeholder="รายได้/ปี" style="width:100px;">
               <span style="align-self:center;color:var(--gray-500);">×</span>
-              <input type="number" min="0" max="60" step="0.1" value="${Number(inputs.incomeYears).toFixed(1)}" onchange="updateNeedsInput('incomeYears',Number(this.value))" style="width:75px;" title="จำนวนปีถึงเกษียณ (อายุเกษียณ − อายุปัจจุบัน) — อายุเกษียณดึงจากหน้าวางแผนเกษียณ">
+              <input type="number" min="0" max="60" step="0.1" value="${Number(inputs.incomeYears).toFixed(1)}" onchange="updateNeedsInput('incomeYears',Number(this.value))" style="width:75px;" title="ปีที่ดูแล = อายุเกษียณ ${inputs._retireAge} − อายุปัจจุบัน (ดึงจากหน้าวางแผนเกษียณ)">
               <span style="align-self:center;color:var(--gray-500);font-size:.8rem;">ปี</span>
             </div>
           </div>
