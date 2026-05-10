@@ -2121,13 +2121,42 @@ function renderTable(policies) {
 
 // ─── SPIDER CHART ───
 function renderSpiderChart(policies) {
+  /* Dynamic recommend ตามรายได้ × multiplier (มาตรฐานอุตสาหกรรมประกัน):
+     - ทุนชีวิต: 7× รายได้/ปี (DIME guideline 5-10×)
+     - สุขภาพ: IPD/ครั้ง × 5 ครั้ง/ปี (ตาม trustedHospitalTier — buffer admission)
+     - โรคร้ายแรง: 3× รายได้/ปี (รักษา + รายได้หาย)
+     - อุบัติเหตุ: 5× รายได้/ปี (สูญเสียอวัยวะถาวร)
+     - ค่าชดเชย: 50% × รายได้/วัน
+     - ทุพพลภาพ: 65% × รายได้/เดือน
+     ไม่มีรายได้ → ใช้ค่าคงที่เป็น fallback */
+  const client = getCurrentClient();
+  const annualIncome = client ? (Number(client.income) ||
+    (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0)) : 0;
+  const monthlyIncome = annualIncome / 12;
+  const dailyIncome   = annualIncome / 365;
+  const tier = (client && client.trustedHospitalTier) || 2;
+  const tierData = HOSPITAL_TIERS[tier - 1] || HOSPITAL_TIERS[1];
+  const tierIPD = tierData.ipdAvg;
+
   const checks = [
-    { type:'ชีวิต',       label:'ชีวิต',          icon:'🛡️', recommend:5000000  },
-    { type:'สุขภาพ',      label:'สุขภาพ',         icon:'❤️', recommend:1000000  },
-    { type:'โรคร้ายแรง', label:'โรคร้ายแรง',    icon:'🏥', recommend:2000000  },
-    { type:'อุบัติเหตุ', label:'อุบัติเหตุ',    icon:'🚑', recommend:500000   },
-    { type:'ค่าชดเชย',   label:'ค่าชดเชย (฿/วัน)', icon:'💵', recommend:2000  },
-    { type:'ทุพพลภาพ',   label:'ทุพพลภาพ (฿/เดือน)', icon:'♿', recommend:30000 },
+    { type:'ชีวิต',       label:'ชีวิต',          icon:'🛡️',
+      recommend: annualIncome > 0 ? Math.round(annualIncome * 7) : 5000000,
+      formula:   annualIncome > 0 ? '7× รายได้/ปี' : 'ค่าเริ่มต้น' },
+    { type:'สุขภาพ',      label:'สุขภาพ',         icon:'❤️',
+      recommend: tierIPD * 5,
+      formula:   `IPD รพ.tier ${tier} × 5 ครั้ง/ปี` },
+    { type:'โรคร้ายแรง', label:'โรคร้ายแรง',    icon:'🏥',
+      recommend: annualIncome > 0 ? Math.round(annualIncome * 3) : 2000000,
+      formula:   annualIncome > 0 ? '3× รายได้/ปี' : 'ค่าเริ่มต้น' },
+    { type:'อุบัติเหตุ', label:'อุบัติเหตุ',    icon:'🚑',
+      recommend: annualIncome > 0 ? Math.round(annualIncome * 5) : 500000,
+      formula:   annualIncome > 0 ? '5× รายได้/ปี' : 'ค่าเริ่มต้น' },
+    { type:'ค่าชดเชย',   label:'ค่าชดเชย (฿/วัน)', icon:'💵',
+      recommend: dailyIncome > 0 ? Math.round(dailyIncome * 0.5) : 2000,
+      formula:   dailyIncome > 0 ? '50% × รายได้/วัน' : 'ค่าเริ่มต้น' },
+    { type:'ทุพพลภาพ',   label:'ทุพพลภาพ (฿/เดือน)', icon:'♿',
+      recommend: monthlyIncome > 0 ? Math.round(monthlyIncome * 0.65) : 30000,
+      formula:   monthlyIncome > 0 ? '65% × รายได้/เดือน' : 'ค่าเริ่มต้น' },
   ];
 
   // Compute coverage by type (รวม rider ทุกประเภทด้วย)
@@ -2169,8 +2198,8 @@ function renderSpiderChart(policies) {
     const level = pct === 0 ? 'danger' : pct < 50 ? 'danger' : pct < 100 ? 'warn' : 'ok';
     const statusText = pct === 0 ? 'ยังไม่มี' : pct < 50 ? 'น้อยเกินไป' : pct < 100 ? 'ยังไม่เพียงพอ' : 'เพียงพอ ✓';
     const sub = have > 0
-      ? `มีอยู่ ${fmtShort(have)} / แนะนำ ${fmtShort(c.recommend)}`
-      : `แนะนำ ${fmtShort(c.recommend)}`;
+      ? `มีอยู่ ${fmtShort(have)} / แนะนำ ${fmtShort(c.recommend)} <small style="color:var(--gray-400);">(${c.formula})</small>`
+      : `แนะนำ ${fmtShort(c.recommend)} <small style="color:var(--gray-400);">(${c.formula})</small>`;
     return `
       <div class="spider-leg-item ${level}">
         <div style="font-size:1.1rem;">${c.icon}</div>
