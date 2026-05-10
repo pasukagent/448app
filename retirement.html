@@ -339,6 +339,18 @@ function savePlanField(field, value) {
   render();
 }
 
+/* แปลงจำนวนเงิน บาท/เดือน → % ของรายได้ → save เป็น incomePctAfterRetire
+   เพื่อให้ user ใส่เป็นจำนวนเงินตรงๆ ได้ (เข้าใจง่ายกว่า %) */
+function updatePctFromMonthly(monthlyAmount, annualIncome) {
+  if (!annualIncome || annualIncome <= 0) {
+    alert('⚠️ ไม่มีข้อมูลรายได้ — แก้ % ตรงๆ หรือเพิ่มรายได้ในข้อมูลลูกค้าก่อน');
+    return;
+  }
+  const annualNeed = Number(monthlyAmount || 0) * 12;
+  const pct = Math.round((annualNeed / annualIncome) * 100 * 10) / 10; // 1 ทศนิยม
+  savePlanField('incomePctAfterRetire', pct);
+}
+
 /* ════════════════════════════════════════════
    AUTO-DERIVE values from client data
 ═══════════════════════════════════════════ */
@@ -524,9 +536,24 @@ function render() {
         </div>
 
         <div class="ret-input-row">
-          <label>💰 % รายได้ที่ต้องการหลังเกษียณ <span class="hint">(แนะนำ 70%)</span></label>
-          <input type="number" min="30" max="120" step="5" value="${plan.incomePctAfterRetire}"
-            onchange="savePlanField('incomePctAfterRetire', this.value)">
+          <label>💰 รายได้ที่ต้องการหลังเกษียณ <span class="hint">(แนะนำ 70%)</span></label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="number" min="0" max="200" step="1" value="${plan.incomePctAfterRetire}"
+              onchange="savePlanField('incomePctAfterRetire', this.value)" style="width:75px;">
+            <span style="color:var(--gray-500);font-size:.85rem;">%</span>
+            <span style="color:var(--gray-300);">=</span>
+            <input type="text" inputmode="decimal" class="money-fmt"
+              value="${derived.annualIncome > 0 ? Math.round(derived.annualIncome * plan.incomePctAfterRetire / 100 / 12).toLocaleString('th-TH') : 0}"
+              onchange="updatePctFromMonthly(parseMoney(this), ${derived.annualIncome})"
+              ${derived.annualIncome > 0 ? '' : 'disabled title="ต้องมีรายได้ในข้อมูลลูกค้าก่อน"'}
+              style="flex:1;min-width:0;text-align:right;">
+            <span style="color:var(--gray-500);font-size:.78rem;white-space:nowrap;">บาท/เดือน</span>
+          </div>
+          <div style="font-size:.72rem;color:var(--gray-400);margin-top:4px;">
+            ${derived.annualIncome > 0
+              ? `≈ ${fmtFull(derived.annualIncome * plan.incomePctAfterRetire / 100)} บาท/ปี · จากรายได้ปัจจุบัน ${fmtFull(derived.annualIncome)}/ปี`
+              : 'ใส่รายได้ในข้อมูลลูกค้าเพื่อแปลง % ↔ บาท'}
+          </div>
         </div>
 
         <div class="ret-divider"></div>
