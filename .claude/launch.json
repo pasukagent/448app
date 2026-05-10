@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "448app",
+      "runtimeExecutable": "C:/Program Files/Git/usr/bin/perl.exe",
+      "runtimeArgs": ["-MIO::Socket::INET", "-e", "use IO::Socket::INET; $|=1; my $s=IO::Socket::INET->new(LocalPort=>3000,Listen=>20,ReuseAddr=>1) or die $!; while(my $c=$s->accept){binmode $c; eval{my $req=''; while(my $l=<$c>){$req.=$l; last if $l eq \"\\r\\n\"} my ($f)=$req=~/GET \\/(\\S*)/; $f||='index.html'; $f=~s/\\?.*//; my $p='C:/aia/448app/'.$f; if(-f $p){open my $fh,'<:raw',$p; local $/; my $b=<$fh>; close $fh; my $ct=$p=~/\\.html$/?'text/html; charset=utf-8':($p=~/\\.js$/?'text/javascript; charset=utf-8':($p=~/\\.css$/?'text/css; charset=utf-8':($p=~/\\.json$/?'application/json':($p=~/\\.svg$/?'image/svg+xml':'application/octet-stream')))); my $cl=length($b); print $c \"HTTP/1.0 200 OK\\r\\nContent-Type: $ct\\r\\nContent-Length: $cl\\r\\nConnection: close\\r\\n\\r\\n\".$b;}else{print $c \"HTTP/1.0 404 Not Found\\r\\nConnection: close\\r\\n\\r\\nNot found\";}}; shutdown($c,1); close $c;}"],
+      "port": 3000
+    }
+  ]
+}

@@ -32,7 +32,19 @@
       "Bash(git commit -m ' *)",
       "Bash(where.exe node *)",
       "Bash(powershell -NoProfile -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source\")",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s \"http://localhost:3001/policies.html\")",
+      "Bash(taskkill //PID 57584 //F)",
+      "Bash(curl -s -o /tmp/deployed-policies.html -w \"HTTP %{http_code} size=%{size_download}\\\\n\" \"https://448app.github.io/policies.html?nocache=$\\(date +%s\\)\")",
+      "Bash(curl -s -o /tmp/deployed-index.html -w \"HTTP %{http_code} size=%{size_download}\\\\n\" \"https://448app.github.io/\")",
+      "Bash(curl -s -o /tmp/deployed-policies.html -w \"HTTP %{http_code} size=%{size_download}\\\\n\" \"https://448app.github.io/448app/policies.html?nocache=$\\(date +%s\\)\")",
+      "Read(//tmp/**)",
+      "Bash(git push *)",
+      "Bash(curl -s \"https://448app.github.io/448app/policies.html?nocache=$\\(date +%s\\)\" -o /tmp/dep2.html)",
+      "Bash(curl -sI \"https://448app.github.io/448app/policies.html?nocache=$\\(date +%s\\)\")",
+      "Bash(awk 'NR>4342 && /^\\(const|let|var\\) /' policies.html)",
+      "Bash(awk 'NR==4384 || NR==4564 || NR==4355' C:/aia/448app/policies.html)"
     ]
   }
 }
