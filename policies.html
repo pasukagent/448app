@@ -4522,8 +4522,9 @@ function getNeedsInputs() {
   const cachedAge = _naAgeNow(c.dob);
   const yearsRaw  = cachedAge != null ? Math.max(retireAge - cachedAge, 1) : 10;
   const yearsToRetire = Math.round(yearsRaw * 10) / 10;
-  /* การศึกษาบุตร: ค่าใช้จ่ายรวม FV จากหน้าการศึกษาบุตร (replicate computeChildPlan) */
-  const eduTotal = (c.children || []).reduce((s, ch) => s + _naChildEduFuture(ch), 0);
+  /* การศึกษาบุตร: ค่าใช้จ่ายรวม FV จากหน้าการศึกษาบุตร (replicate computeChildPlan)
+     round เป็น integer เพื่อกันแสดงทศนิยมขยับ (เช่น 7,901,752.72 → 7,901,753) */
+  const eduTotal = Math.round((c.children || []).reduce((s, ch) => s + _naChildEduFuture(ch), 0));
   /* สินทรัพย์มี: liquid (cash + deposit + bond) จากหน้าสินทรัพย์ */
   const liquidVal = _naLiquidAssets(c);
 
