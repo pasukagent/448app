@@ -677,9 +677,10 @@ function renderChildCard(child, plan) {
       <td class="col-num">
         <input inputmode="decimal" value="${s.baseAnnualCost.toLocaleString('th-TH')}" class="cost-input money-fmt ${isCustom ? 'custom' : ''}"
           onchange="updateChildCost('${child.id}','${custKey}',parseMoney(this))"
-          title="${isCustom ? 'แก้ไขเอง — คลิกขวาเพื่อรีเซ็ต' : 'ค่าเริ่มต้น'}"
+          title="${isCustom ? 'แก้ไขเอง — กดปุ่ม ↺ เพื่อรีเซ็ต' : 'ค่าเริ่มต้น'}"
           oncontextmenu="event.preventDefault();resetChildCost('${child.id}','${custKey}')"
           style="width:130px;padding:5px 8px;border:1.5px solid ${isCustom ? 'var(--red-primary)' : 'var(--gray-200)'};border-radius:6px;font-family:var(--font);font-size:.85rem;text-align:right;background:${isCustom ? '#FFF8F8' : 'white'};">
+        ${isCustom ? `<button onclick="resetChildCost('${child.id}','${custKey}')" title="รีเซ็ตเป็นค่าเริ่มต้น" style="margin-left:4px;padding:3px 7px;border:1.5px solid var(--red-primary);background:white;color:var(--red-primary);border-radius:5px;cursor:pointer;font-family:var(--font);font-size:.85rem;line-height:1;">↺</button>` : ''}
         <span style="font-size:.72rem;color:var(--gray-400);">/ปี</span>
       </td>
       <td class="col-num">${s.yearsLeft > 0 ? s.yearsLeft + ' ปี' : '—'}</td>
@@ -743,7 +744,7 @@ function renderChildCard(child, plan) {
       </div>
 
       <!-- Stages table -->
-      <div class="cost-hint">💡 <b>คลิกที่ค่าเทอม</b>เพื่อแก้ไขเอง · <b>คลิกขวา</b>เพื่อรีเซ็ตเป็นค่าเริ่มต้น</div>
+      <div class="cost-hint">💡 <b>คลิกที่ค่าเทอม</b>เพื่อแก้ไขเอง · กดปุ่ม <b>↺</b> ข้างค่าที่แก้แล้ว เพื่อรีเซ็ตเป็นค่าเริ่มต้น</div>
       <table class="stages-table">
         <thead>
           <tr>
