@@ -1193,25 +1193,29 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
     .filter(g => g.pos >= 0 && g.pos <= 100)
     .sort((a,b) => a.age - b.age);
 
-  /* Lane-based collision avoidance — ทุก group อยู่ด้านบน axis (above) */
+  /* Lane-based collision avoidance — แยก lane ต่อข้าง (above/below) ตาม alternating
+     คี่ (idx 0,2,4...): above, คู่ (idx 1,3,5...): below
+     แต่ละข้างมี lane counter แยก — ป้องกัน lane number จากข้างหนึ่งกระทบอีกข้าง */
   const MIN_DIST_PCT = 14;
   const lanesAbove = [];
-  const placedGroups = groups.map(g => {
+  const lanesBelow = [];
+  const placedGroups = groups.map((g, i) => {
+    const side = (i % 2 === 0) ? 'above' : 'below';
+    const lanes = side === 'above' ? lanesAbove : lanesBelow;
     let lane = 0;
-    while (lane < lanesAbove.length && lanesAbove[lane].some(pp => Math.abs(pp - g.pos) < MIN_DIST_PCT)) {
+    while (lane < lanes.length && lanes[lane].some(pp => Math.abs(pp - g.pos) < MIN_DIST_PCT)) {
       lane++;
     }
-    if (lane >= lanesAbove.length) lanesAbove.push([]);
-    lanesAbove[lane].push(g.pos);
-    return { ...g, side: 'above', lane };
+    if (lane >= lanes.length) lanes.push([]);
+    lanes[lane].push(g.pos);
+    return { ...g, side, lane };
   });
 
-  /* Padding-top + padding-bottom เผื่อ lane stacking + multi-item card height
-     Base 200px (สำหรับ lane 0) + lane * 110 + extra 22px ต่อ item ใน multi-item card
-     Alternating mode — cards แบ่งเป็น above (คี่) / below (คู่) — ต้องเผื่อทั้ง 2 ฝั่ง */
+  /* Padding ต่อข้าง — base 130px (พอ card lane 0) + lane × 110 + multi-item extra */
   const maxItems = Math.max(1, ...placedGroups.map(g => g.items.length));
-  const padTop = 200 + (lanesAbove.length > 1 ? (lanesAbove.length - 1) * 110 : 0) + (maxItems > 1 ? (maxItems - 1) * 22 : 0);
-  const padBottom = padTop;
+  const extraItems = (maxItems > 1) ? (maxItems - 1) * 22 : 0;
+  const padTop    = 130 + (lanesAbove.length > 1 ? (lanesAbove.length - 1) * 110 : 0) + extraItems;
+  const padBottom = 130 + (lanesBelow.length > 1 ? (lanesBelow.length - 1) * 110 : 0) + extraItems;
 
   /* Current age marker — anchor จาก bottom เหมือน milestone อื่นๆ */
   const nowMarker = `
@@ -1269,13 +1273,9 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
 
   /* navMilestone ย้ายไป global scope (หลัง render) เพื่อให้ HTML onclick เรียกได้ */
 
-  /* Alternating above/below — เพื่อลดการทับซ้อนแนวตั้ง
-     - คี่ (index 0,2,4...): above (card อยู่บน, icon ที่ axis ดันลง)
-     - คู่ (index 1,3,5...): below (card อยู่ล่าง, icon ที่ axis ดันขึ้น) */
-  const msMarkers = placedGroups.map((g, i) => {
-    const place = (i % 2 === 0) ? 'above' : 'below';
-    /* below mode = flex-direction reverse → ใส่ icon ก่อน, line, content */
-    if (place === 'below') {
+  /* Render — ใช้ g.side ที่ assigned แล้ว (above/below) + lane ต่อข้าง */
+  const msMarkers = placedGroups.map(g => {
+    if (g.side === 'below') {
       return `
         <div class="tl-milestone below" style="left:${leftStyle(g.pos)}; --lane:${g.lane};">
           ${renderGroupIcon(g)}
