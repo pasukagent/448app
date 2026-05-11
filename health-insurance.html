@@ -737,8 +737,9 @@ function render() {
     <div class="premium-card">
       <label>💸 เบี้ยประกันสุขภาพ/ปี:</label>
       <input class="pc-input money-fmt" type="text" inputmode="decimal"
-        value="${hi.premium || 0}"
+        value="${hi.premium > 0 ? hi.premium : ''}"
         onchange="updatePremium(parseMoney(this))"
+        onfocus="this.select()"
         placeholder="0">
       ${(() => {
         const prem = Number(hi.premium || 0);
