@@ -744,7 +744,8 @@ function render() {
         const prem = Number(hi.premium || 0);
         if (prem <= 0) return '';
         const monthlyPrem = prem / 12;
-        const pctIncome = annualIncome > 0 ? (prem / annualIncome * 100) : null;
+        const annualInc = monthlyIncome * 12;
+        const pctIncome = annualInc > 0 ? (prem / annualInc * 100) : null;
         /* < 5% ดี · 5-10% พอเหมาะ · > 10% เกินมาตรฐาน */
         const color = pctIncome == null ? '#888'
                     : pctIncome < 5 ? '#28a745'
