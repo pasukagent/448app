@@ -732,13 +732,13 @@ function computeMilestones(client) {
     const childName = ch.name || 'บุตร';
     /* parent's age when child reaches each milestone */
     const ageDiff = currentAge - childAge;
-    /* primary school (age 6) */
+    /* primary school (age 6) — round year กัน decimal (childAge เป็นทศนิยม) */
     items.push({
       type: 'child',
       icon: '🏫',
       name: `${escapeHtml(childName)} เข้า ป.1`,
       parentAge: ageDiff + 6,
-      year: currentYear + (6 - childAge),
+      year: Math.round(currentYear + (6 - childAge)),
       meta: 'อายุบุตร 6 ปี',
     });
     /* university (age 18) */
@@ -747,7 +747,7 @@ function computeMilestones(client) {
       icon: '🎓',
       name: `${escapeHtml(childName)} เข้ามหา\'ลัย`,
       parentAge: ageDiff + 18,
-      year: currentYear + (18 - childAge),
+      year: Math.round(currentYear + (18 - childAge)),
       meta: 'อายุบุตร 18 ปี',
     });
     /* university grad (age 22) */
@@ -756,7 +756,7 @@ function computeMilestones(client) {
       icon: '🎉',
       name: `${escapeHtml(childName)} จบ ป.ตรี`,
       parentAge: ageDiff + 22,
-      year: currentYear + (22 - childAge),
+      year: Math.round(currentYear + (22 - childAge)),
       meta: 'อายุบุตร 22 ปี',
     });
   });
@@ -804,18 +804,18 @@ function computeMilestones(client) {
     }
   });
 
-  /* เกษียณ — ใช้อายุที่ผู้ใช้กำหนดได้ */
+  /* เกษียณ — ใช้อายุที่ผู้ใช้กำหนดได้ (round year กัน decimal จาก currentAge) */
   const retireAge = getRetirementAge(client);
   items.push({
     type: 'retire',
     icon: '🛋️',
     name: 'เกษียณ',
     parentAge: retireAge,
-    year: currentYear + (retireAge - currentAge),
+    year: Math.round(currentYear + (retireAge - currentAge)),
     meta: `อายุ ${retireAge} ปี`,
   });
 
-  /* Custom milestones — user-added */
+  /* Custom milestones — user-added (round year กัน decimal) */
   (client.timelineMilestones || []).forEach(m => {
     const age = Number(m.age || 0);
     items.push({
@@ -823,7 +823,7 @@ function computeMilestones(client) {
       icon: m.icon || '🎯',
       name: escapeHtml(m.name || 'Milestone'),
       parentAge: age,
-      year: currentYear + (age - currentAge),
+      year: Math.round(currentYear + (age - currentAge)),
       amount: m.amount,
       meta: m.note ? escapeHtml(m.note) : 'กำหนดเอง',
       isCustom: true,
