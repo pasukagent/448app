@@ -456,6 +456,7 @@ function _psHealthCalc(client) {
 /* === TAX — proper income-based caps (match tax.html + policies.html caps) === */
 function _psTaxCalc(client) {
   const ti = client.taxInputs || {};
+  const hi = client.healthInputs || {};
   const annualIncome = Number(client.income) ||
     (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
   /* available cap per type ตามรายได้ + เพดานกฎหมาย */
@@ -477,9 +478,12 @@ function _psTaxCalc(client) {
     .filter(a => a.type === 'thaiesg')
     .reduce((s,a) => s + _psAnnualContrib(a), 0);
   const thaiesgAmt = ti.thaiesg != null ? Number(ti.thaiesg) : thaiesgFromAssets;
+  /* รวมเบี้ยประกันสุขภาพจาก healthInputs.premium ถ้ามี (ที่กรอกในหน้า "ประกันสุขภาพ")
+     ใช้ ti.healthIns ถ้ามี (override จาก tax.html), ไม่งั้น fallback hi.premium */
+  const healthInsAmt = ti.healthIns != null ? Number(ti.healthIns) : Number(hi.premium || 0);
   /* have = sum ของ deduction จริง (capped) */
   const have = Math.min(Number(ti.lifeIns||0), caps.lifeIns)
-             + Math.min(Number(ti.healthIns||0), caps.healthIns)
+             + Math.min(healthInsAmt, caps.healthIns)
              + Math.min(Number(ti.parentIns||0), caps.parentIns)
              + Math.min(Number(ti.annuity||0), caps.annuity)
              + Math.min(Number(ti.pvd||0), caps.pvd)

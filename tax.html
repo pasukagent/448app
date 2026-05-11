@@ -1479,9 +1479,12 @@
     const pvdContrib     = assets.filter(a => a.type==='pvd').reduce((s,a)=>s+annualContrib(a),0);
     const rmfContrib     = assets.filter(a => a.type==='rmf').reduce((s,a)=>s+annualContrib(a),0);
     const ssfContrib     = assets.filter(a => a.type==='ssf').reduce((s,a)=>s+annualContrib(a),0);
+    /* รวมเบี้ยประกันสุขภาพจากหน้า "ประกันสุขภาพ" (healthInputs.premium) เข้ามาด้วย */
+    const hiPremium      = Number(client.healthInputs && client.healthInputs.premium || 0);
+    const totalHealthPrem = ins.healthPrem + hiPremium;
 
     document.getElementById('d-life-ins').value   = Math.min(ins.lifePrem, 100000);
-    document.getElementById('d-health-ins').value = Math.min(ins.healthPrem, 25000);
+    document.getElementById('d-health-ins').value = Math.min(totalHealthPrem, 25000);
     document.getElementById('d-annuity').value    = Math.min(ins.annuityPrem, 200000);
     document.getElementById('d-pvd').value        = pvdContrib;
     document.getElementById('d-rmf').value        = rmfContrib;
@@ -1570,10 +1573,13 @@
     document.getElementById('d-child').value    = ti.child    != null ? ti.child    : 0;
 
     // 3) Insurance premiums — auto-fill from this client's policies (Phase 3.3 schema-aware)
+    // รวมเบี้ยประกันสุขภาพจากหน้า "ประกันสุขภาพ" (healthInputs.premium) เข้ามาด้วย
     const insBreakdown = computeInsurancePremiumsFromPolicies(policies);
     const { lifePrem, healthPrem, annuityPrem } = insBreakdown;
+    const hiPremium = Number(client.healthInputs && client.healthInputs.premium || 0);
+    const totalHealthPrem = healthPrem + hiPremium;
     document.getElementById('d-life-ins').value   = ti.lifeIns   != null ? ti.lifeIns   : Math.min(lifePrem, 100000);
-    document.getElementById('d-health-ins').value = ti.healthIns != null ? ti.healthIns : Math.min(healthPrem, 25000);
+    document.getElementById('d-health-ins').value = ti.healthIns != null ? ti.healthIns : Math.min(totalHealthPrem, 25000);
     document.getElementById('d-parent-ins').value = ti.parentIns != null ? ti.parentIns : 0;
     document.getElementById('d-annuity').value    = ti.annuity   != null ? ti.annuity   : Math.min(annuityPrem, 200000);
 

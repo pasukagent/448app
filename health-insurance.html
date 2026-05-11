@@ -740,6 +740,30 @@ function render() {
         value="${hi.premium || 0}"
         onchange="updatePremium(parseMoney(this))"
         placeholder="0">
+      ${(() => {
+        const prem = Number(hi.premium || 0);
+        if (prem <= 0) return '';
+        const monthlyPrem = prem / 12;
+        const pctIncome = annualIncome > 0 ? (prem / annualIncome * 100) : null;
+        /* < 5% ดี · 5-10% พอเหมาะ · > 10% เกินมาตรฐาน */
+        const color = pctIncome == null ? '#888'
+                    : pctIncome < 5 ? '#28a745'
+                    : pctIncome <= 10 ? '#FF8C00'
+                    : '#DC3545';
+        const status = pctIncome == null ? '(ยังไม่ระบุรายได้)'
+                    : pctIncome < 5 ? '✅ อยู่ในเกณฑ์ดี'
+                    : pctIncome <= 10 ? '⚠️ พอเหมาะ'
+                    : '⛔ เกินมาตรฐาน (>10%)';
+        return `
+          <div style="margin-top:10px;padding:10px 12px;background:var(--gray-50);border-radius:8px;font-size:.83rem;color:var(--gray-700);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+            <span>≈ ฿${Math.round(monthlyPrem).toLocaleString('th-TH')}/เดือน${pctIncome != null ? ` · <b>${pctIncome.toFixed(1)}%</b> ของรายได้` : ''}</span>
+            <span style="color:${color};font-weight:700;">${status}</span>
+          </div>
+          <div style="margin-top:6px;font-size:.72rem;color:var(--gray-400);">
+            💡 ใช้เป็นค่าลดหย่อนภาษีอัตโนมัติในหน้า "คำนวณภาษี" + รวมในสรุปแผน
+          </div>
+        `;
+      })()}
     </div>
 
     <!-- Progress -->
