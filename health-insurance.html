@@ -866,6 +866,7 @@ function resetRecommendations() {
 
 function updatePremium(value) {
   saveHealthInputs(hi => { hi.premium = Number(value) || 0; });
+  render();
 }
 
 /* ════════════════════════════════════════════
