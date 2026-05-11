@@ -144,6 +144,11 @@
     .tl-mark-name { font-weight: 800; color: var(--gray-800); line-height: 1.2; margin-bottom: 2px; }
     .tl-mark-year { color: var(--gray-500); font-size: .68rem; font-weight: 700; }
     .tl-mark-amount { color: var(--red-primary); font-weight: 700; font-size: .72rem; margin-top: 2px; }
+    /* คลิกได้ — hover เปลี่ยนสีนิดๆ */
+    .tl-mark-clickable { padding: 2px; border-radius: 4px; transition: background .15s; }
+    .tl-mark-clickable:hover { background: var(--red-soft); }
+    .tl-group-item[onclick] { border-radius: 4px; transition: background .15s; padding: 3px 4px; }
+    .tl-group-item[onclick]:hover { background: var(--red-soft); }
 
     /* Multi-item group card */
     .tl-mark-content.is-group { max-width: 180px; padding: 8px 10px; }
@@ -1063,26 +1068,51 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
   function renderGroupCard(g) {
     if (g.items.length === 1) {
       const m = g.items[0];
+      const navAttr = `onclick="navMilestone('${m.type}','${m.customId||''}')" style="cursor:pointer;" title="คลิกเพื่อดูรายละเอียด"`;
       return `<div class="tl-mark-content">
-        <div class="tl-mark-name">${m.name}</div>
-        <div class="tl-mark-year">อายุ ${g.age} ปี</div>
-        ${m.amount ? `<div class="tl-mark-amount">${fmt(m.amount)}</div>` : ''}
-        <button class="tl-add-btn" onclick="openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
+        <div class="tl-mark-clickable" ${navAttr}>
+          <div class="tl-mark-name">${m.name}</div>
+          <div class="tl-mark-year">อายุ ${g.age} ปี</div>
+          ${m.amount ? `<div class="tl-mark-amount">${fmt(m.amount)}</div>` : ''}
+        </div>
+        <button class="tl-add-btn" onclick="event.stopPropagation();openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
       </div>`;
     }
     /* Multi-item — list ทั้งหมดในการ์ดเดียว */
     return `<div class="tl-mark-content is-group">
       <div class="tl-mark-year">อายุ ${g.age} ปี (${g.items.length} รายการ)</div>
       ${g.items.map(it => `
-        <div class="tl-group-item">
+        <div class="tl-group-item" onclick="navMilestone('${it.type}','${it.customId||''}')" style="cursor:pointer;" title="คลิกเพื่อดูรายละเอียด">
           <span class="tl-gi-icon">${it.icon}</span>
           <span class="tl-gi-name">${it.name}</span>
           ${it.amount ? `<span class="tl-gi-amount">${fmtShort(it.amount)}</span>` : ''}
-          ${it.isCustom ? `<button class="tl-gi-del" onclick="deleteCustomMs('${it.customId}')" title="ลบ">×</button>` : ''}
+          ${it.isCustom ? `<button class="tl-gi-del" onclick="event.stopPropagation();deleteCustomMs('${it.customId}')" title="ลบ">×</button>` : ''}
         </div>
       `).join('')}
-      <button class="tl-add-btn" onclick="openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
+      <button class="tl-add-btn" onclick="event.stopPropagation();openMsModal(null,${g.age})">＋ เพิ่มที่อายุนี้</button>
     </div>`;
+  }
+
+  /* คลิก milestone → ไปหน้าจัดการของ type นั้นๆ
+     - child  → education.html (จัดการบุตร + แผนการศึกษา)
+     - goal   → goals.html (เป้าหมายชีวิต)
+     - resp   → networth.html (หนี้สิน)
+     - retire → retirement.html (วางแผนเกษียณ)
+     - custom → เปิด modal แก้ไข */
+  function navMilestone(type, customId) {
+    if (type === 'custom' && customId) {
+      openMsModal(customId);
+      return;
+    }
+    /* save selection ลง localStorage — destination pages ทุกหน้าใช้ aia_selectedClient */
+    if (selectedClientId) localStorage.setItem('aia_selectedClient', selectedClientId);
+    const links = {
+      child:  'education.html',    /* บุตร → แผนการศึกษา */
+      goal:   'goals.html',        /* เป้าหมายชีวิต */
+      resp:   'networth.html',     /* หนี้สิน */
+      retire: 'retirement.html',   /* วางแผนเกษียณ */
+    };
+    if (links[type]) location.href = links[type];
   }
 
   /* ทุก group แสดงด้านบน axis: order = content (top) → line → icon (bottom = axis) */
