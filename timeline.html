@@ -64,10 +64,11 @@
 
     .timeline {
       position: relative;
-      /* axis อยู่ที่ bottom: 60px จากขอบ .timeline เพื่อให้ทุก card อยู่ด้านบน */
+      /* axis อยู่ที่ bottom: ตามค่า --tl-pad-bottom (เพิ่ม space ให้ card "below")
+         padding-top สำหรับ card "above" — alternating mode */
       padding-left: 150px; padding-right: 150px;
       padding-top: var(--tl-pad-top, 200px);
-      padding-bottom: 80px;
+      padding-bottom: var(--tl-pad-bottom, 200px);
       min-width: 1100px;
     }
     .tl-axis {
@@ -324,6 +325,85 @@
     /* Custom milestone styles */
     .tl-mark-icon.t-custom { border-color: #8E44AD; }
     .ms-item.t-custom { border-left-color: #8E44AD; }
+
+    /* Color-coded icon backgrounds — strong tint ตามหมวด สแกนเร็ว */
+    .tl-mark-icon.t-child   { background: #FEF3E2; }
+    .tl-mark-icon.t-goal    { background: #E3F2FD; }
+    .tl-mark-icon.t-resp    { background: #FFEBEE; }
+    .tl-mark-icon.t-retire  { background: #E8F5E9; }
+    .tl-mark-icon.t-custom  { background: #F3E5F5; }
+    /* card border-left ตามหมวด */
+    .tl-mark-content.cat-child   { border-left: 3px solid #F39C12; }
+    .tl-mark-content.cat-goal    { border-left: 3px solid #1976D2; }
+    .tl-mark-content.cat-resp    { border-left: 3px solid #DC3545; }
+    .tl-mark-content.cat-retire  { border-left: 3px solid #28a745; }
+    .tl-mark-content.cat-custom  { border-left: 3px solid #8E44AD; }
+
+    /* Alternating layout: card อยู่ใต้ axis (flipped) */
+    .tl-milestone.below { top: 67px; bottom: auto; flex-direction: column-reverse; }
+    .tl-milestone.below .tl-mark-line { height: calc(12px + var(--lane, 0) * 110px); }
+
+    /* Filter chips bar */
+    .tl-filter-bar {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+      padding: 10px 16px; background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); margin-bottom: 14px;
+    }
+    .tl-filter-bar .filter-lbl { font-size: .82rem; font-weight: 700; color: var(--gray-700); margin-right: 4px; }
+    .tl-chip {
+      padding: 5px 12px; border-radius: 16px; font-size: .8rem; font-weight: 700;
+      border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+      cursor: pointer; font-family: var(--font); transition: all .15s;
+    }
+    .tl-chip.active { color: white; }
+    .tl-chip.t-child.active   { background: #F39C12; border-color: #F39C12; }
+    .tl-chip.t-goal.active    { background: #1976D2; border-color: #1976D2; }
+    .tl-chip.t-resp.active    { background: #DC3545; border-color: #DC3545; }
+    .tl-chip.t-retire.active  { background: #28a745; border-color: #28a745; }
+    .tl-chip.t-custom.active  { background: #8E44AD; border-color: #8E44AD; }
+
+    /* Detail modal */
+    .msd-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .msd-overlay.open { display: flex; }
+    .msd-modal {
+      background: white; border-radius: 16px; max-width: 460px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .msd-header {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 18px 24px;
+      border-radius: 16px 16px 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .msd-header h3 { font-size: 1.1rem; font-weight: 800; }
+    .msd-close {
+      background: none; border: none; color: white;
+      font-size: 1.3rem; cursor: pointer; line-height: 1;
+    }
+    .msd-body { padding: 22px 24px; }
+    .msd-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--gray-100);
+      font-size: .92rem;
+    }
+    .msd-row:last-child { border-bottom: none; }
+    .msd-lbl { color: var(--gray-600); }
+    .msd-val { font-weight: 800; color: var(--gray-800); }
+    .msd-footer {
+      padding: 14px 24px; background: var(--gray-50);
+      border-radius: 0 0 16px 16px;
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .msd-btn {
+      padding: 9px 18px; border-radius: 8px; font-family: var(--font);
+      font-weight: 700; font-size: .88rem; cursor: pointer; border: none;
+    }
+    .msd-btn.secondary { background: white; color: var(--gray-700); border: 1.5px solid var(--gray-300); }
+    .msd-btn.primary   { background: var(--red-primary); color: white; }
+    .msd-btn.primary:hover { background: var(--red-dark); }
     .ms-item.is-custom .ms-info { padding-right: 8px; }
     .ms-delete-btn {
       background: transparent; border: none; cursor: pointer;
@@ -489,6 +569,21 @@
   </div>
 </div>
 
+<!-- Detail modal — แสดงเมื่อคลิก milestone บน timeline -->
+<div class="msd-overlay" id="ms-detail-modal" onclick="if(event.target===this)closeMsDetailModal()">
+  <div class="msd-modal">
+    <div class="msd-header">
+      <h3 id="ms-detail-title">รายละเอียด</h3>
+      <button class="msd-close" onclick="closeMsDetailModal()">✕</button>
+    </div>
+    <div class="msd-body" id="ms-detail-body"></div>
+    <div class="msd-footer">
+      <button class="msd-btn secondary" onclick="closeMsDetailModal()">ปิด</button>
+      <button class="msd-btn primary" id="ms-detail-nav">🎯 ไปจัดการ</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const _uid = localStorage.getItem('aia_currentUser');
 if (!_uid) location.href = 'login.html';
@@ -512,6 +607,45 @@ function updateUser(modify) {
 
 let selectedClientId = null;
 let editingMsId = null;
+
+/* Filter state — true = แสดง, false = ซ่อน. คลิก chip toggle */
+let tlFilter = { child: true, goal: true, resp: true, retire: true, custom: true };
+
+function toggleTlFilter(type) {
+  tlFilter[type] = !tlFilter[type];
+  render();
+}
+
+/* Detail modal — เก็บ items ลง window เพื่อให้ onclick ใน HTML หาได้ */
+function openMsDetailModal(idx) {
+  const m = (window._tlItems || [])[idx];
+  if (!m) return;
+  const TYPE_LABELS = {
+    child: '👶 บุตร', goal: '🎯 เป้าหมาย', resp: '💸 หนี้สิน',
+    retire: '🛋️ เกษียณ', custom: '🎯 Custom'
+  };
+  document.getElementById('ms-detail-title').innerHTML = `${m.icon} ${m.name}`;
+  document.getElementById('ms-detail-body').innerHTML = `
+    <div class="msd-row"><span class="msd-lbl">หมวด</span><span class="msd-val">${TYPE_LABELS[m.type] || m.type}</span></div>
+    <div class="msd-row"><span class="msd-lbl">อายุ</span><span class="msd-val">${Math.round(m.parentAge)} ปี</span></div>
+    ${m.year ? `<div class="msd-row"><span class="msd-lbl">ปี ค.ศ.</span><span class="msd-val">${m.year}</span></div>` : ''}
+    ${m.amount ? `<div class="msd-row"><span class="msd-lbl">จำนวนเงิน</span><span class="msd-val" style="color:var(--red-primary);">฿${Math.round(m.amount).toLocaleString('th-TH')}</span></div>` : ''}
+    ${m.meta ? `<div class="msd-row"><span class="msd-lbl">รายละเอียด</span><span class="msd-val">${m.meta}</span></div>` : ''}
+  `;
+  /* ปุ่ม "ไปจัดการ" — เรียก navMilestone เดิม */
+  const navBtn = document.getElementById('ms-detail-nav');
+  navBtn.onclick = () => {
+    closeMsDetailModal();
+    navMilestone(m.type, m.customId);
+  };
+  /* hide nav button ถ้า type ไม่มี destination (เช่น custom เปิด edit modal เลย) */
+  navBtn.textContent = m.type === 'custom' ? '✏️ แก้ไข' : '🎯 ไปจัดการ';
+  document.getElementById('ms-detail-modal').classList.add('open');
+}
+
+function closeMsDetailModal() {
+  document.getElementById('ms-detail-modal').classList.remove('open');
+}
 const DEFAULT_RETIREMENT_AGE = 60;
 const LIFE_EXPECTANCY = 85;
 const DEFAULT_RANGE_END = 85;
@@ -879,11 +1013,18 @@ function render() {
 
   const range = getRange(client, currentAge);
   const retireAge = getRetirementAge(client);
-  const milestones = computeMilestones(client);
+  /* ดึง milestones ทั้งหมด + assign _idx + filter ตาม tlFilter */
+  const allMilestones = computeMilestones(client);
+  allMilestones.forEach((m, i) => m._idx = i);
+  window._tlItems = allMilestones;
+  const milestones = allMilestones.filter(m => tlFilter[m.type] !== false);
   const yearsLeft = range.end - currentAge;
   const yearsToRetire = Math.max(retireAge - currentAge, 0);
   const upcomingCount = milestones.filter(m => m.parentAge > currentAge).length;
   const customCount   = milestones.filter(m => m.isCustom).length;
+  /* count แต่ละ type สำหรับ chip display */
+  const typeCounts = { child:0, goal:0, resp:0, retire:0, custom:0 };
+  allMilestones.forEach(m => { if (typeCounts[m.type] != null) typeCounts[m.type]++; });
 
   wrap.innerHTML = `
     <!-- Toolbar: ช่วงอายุ + อายุเกษียณ + ปุ่มเพิ่ม -->
@@ -930,9 +1071,19 @@ function render() {
       </div>
     </div>
 
+    <!-- Filter chips — toggle ซ่อน/แสดงแต่ละหมวด -->
+    <div class="tl-filter-bar">
+      <span class="filter-lbl">🔍 กรอง:</span>
+      <button class="tl-chip t-child ${tlFilter.child ? 'active':''}" onclick="toggleTlFilter('child')">👶 บุตร ${typeCounts.child > 0 ? '('+typeCounts.child+')' : ''}</button>
+      <button class="tl-chip t-goal ${tlFilter.goal ? 'active':''}" onclick="toggleTlFilter('goal')">🎯 เป้าหมาย ${typeCounts.goal > 0 ? '('+typeCounts.goal+')' : ''}</button>
+      <button class="tl-chip t-resp ${tlFilter.resp ? 'active':''}" onclick="toggleTlFilter('resp')">💸 หนี้สิน ${typeCounts.resp > 0 ? '('+typeCounts.resp+')' : ''}</button>
+      <button class="tl-chip t-retire ${tlFilter.retire ? 'active':''}" onclick="toggleTlFilter('retire')">🛋️ เกษียณ ${typeCounts.retire > 0 ? '('+typeCounts.retire+')' : ''}</button>
+      <button class="tl-chip t-custom ${tlFilter.custom ? 'active':''}" onclick="toggleTlFilter('custom')">🎯 Custom ${typeCounts.custom > 0 ? '('+typeCounts.custom+')' : ''}</button>
+    </div>
+
     <div class="timeline-card">
       <h3>📍 Life Timeline (อายุ ${range.start} → ${range.end})</h3>
-      <p class="tc-sub">milestones ทั้งหมด ${milestones.length} จุด · เกษียณในอีก ${yearsToRetire.toFixed(0)} ปี</p>
+      <p class="tc-sub">milestones ที่แสดง ${milestones.length} จาก ${allMilestones.length} จุด · เกษียณในอีก ${yearsToRetire.toFixed(0)} ปี</p>
       ${renderTimeline(currentAge, milestones, range)}
       <div class="tl-legend">
         <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1976D2;background:#1976D2;"></span> ปัจจุบัน</div>
@@ -1055,10 +1206,12 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
     return { ...g, side: 'above', lane };
   });
 
-  /* Padding-top เผื่อ lane stacking + multi-item card height
-     Base 200px (สำหรับ lane 0) + lane * 110 + extra 22px ต่อ item ใน multi-item card */
+  /* Padding-top + padding-bottom เผื่อ lane stacking + multi-item card height
+     Base 200px (สำหรับ lane 0) + lane * 110 + extra 22px ต่อ item ใน multi-item card
+     Alternating mode — cards แบ่งเป็น above (คี่) / below (คู่) — ต้องเผื่อทั้ง 2 ฝั่ง */
   const maxItems = Math.max(1, ...placedGroups.map(g => g.items.length));
   const padTop = 200 + (lanesAbove.length > 1 ? (lanesAbove.length - 1) * 110 : 0) + (maxItems > 1 ? (maxItems - 1) * 22 : 0);
+  const padBottom = padTop;
 
   /* Current age marker — anchor จาก bottom เหมือน milestone อื่นๆ */
   const nowMarker = `
@@ -1090,9 +1243,8 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
   function renderGroupCard(g) {
     if (g.items.length === 1) {
       const m = g.items[0];
-      const navAttr = `onclick="navMilestone('${m.type}','${m.customId||''}')" style="cursor:pointer;" title="คลิกเพื่อดูรายละเอียด"`;
-      return `<div class="tl-mark-content">
-        <div class="tl-mark-clickable" ${navAttr}>
+      return `<div class="tl-mark-content cat-${m.type}">
+        <div class="tl-mark-clickable" onclick="openMsDetailModal(${m._idx})" style="cursor:pointer;" title="คลิกดูรายละเอียด">
           <div class="tl-mark-name">${m.name}</div>
           <div class="tl-mark-year">อายุ ${g.age} ปี</div>
           ${m.amount ? `<div class="tl-mark-amount">${fmt(m.amount)}</div>` : ''}
@@ -1104,7 +1256,7 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
     return `<div class="tl-mark-content is-group">
       <div class="tl-mark-year">อายุ ${g.age} ปี (${g.items.length} รายการ)</div>
       ${g.items.map(it => `
-        <div class="tl-group-item" onclick="navMilestone('${it.type}','${it.customId||''}')" style="cursor:pointer;" title="คลิกเพื่อดูรายละเอียด">
+        <div class="tl-group-item" onclick="openMsDetailModal(${it._idx})" style="cursor:pointer;" title="คลิกดูรายละเอียด">
           <span class="tl-gi-icon">${it.icon}</span>
           <span class="tl-gi-name">${it.name}</span>
           ${it.amount ? `<span class="tl-gi-amount">${fmtShort(it.amount)}</span>` : ''}
@@ -1117,17 +1269,32 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
 
   /* navMilestone ย้ายไป global scope (หลัง render) เพื่อให้ HTML onclick เรียกได้ */
 
-  /* ทุก group แสดงด้านบน axis: order = content (top) → line → icon (bottom = axis) */
-  const msMarkers = placedGroups.map(g => `
-    <div class="tl-milestone above" style="left:${leftStyle(g.pos)}; --lane:${g.lane};">
-      ${renderGroupCard(g)}
-      <div class="tl-mark-line"></div>
-      ${renderGroupIcon(g)}
-    </div>
-  `).join('');
+  /* Alternating above/below — เพื่อลดการทับซ้อนแนวตั้ง
+     - คี่ (index 0,2,4...): above (card อยู่บน, icon ที่ axis ดันลง)
+     - คู่ (index 1,3,5...): below (card อยู่ล่าง, icon ที่ axis ดันขึ้น) */
+  const msMarkers = placedGroups.map((g, i) => {
+    const place = (i % 2 === 0) ? 'above' : 'below';
+    /* below mode = flex-direction reverse → ใส่ icon ก่อน, line, content */
+    if (place === 'below') {
+      return `
+        <div class="tl-milestone below" style="left:${leftStyle(g.pos)}; --lane:${g.lane};">
+          ${renderGroupIcon(g)}
+          <div class="tl-mark-line"></div>
+          ${renderGroupCard(g)}
+        </div>
+      `;
+    }
+    return `
+      <div class="tl-milestone above" style="left:${leftStyle(g.pos)}; --lane:${g.lane};">
+        ${renderGroupCard(g)}
+        <div class="tl-mark-line"></div>
+        ${renderGroupIcon(g)}
+      </div>
+    `;
+  }).join('');
 
   return `
-    <div class="timeline" style="--tl-pad-top:${padTop}px;">
+    <div class="timeline" style="--tl-pad-top:${padTop}px;--tl-pad-bottom:${padBottom}px;">
       <div class="tl-axis"></div>
       <div class="tl-axis-label start">${startAge} ปี</div>
       <div class="tl-axis-label end">${endAge} ปี</div>
