@@ -808,6 +808,28 @@ function deleteCustomMs(id) {
   render();
 }
 
+/* คลิก milestone → ไปหน้าจัดการของ type นั้นๆ (global scope — เรียกจาก HTML onclick)
+   - child  → education.html (จัดการบุตร + แผนการศึกษา)
+   - goal   → goals.html (เป้าหมายชีวิต)
+   - resp   → networth.html (หนี้สิน)
+   - retire → retirement.html (วางแผนเกษียณ)
+   - custom → เปิด modal แก้ไข */
+function navMilestone(type, customId) {
+  if (type === 'custom' && customId) {
+    openMsModal(customId);
+    return;
+  }
+  /* save selection ลง localStorage — destination pages ทุกหน้าใช้ aia_selectedClient */
+  if (selectedClientId) localStorage.setItem('aia_selectedClient', selectedClientId);
+  const links = {
+    child:  'education.html',
+    goal:   'goals.html',
+    resp:   'networth.html',
+    retire: 'retirement.html',
+  };
+  if (links[type]) location.href = links[type];
+}
+
 /* ════════════════════════════════════════════
    RENDER
 ═══════════════════════════════════════════ */
@@ -1093,27 +1115,7 @@ function renderTimeline(currentAge, milestones, rangeOpt) {
     </div>`;
   }
 
-  /* คลิก milestone → ไปหน้าจัดการของ type นั้นๆ
-     - child  → education.html (จัดการบุตร + แผนการศึกษา)
-     - goal   → goals.html (เป้าหมายชีวิต)
-     - resp   → networth.html (หนี้สิน)
-     - retire → retirement.html (วางแผนเกษียณ)
-     - custom → เปิด modal แก้ไข */
-  function navMilestone(type, customId) {
-    if (type === 'custom' && customId) {
-      openMsModal(customId);
-      return;
-    }
-    /* save selection ลง localStorage — destination pages ทุกหน้าใช้ aia_selectedClient */
-    if (selectedClientId) localStorage.setItem('aia_selectedClient', selectedClientId);
-    const links = {
-      child:  'education.html',    /* บุตร → แผนการศึกษา */
-      goal:   'goals.html',        /* เป้าหมายชีวิต */
-      resp:   'networth.html',     /* หนี้สิน */
-      retire: 'retirement.html',   /* วางแผนเกษียณ */
-    };
-    if (links[type]) location.href = links[type];
-  }
+  /* navMilestone ย้ายไป global scope (หลัง render) เพื่อให้ HTML onclick เรียกได้ */
 
   /* ทุก group แสดงด้านบน axis: order = content (top) → line → icon (bottom = axis) */
   const msMarkers = placedGroups.map(g => `
