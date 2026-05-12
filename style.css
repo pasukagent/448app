@@ -515,30 +515,6 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 .sb-reopen-handle:hover { background: var(--red-dark); width: 32px; }
 
-/* Fullscreen toggle — floating button at top-right of viewport (always visible) */
-.sb-fullscreen-btn {
-  position: fixed; top: 14px; right: 14px;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,.92); color: var(--red-primary);
-  border: 1.5px solid var(--red-primary);
-  cursor: pointer; font-size: 1.1rem; line-height: 1;
-  display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
-  transition: all .15s;
-  z-index: 50;
-  font-family: var(--font);
-}
-.sb-fullscreen-btn:hover {
-  background: var(--red-primary); color: white; transform: scale(1.06);
-}
-/* When in fullscreen — keep button visible but a bit subtler */
-:fullscreen .sb-fullscreen-btn,
-:-webkit-full-screen .sb-fullscreen-btn {
-  opacity: .45;
-}
-:fullscreen .sb-fullscreen-btn:hover,
-:-webkit-full-screen .sb-fullscreen-btn:hover { opacity: 1; }
-
 /* Sticky topbar */
 .app-topbar {
   background: #fff; border-bottom: 1px solid #F0F0F0;

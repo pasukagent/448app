@@ -125,60 +125,9 @@ if ('serviceWorker' in navigator
     }
   });
 
-  /* ════════════════════════════════════════════
-     FULLSCREEN TOGGLE — ซ่อน tab bar/address bar/taskbar
-     - คลิกปุ่ม ⛶ ที่มุมขวาบน หรือกด F11 (browser default)
-     - Esc ออกจาก fullscreen (browser default)
-     - sync icon ตาม state จริง (event fullscreenchange)
-  ═══════════════════════════════════════════ */
-  const FS_ICON_ENTER = '⛶';   /* expand glyph */
-  const FS_ICON_EXIT  = '🗗';   /* restore glyph */
-
-  function isFullscreen() {
-    return !!(document.fullscreenElement || document.webkitFullscreenElement);
-  }
-
-  function toggleFullscreen() {
-    if (isFullscreen()) {
-      const exit = document.exitFullscreen || document.webkitExitFullscreen;
-      if (exit) exit.call(document);
-    } else {
-      const root = document.documentElement;
-      const req = root.requestFullscreen || root.webkitRequestFullscreen;
-      if (req) {
-        req.call(root).catch(err => {
-          console.warn('Fullscreen denied:', err && err.message);
-          alert('Browser ปฏิเสธคำขอ fullscreen — ลองกด F11 แทนครับ');
-        });
-      }
-    }
-  }
-  window.toggleFullscreen = toggleFullscreen;
-
-  function updateFsIcon() {
-    const btn = document.getElementById('sb-fullscreen-btn');
-    if (!btn) return;
-    btn.innerHTML = isFullscreen() ? FS_ICON_EXIT : FS_ICON_ENTER;
-    btn.title = isFullscreen() ? 'ออกจาก fullscreen (Esc)' : 'เต็มจอ (F11)';
-  }
-
-  function injectFullscreenBtn() {
-    if (document.getElementById('sb-fullscreen-btn')) return;
-    const btn = document.createElement('button');
-    btn.id = 'sb-fullscreen-btn';
-    btn.className = 'sb-fullscreen-btn';
-    btn.innerHTML = FS_ICON_ENTER;
-    btn.title = 'เต็มจอ (F11)';
-    btn.onclick = toggleFullscreen;
-    document.body.appendChild(btn);
-    document.addEventListener('fullscreenchange', updateFsIcon);
-    document.addEventListener('webkitfullscreenchange', updateFsIcon);
-  }
-
   function init() {
     restore();
     injectCollapseUI();
-    injectFullscreenBtn();
     const sb = document.querySelector('.app-sidebar');
     if (sb) {
       sb.addEventListener('click', (e) => {
