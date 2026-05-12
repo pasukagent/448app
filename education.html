@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,13 +23,22 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override for THIS page — indigo accent ════ */
+    :root {
+      --edu-indigo:       #3B43A8;
+      --edu-indigo-light: #6B72C9;
+      --edu-indigo-soft:  #EEF0F9;
+      --edu-yellow:       #F5C242;
+      --edu-red:          #DC3545;
+    }
+
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-left { flex: 1; min-width: 240px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -41,6 +51,300 @@
       border: none; border-radius: 8px; padding: 7px 14px;
       font-family: var(--font); font-weight: 700; font-size: .9rem;
       min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ Section wrap ════ */
+    .e2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 28px 32px 26px;
+      margin-bottom: 18px;
+    }
+    .e2-head {
+      display: flex; align-items: flex-start; gap: 18px;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .e2-head-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--edu-indigo); color: var(--edu-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; flex-shrink: 0;
+    }
+    .e2-head-text { flex: 1; min-width: 200px; padding-top: 6px; }
+    .e2-head-title {
+      font-size: 1.8rem; font-weight: 800; color: var(--edu-indigo);
+      letter-spacing: -0.01em;
+    }
+    .e2-head-sub {
+      font-size: 1.1rem; font-weight: 700; color: var(--edu-indigo);
+      margin-top: 2px; display: flex; align-items: center; gap: 6px;
+    }
+    .e2-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--edu-indigo); color: white;
+      font-size: .76rem; font-weight: 700; cursor: help;
+      font-style: italic; font-family: serif;
+    }
+
+    /* Top-right: number of children stepper */
+    .e2-count-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 18px;
+    }
+    .e2-count-spacer { flex: 1; }
+    .e2-count-label {
+      font-size: 1.05rem; font-weight: 700; color: var(--edu-indigo);
+    }
+    .e2-count-pill {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 2.5px solid var(--edu-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 800; color: var(--edu-indigo);
+      background: white;
+    }
+    .e2-stepper {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #C6C6CB; color: #2B2B2B;
+      border: none; cursor: pointer; flex-shrink: 0;
+      font-size: 1.2rem; font-weight: 700; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s;
+    }
+    .e2-stepper:hover { background: var(--edu-indigo); color: white; }
+    .e2-stepper:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* Child row */
+    .e2-child-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .e2-child-row {
+      display: grid;
+      grid-template-columns: 50px 1fr auto auto auto auto auto;
+      gap: 10px; align-items: center;
+    }
+    .e2-child-num {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 2.5px solid var(--edu-indigo); color: var(--edu-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800; background: white;
+    }
+    .e2-input-pill {
+      background: white; border: 2px solid var(--edu-indigo);
+      border-radius: 100px; padding: 8px 18px; min-height: 44px;
+      box-sizing: border-box;
+      display: flex; align-items: center; gap: 6px;   /* keep input + suffix on one line */
+    }
+    .e2-input-pill input {
+      flex: 1; min-width: 0;   /* shrink to fit alongside suffix */
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 600;
+      color: var(--edu-indigo);
+    }
+    .e2-input-pill.short input { text-align: center; }
+    .e2-gender-group { display: flex; gap: 4px; }
+    .e2-gender-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid var(--edu-indigo); background: white;
+      color: var(--edu-indigo); font-size: 1.1rem;
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .e2-gender-btn.active {
+      background: var(--edu-yellow); border-color: var(--edu-yellow);
+      color: #2B2B2B;
+    }
+    .e2-row-lbl {
+      font-size: .95rem; font-weight: 700; color: var(--edu-indigo);
+      padding: 0 6px;
+    }
+    .e2-pill-suffix {
+      font-size: .92rem; font-weight: 700; color: var(--edu-indigo);
+      margin-left: 4px;
+    }
+    .e2-del-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid #D14; background: white; color: #D14;
+      cursor: pointer; font-size: 1rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .e2-del-btn:hover { background: #D14; color: white; }
+
+    /* Center caption */
+    .e2-caption {
+      text-align: center; margin: 12px 0 8px;
+    }
+    .e2-cap-1 { font-size: 1.15rem; font-weight: 700; color: var(--edu-indigo); }
+    .e2-cap-2 { font-size: 1.4rem; font-weight: 800; color: #222; margin-top: 2px; }
+    .e2-cap-3 { font-size: .92rem; color: #666; margin-top: 4px; font-style: italic; }
+
+    /* Bottom row: level | result card | inflation */
+    .e2-bottom {
+      display: grid;
+      grid-template-columns: minmax(180px, auto) 1fr minmax(140px, auto);
+      gap: 18px; align-items: start; margin-top: 14px;
+    }
+    .e2-level-block {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .e2-level-title {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 1rem; font-weight: 700; color: #222; margin-bottom: 4px;
+    }
+    .e2-level-title .gear {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; background: transparent; border: none;
+      color: var(--edu-indigo); cursor: pointer; font-size: 1rem;
+    }
+    .e2-radio {
+      display: inline-flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 6px 4px;
+      font-size: 1rem; font-weight: 600; color: #222;
+    }
+    .e2-radio-circle {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #999; background: white;
+      flex-shrink: 0; position: relative; transition: all .15s;
+    }
+    .e2-radio.active .e2-radio-circle {
+      border-color: var(--edu-yellow); background: var(--edu-yellow);
+    }
+    .e2-radio.active .e2-radio-circle::after {
+      content: ''; position: absolute; inset: 4px;
+      border-radius: 50%; background: white;
+    }
+
+    .e2-result-card {
+      background: white; border: 2.5px solid var(--edu-indigo);
+      border-radius: 18px; padding: 18px 24px;
+    }
+    .e2-result-row {
+      display: grid; grid-template-columns: 1fr auto auto;
+      gap: 16px; align-items: center;
+      padding: 6px 0;
+    }
+    .e2-result-row + .e2-result-row { border-top: 1.5px solid var(--edu-indigo); }
+    .e2-result-name { font-size: 1.1rem; font-weight: 700; color: var(--edu-indigo); }
+    .e2-result-name.total { font-size: 1.25rem; font-weight: 800; color: var(--edu-red); }
+    .e2-result-val { font-size: 1.3rem; font-weight: 800; color: var(--edu-indigo); }
+    .e2-result-val.total { color: var(--edu-red); font-size: 1.7rem; }
+    .e2-result-unit { font-size: 1rem; font-weight: 700; color: var(--edu-indigo); }
+    .e2-result-unit.total { color: var(--edu-red); }
+    .e2-result-foot {
+      margin-top: 8px; padding-top: 10px;
+      border-top: 1px dashed #DDD;
+      font-size: .82rem; color: #666; font-style: italic;
+      text-align: center;
+    }
+
+    .e2-inflation-block {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+      padding-top: 4px;
+    }
+    .e2-inflation-lbl {
+      font-size: 1rem; font-weight: 700; color: var(--edu-indigo);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .e2-inflation-pill {
+      display: inline-flex; align-items: center;
+      background: white; border: 2px solid var(--edu-indigo);
+      border-radius: 100px; padding: 6px 14px; min-height: 42px;
+      gap: 6px;
+    }
+    .e2-inflation-pill input {
+      width: 50px; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--edu-indigo); text-align: right;
+    }
+
+    .no-client, .empty-children {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon, .empty-children .ec-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width: 980px) {
+      .e2-bottom { grid-template-columns: 1fr; }
+      .e2-child-row { grid-template-columns: 50px 1fr auto auto; flex-wrap: wrap; }
+    }
+
+    /* ════ Cost Detail Modal (รายการค่าใช้จ่าย) ════ */
+    .e2-cost-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+      overflow-y: auto;
+    }
+    .e2-cost-overlay.open { display: flex; }
+    .e2-cost-card {
+      background: white; border-radius: 18px;
+      max-width: 760px; width: 100%; padding: 24px 28px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .e2-cost-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .e2-cost-title {
+      font-size: 1.3rem; font-weight: 800; color: #222;
+    }
+    .e2-cost-reset {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: white; color: var(--edu-indigo);
+      border: 1.5px solid var(--edu-indigo);
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .e2-cost-reset:hover { background: var(--edu-indigo); color: white; transform: rotate(-90deg); }
+    .e2-cost-subtitle {
+      font-size: .82rem; color: #888; font-style: italic;
+      margin-bottom: 18px;
+    }
+    .e2-cost-grid {
+      display: grid;
+      grid-template-columns: minmax(220px, 2fr) 1fr 1fr 1fr;
+      gap: 12px 18px; align-items: center;
+      padding: 0 4px;
+    }
+    .e2-cost-grid-head {
+      font-size: 1rem; font-weight: 700; color: #222;
+      text-align: center;
+    }
+    .e2-cost-grid-head.col-name { text-align: left; }
+    .e2-cost-row-label {
+      font-size: .95rem; font-weight: 600; color: #222;
+    }
+    .e2-cost-pill {
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid var(--edu-indigo); border-radius: 100px;
+      padding: 6px 14px; min-height: 36px;
+      background: white;
+    }
+    .e2-cost-pill input {
+      width: 100%; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: .95rem; font-weight: 700;
+      color: var(--edu-indigo); text-align: center;
+    }
+    .e2-cost-actions {
+      display: flex; gap: 14px; justify-content: center;
+      margin-top: 22px;
+    }
+    .e2-cost-btn {
+      padding: 10px 30px; border: none; border-radius: 8px;
+      font-family: var(--font); font-weight: 800; font-size: 1rem;
+      cursor: pointer; min-width: 100px;
+      transition: all .15s;
+    }
+    .e2-cost-btn.save { background: var(--edu-indigo); color: white; }
+    .e2-cost-btn.save:hover { background: var(--edu-indigo-light); transform: translateY(-1px); }
+    .e2-cost-btn.cancel { background: #DDD; color: #444; }
+    .e2-cost-btn.cancel:hover { background: #CCC; }
+
+    @media (max-width: 720px) {
+      .e2-cost-card { padding: 18px 14px; }
+      .e2-cost-grid { grid-template-columns: minmax(160px, 1.5fr) 1fr 1fr 1fr; gap: 8px 10px; }
+      .e2-cost-row-label { font-size: .82rem; }
+      .e2-cost-pill input { font-size: .85rem; }
     }
 
     /* Summary */
@@ -257,6 +561,15 @@
       .savings-row  { grid-template-columns: 1fr; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -368,6 +681,22 @@
   </div>
 </div>
 
+<!-- Cost Detail Modal — 9 rows × 3 levels (รายการค่าใช้จ่าย) -->
+<div class="e2-cost-overlay" id="e2-cost-modal" onclick="if(event.target===this)closeCostModal()">
+  <div class="e2-cost-card">
+    <div class="e2-cost-header">
+      <div class="e2-cost-title">รายการค่าใช้จ่าย</div>
+      <button class="e2-cost-reset" onclick="resetCostTable()" title="รีเซตเป็นค่าเริ่มต้น">↻</button>
+    </div>
+    <div class="e2-cost-subtitle">*ค่าใช้จ่ายแสดงเป็นต่อปี</div>
+    <div class="e2-cost-grid" id="e2-cost-grid"></div>
+    <div class="e2-cost-actions">
+      <button class="e2-cost-btn save" onclick="saveCostTable()">บันทึก</button>
+      <button class="e2-cost-btn cancel" onclick="closeCostModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -430,6 +759,101 @@ const LEVEL_INDEX = { economy:0, medium:1, premium:2 };
 const DEFAULT_INFLATION = 5; // % per year for education (default)
 
 /* ════════════════════════════════════════════
+   CHILD REARING COST per level (บาท/เดือน)
+   — ค่าเลี้ยงดูทั่วไป นอกเหนือจากค่าการศึกษา (อาหาร/เสื้อผ้า/ของใช้/หมอ/บันเทิง)
+═══════════════════════════════════════════ */
+const REARING_COST = {
+  economy:  10000,
+  medium:   25000,
+  premium:  50000,
+};
+const REARING_END_AGE = 21;
+const LEVEL_NAME_TH = { economy: 'เริ่มต้น', medium: 'ทางสายกลาง', premium: 'จัดเต็ม' };
+
+/* ════════════════════════════════════════════
+   DEFAULT COST TABLE — ค่าใช้จ่ายต่อปี ตามอายุ × ระดับ (ต่อบุตร 1 คน)
+   [economy, medium, premium]
+═══════════════════════════════════════════ */
+const COST_KEYS = [
+  { key:'age_0_3',          label:'ช่วง 0-3 ขวบ',                  ageMin:0,  ageMax:3,  category:'living' },
+  { key:'babysitter_0_3',   label:'พี่เลี้ยงเด็กต่อปี 0-3 ขวบ',     ageMin:0,  ageMax:3,  category:'care'   },
+  { key:'living_0_3',       label:'ค่ากินอยู่+อุปกรณ์ 0-3 ขวบ',     ageMin:0,  ageMax:3,  category:'living' },
+  { key:'tuition_kp',       label:'ค่าเทอมต่อปี อนุบาล-ประถม',     ageMin:3,  ageMax:12, category:'tuition'},
+  { key:'living_kp',        label:'ค่ากินอยู่+อุปกรณ์ อนุบาล-ประถม',ageMin:3,  ageMax:12, category:'living' },
+  { key:'tuition_mid',      label:'ค่าเทอมต่อปี มัธยม',            ageMin:12, ageMax:18, category:'tuition'},
+  { key:'living_mid',       label:'ค่ากินอยู่+อุปกรณ์ มัธยม',       ageMin:12, ageMax:18, category:'living' },
+  { key:'tuition_bachelor', label:'ค่าเทอมต่อปี ปริญญาตรี',         ageMin:18, ageMax:22, category:'tuition'},
+  { key:'living_bachelor',  label:'ค่ากินอยู่+อุปกรณ์ ปริญญาตรี',    ageMin:18, ageMax:22, category:'living' },
+];
+const DEFAULT_COST_TABLE = {
+  age_0_3:           [ 40000,  75000,  110000],
+  babysitter_0_3:    [ 50000, 100000,  300000],
+  living_0_3:        [ 55000, 150000,  650000],
+  tuition_kp:        [ 17000, 175000,  800000],
+  living_kp:         [ 55000, 150000,  650000],
+  tuition_mid:       [ 19500, 200000, 1300000],
+  living_mid:        [ 55000, 150000,  650000],
+  tuition_bachelor:  [ 35000, 300000, 3000000],
+  living_bachelor:   [ 55000, 150000,  650000],
+};
+
+/* Get current cost table (from client.eduCostTable, fallback to defaults) */
+function getCostTable() {
+  const c = getCurrent();
+  const custom = (c && c.eduCostTable) || {};
+  const out = {};
+  COST_KEYS.forEach(k => {
+    out[k.key] = custom[k.key] || DEFAULT_COST_TABLE[k.key].slice();
+  });
+  return out;
+}
+
+/* Sum yearly cost (THB/year) for given age + level + category filter
+   age: integer year (e.g., 5)
+   level: 'economy' | 'medium' | 'premium'
+   categories: array of category names to include — e.g., ['living','care'] or ['tuition']
+   ─ Picks COST_KEYS where ageMin <= age < ageMax AND category in filter */
+function _sumYearlyCostByCategory(age, level, categories) {
+  const costTable = getCostTable();
+  const lvIdx = LEVEL_INDEX[level] != null ? LEVEL_INDEX[level] : 1;
+  let total = 0;
+  for (const k of COST_KEYS) {
+    if (categories.indexOf(k.category) >= 0 && age >= k.ageMin && age < k.ageMax) {
+      const row = costTable[k.key] || DEFAULT_COST_TABLE[k.key] || [0,0,0];
+      total += Number(row[lvIdx] || 0);
+    }
+  }
+  return total;
+}
+
+/* Get LAST applicable age across COST_KEYS (= the end of life-stage cost coverage) */
+function _maxCostAge() {
+  return COST_KEYS.reduce((m, k) => Math.max(m, k.ageMax), 0);
+}
+
+/* คำนวณค่าเลี้ยงดูจนถึงอายุที่กำหนด (รวม inflation)
+   — ใช้ค่าจาก cost table (categories: living + care) — sync กับ modal "รายการค่าใช้จ่าย" */
+function computeRearingCost(child) {
+  const age = ageNow(getChildDob(child));
+  if (age == null) return 0;
+  const level = child.level || 'medium';
+  const inflPct = child.inflationRate != null ? Number(child.inflationRate) : DEFAULT_INFLATION;
+  const INFL = inflPct / 100;
+  /* sum from current age until end-of-coverage (REARING_END_AGE) */
+  let total = 0;
+  const startAge = Math.floor(age);
+  for (let a = startAge; a < REARING_END_AGE; a++) {
+    if (a < age) continue;   /* skip past years */
+    const yearCost = _sumYearlyCostByCategory(a, level, ['living', 'care']);
+    const yearOffset = a - age;   /* decimal — partial first year handled by Math.pow */
+    if (yearCost > 0 && yearOffset >= 0) {
+      total += yearCost * Math.pow(1 + INFL, yearOffset);
+    }
+  }
+  return total;
+}
+
+/* ════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
 let selectedClientId = null;
@@ -463,6 +887,21 @@ function escapeHtml(s) {
 /* ════════════════════════════════════════════
    COST CALCULATION
 ═══════════════════════════════════════════ */
+/* Sum assets tagged "นำไปใช้กับ การศึกษาบุตร" → แบ่งเท่าๆ ต่อบุตร */
+function _eduAssetPerChild() {
+  const client = getCurrent();
+  if (!client) return { lump: 0, monthly: 0 };
+  const children = client.children || [];
+  if (children.length === 0) return { lump: 0, monthly: 0 };
+  const eduAssets = (client.assets || []).filter(a => a.appliedTo === 'education');
+  const lump = eduAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const monthly = eduAssets.reduce((s,a) => {
+    const v = Number(a.contribution||0);
+    return s + (a.contribFreq === 'monthly' ? v : v/12);
+  }, 0);
+  return { lump: lump / children.length, monthly: monthly / children.length };
+}
+
 function computeChildPlan(child) {
   const age = ageNow(getChildDob(child));
   if (age == null) return null;
@@ -523,9 +962,23 @@ function computeChildPlan(child) {
       };
     });
 
-  const totalFuture = stages.reduce((s, x) => s + x.futureCost, 0);
-  const eduSavings = Number(child.eduSavings || 0);
-  const eduMonthly = Number(child.eduMonthly || 0); // ออม/เดือน ที่กำลังจ่าย
+  /* totalFuture (ค่าเทอม) — ใช้จาก cost table (category=tuition) — sync กับ modal "รายการค่าใช้จ่าย"
+     fallback: ถ้า cost table ทั้งหมดเป็น default → ใช้ค่าเดิมจาก stages (backward compat) */
+  let totalFuture = 0;
+  const _level = level;
+  const maxAge = _maxCostAge();
+  for (let a = Math.floor(age); a < maxAge; a++) {
+    if (a < age) continue;
+    const yearCost = _sumYearlyCostByCategory(a, _level, ['tuition']);
+    const yearOffset = a - age;
+    if (yearCost > 0 && yearOffset >= 0) {
+      totalFuture += yearCost * Math.pow(1 + INFLATION, yearOffset);
+    }
+  }
+  /* รวมเงินที่มาจาก asset ที่ tag "นำไปใช้กับ การศึกษาบุตร" — แบ่งเท่าๆ ต่อบุตร */
+  const _eduSplit = _eduAssetPerChild();
+  const eduSavings = Number(child.eduSavings || 0) + _eduSplit.lump;
+  const eduMonthly = Number(child.eduMonthly || 0) + _eduSplit.monthly;
   const yearsToFinish = Math.max(...stages.filter(s => s.status !== 'passed').map(s => s.startAge + s.years - age), 0);
 
   // FV ของก้อนปัจจุบัน + ออม/เดือน (annuity-due, return 4%/yr)
@@ -603,58 +1056,298 @@ function render() {
   }
 
   const children = getChildren();
-  const plans = children.map(c => ({ child: c, plan: computeChildPlan(c) }))
-                        .filter(p => p.plan != null);
 
-  const totalCost     = plans.reduce((s,p) => s + p.plan.totalFuture, 0);
-  const totalSavings  = plans.reduce((s,p) => s + p.plan.eduSavings, 0);
-  const totalGap      = plans.reduce((s,p) => s + p.plan.gap, 0);
-  const totalMonthly  = plans.reduce((s,p) => s + p.plan.reqMonthly, 0);
+  /* ระดับการเลี้ยงดู — ใช้ของบุตรคนแรกเป็น "plan level" (sync ทุกคน) */
+  const planLevel = (children[0] && children[0].level) || 'premium';
+  /* อัตราเงินเฟ้อ — ใช้ของคนแรกเป็น plan inflation */
+  const planInfl  = (children[0] && children[0].inflationRate != null)
+                    ? Number(children[0].inflationRate) : DEFAULT_INFLATION;
 
-  let html = `
-    <!-- Top toolbar -->
-    <div class="edu-toolbar">
-      <div class="edu-toolbar-title">👨‍👩‍👧‍👦 บุตรในแผน <span class="edu-count-pill">${children.length} คน</span></div>
-      <button class="btn-add-child" onclick="openChildModal()">➕ เพิ่มบุตร</button>
-    </div>
+  /* คำนวณรวม (การศึกษา + เลี้ยงดู) */
+  const childResults = children.map(c => {
+    const plan = computeChildPlan(c);
+    const eduCost = plan ? plan.totalFuture : 0;
+    const rearCost = computeRearingCost(c);
+    return { child: c, eduCost, rearCost, total: eduCost + rearCost };
+  });
+  const grandTotal = childResults.reduce((s,r) => s + r.total, 0);
 
-    <!-- Summary -->
-    <div class="summary-card">
-      <div class="sc-item">
-        <div class="sc-lbl">👶 จำนวนบุตร</div>
-        <div class="sc-val">${children.length} คน</div>
-        <div class="sc-sub">ในแผน</div>
+  wrap.innerHTML = `
+    <div class="e2-wrap">
+      <!-- Header -->
+      <div class="e2-head">
+        <div class="e2-head-icon">🎓</div>
+        <div class="e2-head-text">
+          <div class="e2-head-title">การศึกษาบุตร</div>
+          <div class="e2-head-sub">
+            ความคุ้มครอง
+            <span class="e2-info" title="มูลค่าค่าใช้จ่ายรวม — ใช้เป็นทุนประกันชีวิตขั้นต่ำเพื่อคุ้มครองบุตรกรณีผู้ปกครองจากไปก่อน">i</span>
+          </div>
+        </div>
+        <div class="e2-count-spacer"></div>
+        <div class="e2-count-label">จำนวนบุตร</div>
+        <div class="e2-count-pill">${children.length}</div>
+        <button class="e2-stepper" onclick="changeChildCount(-1)" ${children.length === 0 ? 'disabled' : ''}>−</button>
+        <button class="e2-stepper" onclick="changeChildCount(1)">+</button>
       </div>
-      <div class="sc-item">
-        <div class="sc-lbl">💸 ค่าใช้จ่ายรวม (FV)</div>
-        <div class="sc-val cost">${fmtShort(totalCost)}</div>
-        <div class="sc-sub">รวม inflation/ปี ตามที่ตั้ง</div>
-      </div>
-      <div class="sc-item">
-        <div class="sc-lbl">💰 ออมไว้แล้ว (FV)</div>
-        <div class="sc-val green">${fmtShort(plans.reduce((s,p) => s + p.plan.fvOfCurrentSavings, 0))}</div>
-        <div class="sc-sub">โต @ 4%/ปี</div>
-      </div>
-      <div class="sc-item">
-        <div class="sc-lbl">⚠️ ขาดอีก</div>
-        <div class="sc-val ${totalGap > 0 ? 'gap-pos' : 'green'}">${fmtShort(totalGap)}</div>
-        <div class="sc-sub">${totalGap > 0 ? `~${fmt(totalMonthly)}/เดือน` : 'พร้อมแล้ว ✓'}</div>
-      </div>
-    </div>
 
-    <div class="children-grid" id="children-grid">
-      ${children.length === 0
-        ? `<div class="empty-children">
-            <div class="ec-icon">👨‍👩‍👧‍👦</div>
-            <h3 style="font-size:1rem;color:var(--gray-700);margin-bottom:6px;">ยังไม่มีข้อมูลบุตร</h3>
-            <p style="font-size:.9rem;">กดปุ่ม "+ เพิ่มบุตร" ด้านบนเพื่อเริ่มต้นวางแผนการศึกษา</p>
-          </div>`
-        : plans.map(p => renderChildCard(p.child, p.plan)).join('')
-      }
+      <!-- Children list -->
+      <div class="e2-child-list">
+        ${children.length === 0
+          ? `<div class="empty-children" style="padding:30px 20px;">
+              <div class="ec-icon">👨‍👩‍👧‍👦</div>
+              <p style="font-size:.95rem;">ยังไม่มีข้อมูลบุตร — กดปุ่ม + ด้านบนเพื่อเพิ่ม</p>
+            </div>`
+          : children.map((c, i) => renderChildRow(c, i + 1)).join('')
+        }
+      </div>
+
+      <!-- Caption -->
+      <div class="e2-caption">
+        <div class="e2-cap-1">ประมาณการค่าใช้จ่าย</div>
+        <div class="e2-cap-2">การศึกษาและเลี้ยงดูบุตร</div>
+        <div class="e2-cap-3">*เพื่อเตรียมความคุ้มครอง กรณีจากไปก่อน</div>
+      </div>
+
+      <!-- Bottom row: level | result | inflation -->
+      <div class="e2-bottom">
+        <!-- Level selector -->
+        <div class="e2-level-block">
+          <div class="e2-level-title">
+            ระดับการเลี้ยงดู
+            <button class="gear" onclick="openCostModal()" title="ตั้งค่ารายละเอียดค่าใช้จ่าย">⚙</button>
+          </div>
+          ${LEVELS.map(lv => `
+            <div class="e2-radio ${planLevel === lv.key ? 'active':''}" onclick="applyLevelToAll('${lv.key}')">
+              <div class="e2-radio-circle"></div>
+              <span>${LEVEL_NAME_TH[lv.key] || lv.name}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Result card -->
+        <div class="e2-result-card">
+          ${childResults.length === 0 ? `
+            <div style="text-align:center; color:#999; padding:20px;">เพิ่มบุตรเพื่อดูประมาณการ</div>
+          ` : `
+            ${childResults.map(r => `
+              <div class="e2-result-row">
+                <div class="e2-result-name">${escapeHtml(r.child.name || 'บุตร')}</div>
+                <div class="e2-result-val">${(r.total || 0).toLocaleString('th-TH', { maximumFractionDigits: 1 })}</div>
+                <div class="e2-result-unit">บาท</div>
+              </div>
+            `).join('')}
+            <div class="e2-result-row">
+              <div class="e2-result-name total">รวม</div>
+              <div class="e2-result-val total">${(grandTotal || 0).toLocaleString('th-TH', { maximumFractionDigits: 1 })}</div>
+              <div class="e2-result-unit total">บาท</div>
+            </div>
+            <div class="e2-result-foot">
+              *ข้อมูลประมาณการค่าใช้จ่ายถึงอายุ ${REARING_END_AGE} ปี / เรียนจบปริญญาตรี
+            </div>
+          `}
+        </div>
+
+        <!-- Inflation rate -->
+        <div class="e2-inflation-block">
+          <div class="e2-inflation-lbl">
+            อัตราเงินเฟ้อ
+            <span class="e2-info" title="ปรับมูลค่าค่าใช้จ่ายในอนาคต ค่าเฉลี่ยการศึกษา 5%/ปี">i</span>
+          </div>
+          <div class="e2-inflation-pill">
+            <input type="number" min="0" max="20" step="0.1" value="${planInfl}"
+              onchange="applyInflationToAll(Number(this.value))">
+            <span class="e2-pill-suffix">%</span>
+          </div>
+        </div>
+      </div>
     </div>
   `;
+}
 
-  wrap.innerHTML = html;
+/* ════════════════════════════════════════════
+   RENDER ROW — 1 บุตร 1 แถว (inline edit)
+═══════════════════════════════════════════ */
+function renderChildRow(child, idx) {
+  const dob = getChildDob(child) || '';
+  const age = ageNow(dob);
+  const ageStr = (age == null) ? '' : Math.floor(age);
+  const gender = child.gender === 'หญิง' ? 'female' : 'male';
+  return `
+    <div class="e2-child-row" data-cid="${child.id}">
+      <div class="e2-child-num">${idx}</div>
+      <div class="e2-input-pill">
+        <input type="text" placeholder="ชื่อบุตร" value="${escapeHtml(child.name||'')}"
+          onchange="updateChildField('${child.id}','name',this.value)">
+      </div>
+      <div class="e2-gender-group">
+        <button class="e2-gender-btn ${gender === 'male' ? 'active' : ''}"
+          onclick="updateChildField('${child.id}','gender','ชาย')" title="ชาย">♂</button>
+        <button class="e2-gender-btn ${gender === 'female' ? 'active' : ''}"
+          onclick="updateChildField('${child.id}','gender','หญิง')" title="หญิง">♀</button>
+      </div>
+      <div class="e2-row-lbl">วันเกิด</div>
+      <div class="e2-input-pill short" style="min-width:130px;">
+        <input type="date" value="${dob}"
+          onchange="updateChildField('${child.id}','dob',this.value)">
+      </div>
+      <div class="e2-row-lbl">อายุ</div>
+      <div class="e2-input-pill short" style="min-width:70px;">
+        <input type="text" value="${ageStr}" readonly style="cursor:default;">
+        <span class="e2-pill-suffix">ปี</span>
+      </div>
+      <button class="e2-del-btn" onclick="deleteChild('${child.id}')" title="ลบ">🗑</button>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════
+   HELPERS — child count + level + inflation
+═══════════════════════════════════════════ */
+function changeChildCount(delta) {
+  const children = getChildren();
+  if (delta > 0) {
+    /* เพิ่มบุตรใหม่ (blank) */
+    updateUser(u => {
+      const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+      if (!c) return;
+      if (!c.children) c.children = [];
+      /* ใช้ level + inflation ของคนก่อนหน้า (sync) */
+      const refLevel = (c.children[0] && c.children[0].level) || 'premium';
+      const refInfl  = (c.children[0] && c.children[0].inflationRate) || DEFAULT_INFLATION;
+      c.children.push({
+        id: 'ch' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        name: '',
+        gender: 'ชาย',
+        dob: '',
+        level: refLevel,
+        inflationRate: refInfl,
+        eduSavings: 0, eduMonthly: 0,
+        includeMaster: false, includePhd: false,
+      });
+    });
+  } else if (delta < 0 && children.length > 0) {
+    /* ลบคนสุดท้าย */
+    updateUser(u => {
+      const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+      if (c && c.children) c.children.pop();
+    });
+  }
+  render();
+}
+
+function applyLevelToAll(level) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    c.children.forEach(ch => { ch.level = level; });
+  });
+  render();
+}
+
+function applyInflationToAll(rate) {
+  const v = Number(rate);
+  if (!isFinite(v) || v < 0) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    c.children.forEach(ch => { ch.inflationRate = v; });
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   COST DETAIL MODAL — รายการค่าใช้จ่าย
+   9 categories × 3 levels (เริ่มต้น / ทางสายกลาง / จัดเต็ม)
+═══════════════════════════════════════════ */
+let _editingCostTable = null;   /* temp state during modal edit */
+
+function openCostModal() {
+  if (!selectedClientId) return;
+  _editingCostTable = getCostTable();   /* deep copy (slice already done in getCostTable) */
+  renderCostGrid();
+  document.getElementById('e2-cost-modal').classList.add('open');
+}
+
+function closeCostModal() {
+  document.getElementById('e2-cost-modal').classList.remove('open');
+  _editingCostTable = null;
+}
+
+function renderCostGrid() {
+  const grid = document.getElementById('e2-cost-grid');
+  let html = `
+    <div class="e2-cost-grid-head col-name"></div>
+    <div class="e2-cost-grid-head">เริ่มต้น</div>
+    <div class="e2-cost-grid-head">ทางสายกลาง</div>
+    <div class="e2-cost-grid-head">จัดเต็ม</div>
+  `;
+  COST_KEYS.forEach(k => {
+    const vals = _editingCostTable[k.key] || DEFAULT_COST_TABLE[k.key];
+    html += `<div class="e2-cost-row-label">${k.label}</div>`;
+    for (let i = 0; i < 3; i++) {
+      html += `
+        <div class="e2-cost-pill">
+          <input type="text" inputmode="decimal" data-cost-key="${k.key}" data-cost-idx="${i}"
+            value="${Number(vals[i]||0).toLocaleString('th-TH')}"
+            onfocus="this.select()"
+            oninput="_onCostInput(this)">
+        </div>
+      `;
+    }
+  });
+  grid.innerHTML = html;
+}
+
+function _onCostInput(el) {
+  const key = el.getAttribute('data-cost-key');
+  const idx = Number(el.getAttribute('data-cost-idx'));
+  const raw = String(el.value).replace(/[^\d.]/g, '');
+  const sel = el.selectionStart || 0;
+  const before = el.value.substring(0, sel);
+  const digitsBefore = (before.match(/\d/g) || []).length;
+  /* update temp state */
+  if (!_editingCostTable[key]) _editingCostTable[key] = DEFAULT_COST_TABLE[key].slice();
+  _editingCostTable[key][idx] = Number(raw) || 0;
+  /* live re-format with comma + restore cursor */
+  const n = Number(raw);
+  if (isNaN(n)) return;
+  const formatted = n.toLocaleString('th-TH');
+  el.value = formatted;
+  let pos = formatted.length, count = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (/\d/.test(formatted[i])) count++;
+    if (count >= digitsBefore) { pos = i + 1; break; }
+  }
+  el.setSelectionRange(pos, pos);
+}
+
+function resetCostTable() {
+  if (!confirm('รีเซตค่าใช้จ่ายทั้งหมดเป็นค่าเริ่มต้น?')) return;
+  _editingCostTable = {};
+  COST_KEYS.forEach(k => { _editingCostTable[k.key] = DEFAULT_COST_TABLE[k.key].slice(); });
+  renderCostGrid();
+}
+
+function saveCostTable() {
+  if (!_editingCostTable) { closeCostModal(); return; }
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    /* Save only values that differ from defaults — keeps schema lean */
+    const overrides = {};
+    COST_KEYS.forEach(k => {
+      const cur = _editingCostTable[k.key] || DEFAULT_COST_TABLE[k.key];
+      const def = DEFAULT_COST_TABLE[k.key];
+      if (cur[0] !== def[0] || cur[1] !== def[1] || cur[2] !== def[2]) {
+        overrides[k.key] = cur.slice();
+      }
+    });
+    if (Object.keys(overrides).length > 0) c.eduCostTable = overrides;
+    else delete c.eduCostTable;   /* all default → don't store */
+  });
+  closeCostModal();
+  render();
 }
 
 function renderChildCard(child, plan) {

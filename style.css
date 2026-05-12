@@ -463,7 +463,81 @@ footer span { color: var(--red-primary); font-weight: 700; }
   max-width: calc(100vw - 240px);
   display: flex; flex-direction: column; min-height: 100vh;
   min-width: 0; overflow-x: hidden; /* clip ทุกอย่างที่ล้น */
+  transition: margin-left .28s ease, width .28s ease, max-width .28s ease;
 }
+
+/* ════ Sidebar COLLAPSE (Option A — slide out fully) ════ */
+.app-sidebar {
+  transition: transform .28s ease;
+}
+.app-sidebar.collapsed { transform: translateX(-100%); }
+.app-main.expanded {
+  margin-left: 0;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Toggle button — inside sidebar header */
+.sb-collapse-btn {
+  position: absolute; top: 12px; right: 12px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--red-soft); color: var(--red-primary);
+  border: 1.5px solid var(--red-primary);
+  cursor: pointer; font-size: .82rem; font-weight: 700; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  font-family: var(--font);
+}
+.sb-collapse-btn:hover { background: var(--red-primary); color: white; transform: scale(1.05); }
+.sb-logo-area { position: relative; }
+
+/* Reopen handle — floating button at left edge when sidebar is hidden */
+.sb-reopen-handle {
+  position: fixed; top: 50%; left: 0;
+  transform: translateY(-50%) translateX(-100%);
+  width: 28px; height: 60px;
+  border-radius: 0 12px 12px 0;
+  background: var(--red-primary); color: white;
+  border: none; cursor: pointer;
+  font-size: .88rem; font-weight: 700; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 2px 4px 12px rgba(0,0,0,.18);
+  transition: transform .28s ease, background .15s;
+  z-index: 49;
+  font-family: var(--font);
+  opacity: 0;
+  pointer-events: none;
+}
+.sb-reopen-handle.visible {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.sb-reopen-handle:hover { background: var(--red-dark); width: 32px; }
+
+/* Fullscreen toggle — floating button at top-right of viewport (always visible) */
+.sb-fullscreen-btn {
+  position: fixed; top: 14px; right: 14px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.92); color: var(--red-primary);
+  border: 1.5px solid var(--red-primary);
+  cursor: pointer; font-size: 1.1rem; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  transition: all .15s;
+  z-index: 50;
+  font-family: var(--font);
+}
+.sb-fullscreen-btn:hover {
+  background: var(--red-primary); color: white; transform: scale(1.06);
+}
+/* When in fullscreen — keep button visible but a bit subtler */
+:fullscreen .sb-fullscreen-btn,
+:-webkit-full-screen .sb-fullscreen-btn {
+  opacity: .45;
+}
+:fullscreen .sb-fullscreen-btn:hover,
+:-webkit-full-screen .sb-fullscreen-btn:hover { opacity: 1; }
 
 /* Sticky topbar */
 .app-topbar {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,12 +23,21 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override for THIS page — indigo accent ════ */
+    :root {
+      --ret-indigo:       #3B43A8;
+      --ret-indigo-light: #6B72C9;
+      --ret-indigo-pill:  #D4D7EB;
+      --ret-indigo-soft:  #EEF0F9;
+      --ret-yellow:       #F5C242;
+    }
+
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -42,8 +52,153 @@
       min-width: 180px; cursor: pointer;
     }
 
+    /* ════ Section header (icon + title) ════ */
+    .r2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 32px 24px;
+      margin-bottom: 18px;
+    }
+    .r2-section-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 26px;
+    }
+    .r2-section-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--ret-indigo); color: var(--ret-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; flex-shrink: 0; background: white;
+    }
+    .r2-section-title {
+      font-size: 1.8rem; font-weight: 800; color: var(--ret-indigo);
+      letter-spacing: -0.01em;
+    }
+
+    /* ════ Form rows (label left, control group right) ════ */
+    .r2-form { display: flex; flex-direction: column; gap: 16px; }
+    .r2-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 16px; align-items: center;
+    }
+    .r2-label {
+      font-size: 1.05rem; font-weight: 700; color: #222;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .r2-label .ret-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--ret-indigo); color: white;
+      font-size: .72rem; font-weight: 700; cursor: help;
+      font-style: italic; font-family: serif;
+    }
+    .r2-control { display: flex; align-items: center; gap: 8px; }
+
+    /* ════ Pill input + stepper ════ */
+    .r2-pill {
+      display: inline-flex; align-items: center;
+      background: var(--ret-indigo-pill);
+      border-radius: 100px; padding: 4px 10px 4px 16px;
+      min-width: 180px; height: 44px; gap: 6px;
+    }
+    .r2-pill input {
+      flex: 1; min-width: 0; background: transparent;
+      border: none; outline: none;
+      font-family: var(--font); font-size: 1.1rem; font-weight: 800;
+      color: var(--ret-indigo); text-align: right;
+      padding: 0 6px;
+    }
+    .r2-pill input::-webkit-outer-spin-button,
+    .r2-pill input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .r2-pill input[type=number] { -moz-appearance: textfield; }
+    .r2-pill-suffix {
+      font-size: 1rem; font-weight: 700; color: var(--ret-indigo);
+      padding-right: 6px; flex-shrink: 0;
+    }
+    .r2-stepper {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #C6C6CB; color: #2B2B2B;
+      border: none; cursor: pointer; flex-shrink: 0;
+      font-size: 1.3rem; font-weight: 700; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s;
+    }
+    .r2-stepper:hover { background: var(--ret-indigo); color: white; }
+    .r2-stepper:active { transform: scale(.92); }
+
+    /* ════ Segment selector (อายุขัย) ════ */
+    .r2-segment {
+      display: inline-flex; align-items: center;
+      background: var(--ret-indigo-pill);
+      border-radius: 100px; padding: 4px;
+      height: 44px;
+    }
+    .r2-segment button {
+      min-width: 56px; height: 36px; padding: 0 16px;
+      border: none; background: transparent; cursor: pointer;
+      font-family: var(--font); font-weight: 800; font-size: 1rem;
+      color: var(--ret-indigo); border-radius: 100px;
+      transition: all .15s;
+    }
+    .r2-segment button:hover { background: rgba(255,255,255,.5); }
+    .r2-segment button.active {
+      background: var(--ret-yellow); color: #2B2B2B;
+      box-shadow: 0 2px 6px rgba(245,194,66,.4);
+    }
+
+    /* ════ Toggle switch ════ */
+    .r2-toggle-row {
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 12px; align-items: center;
+    }
+    .r2-switch {
+      width: 52px; height: 28px; border-radius: 100px;
+      background: var(--ret-indigo-pill); position: relative;
+      cursor: pointer; transition: background .2s; flex-shrink: 0;
+    }
+    .r2-switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: white; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+      transition: left .2s;
+    }
+    .r2-switch.on {
+      background: var(--ret-indigo);
+    }
+    .r2-switch.on::after { left: 27px; }
+
+    /* ════ Note area with corner brackets ════ */
+    .r2-note-wrap {
+      position: relative; padding: 20px 22px;
+      margin-top: 12px;
+    }
+    .r2-note-wrap::before,
+    .r2-note-wrap::after {
+      content: ''; position: absolute; width: 28px; height: 28px;
+      border: 2px solid #222; pointer-events: none;
+    }
+    .r2-note-wrap::before {
+      top: 0; left: 0;
+      border-right: none; border-bottom: none;
+      border-top-left-radius: 4px;
+    }
+    .r2-note-wrap::after {
+      bottom: 0; left: 0;
+      border-right: none; border-top: none;
+      border-bottom-left-radius: 4px;
+    }
+    .r2-note-label {
+      font-size: 1.05rem; font-weight: 800; color: #222;
+      margin-bottom: 6px;
+    }
+    .r2-note-textarea {
+      width: 100%; border: none; outline: none; resize: vertical;
+      min-height: 70px; background: transparent;
+      font-family: var(--font); font-size: .95rem;
+      color: #333; box-sizing: border-box; padding: 4px 0;
+    }
+
+    /* ════ Results section (kept below form, lighter style) ════ */
     .ret-layout {
-      display: grid; grid-template-columns: 360px 1fr; gap: 22px;
+      display: grid; grid-template-columns: 1fr; gap: 18px;
       align-items: start;
     }
     @media (max-width: 1100px) { .ret-layout { grid-template-columns: 1fr; } }
@@ -185,6 +340,15 @@
     }
     .auto-fill-info b { color: #1B5E20; }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -287,11 +451,18 @@ let showFullTable = false;
 const DEFAULT_PLAN = {
   retireAge: 60,
   lifeExpectancy: 85,
-  incomePctAfterRetire: 70,
+  incomePctAfterRetire: 70,         /* legacy fallback */
+  annualSpend: 0,                    /* บาท/ปี — primary new field */
   inflationRate: 3,
-  expectedReturn: 5,
-  monthlyContribution: 0, // จะ pre-fill จาก current contributions ถ้ามี
+  expectedReturn: 5,                 /* legacy single rate */
+  returnBefore: 4,                   /* % ก่อนเกษียณ (accumulation) */
+  returnAfter: 3,                    /* % หลังเกษียณ (distribution) */
+  preserveCapital: false,            /* คำนวณแบบคงเงินต้น */
+  withdrawalRate: 4,                 /* % ถอนต่อปี เมื่อ preserveCapital=true */
+  monthlyContribution: 0,
+  note: '',
 };
+const LIFE_EXPECTANCY_OPTIONS = [80, 85, 90, 95, 100];
 
 function fmt(n) {
   if (!isFinite(n)) return '—';
@@ -314,18 +485,48 @@ function getPlan(client) {
   /* ใช้ retirementAge จาก timeline.html ถ้ามี (เก่า) */
   const retireAge = saved.retireAge != null ? saved.retireAge :
     (client && client.retirementAge ? Number(client.retirementAge) : DEFAULT_PLAN.retireAge);
+  const er = saved.expectedReturn ?? DEFAULT_PLAN.expectedReturn;
   return {
     retireAge:            Number(retireAge),
     lifeExpectancy:       Number(saved.lifeExpectancy ?? DEFAULT_PLAN.lifeExpectancy),
     incomePctAfterRetire: Number(saved.incomePctAfterRetire ?? DEFAULT_PLAN.incomePctAfterRetire),
+    annualSpend:          Number(saved.annualSpend ?? DEFAULT_PLAN.annualSpend),
     inflationRate:        Number(saved.inflationRate ?? DEFAULT_PLAN.inflationRate),
-    expectedReturn:       Number(saved.expectedReturn ?? DEFAULT_PLAN.expectedReturn),
+    expectedReturn:       Number(er),
+    /* ถ้ายังไม่เคยตั้ง returnBefore/After ใช้ expectedReturn เป็นค่า default */
+    returnBefore:         Number(saved.returnBefore ?? er),
+    returnAfter:          Number(saved.returnAfter ?? Math.max(er - 1, 1)),
+    preserveCapital:      !!saved.preserveCapital,
+    withdrawalRate:       Number(saved.withdrawalRate ?? DEFAULT_PLAN.withdrawalRate),
     monthlyContribution:  Number(saved.monthlyContribution ?? DEFAULT_PLAN.monthlyContribution),
+    note:                 String(saved.note ?? ''),
   };
 }
 
 function savePlanField(field, value) {
   if (!selectedClientId) return;
+  /* String fields (note) — save as-is */
+  if (field === 'note') {
+    updateUser(u => {
+      const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+      if (!c) return;
+      if (!c.retirementPlan) c.retirementPlan = {};
+      c.retirementPlan.note = String(value || '');
+    });
+    return;   /* note doesn't need re-render */
+  }
+  /* Boolean field */
+  if (field === 'preserveCapital') {
+    updateUser(u => {
+      const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+      if (!c) return;
+      if (!c.retirementPlan) c.retirementPlan = {};
+      c.retirementPlan.preserveCapital = !!value;
+    });
+    render();
+    return;
+  }
+  /* Numeric fields */
   const v = Number(value);
   if (!isFinite(v) || v < 0) return;
   updateUser(u => {
@@ -335,8 +536,39 @@ function savePlanField(field, value) {
     c.retirementPlan[field] = v;
     /* sync retireAge กับ timeline.html (legacy field) */
     if (field === 'retireAge') c.retirementAge = v;
+    /* ตั้ง annualSpend → sync legacy incomePctAfterRetire */
+    if (field === 'annualSpend') {
+      const inc = Number(c.income) || (c.cashflow && Number(c.cashflow.income) ? Number(c.cashflow.income) * 12 : 0);
+      if (inc > 0) c.retirementPlan.incomePctAfterRetire = Math.round((v / inc) * 1000) / 10;
+    }
   });
   render();
+}
+
+/* Stepper handler — −/+ buttons */
+function stepField(field, delta) {
+  const client = getCurrent();
+  if (!client) return;
+  const plan = getPlan(client);
+  const cur = Number(plan[field] || 0);
+  /* Field-specific bounds and step sizes */
+  const cfg = {
+    retireAge:       { min:30,  max:100, step:1   },
+    annualSpend:     { min:0,   max:1e9, step:10000 },
+    inflationRate:   { min:0,   max:15,  step:0.5 },
+    returnBefore:    { min:0,   max:20,  step:0.5 },
+    returnAfter:     { min:0,   max:20,  step:0.5 },
+    withdrawalRate:  { min:0,   max:20,  step:0.5 },
+  };
+  const c = cfg[field] || { min:0, max:1e9, step:1 };
+  let v = cur + delta * c.step;
+  if (v < c.min) v = c.min;
+  if (v > c.max) v = c.max;
+  /* keep 1 decimal for rate fields */
+  if (['inflationRate','returnBefore','returnAfter','withdrawalRate'].includes(field)) {
+    v = Math.round(v * 10) / 10;
+  }
+  savePlanField(field, v);
 }
 
 /* แปลงจำนวนเงิน บาท/เดือน → % ของรายได้ → save เป็น incomePctAfterRetire
@@ -366,7 +598,7 @@ function getDerivedData(client) {
     (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
   /* current retirement savings = PVD + RMF + SSF + ThaiESG */
   const retireAssets = (client.assets || [])
-    .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type));
+    .filter(a => ['pvd','rmf','ssf','thaiesg','annuity'].includes(a.type) || a.appliedTo === 'retire');
   const currentSavings = retireAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
   /* current monthly contribution rate — normalize contribFreq ก่อนแล้ว ÷ 12 */
   const currentMonthlyContrib = retireAssets
@@ -381,23 +613,31 @@ function calculate(plan, derived, currentAge) {
   const yearsToRetire = Math.max(plan.retireAge - currentAge, 0);
   const yearsAfterRetire = Math.max(plan.lifeExpectancy - plan.retireAge, 1);
 
-  /* Annual need at retirement (ปรับ inflation) */
-  const annualNeedNow = derived.annualIncome * (plan.incomePctAfterRetire / 100);
+  /* Annual need at retirement (ปรับ inflation) — ใช้ annualSpend ถ้าตั้งไว้, ไม่งั้น fallback % × income */
+  const annualNeedNow = plan.annualSpend > 0
+    ? Number(plan.annualSpend)
+    : derived.annualIncome * (plan.incomePctAfterRetire / 100);
   const annualNeedAtRetire = annualNeedNow * Math.pow(1 + plan.inflationRate/100, yearsToRetire);
 
-  /* Real return rate (ผลตอบแทนหลังหักเงินเฟ้อ) */
-  const realRate = (1 + plan.expectedReturn/100) / (1 + plan.inflationRate/100) - 1;
+  /* Real rate — returnAfter หักเงินเฟ้อ (ใช้ใน distribution phase + chart annotations) */
+  const realRate = (1 + plan.returnAfter/100) / (1 + plan.inflationRate/100) - 1;
 
-  /* Target corpus at retirement (PV of annuity ที่ต้องจ่ายต่อปี) */
+  /* Target corpus — 2 โหมด */
   let targetCorpus;
-  if (Math.abs(realRate) < 0.0001) {
-    targetCorpus = annualNeedAtRetire * yearsAfterRetire;
+  if (plan.preserveCapital && plan.withdrawalRate > 0) {
+    /* คงเงินต้น — ใช้กฎ withdrawal rate (เช่น 4% rule) */
+    targetCorpus = annualNeedAtRetire / (plan.withdrawalRate / 100);
   } else {
-    targetCorpus = annualNeedAtRetire * (1 - Math.pow(1 + realRate, -yearsAfterRetire)) / realRate;
+    /* PV of annuity — ถอนใช้จนหมดที่ lifeExpectancy */
+    if (Math.abs(realRate) < 0.0001) {
+      targetCorpus = annualNeedAtRetire * yearsAfterRetire;
+    } else {
+      targetCorpus = annualNeedAtRetire * (1 - Math.pow(1 + realRate, -yearsAfterRetire)) / realRate;
+    }
   }
 
-  /* FV of current savings + monthly contribution at retirement */
-  const r = plan.expectedReturn / 100;
+  /* FV of current savings + monthly contribution at retirement — ใช้ returnBefore */
+  const r = plan.returnBefore / 100;
   const fvCurrent = derived.currentSavings * Math.pow(1 + r, yearsToRetire);
   const monthly = plan.monthlyContribution || 0;
   const annualContrib = monthly * 12;
@@ -512,83 +752,138 @@ function render() {
       </div>
     ` : ''}
 
-    <div class="ret-layout">
-      <!-- Inputs -->
-      <div class="ret-inputs">
-        <h3>⚙️ ตั้งค่าการวางแผน</h3>
+    <!-- ════ NEW PILL-STYLE FORM (per Planista screenshot) ════ -->
+    <div class="r2-wrap">
+      <div class="r2-section-head">
+        <div class="r2-section-icon">🛋️</div>
+        <div class="r2-section-title">เกษียณ</div>
+      </div>
 
-        <div class="ret-input-row">
-          <label>📅 อายุปัจจุบัน <span class="hint">(จากวันเกิด)</span></label>
-          <input type="number" value="${currentAge.toFixed(0)}" readonly>
-        </div>
-
-        <div class="ret-input-2col">
-          <div class="ret-input-row">
-            <label>🛋️ อายุเกษียณ</label>
-            <input type="number" min="30" max="100" value="${plan.retireAge}"
-              onchange="savePlanField('retireAge', this.value)">
-          </div>
-          <div class="ret-input-row">
-            <label>🌅 อายุขัย <span class="hint">เป้าหมาย</span></label>
-            <input type="number" min="50" max="120" value="${plan.lifeExpectancy}"
-              onchange="savePlanField('lifeExpectancy', this.value)">
-          </div>
-        </div>
-
-        <div class="ret-input-row">
-          <label>💰 รายได้ที่ต้องการหลังเกษียณ <span class="hint">(แนะนำ 70%)</span></label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="number" min="0" max="200" step="1" value="${plan.incomePctAfterRetire}"
-              onchange="savePlanField('incomePctAfterRetire', this.value)" style="width:75px;">
-            <span style="color:var(--gray-500);font-size:.85rem;">%</span>
-            <span style="color:var(--gray-300);">=</span>
-            <input type="text" inputmode="decimal" class="money-fmt"
-              value="${derived.annualIncome > 0 ? Math.round(derived.annualIncome * plan.incomePctAfterRetire / 100 / 12).toLocaleString('th-TH') : 0}"
-              onchange="updatePctFromMonthly(parseMoney(this), ${derived.annualIncome})"
-              ${derived.annualIncome > 0 ? '' : 'disabled title="ต้องมีรายได้ในข้อมูลลูกค้าก่อน"'}
-              style="flex:1;min-width:0;text-align:right;">
-            <span style="color:var(--gray-500);font-size:.78rem;white-space:nowrap;">บาท/เดือน</span>
-          </div>
-          <div style="font-size:.72rem;color:var(--gray-400);margin-top:4px;">
-            ${derived.annualIncome > 0
-              ? `≈ ${fmtFull(derived.annualIncome * plan.incomePctAfterRetire / 100)} บาท/ปี · จากรายได้ปัจจุบัน ${fmtFull(derived.annualIncome)}/ปี`
-              : 'ใส่รายได้ในข้อมูลลูกค้าเพื่อแปลง % ↔ บาท'}
+      <div class="r2-form">
+        <!-- 1. อายุเกษียณ -->
+        <div class="r2-row">
+          <div class="r2-label">อายุที่คิดว่าจะสามารถเกษียณ</div>
+          <div class="r2-control">
+            <div class="r2-pill">
+              <input type="number" min="30" max="100" value="${plan.retireAge}"
+                onchange="savePlanField('retireAge', this.value)">
+              <span class="r2-pill-suffix">ปี</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('retireAge', -1)">−</button>
+            <button class="r2-stepper" onclick="stepField('retireAge', 1)">+</button>
           </div>
         </div>
 
-        <div class="ret-divider"></div>
-
-        <div class="ret-input-2col">
-          <div class="ret-input-row">
-            <label>📈 ผลตอบแทนคาดหวัง %</label>
-            <input type="number" min="0" max="20" step="0.5" value="${plan.expectedReturn}"
-              onchange="savePlanField('expectedReturn', this.value)">
+        <!-- 2. จำนวนเงินต่อปีที่ต้องการใช้ -->
+        <div class="r2-row">
+          <div class="r2-label">จำนวนเงินต่อปีที่ต้องการใช้</div>
+          <div class="r2-control">
+            <div class="r2-pill">
+              <input type="text" inputmode="decimal" class="money-fmt"
+                value="${(plan.annualSpend > 0
+                  ? plan.annualSpend
+                  : (derived.annualIncome * plan.incomePctAfterRetire / 100)
+                ).toLocaleString('th-TH', { maximumFractionDigits: 0 })}"
+                onchange="savePlanField('annualSpend', parseMoney(this))">
+              <span class="r2-pill-suffix">บาท</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('annualSpend', -1)">−</button>
+            <button class="r2-stepper" onclick="stepField('annualSpend', 1)">+</button>
           </div>
-          <div class="ret-input-row">
-            <label>🔥 อัตราเงินเฟ้อ %</label>
-            <input type="number" min="0" max="15" step="0.5" value="${plan.inflationRate}"
-              onchange="savePlanField('inflationRate', this.value)">
+        </div>
+
+        <!-- 3. อัตราเงินเฟ้อ -->
+        <div class="r2-row">
+          <div class="r2-label">
+            อัตราเงินเฟ้อคาดการณ์
+            <span class="ret-info" title="อัตราเงินเฟ้อเฉลี่ยของไทยอยู่ที่ ~2-3% ต่อปี ใช้เพื่อปรับมูลค่าเงินในอนาคต">i</span>
+          </div>
+          <div class="r2-control">
+            <div class="r2-pill">
+              <input type="number" min="0" max="15" step="0.1" value="${plan.inflationRate}"
+                onchange="savePlanField('inflationRate', this.value)">
+              <span class="r2-pill-suffix">%</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('inflationRate', -1)">−</button>
+            <button class="r2-stepper" onclick="stepField('inflationRate', 1)">+</button>
           </div>
         </div>
 
-        <div class="ret-divider"></div>
-
-        <div class="ret-input-row">
-          <label>💵 รายได้ปัจจุบัน/ปี <span class="hint">(จากข้อมูลลูกค้า)</span></label>
-          <input type="number" value="${derived.annualIncome}" readonly>
+        <!-- 4. อายุขัย — segment selector -->
+        <div class="r2-row">
+          <div class="r2-label">
+            อายุขัยคาดการณ์
+            <span class="ret-info" title="ค่าเฉลี่ยคนไทยอยู่ที่ ~80 ปี เลือกอายุขัยเป้าหมายเพื่อคำนวณเงินที่ต้องเก็บ">i</span>
+          </div>
+          <div class="r2-control">
+            <div class="r2-segment">
+              ${LIFE_EXPECTANCY_OPTIONS.map(age =>
+                `<button class="${plan.lifeExpectancy === age ? 'active' : ''}"
+                         onclick="savePlanField('lifeExpectancy', ${age})">${age}</button>`
+              ).join('')}
+            </div>
+          </div>
         </div>
 
-        <div class="ret-input-row">
-          <label>💎 เงินเก็บเพื่อเกษียณตอนนี้ <span class="hint">(PVD/RMF/SSF/ThaiESG)</span></label>
-          <input type="number" value="${derived.currentSavings}" readonly>
+        <!-- 5. ผลตอบแทน (ก่อนเกษียณ) -->
+        <div class="r2-row">
+          <div class="r2-label">ผลตอบแทน (ก่อนเกษียณ)</div>
+          <div class="r2-control">
+            <div class="r2-pill">
+              <input type="number" min="0" max="20" step="0.1" value="${plan.returnBefore}"
+                onchange="savePlanField('returnBefore', this.value)">
+              <span class="r2-pill-suffix">%</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('returnBefore', -1)">−</button>
+            <button class="r2-stepper" onclick="stepField('returnBefore', 1)">+</button>
+          </div>
         </div>
 
-        <div class="ret-input-row">
-          <label>📅 ออมต่อเดือน (ปัจจุบัน)</label>
-          <input type="number" min="0" value="${plan.monthlyContribution}"
-            onchange="savePlanField('monthlyContribution', this.value)">
+        <!-- 6. ผลตอบแทน (หลังเกษียณ) -->
+        <div class="r2-row">
+          <div class="r2-label">ผลตอบแทน (หลังเกษียณ)</div>
+          <div class="r2-control">
+            <div class="r2-pill">
+              <input type="number" min="0" max="20" step="0.1" value="${plan.returnAfter}"
+                onchange="savePlanField('returnAfter', this.value)">
+              <span class="r2-pill-suffix">%</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('returnAfter', -1)">−</button>
+            <button class="r2-stepper" onclick="stepField('returnAfter', 1)">+</button>
+          </div>
+        </div>
+
+        <!-- 7. Toggle + คำนวณคงเงินต้น + อัตราถอน -->
+        <div class="r2-row">
+          <div class="r2-label">
+            <div class="r2-switch ${plan.preserveCapital ? 'on' : ''}"
+                 onclick="savePlanField('preserveCapital', !${plan.preserveCapital})"
+                 title="${plan.preserveCapital ? 'ปิดโหมดคงเงินต้น' : 'เปิดโหมดคงเงินต้น'}"></div>
+            <span style="margin-left:4px;">คำนวณแบบคงเงินต้น ที่อัตราการถอน</span>
+            <span class="ret-info" title="เปิด: เก็บเงินต้นไว้ ใช้แค่ดอกผล (เช่นกฎ 4%) — ปิด: ถอนใช้เงินต้นจนหมดที่อายุขัย">i</span>
+          </div>
+          <div class="r2-control">
+            <div class="r2-pill" style="${plan.preserveCapital ? '' : 'opacity:.45;'}">
+              <input type="number" min="0" max="20" step="0.1" value="${plan.withdrawalRate}"
+                ${plan.preserveCapital ? '' : 'disabled'}
+                onchange="savePlanField('withdrawalRate', this.value)">
+              <span class="r2-pill-suffix">%</span>
+            </div>
+            <button class="r2-stepper" onclick="stepField('withdrawalRate', -1)" ${plan.preserveCapital?'':'disabled style="opacity:.45;"'}>−</button>
+            <button class="r2-stepper" onclick="stepField('withdrawalRate', 1)" ${plan.preserveCapital?'':'disabled style="opacity:.45;"'}>+</button>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="r2-note-wrap">
+          <div class="r2-note-label">Note:</div>
+          <textarea class="r2-note-textarea" placeholder="บันทึกเพิ่มเติม..."
+            onchange="savePlanField('note', this.value)">${(plan.note||'').replace(/</g,'&lt;')}</textarea>
         </div>
       </div>
+    </div>
+
+    <div class="ret-layout">
 
       <!-- Results -->
       <div class="ret-results">

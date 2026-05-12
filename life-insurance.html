@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,13 +23,20 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override — indigo accent ════ */
+    :root {
+      --li2-indigo:       #3B43A8;
+      --li2-indigo-light: #6B72C9;
+      --li2-indigo-soft:  #EEF0F9;
+      --li2-red:          #DC3545;
+    }
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-left { flex: 1; min-width: 240px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -41,6 +49,265 @@
       border: none; border-radius: 8px; padding: 7px 14px;
       font-family: var(--font); font-weight: 700; font-size: .9rem;
       min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ New layout — section wrap ════ */
+    .li2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 32px 28px;
+      margin-bottom: 18px;
+    }
+    .li2-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 24px;
+    }
+    .li2-head-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--li2-indigo); color: var(--li2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; flex-shrink: 0;
+    }
+    .li2-head-title {
+      font-size: 1.8rem; font-weight: 800; color: var(--li2-indigo);
+      letter-spacing: -0.01em;
+    }
+    .li2-head-spacer { flex: 1; }
+    .li2-link-btn {
+      padding: 10px 22px; border-radius: 100px;
+      background: white; color: var(--li2-indigo);
+      border: 2px solid var(--li2-indigo);
+      font-family: var(--font); font-weight: 800; font-size: .95rem;
+      cursor: pointer; transition: all .15s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .li2-link-btn:hover { background: var(--li2-indigo); color: white; }
+
+    /* ════ Two columns: debts | responsibilities ════ */
+    .li2-cols {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 48px; margin-bottom: 24px;
+    }
+    .li2-cols > div { min-width: 0; }   /* allow children to shrink inside grid track */
+    .li2-col-title {
+      font-size: 1.4rem; font-weight: 800; color: var(--li2-indigo);
+      margin-bottom: 14px;
+    }
+    .li2-rows {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .li2-row {
+      display: flex; align-items: center; gap: 8px;
+      min-width: 0;                       /* let row shrink inside narrow column */
+    }
+    .li2-radio {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid #888; background: white;
+      cursor: pointer; flex-shrink: 0;
+      position: relative; transition: all .15s;
+    }
+    .li2-radio.checked { border-color: var(--li2-indigo); }
+    .li2-radio.checked::after {
+      content: ''; position: absolute; inset: 5px;
+      border-radius: 50%; background: var(--li2-indigo);
+    }
+    .li2-pill-name {
+      flex: 1 1 0; min-width: 90px; padding: 8px 16px; min-height: 42px;
+      border: 1.5px solid var(--li2-indigo);
+      border-radius: 100px;
+      background: white;
+      display: flex; align-items: center;
+      overflow: hidden;                   /* clip long text to keep pill width predictable */
+    }
+    .li2-pill-name input {
+      width: 100%; min-width: 0;
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--li2-indigo);
+      text-overflow: ellipsis;
+    }
+    .li2-pill-amt {
+      flex: 0 1 150px; min-width: 110px; padding: 8px 16px; min-height: 42px;
+      border: 1.5px solid var(--li2-indigo);
+      border-radius: 100px;
+      display: flex; align-items: center; gap: 6px;
+      background: white;
+    }
+    .li2-pill-amt input {
+      flex: 1; min-width: 50px;
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--li2-indigo); text-align: right; width: 100%;
+    }
+    .li2-pill-unit {
+      font-size: .9rem; font-weight: 700; color: var(--li2-indigo);
+      flex-shrink: 0;
+    }
+    .li2-row-icon-btn {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: transparent; border: none; cursor: pointer;
+      color: #888; font-size: 1.2rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s;
+      text-decoration: none;
+    }
+    .li2-row-icon-btn:hover { color: var(--li2-indigo); transform: scale(1.1); }
+    .li2-row-del {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: transparent; border: none; cursor: pointer;
+      color: #BBB; font-size: 1rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s;
+    }
+    .li2-row-del:hover { color: var(--li2-red); }
+
+    .li2-add-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #BFC3D0; color: white; border: none;
+      cursor: pointer; font-size: 1.4rem; font-weight: 700; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s; margin-top: 4px;
+    }
+    .li2-add-btn:hover { background: var(--li2-indigo); }
+
+    .li2-total {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 12px; align-items: center; margin-top: 16px;
+    }
+    .li2-total-lbl {
+      font-size: 1.05rem; font-weight: 700; color: #222;
+    }
+    .li2-total-pill {
+      min-width: 140px; padding: 8px 18px; min-height: 42px;
+      border: 1.5px solid #888; border-radius: 100px;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font); font-size: 1.05rem; font-weight: 800;
+      color: var(--li2-red);
+    }
+
+    /* ════ Bottom summary ════ */
+    .li2-summary {
+      background: #FAFBFD; border: 1px solid #DCE0E8;
+      border-radius: 18px; padding: 24px 30px;
+      margin-top: 16px;
+    }
+    .li2-sum-row {
+      display: grid; grid-template-columns: 1fr auto auto;
+      gap: 16px; align-items: center;
+      padding: 10px 0;
+    }
+    .li2-sum-row + .li2-sum-row {
+      border-top: 1px dashed #DDD;
+    }
+    .li2-sum-lbl {
+      font-size: 1.1rem; font-weight: 700; color: #222;
+    }
+    .li2-sum-pill-readonly {
+      min-width: 220px; padding: 6px 18px; min-height: 36px;
+      border: 1.5px solid var(--li2-indigo); border-radius: 100px;
+      background: white;
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+      font-family: var(--font); font-size: 1rem; font-weight: 800;
+      color: var(--li2-indigo);
+    }
+    .li2-sum-pill-input {
+      min-width: 220px; padding: 6px 18px; min-height: 36px;
+      border: 1.5px solid var(--li2-indigo); border-radius: 100px;
+      background: white;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .li2-sum-pill-input input {
+      flex: 1; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--li2-indigo); text-align: right;
+    }
+    .li2-sum-val-text {
+      font-size: 1.1rem; font-weight: 800; color: var(--li2-indigo);
+    }
+    .li2-sum-val-text.red { color: var(--li2-red); }
+    .li2-sum-unit { font-size: 1rem; font-weight: 700; color: #222; }
+
+    /* ════ Bottom progress ════ */
+    .li2-progress-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 22px 4px 4px;
+    }
+    .li2-progress-bar {
+      flex: 1; height: 16px; border-radius: 100px;
+      background: white; border: 1.5px solid #BBB;
+      overflow: hidden;
+    }
+    .li2-progress-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #6BCB77);
+      transition: width .4s;
+    }
+    .li2-progress-pct {
+      font-size: 1.15rem; font-weight: 800; color: #28a745;
+      min-width: 50px; text-align: right;
+    }
+    .li2-progress-pct.warn { color: #F39C12; }
+    .li2-progress-pct.bad { color: var(--li2-red); }
+
+    /* ════ Parent Care Modal — บิดา + มารดา ════ */
+    .li2-parent-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .li2-parent-overlay.open { display: flex; }
+    .li2-parent-card {
+      background: white; border-radius: 18px;
+      max-width: 720px; width: 100%; padding: 24px 32px 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      position: relative;
+    }
+    .li2-parent-close {
+      position: absolute; top: 12px; right: 16px;
+      width: 32px; height: 32px; border: none; background: transparent;
+      cursor: pointer; font-size: 1.4rem; color: #666; line-height: 1;
+    }
+    .li2-parent-close:hover { color: #222; }
+    .li2-parent-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+      margin-top: 14px;
+    }
+    .li2-parent-col-title {
+      font-size: 1.2rem; font-weight: 800; color: #222;
+      margin-bottom: 16px;
+    }
+    .li2-parent-row {
+      display: grid; grid-template-columns: 110px 1fr; gap: 8px;
+      align-items: center; margin-bottom: 12px;
+    }
+    .li2-parent-row label {
+      font-size: 1rem; font-weight: 600; color: #222;
+    }
+    .li2-parent-pill {
+      display: flex; align-items: center;
+      border: 1.5px solid #222; border-radius: 100px;
+      padding: 6px 14px; min-height: 36px; gap: 6px;
+    }
+    .li2-parent-pill input {
+      flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--li2-indigo); text-align: right;
+    }
+    .li2-parent-pill-suffix {
+      font-size: .95rem; font-weight: 700; color: #222; flex-shrink: 0;
+    }
+    .li2-parent-computed {
+      font-size: 1rem; font-weight: 800; color: var(--li2-red);
+      text-align: right; padding-right: 14px;
+    }
+    .li2-parent-calc-btn {
+      display: block; margin: 22px auto 0;
+      padding: 10px 36px; border: 1.5px solid #222; background: white;
+      border-radius: 100px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: 1rem;
+      color: #222; transition: all .15s;
+    }
+    .li2-parent-calc-btn:hover { background: var(--li2-indigo); color: white; border-color: var(--li2-indigo); }
+    @media (max-width: 680px) {
+      .li2-parent-grid { grid-template-columns: 1fr; gap: 18px; }
     }
 
     /* Top section — debt + responsibility */
@@ -217,6 +484,15 @@
       .sb-row .sb-val { text-align: right; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -289,6 +565,80 @@
       <div id="content-wrap"></div>
     </div>
   </main>
+</div>
+
+<!-- Parent Care Modal — บิดา + มารดา -->
+<div class="li2-parent-overlay" id="li2-parent-modal" onclick="if(event.target===this)closeParentCareModal()">
+  <div class="li2-parent-card">
+    <button class="li2-parent-close" onclick="closeParentCareModal()" title="ปิด">✕</button>
+    <div class="li2-parent-grid">
+      <!-- บิดา -->
+      <div class="li2-parent-col">
+        <div class="li2-parent-col-title">บิดา</div>
+        <div class="li2-parent-row">
+          <label>เดือนละ</label>
+          <div class="li2-parent-pill">
+            <input type="text" id="pc-father-monthly" inputmode="decimal" placeholder="0"
+              oninput="_pcInput(this)" onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">บาท</span>
+          </div>
+        </div>
+        <div class="li2-parent-row">
+          <label>ปีละ</label>
+          <div class="li2-parent-computed" id="pc-father-yearly">0 บาท</div>
+        </div>
+        <div class="li2-parent-row">
+          <label>ระยะเวลา</label>
+          <div class="li2-parent-pill">
+            <input type="number" id="pc-father-years" min="0" max="60" step="1" placeholder="0"
+              onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">ปี</span>
+          </div>
+        </div>
+        <div class="li2-parent-row">
+          <label>อัตราเงินเฟ้อ</label>
+          <div class="li2-parent-pill">
+            <input type="number" id="pc-father-infl" min="0" max="15" step="0.1" placeholder="0"
+              onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">%</span>
+          </div>
+        </div>
+      </div>
+      <!-- มารดา -->
+      <div class="li2-parent-col">
+        <div class="li2-parent-col-title">มารดา</div>
+        <div class="li2-parent-row">
+          <label>เดือนละ</label>
+          <div class="li2-parent-pill">
+            <input type="text" id="pc-mother-monthly" inputmode="decimal" placeholder="0"
+              oninput="_pcInput(this)" onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">บาท</span>
+          </div>
+        </div>
+        <div class="li2-parent-row">
+          <label>ปีละ</label>
+          <div class="li2-parent-computed" id="pc-mother-yearly">0 บาท</div>
+        </div>
+        <div class="li2-parent-row">
+          <label>ระยะเวลา</label>
+          <div class="li2-parent-pill">
+            <input type="number" id="pc-mother-years" min="0" max="60" step="1" placeholder="0"
+              onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">ปี</span>
+          </div>
+        </div>
+        <div class="li2-parent-row">
+          <label>อัตราเงินเฟ้อ</label>
+          <div class="li2-parent-pill">
+            <input type="number" id="pc-mother-infl" min="0" max="15" step="0.1" placeholder="0"
+              onkeydown="_pcKey(event)" onblur="_pcRecompute()">
+            <span class="li2-parent-pill-suffix">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="li2-parent-calc-btn" onclick="applyParentCare()">คำนวณ</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -414,6 +764,62 @@ const EDU_COST_TABLE = {
 const EDU_LEVEL_IDX = { economy:0, medium:1, premium:2 };
 const EDU_DEFAULT_INFLATION = 5;
 
+/* ════════════════════════════════════════════
+   COST TABLE — sync กับ education.html (9 รายการ × 3 ระดับ)
+   ใช้สำหรับ getChildTotalCost() = education + rearing (ตรงกับ "รวม" ในหน้า การศึกษาบุตร)
+═══════════════════════════════════════════ */
+const EDU_COST_KEYS = [
+  { key:'age_0_3',          ageMin:0,  ageMax:3,  category:'living' },
+  { key:'babysitter_0_3',   ageMin:0,  ageMax:3,  category:'care'   },
+  { key:'living_0_3',       ageMin:0,  ageMax:3,  category:'living' },
+  { key:'tuition_kp',       ageMin:3,  ageMax:12, category:'tuition'},
+  { key:'living_kp',        ageMin:3,  ageMax:12, category:'living' },
+  { key:'tuition_mid',      ageMin:12, ageMax:18, category:'tuition'},
+  { key:'living_mid',       ageMin:12, ageMax:18, category:'living' },
+  { key:'tuition_bachelor', ageMin:18, ageMax:22, category:'tuition'},
+  { key:'living_bachelor',  ageMin:18, ageMax:22, category:'living' },
+];
+const EDU_DEFAULT_COST_TABLE = {
+  age_0_3:           [ 40000,  75000,  110000],
+  babysitter_0_3:    [ 50000, 100000,  300000],
+  living_0_3:        [ 55000, 150000,  650000],
+  tuition_kp:        [ 17000, 175000,  800000],
+  living_kp:         [ 55000, 150000,  650000],
+  tuition_mid:       [ 19500, 200000, 1300000],
+  living_mid:        [ 55000, 150000,  650000],
+  tuition_bachelor:  [ 35000, 300000, 3000000],
+  living_bachelor:   [ 55000, 150000,  650000],
+};
+const REARING_END_AGE = 21;
+
+/* อ่าน cost table — ใช้ client.eduCostTable ถ้ามี (sync กับ modal "ตั้งค่ารายละเอียด" ในหน้า education.html) */
+function _getEduCostTable() {
+  const c = getCurrent();
+  const custom = (c && c.eduCostTable) || {};
+  const out = {};
+  EDU_COST_KEYS.forEach(k => {
+    out[k.key] = custom[k.key] || EDU_DEFAULT_COST_TABLE[k.key].slice();
+  });
+  return out;
+}
+
+/* รวมค่าใช้จ่าย/ปี ที่อายุ a ระดับ level — filter category */
+function _sumYearlyCostByCategory(age, level, categories) {
+  const costTable = _getEduCostTable();
+  const lvIdx = EDU_LEVEL_IDX[level] != null ? EDU_LEVEL_IDX[level] : 1;
+  let total = 0;
+  for (const k of EDU_COST_KEYS) {
+    if (categories.indexOf(k.category) >= 0 && age >= k.ageMin && age < k.ageMax) {
+      const row = costTable[k.key] || EDU_DEFAULT_COST_TABLE[k.key] || [0,0,0];
+      total += Number(row[lvIdx] || 0);
+    }
+  }
+  return total;
+}
+function _maxCostAge() {
+  return EDU_COST_KEYS.reduce((m, k) => Math.max(m, k.ageMax), 0);
+}
+
 /* ตรงกับ ageNow() ใน education.html — คืนค่า age เป็นทศนิยม (5.4 ปี ไม่ใช่ 5)
    ★ Cache ผลลัพธ์ตาม dob ต่อ session — กันค่ากระเพื่อมทุก render (Date.now เปลี่ยน
    ทุก ms → age เปลี่ยนเล็กน้อย → I/E ใน DIME ขยับหลักสิบบาท ดู "มั่ว") */
@@ -471,6 +877,45 @@ function getChildEducationFuture(child) {
     }
   });
   return totalFuture;
+}
+
+/* รวม education + rearing — ตรงกับ "รวม" ในหน้า การศึกษาบุตร (grandTotal)
+   = computeChildPlan().totalFuture + computeRearingCost() ใน education.html
+   ใช้สำหรับ ปุ่ม 📊 "ดึงยอดรวมการศึกษาบุตร" ที่ row "บุตร" */
+function getChildTotalCost(child) {
+  const age = _ageNow(child.dob || child.birthdate);
+  const level = child.level || 'medium';
+  const lvIdx = EDU_LEVEL_IDX[level] != null ? EDU_LEVEL_IDX[level] : 1;
+  /* fallback ถ้าไม่มี dob */
+  if (age == null) return [800000, 1500000, 3000000][lvIdx] || 1500000;
+
+  const inflationPct = child.inflationRate != null ? Number(child.inflationRate) : EDU_DEFAULT_INFLATION;
+  const INFL = inflationPct / 100;
+
+  /* eduCost (category=tuition) — วิ่งจากอายุปัจจุบัน → _maxCostAge() (22) */
+  let eduTotal = 0;
+  const maxAge = _maxCostAge();
+  for (let a = Math.floor(age); a < maxAge; a++) {
+    if (a < age) continue;
+    const yearCost = _sumYearlyCostByCategory(a, level, ['tuition']);
+    const yearOffset = a - age;
+    if (yearCost > 0 && yearOffset >= 0) {
+      eduTotal += yearCost * Math.pow(1 + INFL, yearOffset);
+    }
+  }
+
+  /* rearCost (category=living + care) — วิ่งถึง REARING_END_AGE (21) */
+  let rearTotal = 0;
+  for (let a = Math.floor(age); a < REARING_END_AGE; a++) {
+    if (a < age) continue;
+    const yearCost = _sumYearlyCostByCategory(a, level, ['living', 'care']);
+    const yearOffset = a - age;
+    if (yearCost > 0 && yearOffset >= 0) {
+      rearTotal += yearCost * Math.pow(1 + INFL, yearOffset);
+    }
+  }
+
+  return eduTotal + rearTotal;
 }
 
 /* อ่านอายุเกษียณจาก client (priority เดียวกับ retirement.html getPlan):
@@ -553,8 +998,9 @@ function render() {
   }
 
   const li = getLifeInputs();
-  const totalDebt = li.debts.reduce((s,d) => s + Number(d.amount||0), 0);
-  const totalResp = li.responsibilities.reduce((s,r) => s + Number(r.amount||0), 0);
+  /* Only sum items where included !== false (radio checked) */
+  const totalDebt = li.debts.filter(d => d.included !== false).reduce((s,d) => s + Number(d.amount||0), 0);
+  const totalResp = li.responsibilities.filter(r => r.included !== false).reduce((s,r) => s + Number(r.amount||0), 0);
 
   /* method: 'simple' = หนี้สิน+ความรับผิดชอบ (เดิม)
               'dime'   = Debt+Income+Mortgage+Education (มาตรฐาน DIME) */
@@ -575,135 +1021,148 @@ function render() {
   const c = getCurrent();
   const policies = (c && c.policies) || [];
 
+  /* Force Simple method on new UI — DIME logic preserved for other pages via schema */
+  if (li.method !== 'simple') saveLifeInputs(x => { x.method = 'simple'; });
+
+  const gapAbs = Math.abs(gap);
+  const pctClass = pct >= 100 ? '' : (pct >= 50 ? 'warn' : 'bad');
+
   wrap.innerHTML = `
-    <!-- Method toggle -->
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-      <span style="font-weight:700;color:var(--gray-700);">วิธีคำนวณ:</span>
-      <button onclick="setMethod('simple')" style="padding:6px 14px;border:1.5px solid ${method==='simple'?'var(--red-primary)':'var(--gray-300)'};background:${method==='simple'?'var(--red-soft)':'white'};color:${method==='simple'?'var(--red-primary)':'var(--gray-600)'};border-radius:6px;font-weight:700;font-family:var(--font);font-size:.85rem;cursor:pointer;">📋 หนี้สิน + ความรับผิดชอบ</button>
-      <button onclick="setMethod('dime')" style="padding:6px 14px;border:1.5px solid ${method==='dime'?'var(--red-primary)':'var(--gray-300)'};background:${method==='dime'?'var(--red-soft)':'white'};color:${method==='dime'?'var(--red-primary)':'var(--gray-600)'};border-radius:6px;font-weight:700;font-family:var(--font);font-size:.85rem;cursor:pointer;">🎯 DIME (มาตรฐานสากล)</button>
-    </div>
-    ${method === 'dime' ? `
-      <div style="background:#FFF8E1;border-left:4px solid #F39C12;padding:12px 16px;border-radius:6px;margin-bottom:14px;font-size:.88rem;">
-        <b>🎯 DIME Method</b> — ทุนประกันที่ควรมี = หนี้สิน + (รายได้/ปี × ปีถึงเกษียณ) + การศึกษาบุตร<br>
-        <span style="color:#666;font-size:.82rem;">D: ${fmtBaht(dime.debt)} · I: ${fmtBaht(dime.income)} (${dime.yearsToRetire.toFixed(1)} ปี ถึงอายุ ${dime.retireAge}) · E: ${fmtBaht(dime.education)} · <b>รวม ${fmtBaht(dime.total)}</b></span><br>
-        <span style="color:#888;font-size:.76rem;">อายุเกษียณ ${dime.retireAge} ปี — แก้ที่ <a href="retirement.html" style="color:var(--red-primary);">หน้าวางแผนเกษียณ</a></span>
-      </div>` : ''}
+    <div class="li2-wrap">
+      <!-- Header -->
+      <div class="li2-head">
+        <div class="li2-head-icon">☂</div>
+        <div class="li2-head-title">ประกันชีวิต</div>
+        <div class="li2-head-spacer"></div>
+        <a class="li2-link-btn" href="policies.html">สรุปประกัน</a>
+      </div>
 
-    <!-- Section 1 & 2: Debt + Responsibility — fade ใน DIME mode (ไม่ใช้ใน formula) -->
-    <div class="li-grid" style="${method === 'dime' ? 'opacity:.55;' : ''}">
-
-      <!-- Debt -->
-      <div class="li-card" title="${method === 'dime' ? 'DIME mode ใช้หนี้สินจากงบการเงินอัตโนมัติ — ช่องนี้ใช้กับ Simple mode' : ''}">
-        <div class="li-card-title">
-          <div class="li-ico">💸</div>
-          <span>หนี้สิน${method === 'dime' ? ' <small style="font-weight:400;color:var(--gray-500);font-size:.72rem;">(ใช้กับ Simple)</small>' : ''}</span>
-          <button onclick="importLiabilities()" style="margin-left:auto;padding:4px 10px;border:1px solid var(--gray-300);background:white;border-radius:5px;font-size:.78rem;cursor:pointer;font-family:var(--font);" title="ดึงหนี้สิน + สินทรัพย์สภาพคล่องจากงบการเงิน">📥 ดึงจากงบการเงิน</button>
+      <!-- Two columns -->
+      <div class="li2-cols">
+        <!-- LEFT: หนี้สิน -->
+        <div>
+          <div class="li2-col-title">หนี้สิน</div>
+          <div class="li2-rows" id="debt-list">
+            ${li.debts.map(d => renderRowNew(d, 'debt')).join('')}
+          </div>
+          <button class="li2-add-btn" onclick="addRow('debt')" title="เพิ่มหนี้สิน">+</button>
+          <div class="li2-total">
+            <div class="li2-total-lbl">หนี้สินรวม</div>
+            <div class="li2-total-pill">${fmt(totalDebt)}</div>
+          </div>
         </div>
-        <div id="debt-list">
-          ${li.debts.map(d => renderRow(d, 'debt')).join('')}
+
+        <!-- RIGHT: ความรับผิดชอบ -->
+        <div>
+          <div class="li2-col-title">ความรับผิดชอบ</div>
+          <div class="li2-rows" id="resp-list">
+            ${li.responsibilities.map(r => renderRowNew(r, 'resp')).join('')}
+          </div>
+          <button class="li2-add-btn" onclick="addRow('resp')" title="เพิ่มความรับผิดชอบ">+</button>
+          <div class="li2-total">
+            <div class="li2-total-lbl">ความรับผิดชอบรวม</div>
+            <div class="li2-total-pill">${fmt(totalResp)}</div>
+          </div>
         </div>
-        <div class="li-total-strip">
-          <span class="total-lbl">หนี้สินรวม</span>
-          <span class="total-val">${fmtBaht(totalDebt)}</span>
+      </div>
+
+      <!-- Bottom summary -->
+      <div class="li2-summary">
+        <div class="li2-sum-row">
+          <div class="li2-sum-lbl">หนี้สินและความรับผิดชอบรวม</div>
+          <div class="li2-sum-val-text">${fmt(totalNeed)}</div>
+          <div class="li2-sum-unit">บาท</div>
         </div>
-        <button class="li-add-row-btn" onclick="addRow('debt')">＋ เพิ่มหนี้สิน</button>
-      </div>
-
-      <!-- Responsibility -->
-      <div class="li-card" title="${method === 'dime' ? 'DIME mode คำนวณการศึกษาบุตร (E) จากหน้าการศึกษาบุตรอัตโนมัติ — ช่องนี้ใช้กับ Simple mode' : ''}">
-        <div class="li-card-title">
-          <div class="li-ico">🤝</div>
-          <span>ความรับผิดชอบ${method === 'dime' ? ' <small style="font-weight:400;color:var(--gray-500);font-size:.72rem;">(ใช้กับ Simple)</small>' : ''}</span>
+        <div class="li2-sum-row">
+          <div class="li2-sum-lbl">ประกันชีวิตที่เตรียมไว้แล้ว</div>
+          <a class="li2-sum-pill-readonly" href="policies.html" style="text-decoration:none;" title="คลิกเพื่อจัดการกรมธรรม์">
+            <span>${fmt(currentLifeCov)}</span>
+          </a>
+          <a class="li2-row-icon-btn" href="policies.html" title="ดู/เพิ่มกรมธรรม์">📊</a>
         </div>
-        <div id="resp-list">
-          ${li.responsibilities.map(r => renderRow(r, 'resp')).join('')}
+        <div class="li2-sum-row">
+          <div class="li2-sum-lbl">สินทรัพย์สภาพคล่องที่มี</div>
+          <div class="li2-sum-pill-input">
+            <input class="money-fmt" type="text" inputmode="decimal"
+              value="${currentLiquid}"
+              onchange="updateLiquid(parseMoney(this))"
+              title="ดึงจากเงินฝาก+ตราสารหนี้อัตโนมัติ — แก้เองได้">
+          </div>
+          <div class="li2-sum-unit">บาท</div>
         </div>
-        <div class="li-total-strip">
-          <span class="total-lbl">ความรับผิดชอบรวม</span>
-          <span class="total-val">${fmtBaht(totalResp)}</span>
+        <div class="li2-sum-row">
+          <div class="li2-sum-lbl">${gap > 0 ? 'ควรจัดสรรเพิ่มอีก' : '✓ คุ้มครองพอแล้ว — ส่วนเกิน'}</div>
+          <div class="li2-sum-val-text ${gap > 0 ? 'red' : ''}">${fmt(gapAbs)}</div>
+          <div class="li2-sum-unit">บาท</div>
         </div>
-        <button class="li-add-row-btn" onclick="addRow('resp')">＋ เพิ่มความรับผิดชอบ</button>
       </div>
 
-    </div>
-
-    <!-- Validation Panel — block / warn / hint / ok -->
-    ${(() => {
-      const issues = getValidations();
-      if (issues.length === 0) return '';
-      const iconMap = { warn: '⚠️', hint: '💡', ok: '✅' };
-      return `<div class="validation-panel">
-        <div class="vp-title">✅ ตรวจสอบข้อมูล</div>
-        ${issues.map(i => `<div class="vp-row vp-${i.level}">
-          <span class="vp-icon">${iconMap[i.level] || '•'}</span>
-          <span class="vp-msg">${i.msg}</span>
-        </div>`).join('')}
-      </div>`;
-    })()}
-
-    <!-- Section 3: Combined summary -->
-    <div class="summary-box">
-      <div class="sb-row">
-        <span class="sb-lbl">${method === 'dime'
-          ? '🎯 ทุนประกันที่ควรมี (DIME D+I+E)'
-          : '📊 หนี้สินและความรับผิดชอบรวม'}</span>
-        <span class="sb-val">${fmtBaht(totalNeed)}</span>
+      <!-- Progress -->
+      <div class="li2-progress-row">
+        <div class="li2-progress-bar">
+          <div class="li2-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="li2-progress-pct ${pctClass}">${pct}%</div>
       </div>
-      ${method === 'dime' ? `<div class="sb-row" style="font-size:.78rem;color:var(--gray-500);padding:6px 0 8px;border-bottom:1px solid var(--gray-100);">
-        <span style="grid-column:1/-1;font-style:italic;">
-          💡 ช่อง "หนี้สิน + ความรับผิดชอบ" ด้านบนเป็นโหมด Simple — ใน DIME ใช้ค่าอัตโนมัติจากงบการเงิน/ลูกค้า/หน้าการศึกษาบุตร
-        </span>
-      </div>` : ''}
-      <div class="sb-row">
-        <span class="sb-lbl">
-          ☂️ ประกันชีวิตที่เตรียมไว้แล้ว
-          <a href="policies.html" class="add-policy-link">+ เพิ่มกรมธรรม์</a>
-        </span>
-        <span class="sb-val" style="color:#28a745;">${fmtBaht(currentLifeCov)}</span>
-      </div>
-      <div class="sb-row">
-        <span class="sb-lbl">💰 สินทรัพย์สภาพคล่องที่มี</span>
-        <span class="sb-val">
-          <input class="input-inline money-fmt" type="text" inputmode="decimal"
-            value="${currentLiquid}"
-            onchange="updateLiquid(parseMoney(this))"
-            title="ดึงจากเงินฝาก+ตราสารหนี้อัตโนมัติ — แก้เองได้">
-        </span>
-      </div>
-      <div class="sb-row highlight">
-        <span class="sb-lbl">${gap > 0 ? '⚠️ ควรจัดสรรเพิ่มอีก' : '✅ คุ้มครองพอแล้ว — ส่วนเกิน'}</span>
-        <span class="sb-val">${fmtBaht(Math.abs(gap))}</span>
-      </div>
-    </div>
-
-    <!-- Progress -->
-    <div class="progress-card">
-      <div class="progress-title">
-        <span>🎯 ความเพียงพอของประกันชีวิต</span>
-        <span class="pct" style="color:${pct >= 100 ? '#28a745' : pct >= 50 ? '#FF8C00' : '#DC3545'}">${pct}%</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill ${pct >= 100 ? '' : pct >= 50 ? 'warn' : 'bad'}" style="width:${pct}%"></div>
-      </div>
-    </div>
-
-    <!-- Existing policies preview -->
-    <div class="policies-preview">
-      <div class="pp-head">
-        <h3>📋 กรมธรรม์ของลูกค้า (${policies.length})</h3>
-        <a href="policies.html" style="color:var(--red-primary);font-weight:700;text-decoration:none;font-size:.85rem;">
-          จัดการ →
-        </a>
-      </div>
-      ${policies.length === 0
-        ? `<div class="pp-empty">📭 ยังไม่มีกรมธรรม์ — <a href="policies.html">เพิ่มกรมธรรม์</a></div>`
-        : `<div class="pp-list">${policies.slice(0, 5).map(p => renderPolicyItem(p)).join('')}</div>`
-      }
     </div>
   `;
 
   refreshAllMoneyInputs();
 }
+
+/* New pill-style row renderer */
+function renderRowNew(item, kind) {
+  /* Each row has: radio | name pill | amount pill | trailing icon (for fixed rows) or delete (custom) */
+  const isFixed = !!item.fixed;
+  /* Trailing icon — based on item type (now calls real functions) */
+  let trailingIcon = '';
+  if (item.id === 'r-parents') {
+    trailingIcon = `<button class="li2-row-icon-btn" onclick="openParentCareModal()" title="คำนวณค่าดูแลบิดามารดา">🧮</button>`;
+  } else if (item.id === 'r-children') {
+    trailingIcon = `<button class="li2-row-icon-btn" onclick="pullChildrenEducation()" title="ดึงยอดรวมการศึกษาบุตร">📊</button>`;
+  } else if (isFixed && kind === 'debt') {
+    trailingIcon = `<button class="li2-row-icon-btn" onclick="pullDebtFromNetworth('${item.id}')" title="ดึงจากงบการเงิน">📊</button>`;
+  }
+  /* Delete button — only for custom rows */
+  const delBtn = isFixed
+    ? trailingIcon
+    : `<button class="li2-row-del" onclick="deleteRow('${kind}','${item.id}')" title="ลบ">🗑</button>`;
+  /* Name display — fixed rows show readonly text in pill; custom rows have editable input */
+  const nameHtml = isFixed
+    ? `<div class="li2-pill-name"><input type="text" value="${(item.name||'').replace(/"/g,'&quot;')}" readonly style="cursor:default;"></div>`
+    : `<div class="li2-pill-name"><input type="text" value="${(item.name||'').replace(/"/g,'&quot;')}" placeholder="ชื่อรายการ" onchange="updateItemName('${kind}','${item.id}',this.value)"></div>`;
+
+  /* Radio = "included in total" toggle. Default true. Click to exclude/include. */
+  const isIncluded = item.included !== false;
+  return `<div class="li2-row" data-id="${item.id}">
+    <div class="li2-radio ${isIncluded ? 'checked' : ''}"
+         onclick="toggleRowIncluded('${kind}','${item.id}')"
+         title="${isIncluded ? 'คลิกเพื่อไม่นับในการคำนวณ' : 'คลิกเพื่อนับในการคำนวณ'}"></div>
+    ${nameHtml}
+    <div class="li2-pill-amt">
+      <input class="money-fmt" type="text" inputmode="decimal"
+        value="${item.amount||0}"
+        onchange="updateItemAmount('${kind}','${item.id}',parseMoney(this))"
+        placeholder="0">
+      <span class="li2-pill-unit">บาท</span>
+    </div>
+    ${delBtn}
+  </div>`;
+}
+
+/* Toggle "included" flag — when off, row excluded from total */
+function toggleRowIncluded(kind, id) {
+  const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
+  saveLifeInputs(li => {
+    if (!li[dataKey]) return;
+    const item = li[dataKey].find(x => x.id === id);
+    if (!item) return;
+    item.included = item.included === false ? true : false;
+  });
+  render();
+}
+/* Keep old name as alias for backward compat */
+function toggleRowAmount(kind, id) { return toggleRowIncluded(kind, id); }
 
 function renderRow(item, kind) {
   const dataKey = kind === 'debt' ? 'debts' : 'responsibilities';
@@ -882,6 +1341,150 @@ function deleteRow(kind, id) {
     if (!li[dataKey]) return;
     li[dataKey] = li[dataKey].filter(x => x.id !== id);
   });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   Pull functions — fed by 📊 / 🧮 icons in each row
+═══════════════════════════════════════════ */
+/* Pull liability from networth for a specific row (d-home / d-car) */
+function pullDebtFromNetworth(rowId) {
+  const c = getCurrent();
+  if (!c) return;
+  const liabs = c.liabilities || [];
+  let typeFilter;
+  if (rowId === 'd-home') typeFilter = 'home';
+  else if (rowId === 'd-car') typeFilter = 'car';
+  else return;
+  const total = liabs.filter(l => l.type === typeFilter)
+    .reduce((s,l) => s + Number(l.principal||0), 0);
+  saveLifeInputs(li => {
+    const d = li.debts.find(x => x.id === rowId);
+    if (d) d.amount = Math.round(total);
+  });
+  showToast(total > 0
+    ? `✅ ดึงยอดหนี้${typeFilter === 'home' ? 'บ้าน' : 'รถ'}จากงบการเงิน ${total.toLocaleString('th-TH')} บาท`
+    : `⚠️ ไม่พบหนี้${typeFilter === 'home' ? 'บ้าน' : 'รถ'}ในงบการเงิน`);
+  render();
+}
+
+/* Pull total future education cost (Σ over all children) into "บุตร" responsibility */
+function pullChildrenEducation() {
+  const c = getCurrent();
+  if (!c) return;
+  const children = c.children || [];
+  if (children.length === 0) {
+    showToast('⚠️ ไม่มีข้อมูลบุตร — ไปกรอกที่หน้า "การศึกษาบุตร" ก่อน');
+    return;
+  }
+  /* ใช้ getChildTotalCost = eduCost + rearCost — ตรงกับ "รวม" ในหน้า การศึกษาบุตร */
+  const total = children.reduce((s, ch) => {
+    const v = getChildTotalCost(ch);
+    return s + (isFinite(v) ? Number(v) : 0);
+  }, 0);
+  saveLifeInputs(li => {
+    const r = li.responsibilities.find(x => x.id === 'r-children');
+    if (r) r.amount = Math.round(total);
+  });
+  showToast(`✅ ดึงยอดการศึกษา+เลี้ยงดูบุตร ${children.length} คน รวม ${Math.round(total).toLocaleString('th-TH')} บาท`);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   PARENT CARE MODAL — บิดา + มารดา
+═══════════════════════════════════════════ */
+function openParentCareModal() {
+  if (!selectedClientId) return;
+  /* Restore saved values (if any) */
+  const li = getLifeInputs();
+  const pc = (li && li.parentCare) || { father:{}, mother:{} };
+  document.getElementById('pc-father-monthly').value = pc.father.monthly ? Number(pc.father.monthly).toLocaleString('th-TH') : '';
+  document.getElementById('pc-father-years').value = pc.father.years || '';
+  document.getElementById('pc-father-infl').value = pc.father.infl != null ? pc.father.infl : '';
+  document.getElementById('pc-mother-monthly').value = pc.mother.monthly ? Number(pc.mother.monthly).toLocaleString('th-TH') : '';
+  document.getElementById('pc-mother-years').value = pc.mother.years || '';
+  document.getElementById('pc-mother-infl').value = pc.mother.infl != null ? pc.mother.infl : '';
+  _pcRecompute();
+  document.getElementById('li2-parent-modal').classList.add('open');
+}
+
+function closeParentCareModal() {
+  document.getElementById('li2-parent-modal').classList.remove('open');
+}
+
+/* Live comma format + cursor preservation for "เดือนละ" inputs */
+function _pcInput(el) {
+  const sel = el.selectionStart || 0;
+  const before = el.value.substring(0, sel);
+  const digitsBefore = (before.match(/\d/g) || []).length;
+  const raw = String(el.value).replace(/[^\d.]/g, '');
+  if (raw === '') { el.value = ''; _pcRecompute(); return; }
+  const n = parseFloat(raw);
+  if (isNaN(n)) return;
+  const formatted = n.toLocaleString('th-TH', { maximumFractionDigits: 0 });
+  el.value = formatted;
+  let pos = formatted.length, count = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (/\d/.test(formatted[i])) count++;
+    if (count >= digitsBefore) { pos = i + 1; break; }
+  }
+  el.setSelectionRange(pos, pos);
+  _pcRecompute();
+}
+
+function _pcKey(e) {
+  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); _pcRecompute(); }
+}
+
+/* Read modal inputs → compute totals per parent + display "ปีละ" */
+function _pcReadInputs() {
+  const parse = id => {
+    const v = (document.getElementById(id) || {}).value || '';
+    return Number(String(v).replace(/[^\d.]/g, '')) || 0;
+  };
+  return {
+    father: { monthly: parse('pc-father-monthly'), years: parse('pc-father-years'), infl: parse('pc-father-infl') },
+    mother: { monthly: parse('pc-mother-monthly'), years: parse('pc-mother-years'), infl: parse('pc-mother-infl') },
+  };
+}
+
+/* Total support for one parent over N years with inflation
+   formula: Σ y=0..N-1 of (monthly × 12 × (1+infl)^y)
+   - คล้ายกับการคำนวณรายจ่ายในอนาคต (เงินเฟ้อขึ้นตามปี) */
+function _pcTotal(p) {
+  const annual = (Number(p.monthly) || 0) * 12;
+  const years = Math.max(Math.round(Number(p.years) || 0), 0);
+  const infl = (Number(p.infl) || 0) / 100;
+  if (annual <= 0 || years <= 0) return 0;
+  if (Math.abs(infl) < 0.0001) return annual * years;
+  return annual * (Math.pow(1 + infl, years) - 1) / infl;
+}
+
+function _pcRecompute() {
+  const v = _pcReadInputs();
+  const fyearly = (Number(v.father.monthly) || 0) * 12;
+  const myearly = (Number(v.mother.monthly) || 0) * 12;
+  const elF = document.getElementById('pc-father-yearly');
+  const elM = document.getElementById('pc-mother-yearly');
+  if (elF) elF.textContent = Math.round(fyearly).toLocaleString('th-TH') + ' บาท';
+  if (elM) elM.textContent = Math.round(myearly).toLocaleString('th-TH') + ' บาท';
+}
+
+/* User clicks "คำนวณ" → compute totals, save to responsibility[r-parents], close modal */
+function applyParentCare() {
+  const v = _pcReadInputs();
+  const totalFather = _pcTotal(v.father);
+  const totalMother = _pcTotal(v.mother);
+  const grand = Math.round(totalFather + totalMother);
+  saveLifeInputs(li => {
+    /* Save inputs for re-opening later */
+    li.parentCare = v;
+    /* Set the responsibility amount */
+    const r = li.responsibilities.find(x => x.id === 'r-parents');
+    if (r) r.amount = grand;
+  });
+  closeParentCareModal();
+  showToast(`✅ คำนวณค่าดูแลบิดามารดา รวม ${grand.toLocaleString('th-TH')} บาท`);
   render();
 }
 

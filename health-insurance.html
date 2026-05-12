@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,13 +23,169 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override — indigo accent ════ */
+    :root {
+      --hi2-indigo:       #3B43A8;
+      --hi2-indigo-light: #6B72C9;
+      --hi2-indigo-soft:  #EEF0F9;
+      --hi2-red:          #DC3545;
+    }
+
+    /* ════ New section layout ════ */
+    .hi2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 32px 28px;
+      margin-bottom: 18px;
+    }
+    .hi2-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 18px;
+    }
+    .hi2-head-icon {
+      width: 76px; height: 76px; border-radius: 14px;
+      background: var(--hi2-indigo); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; flex-shrink: 0;
+    }
+    .hi2-head-title {
+      font-size: 1.8rem; font-weight: 800; color: var(--hi2-indigo);
+      letter-spacing: -0.01em;
+    }
+
+    /* Hospital picker — pill */
+    .hi2-hosp-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0 18px; flex-wrap: wrap;
+    }
+    .hi2-hosp-lbl {
+      font-size: 1.1rem; font-weight: 700; color: var(--hi2-indigo);
+    }
+    .hi2-hosp-pill {
+      flex: 1; min-width: 280px; padding: 8px 22px; min-height: 44px;
+      border: 1.5px solid #444;
+      border-radius: 100px; background: white;
+      display: flex; align-items: center;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: #222; cursor: pointer; transition: all .15s;
+    }
+    .hi2-hosp-pill:hover { border-color: var(--hi2-indigo); }
+    .hi2-hosp-pill.placeholder { color: #999; font-weight: 500; }
+    .hi2-hosp-search {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: white; color: var(--hi2-indigo);
+      border: 1.5px solid var(--hi2-indigo);
+      cursor: pointer; font-size: 1.2rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .hi2-hosp-search:hover { background: var(--hi2-indigo); color: white; }
+
+    /* Coverage table — 3 columns */
+    .hi2-table {
+      width: 100%; border-collapse: collapse; font-size: .95rem;
+    }
+    .hi2-table thead th {
+      padding: 12px 8px; text-align: right;
+      font-size: 1.05rem; font-weight: 700; color: var(--hi2-indigo);
+      border-bottom: 2px solid var(--hi2-indigo);
+    }
+    .hi2-table thead th:first-child {
+      text-align: left;
+      color: var(--hi2-indigo); font-size: 1.05rem;
+    }
+    .hi2-table thead th .hi2-th-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; margin-left: 4px;
+      background: var(--hi2-indigo-soft); color: var(--hi2-indigo);
+      border-radius: 4px; font-size: .82rem; cursor: help;
+      vertical-align: middle;
+    }
+    .hi2-table tbody tr td {
+      padding: 14px 8px; border-bottom: 1.5px solid #DDD;
+      vertical-align: middle;
+    }
+    .hi2-table tbody tr:last-child td { border-bottom: 1.5px solid #DDD; }
+    .hi2-table tbody tr td:first-child {
+      color: #222; font-size: 1rem; font-weight: 600;
+    }
+    .hi2-table tbody tr td:not(:first-child) {
+      text-align: right; font-size: 1rem; font-weight: 700; color: var(--hi2-indigo);
+    }
+    .hi2-table .hi2-cell-prepared.short {
+      color: var(--hi2-red);
+    }
+    .hi2-table .hi2-cell-empty {
+      color: transparent; /* hide if no value */
+    }
+    .hi2-cell-input {
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--hi2-indigo); text-align: right;
+      width: 100%; max-width: 140px;
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: border-color .15s, color .15s;
+    }
+    .hi2-cell-input:hover { border-bottom-color: var(--hi2-indigo-light); }
+    .hi2-cell-input:focus { border-bottom-color: var(--hi2-indigo); }
+    .hi2-cell-input.short { color: var(--hi2-red); }
+    .hi2-cell-input::placeholder { color: #C5CCDB; font-weight: 500; }
+    .hi2-cell-select {
+      border: 1.5px solid #444; border-radius: 100px;
+      padding: 6px 16px; font-family: var(--font); font-size: .92rem;
+      font-weight: 700; color: var(--hi2-indigo); background: white;
+      cursor: pointer; min-width: 110px;
+    }
+    .hi2-cell-select:focus { outline: none; border-color: var(--hi2-indigo); }
+
+    /* Premium row */
+    .hi2-premium-row {
+      display: flex; align-items: center; gap: 18px;
+      padding: 22px 4px 4px; flex-wrap: wrap; justify-content: center;
+    }
+    .hi2-premium-lbl {
+      font-size: 1.2rem; font-weight: 700; color: var(--hi2-indigo);
+    }
+    .hi2-premium-pill {
+      flex: 1; min-width: 320px; max-width: 600px;
+      padding: 8px 22px; min-height: 44px;
+      border: 1.5px solid #444; border-radius: 100px; background: white;
+      display: flex; align-items: center;
+    }
+    .hi2-premium-pill input {
+      width: 100%; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+      color: var(--hi2-indigo); text-align: right;
+    }
+
+    /* Progress */
+    .hi2-progress-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 4px 4px;
+    }
+    .hi2-progress-bar {
+      flex: 1; height: 18px; border-radius: 100px;
+      background: white; border: 1.5px solid #BBB;
+      overflow: hidden;
+    }
+    .hi2-progress-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #6BCB77);
+      transition: width .4s;
+    }
+    .hi2-progress-pct {
+      font-size: 1.25rem; font-weight: 800; color: #28a745;
+      min-width: 60px; text-align: right;
+    }
+    .hi2-progress-pct.warn { color: #F39C12; }
+    .hi2-progress-pct.bad { color: var(--hi2-red); }
+
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-left { flex: 1; min-width: 240px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -243,6 +400,15 @@
       .hospital-row { grid-template-columns: 1fr; gap: 6px; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -686,103 +852,107 @@ function render() {
   const age = getClientAge(client);
   const monthlyIncome = getClientMonthlyIncome(client);
 
-  wrap.innerHTML = `
-    <!-- Hospital picker -->
-    <div class="hospital-card">
-      <div class="hospital-card-label">🏥 โรงพยาบาลที่ไว้วางใจ:</div>
-      <div class="hospital-display ${hospital ? 'selected' : ''}" onclick="openHospitalModal()">
-        ${hospital
-          ? `<b>${hospital.name}</b> · ${tier === 'vip' ? 'VIP' : 'STD'}
-             <span class="h-rate">${fmtBaht(hospitalRate)}/วัน · ${hospital.region}</span>`
-          : 'คลิกเพื่อเลือกโรงพยาบาล...'
-        }
-      </div>
-      <button class="btn-pick-hospital" onclick="openHospitalModal()">${hospital ? '🔄 เปลี่ยน' : '🔍 เลือก'}</button>
-    </div>
+  const pctClass = coverPct >= 80 ? '' : (coverPct >= 50 ? 'warn' : 'bad');
+  const hospLabel = hospital
+    ? `${hospital.name}: ${tier === 'vip' ? 'VIP' : 'STD'}`
+    : 'คลิกเพื่อเลือกโรงพยาบาล...';
 
-    <!-- Coverage table -->
-    <div class="coverage-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-        <div>
-          <h3 style="margin-bottom:4px;">📊 ความคุ้มครองสุขภาพ</h3>
-          <p style="font-size:.78rem;color:var(--gray-500);">
-            ${hospital
-              ? `🤖 คำนวณจาก <b>${hospital.name}</b> (${tier === 'vip' ? 'VIP' : 'STD'})${age ? ' · อายุ ' + age + ' ปี' : ''}${monthlyIncome > 0 ? ' · รายได้ ' + fmtBaht(monthlyIncome) + '/เดือน' : ' · ยังไม่ระบุรายได้'}`
-              : '⚠️ เลือกโรงพยาบาลก่อนเพื่อดูคำแนะนำที่ปรับตาม รพ.'
-            }
-            ${hasCustomRec ? '<span style="color:var(--red-primary);font-weight:700;"> · ✏️ มีการแก้ไขเอง</span>' : ''}
-          </p>
-        </div>
-        ${hasCustomRec
-          ? `<button onclick="resetRecommendations()" style="background:var(--red-soft);color:var(--red-primary);border:1.5px solid var(--red-primary);border-radius:8px;padding:7px 14px;font-size:.83rem;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;">↺ รีเซ็ตค่าแนะนำ</button>`
-          : ''
-        }
+  wrap.innerHTML = `
+    <div class="hi2-wrap">
+      <!-- Header -->
+      <div class="hi2-head">
+        <div class="hi2-head-icon">➕</div>
+        <div class="hi2-head-title">ประกันสุขภาพ</div>
       </div>
-      <table class="coverage-table">
+
+      <!-- Hospital picker row -->
+      <div class="hi2-hosp-row">
+        <div class="hi2-hosp-lbl">โรงพยาบาลที่ไว้วางใจ</div>
+        <div class="hi2-hosp-pill ${hospital ? '' : 'placeholder'}" onclick="openHospitalModal()" title="คลิกเพื่อเปลี่ยน">
+          ${hospital ? `${hospital.name}: ${tier === 'vip' ? 'VIP' : 'STD'}` : 'คลิกเพื่อเลือกโรงพยาบาล...'}
+        </div>
+        <button class="hi2-hosp-search" onclick="openHospitalModal()" title="ค้นหาโรงพยาบาล">🔍</button>
+      </div>
+
+      <!-- Coverage table -->
+      <table class="hi2-table">
         <thead>
           <tr>
-            <th>วงเงินค่ารักษา</th>
-            <th class="col-num">เตรียมไว้แล้ว</th>
-            <th class="col-num">แนะนำ <span style="font-weight:400;color:var(--gray-400);font-size:.7rem;">(แก้ไขได้)</span></th>
-            <th class="col-num">สถานะ</th>
+            <th>วงเงินค่ารักษา <span class="hi2-th-icon" title="แต่ละรายการคำนวณตามโรงพยาบาลที่เลือก + อายุ + รายได้">i</span></th>
+            <th>เตรียมไว้แล้ว <span class="hi2-th-icon" onclick="alert('ดึงค่าจากกรมธรรม์ (medical riders) อัตโนมัติ — ดูที่หน้าสรุปประกัน')" style="cursor:pointer;" title="ดึงจากกรมธรรม์">📊</span></th>
+            <th>แนะนำ</th>
           </tr>
         </thead>
         <tbody>
-          ${COVERAGE_ROWS.map(r => renderCoverageRow(r, hi.prepared, finalRec, customRec)).join('')}
+          ${COVERAGE_ROWS.map(r => renderCoverageRowNew(r, hi.prepared, finalRec, autoPreparedFromPolicies)).join('')}
         </tbody>
       </table>
-    </div>
 
-    <!-- Premium -->
-    <div class="premium-card">
-      <label>💸 เบี้ยประกันสุขภาพ/ปี:</label>
-      <input class="pc-input money-fmt" type="text" inputmode="decimal"
-        value="${hi.premium > 0 ? hi.premium : ''}"
-        onchange="updatePremium(parseMoney(this))"
-        onfocus="this.select()"
-        placeholder="0">
-      ${(() => {
-        const prem = Number(hi.premium || 0);
-        if (prem <= 0) return '';
-        const monthlyPrem = prem / 12;
-        const annualInc = monthlyIncome * 12;
-        const pctIncome = annualInc > 0 ? (prem / annualInc * 100) : null;
-        /* < 5% ดี · 5-10% พอเหมาะ · > 10% เกินมาตรฐาน */
-        const color = pctIncome == null ? '#888'
-                    : pctIncome < 5 ? '#28a745'
-                    : pctIncome <= 10 ? '#FF8C00'
-                    : '#DC3545';
-        const status = pctIncome == null ? '(ยังไม่ระบุรายได้)'
-                    : pctIncome < 5 ? '✅ อยู่ในเกณฑ์ดี'
-                    : pctIncome <= 10 ? '⚠️ พอเหมาะ'
-                    : '⛔ เกินมาตรฐาน (>10%)';
-        return `
-          <div style="margin-top:10px;padding:10px 12px;background:var(--gray-50);border-radius:8px;font-size:.83rem;color:var(--gray-700);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-            <span>≈ ฿${Math.round(monthlyPrem).toLocaleString('th-TH')}/เดือน${pctIncome != null ? ` · <b>${pctIncome.toFixed(1)}%</b> ของรายได้` : ''}</span>
-            <span style="color:${color};font-weight:700;">${status}</span>
-          </div>
-          <div style="margin-top:6px;font-size:.72rem;color:var(--gray-400);">
-            💡 ใช้เป็นค่าลดหย่อนภาษีอัตโนมัติในหน้า "คำนวณภาษี" + รวมในสรุปแผน
-          </div>
-        `;
-      })()}
-    </div>
+      <!-- Premium -->
+      <div class="hi2-premium-row">
+        <div class="hi2-premium-lbl">เบี้ยประกันสุขภาพ</div>
+        <div class="hi2-premium-pill">
+          <input class="money-fmt" type="text" inputmode="decimal"
+            value="${hi.premium > 0 ? hi.premium : ''}"
+            onchange="updatePremium(parseMoney(this))"
+            onfocus="this.select()"
+            placeholder="0">
+        </div>
+      </div>
 
-    <!-- Progress -->
-    <div class="progress-card">
-      <div class="progress-title">
-        <span>🎯 ความครอบคลุมเทียบกับมาตรฐาน รพ.</span>
-        <span class="pct" style="color:${coverPct >= 80 ? '#28a745' : coverPct >= 50 ? '#FF8C00' : '#DC3545'}">${coverPct}%</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill ${coverPct >= 80 ? '' : coverPct >= 50 ? 'warn' : 'bad'}" style="width:${coverPct}%"></div>
-      </div>
-      <div style="font-size:.78rem;color:var(--gray-500);margin-top:8px;">
-        ผ่านเกณฑ์ ${okCount}/${targetCount} รายการ · ${hospital ? 'เทียบกับ ' + hospital.name : 'ยังไม่เลือก รพ.'}
+      <!-- Progress -->
+      <div class="hi2-progress-row">
+        <div class="hi2-progress-bar">
+          <div class="hi2-progress-fill" style="width:${coverPct}%"></div>
+        </div>
+        <div class="hi2-progress-pct ${pctClass}">${coverPct}%</div>
       </div>
     </div>
   `;
   refreshAllMoneyInputs();
+}
+
+/* New pill-style row renderer — 3 cols (label | prepared | recommended) */
+function renderCoverageRowNew(row, prepared, finalRec, autoPrep) {
+  /* Skip "ค่าบริการพยาบาล" select special-case */
+  if (row.selectOptions) {
+    const value = prepared[row.key] || 'เหมาจ่าย';
+    const recommend = finalRec[row.key];
+    return `<tr>
+      <td>${row.label}</td>
+      <td>
+        <select class="hi2-cell-select" onchange="updatePrepared('${row.key}',this.value)">
+          ${row.selectOptions.map(o => `<option value="${o}" ${value === o ? 'selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select class="hi2-cell-select" onchange="updateRecommendation('${row.key}',this.value)">
+          ${row.selectOptions.map(o => `<option value="${o}" ${recommend === o ? 'selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }
+  const recommend = Number(finalRec[row.key] || 0);
+  const fromPol = Number(autoPrep[row.key] || 0);
+  const prepRaw = prepared[row.key];
+  const prepVal = (prepRaw != null && prepRaw !== '') ? Number(prepRaw) : fromPol;
+  const isShort = prepVal > 0 && recommend > 0 && prepVal < recommend;
+  const recCls = recommend > 0 ? '' : 'hi2-cell-empty';
+  return `<tr>
+    <td>${row.label}</td>
+    <td>
+      <input class="hi2-cell-input money-fmt ${isShort ? 'short' : ''}" type="text" inputmode="decimal"
+        value="${prepVal > 0 ? prepVal : ''}"
+        onchange="updatePrepared('${row.key}',parseMoney(this))"
+        placeholder="—">
+    </td>
+    <td>
+      <input class="hi2-cell-input money-fmt" type="text" inputmode="decimal"
+        value="${recommend > 0 ? recommend : ''}"
+        onchange="updateRecommendation('${row.key}',parseMoney(this))"
+        placeholder="—">
+    </td>
+  </tr>`;
 }
 
 function renderCoverageRow(row, prepared, finalRec, customRec) {

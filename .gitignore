@@ -2,6 +2,9 @@
 *.png
 *.mp4
 
+# Exception: PWA icons (required for install)
+!icon-*.png
+
 # OS files
 .DS_Store
 Thumbs.db

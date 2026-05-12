@@ -1,0 +1,896 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — ค่าเล่าเรียนมหาวิทยาลัย</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
+  <script src="money-input.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    :root {
+      --e3-indigo:       #3B43A8;
+      --e3-indigo-light: #6B72C9;
+      --e3-indigo-soft:  #EEF0F9;
+      --e3-yellow:       #F5C242;
+      --e3-yellow-dark:  #D4A032;
+      --e3-red:          #DC3545;
+      --e3-gray-pill:    #E5E5E5;
+    }
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
+    }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    .e3-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 32px 28px;
+      margin-bottom: 18px;
+    }
+
+    /* ════ Header ════ */
+    .e3-head {
+      display: flex; align-items: flex-start; gap: 18px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .e3-head-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--e3-indigo); color: var(--e3-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; flex-shrink: 0;
+    }
+    .e3-head-text { flex: 1; min-width: 200px; padding-top: 6px; }
+    .e3-head-title {
+      font-size: 1.6rem; font-weight: 800; color: var(--e3-indigo);
+    }
+    .e3-head-sub {
+      font-size: 1.05rem; font-weight: 700; color: var(--e3-indigo);
+      margin-top: 2px; display: flex; align-items: center; gap: 6px;
+    }
+    .e3-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--e3-indigo); color: white;
+      font-size: .72rem; font-weight: 700; cursor: help;
+      font-style: italic; font-family: serif;
+    }
+    /* Right side inflation pill */
+    .e3-infl-wrap {
+      display: flex; align-items: center; gap: 10px; padding-top: 4px;
+    }
+    .e3-infl-lbl {
+      font-size: .92rem; font-weight: 700; color: var(--e3-indigo);
+      text-align: right; line-height: 1.3;
+    }
+    .e3-infl-pill {
+      display: inline-flex; align-items: center;
+      background: white; border: 2px solid var(--e3-indigo);
+      border-radius: 100px; padding: 4px 14px; min-height: 38px;
+      gap: 4px;
+    }
+    .e3-infl-pill input {
+      width: 36px; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--e3-indigo); text-align: right;
+    }
+    .e3-pill-suffix {
+      font-size: .92rem; font-weight: 700; color: var(--e3-indigo);
+    }
+    .e3-gear-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: transparent; border: none;
+      color: var(--gray-600); cursor: pointer; font-size: 1.2rem;
+    }
+    .e3-gear-btn:hover { color: var(--e3-indigo); background: var(--e3-indigo-soft); }
+
+    /* ════ Child block ════ */
+    .e3-child {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px dashed #DDD;
+    }
+    .e3-child:last-of-type { border-bottom: none; }
+    .e3-child-num {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid #444; color: #444;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; background: white;
+      align-self: flex-start; margin-top: 2px;
+    }
+    .e3-child-body { display: flex; flex-direction: column; gap: 10px; }
+    .e3-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    }
+    /* Generic pill */
+    .e3-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: white; border: 1.5px solid var(--e3-indigo);
+      border-radius: 100px; padding: 6px 16px; min-height: 36px;
+      font-family: var(--font);
+    }
+    .e3-pill input {
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--e3-indigo); padding: 0;
+    }
+    .e3-pill.readonly {
+      background: var(--e3-gray-pill); border-color: var(--e3-gray-pill);
+    }
+    .e3-pill.readonly input,
+    .e3-pill.readonly .e3-pill-num {
+      color: #444; pointer-events: none;
+    }
+    .e3-pill-num {
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--e3-indigo);
+    }
+    .e3-pill.value-red { background: white; border-color: var(--e3-indigo); }
+    .e3-pill.value-red .e3-pill-num { color: var(--e3-red); }
+    .e3-row-lbl {
+      font-size: .92rem; font-weight: 700; color: var(--e3-indigo);
+      padding: 0 4px;
+    }
+    .e3-pill-name input {
+      min-width: 130px; font-weight: 700; color: var(--e3-indigo); font-size: 1.05rem;
+    }
+    .e3-pill-num-input {
+      width: 60px; text-align: center;
+    }
+
+    /* Level dollar-sign selector */
+    .e3-level-row {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 8px;
+    }
+    .e3-level-btn {
+      padding: 4px 10px; border-radius: 6px; cursor: pointer;
+      font-weight: 800; font-size: 1.05rem;
+      color: #B0B0B0; background: transparent;
+      border: 1.5px solid transparent;
+      transition: all .12s;
+      letter-spacing: -.05em;
+    }
+    .e3-level-btn:hover { color: var(--e3-yellow); }
+    .e3-level-btn.active {
+      color: var(--e3-yellow); border-color: var(--e3-yellow);
+      background: rgba(245,194,66,.1);
+    }
+
+    /* ════ Bottom totals ════ */
+    .e3-totals {
+      margin-top: 22px; padding-top: 22px;
+      border-top: 2px dashed #DDD;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .e3-total-row {
+      display: grid; grid-template-columns: minmax(180px, auto) 1fr auto;
+      gap: 18px; align-items: center;
+    }
+    .e3-total-lbl {
+      font-size: 1.3rem; font-weight: 800; color: #222;
+    }
+    .e3-total-pill {
+      display: flex; align-items: center; justify-content: center;
+      background: white; border: 2px solid var(--e3-yellow-dark);
+      border-radius: 100px; padding: 14px 30px;
+      font-family: var(--font); font-size: 1.6rem; font-weight: 800;
+      color: var(--e3-yellow-dark); letter-spacing: -0.01em;
+    }
+    .e3-total-unit {
+      font-size: 1.3rem; font-weight: 800; color: #222;
+    }
+    .e3-total-foot {
+      font-size: .9rem; color: #666; font-style: italic;
+      text-align: center; margin-top: 8px;
+    }
+
+    /* Progress bar */
+    .e3-progress-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 4px 8px;
+    }
+    .e3-progress-bar {
+      flex: 1; height: 16px; border-radius: 100px;
+      background: white; border: 1.5px solid #BBB;
+      overflow: hidden;
+    }
+    .e3-progress-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #6BCB77);
+      transition: width .4s;
+    }
+    .e3-progress-pct {
+      font-size: 1.1rem; font-weight: 800; color: #28a745;
+      min-width: 50px; text-align: right;
+    }
+
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width: 980px) {
+      .e3-child { grid-template-columns: 44px 1fr; }
+      .e3-row { gap: 6px 8px; }
+    }
+
+    /* ════ Higher-Ed Cost Modal ════ */
+    .e3-cost-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .e3-cost-overlay.open { display: flex; }
+    .e3-cost-card {
+      background: white; border-radius: 18px;
+      max-width: 720px; width: 100%; padding: 24px 28px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .e3-cost-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .e3-cost-title { font-size: 1.3rem; font-weight: 800; color: #222; }
+    .e3-cost-reset {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: white; color: var(--e3-indigo);
+      border: 1.5px solid var(--e3-indigo);
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .e3-cost-reset:hover { background: var(--e3-indigo); color: white; transform: rotate(-90deg); }
+    .e3-cost-grid {
+      display: grid;
+      grid-template-columns: minmax(200px, 2fr) 1fr 1fr 1fr;
+      gap: 14px 18px; align-items: center;
+    }
+    .e3-cost-grid-head {
+      font-size: 1rem; font-weight: 700; color: #222; text-align: center;
+    }
+    .e3-cost-grid-head.col-name { text-align: left; }
+    .e3-cost-row-label { font-size: .95rem; font-weight: 600; color: #222; }
+    .e3-cost-pill {
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid var(--e3-indigo); border-radius: 100px;
+      padding: 6px 14px; min-height: 36px; background: white;
+    }
+    .e3-cost-pill input {
+      width: 100%; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: .95rem; font-weight: 700;
+      color: var(--e3-indigo); text-align: center;
+    }
+    .e3-cost-actions {
+      display: flex; gap: 14px; justify-content: center; margin-top: 24px;
+    }
+    .e3-cost-btn {
+      padding: 10px 30px; border: none; border-radius: 8px;
+      font-family: var(--font); font-weight: 800; font-size: 1rem;
+      cursor: pointer; min-width: 100px; transition: all .15s;
+    }
+    .e3-cost-btn.save { background: var(--e3-indigo); color: white; }
+    .e3-cost-btn.save:hover { background: var(--e3-indigo-light); transform: translateY(-1px); }
+    .e3-cost-btn.cancel { background: #DDD; color: #444; }
+    .e3-cost-btn.cancel:hover { background: #CCC; }
+  </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item active" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>🎓 ค่าเล่าเรียนมหาวิทยาลัย</h2>
+          <p>ประมาณการค่าเทอม + เก็บเงินเพิ่ม/ปี เพื่อให้บุตรเรียนจบ ป.ตรี</p>
+        </div>
+        <div class="client-pick">
+          <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Higher-Ed Cost Modal — 3 rows × 3 levels -->
+<div class="e3-cost-overlay" id="e3-cost-modal" onclick="if(event.target===this)closeHigherEdModal()">
+  <div class="e3-cost-card">
+    <div class="e3-cost-header">
+      <div class="e3-cost-title">รายการค่าใช้จ่าย</div>
+      <button class="e3-cost-reset" onclick="resetHigherEdTable()" title="รีเซตเป็นค่าเริ่มต้น">↻</button>
+    </div>
+    <div class="e3-cost-grid" id="e3-cost-grid"></div>
+    <div class="e3-cost-actions">
+      <button class="e3-cost-btn save" onclick="saveHigherEdTable()">บันทึก</button>
+      <button class="e3-cost-btn cancel" onclick="closeHigherEdModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]); localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+function getChildren() { const c = getCurrent(); return (c && c.children) || []; }
+
+let selectedClientId = null;
+
+/* ════════════════════════════════════════════
+   CONSTANTS — same as education.html
+═══════════════════════════════════════════ */
+const BACHELOR_START_AGE = 18;
+const BACHELOR_YEARS = 4;
+const LEVEL_KEYS = ['economy','medium','premium'];
+const LEVEL_INDEX = { economy:0, medium:1, premium:2 };
+const LEVEL_LABEL_TH = { economy: 'เริ่มต้น (รัฐบาล)', medium: 'กลาง (เอกชน)', premium: 'จัดเต็ม (อินเตอร์)' };
+const DEFAULT_BACHELOR_INFL = 3;
+const DEFAULT_BACHELOR_RETURN = 3;
+
+/* ════════════════════════════════════════════
+   HIGHER-ED COST TABLE — 3 rows × 3 levels (THB/year)
+   - เก็บใน client.eduCostTable (shared schema กับ education.html)
+   - ถ้าไม่มี → fallback DEFAULT_HIGHER_ED
+═══════════════════════════════════════════ */
+const HIGHER_ED_KEYS = [
+  { key: 'tuition_bachelor', label: 'ค่าเทอมต่อปี ปริญญาตรี' },
+  { key: 'tuition_master',   label: 'ค่าเทอมต่อปี ปริญญาโท' },
+  { key: 'tuition_doctoral', label: 'ค่าเทอมต่อปี ปริญญาเอก' },
+];
+const DEFAULT_HIGHER_ED = {
+  tuition_bachelor: [ 35000, 300000, 3000000],
+  tuition_master:   [ 50000, 500000, 4750000],
+  tuition_doctoral: [ 71000, 600000, 5000000],
+};
+
+function getHigherEdTable() {
+  const c = getCurrent();
+  const custom = (c && c.eduCostTable) || {};
+  const out = {};
+  HIGHER_ED_KEYS.forEach(k => {
+    out[k.key] = custom[k.key] || DEFAULT_HIGHER_ED[k.key].slice();
+  });
+  return out;
+}
+function _getBachelorTuition(level) {
+  const table = getHigherEdTable();
+  const lvIdx = LEVEL_INDEX[level] != null ? LEVEL_INDEX[level] : 1;
+  return Number((table.tuition_bachelor || [])[lvIdx] || 0);
+}
+
+/* ════════════════════════════════════════════
+   HIGHER-ED COST MODAL — handlers
+═══════════════════════════════════════════ */
+let _editingHigherEd = null;
+
+function openHigherEdModal() {
+  if (!selectedClientId) return;
+  _editingHigherEd = getHigherEdTable();
+  renderHigherEdGrid();
+  document.getElementById('e3-cost-modal').classList.add('open');
+}
+
+function closeHigherEdModal() {
+  document.getElementById('e3-cost-modal').classList.remove('open');
+  _editingHigherEd = null;
+}
+
+function renderHigherEdGrid() {
+  const grid = document.getElementById('e3-cost-grid');
+  let html = `
+    <div class="e3-cost-grid-head col-name"></div>
+    <div class="e3-cost-grid-head">เริ่มต้น</div>
+    <div class="e3-cost-grid-head">ทางสายกลาง</div>
+    <div class="e3-cost-grid-head">จัดเต็ม</div>
+  `;
+  HIGHER_ED_KEYS.forEach(k => {
+    const vals = _editingHigherEd[k.key] || DEFAULT_HIGHER_ED[k.key];
+    html += `<div class="e3-cost-row-label">${k.label}</div>`;
+    for (let i = 0; i < 3; i++) {
+      html += `
+        <div class="e3-cost-pill">
+          <input type="text" inputmode="decimal" data-he-key="${k.key}" data-he-idx="${i}"
+            value="${Number(vals[i]||0).toLocaleString('th-TH')}"
+            onfocus="this.select()"
+            oninput="_onHigherEdInput(this)">
+        </div>
+      `;
+    }
+  });
+  grid.innerHTML = html;
+}
+
+function _onHigherEdInput(el) {
+  const key = el.getAttribute('data-he-key');
+  const idx = Number(el.getAttribute('data-he-idx'));
+  const sel = el.selectionStart || 0;
+  const before = el.value.substring(0, sel);
+  const digitsBefore = (before.match(/\d/g) || []).length;
+  const raw = String(el.value).replace(/[^\d.]/g, '');
+  if (!_editingHigherEd[key]) _editingHigherEd[key] = DEFAULT_HIGHER_ED[key].slice();
+  _editingHigherEd[key][idx] = Number(raw) || 0;
+  const n = Number(raw);
+  if (isNaN(n)) return;
+  const formatted = n.toLocaleString('th-TH');
+  el.value = formatted;
+  let pos = formatted.length, count = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (/\d/.test(formatted[i])) count++;
+    if (count >= digitsBefore) { pos = i + 1; break; }
+  }
+  el.setSelectionRange(pos, pos);
+}
+
+function resetHigherEdTable() {
+  if (!confirm('รีเซตค่าใช้จ่ายทั้งหมดเป็นค่าเริ่มต้น?')) return;
+  _editingHigherEd = {};
+  HIGHER_ED_KEYS.forEach(k => { _editingHigherEd[k.key] = DEFAULT_HIGHER_ED[k.key].slice(); });
+  renderHigherEdGrid();
+}
+
+function saveHigherEdTable() {
+  if (!_editingHigherEd) { closeHigherEdModal(); return; }
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.eduCostTable) c.eduCostTable = {};
+    /* Merge only the higher-ed keys — preserve other keys (e.g., from education.html modal) */
+    HIGHER_ED_KEYS.forEach(k => {
+      const cur = _editingHigherEd[k.key] || DEFAULT_HIGHER_ED[k.key];
+      const def = DEFAULT_HIGHER_ED[k.key];
+      if (cur[0] !== def[0] || cur[1] !== def[1] || cur[2] !== def[2]) {
+        c.eduCostTable[k.key] = cur.slice();
+      } else {
+        delete c.eduCostTable[k.key];
+      }
+    });
+    /* If table is empty after merge → remove it from client */
+    if (Object.keys(c.eduCostTable).length === 0) delete c.eduCostTable;
+  });
+  closeHigherEdModal();
+  render();
+}
+
+function ageNow(dob) {
+  if (!dob) return null;
+  return Math.max((new Date() - new Date(dob)) / (365.25 * 24 * 3600 * 1000), 0);
+}
+function getChildDob(c) { return c && (c.dob || c.birthdate) || null; }
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function fmtMoney(n) {
+  if (!isFinite(n) || n == null) return '—';
+  return Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtInt(n) {
+  if (!isFinite(n) || n == null) return '—';
+  return Math.round(Number(n)).toLocaleString('th-TH');
+}
+
+/* ════════════════════════════════════════════
+   COMPUTE — bachelor only
+═══════════════════════════════════════════ */
+/* Sum assets tagged "นำไปใช้กับ การศึกษาบุตร" → แบ่งเท่าๆ ต่อบุตร */
+function _eduAssetPerChild() {
+  const client = getCurrent();
+  if (!client) return { lump: 0, monthly: 0 };
+  const children = client.children || [];
+  if (children.length === 0) return { lump: 0, monthly: 0 };
+  const eduAssets = (client.assets || []).filter(a => a.appliedTo === 'education');
+  const lump = eduAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const monthly = eduAssets.reduce((s,a) => {
+    const v = Number(a.contribution||0);
+    return s + (a.contribFreq === 'monthly' ? v : v/12);
+  }, 0);
+  return { lump: lump / children.length, monthly: monthly / children.length };
+}
+
+function computeBachelor(child) {
+  const age = ageNow(getChildDob(child));
+  if (age == null) return null;
+
+  const yearsToBachelor = Math.max(BACHELOR_START_AGE - age, 0);
+  const yearsToSave = Math.max(yearsToBachelor, 1);   /* กัน div by 0 */
+  const startYear = new Date().getFullYear() + Math.round(yearsToBachelor);
+
+  const level = child.level || 'medium';
+  const lvIdx = LEVEL_INDEX[level] != null ? LEVEL_INDEX[level] : 1;
+  const baseAnnualCost = _getBachelorTuition(level);
+
+  const inflPct = child.bachelorInfl != null
+    ? Number(child.bachelorInfl)
+    : (child.inflationRate != null ? Number(child.inflationRate) : DEFAULT_BACHELOR_INFL);
+  const INFL = inflPct / 100;
+
+  /* รวมค่าเทอม 4 ปี ปรับ inflation รายปี */
+  let totalTuition = 0;
+  for (let y = 0; y < BACHELOR_YEARS; y++) {
+    totalTuition += baseAnnualCost * Math.pow(1 + INFL, yearsToBachelor + y);
+  }
+
+  const _split = _eduAssetPerChild();
+  const eduSavings = Number(child.eduSavings || 0) + _split.lump;
+  const gap = Math.max(totalTuition - eduSavings, 0);
+  const overage = Math.max(eduSavings - totalTuition, 0);
+
+  /* เก็บเงินเพิ่ม/ปี (FV annuity ปกติ ไม่ใช่ annuity-due) */
+  const returnPct = child.bachelorReturn != null
+    ? Number(child.bachelorReturn) : DEFAULT_BACHELOR_RETURN;
+  const r = returnPct / 100;
+  let reqAnnual = 0;
+  if (gap > 0 && yearsToSave > 0) {
+    if (Math.abs(r) < 0.0001) {
+      reqAnnual = gap / yearsToSave;
+    } else {
+      const fvFactor = (Math.pow(1 + r, yearsToSave) - 1) / r;
+      reqAnnual = gap / fvFactor;
+    }
+  }
+
+  const progressPct = totalTuition > 0
+    ? Math.min(100, (eduSavings / totalTuition) * 100)
+    : 0;
+
+  return {
+    age, level, startYear,
+    yearsToSave: Math.round(yearsToSave),
+    totalTuition, eduSavings, gap, overage,
+    inflPct, returnPct, reqAnnual,
+    progressPct,
+  };
+}
+
+/* ════════════════════════════════════════════
+   CHILD CRUD
+═══════════════════════════════════════════ */
+function updateChildField(id, field, value) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    const ch = c.children.find(x => x.id === id);
+    if (!ch) return;
+    ch[field] = value;
+  });
+  render();
+}
+function updateChildLevel(id, level) {
+  updateChildField(id, 'level', level);
+}
+function updateAllInflation(v) {
+  const n = Number(v);
+  if (!isFinite(n) || n < 0) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.children) return;
+    c.children.forEach(ch => { ch.bachelorInfl = n; });
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+  const children = getChildren();
+  if (children.length === 0) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👨‍👩‍👧‍👦</div>
+      <p>ยังไม่มีข้อมูลบุตร — <a href="education.html">ไปที่หน้าการศึกษาบุตร</a> เพื่อเพิ่มข้อมูลก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const planInfl = (children[0].bachelorInfl != null)
+    ? Number(children[0].bachelorInfl)
+    : (children[0].inflationRate != null ? Number(children[0].inflationRate) : DEFAULT_BACHELOR_INFL);
+
+  const results = children.map(c => ({ child: c, calc: computeBachelor(c) })).filter(r => r.calc);
+  const grandTotal = results.reduce((s,r) => s + r.calc.totalTuition, 0);
+  const grandGap = results.reduce((s,r) => s + r.calc.gap, 0);
+  const grandSavings = results.reduce((s,r) => s + r.calc.eduSavings, 0);
+  const overallPct = grandTotal > 0
+    ? Math.min(100, (grandSavings / grandTotal) * 100)
+    : 0;
+
+  wrap.innerHTML = `
+    <div class="e3-wrap">
+      <!-- Header -->
+      <div class="e3-head">
+        <div class="e3-head-icon">🎓</div>
+        <div class="e3-head-text">
+          <div class="e3-head-title">การศึกษาบุตร</div>
+          <div class="e3-head-sub">
+            ค่าเล่าเรียนระดับมหาวิทยาลัย
+            <span class="e3-info" title="ค่าเทอม 4 ปี ปริญญาตรี ปรับด้วยอัตราเงินเฟ้อ ใช้คำนวณเงินที่ต้องเก็บเพิ่มต่อปี">i</span>
+          </div>
+        </div>
+        <div class="e3-infl-wrap">
+          <div class="e3-infl-lbl">
+            อัตราเงินเฟ้อ<br>ค่าเล่าเรียน
+            <span class="e3-info" title="อัตราเงินเฟ้อเฉพาะค่าเทอม (default 3%/ปี)">i</span>
+          </div>
+          <div class="e3-infl-pill">
+            <input type="number" min="0" max="20" step="0.1" value="${planInfl}"
+              onchange="updateAllInflation(this.value)">
+            <span class="e3-pill-suffix">%</span>
+          </div>
+          <button class="e3-gear-btn" onclick="openHigherEdModal()" title="ตั้งค่ารายละเอียดค่าใช้จ่าย">⚙</button>
+        </div>
+      </div>
+
+      <!-- Children rows -->
+      ${results.map((r, i) => renderChildBlock(r.child, r.calc, i + 1)).join('')}
+
+      <!-- Bottom totals -->
+      <div class="e3-totals">
+        <div class="e3-total-row">
+          <div class="e3-total-lbl">รวมค่าเล่าเรียน</div>
+          <div class="e3-total-pill">${fmtMoney(grandTotal)}</div>
+          <div class="e3-total-unit">บาท</div>
+        </div>
+        <div class="e3-total-row">
+          <div class="e3-total-lbl">ขาดอีก</div>
+          <div class="e3-total-pill">${fmtMoney(grandGap)}</div>
+          <div class="e3-total-unit">บาท</div>
+        </div>
+        <div class="e3-total-foot">*เริ่มเรียนปริญญาตรี ณ อายุ ${BACHELOR_START_AGE} ปี</div>
+      </div>
+
+      <!-- Progress -->
+      <div class="e3-progress-row">
+        <div class="e3-progress-bar"><div class="e3-progress-fill" style="width:${overallPct}%"></div></div>
+        <div class="e3-progress-pct">${overallPct.toFixed(0)}%</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderChildBlock(child, calc, idx) {
+  const lvIdx = LEVEL_INDEX[calc.level] != null ? LEVEL_INDEX[calc.level] : 1;
+  return `
+    <div class="e3-child">
+      <div class="e3-child-num">${idx}</div>
+      <div class="e3-child-body">
+        <!-- Row 1: name | start year | total tuition -->
+        <div class="e3-row">
+          <div class="e3-pill e3-pill-name" style="flex:0 1 200px;">
+            <input type="text" value="${escapeHtml(child.name||'')}"
+              onchange="updateChildField('${child.id}','name',this.value)" placeholder="ชื่อบุตร">
+          </div>
+          <div class="e3-row-lbl">ปีที่เริ่มเรียน</div>
+          <div class="e3-pill readonly">
+            <span class="e3-pill-num">${calc.startYear}</span>
+          </div>
+          <div class="e3-row-lbl">ค่าเล่าเรียนรวมเงินเฟ้อ</div>
+          <div class="e3-pill readonly">
+            <span class="e3-pill-num">${fmtMoney(calc.totalTuition)}</span>
+          </div>
+          <div class="e3-row-lbl">บาท</div>
+        </div>
+
+        <!-- Row 2: level | saved | gap -->
+        <div class="e3-row">
+          <div class="e3-row-lbl">ประเภทสถานศึกษา</div>
+          <div class="e3-level-row" role="radiogroup" aria-label="ระดับสถานศึกษา">
+            ${LEVEL_KEYS.map((k, i) => `
+              <button class="e3-level-btn ${calc.level === k ? 'active' : ''}"
+                onclick="updateChildLevel('${child.id}','${k}')"
+                title="${LEVEL_LABEL_TH[k]}">${'$'.repeat(i+1)}</button>
+            `).join('')}
+          </div>
+          <div class="e3-row-lbl">เตรียมไว้แล้ว</div>
+          <div class="e3-pill">
+            <input type="text" inputmode="decimal" class="money-fmt e3-pill-num-input"
+              style="width:110px; text-align:right;"
+              value="${(calc.eduSavings || 0).toLocaleString('th-TH')}"
+              onchange="updateChildField('${child.id}','eduSavings',parseMoney(this))">
+          </div>
+          <div class="e3-row-lbl">บาท</div>
+          <div class="e3-row-lbl">ขาดอีก</div>
+          <div class="e3-pill value-red">
+            <span class="e3-pill-num">${fmtMoney(calc.gap)}</span>
+          </div>
+          <div class="e3-row-lbl">บาท</div>
+        </div>
+
+        <!-- Row 3: years to save | return | required annual savings -->
+        <div class="e3-row">
+          <div class="e3-row-lbl">ระยะเวลาเก็บเงิน</div>
+          <div class="e3-pill readonly">
+            <span class="e3-pill-num">${calc.yearsToSave}</span>
+          </div>
+          <div class="e3-row-lbl">ปี</div>
+          <div class="e3-row-lbl">ผลตอบแทน</div>
+          <div class="e3-pill">
+            <input type="number" min="0" max="20" step="0.1" class="e3-pill-num-input"
+              style="width:50px;"
+              value="${calc.returnPct}"
+              onchange="updateChildField('${child.id}','bachelorReturn',Number(this.value))">
+            <span class="e3-pill-suffix">%</span>
+          </div>
+          <div class="e3-row-lbl">เก็บเงินเพิ่มปีละ</div>
+          <div class="e3-pill value-red">
+            <span class="e3-pill-num">${fmtMoney(calc.reqAnnual)}</span>
+          </div>
+          <div class="e3-row-lbl">บาท</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else { sbAv.textContent = initial; }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

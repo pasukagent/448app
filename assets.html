@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,12 +23,20 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override for THIS page — blue accent (spreadsheet style) ════ */
+    :root {
+      --ast-blue:       #1F3D7A;
+      --ast-blue-light: #4A6FAB;
+      --ast-blue-soft:  #E8EEF7;
+      --ast-divider:    #C8D2E5;
+    }
+
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
     .client-pick {
@@ -43,88 +52,294 @@
       min-width: 180px; cursor: pointer;
     }
 
-    /* Summary cards */
-    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
-    .sum-card {
-      background: white; border-radius: var(--radius); padding: 16px 18px;
-      box-shadow: var(--shadow-sm); border-left: 3px solid var(--red-primary);
+    /* ════ Spreadsheet container ════ */
+    .ast-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 24px 28px 18px;
     }
-    .sum-card.lc-blue   { border-left-color: #0E76A8; }
-    .sum-card.lc-green  { border-left-color: #28a745; }
-    .sum-card.lc-orange { border-left-color: #FF8C00; }
-    .sum-lbl { font-size: .78rem; color: var(--gray-500); margin-bottom: 4px; font-weight: 600; }
-    .sum-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-800); }
-    .sum-sub { font-size: .76rem; color: var(--gray-400); margin-top: 2px; }
-
-    /* Toolbar */
-    .toolbar {
-      background: white; border-radius: var(--radius); padding: 14px 20px;
-      box-shadow: var(--shadow-sm); margin-bottom: 18px;
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    .ast-section-head {
+      display: flex; align-items: flex-end; gap: 14px;
+      padding-bottom: 14px; border-bottom: 2px solid var(--ast-blue);
+      margin-bottom: 6px;
     }
-    .toolbar-title { font-weight: 700; font-size: .97rem; color: var(--gray-800); }
-    .toolbar-spacer { flex: 1; }
-    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-    .fchip {
-      padding: 4px 11px; border-radius: 16px; font-size: .76rem; font-weight: 600;
-      border: 1.5px solid var(--gray-200); background: var(--gray-100); color: var(--gray-600);
-      cursor: pointer; transition: all .15s; font-family: var(--font);
+    .ast-section-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--ast-blue); color: var(--ast-blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; flex-shrink: 0; background: white;
     }
-    .fchip.active { background: var(--red-soft); border-color: var(--red-primary); color: var(--red-primary); }
-    .btn-add {
-      background: var(--red-primary); color: white; border: none;
-      border-radius: 8px; padding: 8px 16px; font-size: .88rem; font-weight: 700;
-      cursor: pointer; font-family: var(--font);
+    .ast-section-title {
+      font-size: 1.7rem; font-weight: 800; color: var(--ast-blue);
+      letter-spacing: -0.01em; flex-shrink: 0; padding-bottom: 4px;
     }
-    .btn-add:hover { background: var(--red-dark); }
-
-    /* Asset table */
-    .assets-table {
-      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden;
-    }
-    .assets-table table { width: 100%; border-collapse: collapse; }
-    .assets-table th {
-      background: var(--gray-100); padding: 11px 14px; text-align: left;
-      font-size: .78rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .04em;
-      border-bottom: 1px solid var(--gray-200);
-    }
-    .assets-table td {
-      padding: 12px 14px; font-size: .88rem; border-bottom: 1px solid var(--gray-100);
-      vertical-align: middle;
-    }
-    .assets-table tr:last-child td { border-bottom: none; }
-    .assets-table tr:hover { background: #FFF8F8; }
-    .a-type-pill {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 9px; border-radius: 14px; font-size: .73rem; font-weight: 700;
-    }
-    .a-name { font-weight: 700; color: var(--gray-800); }
-    .a-note { font-size: .76rem; color: var(--gray-400); margin-top: 2px; }
-    .a-num  { text-align: right; font-weight: 700; color: var(--gray-800); white-space: nowrap; }
-    .a-num.green { color: #28a745; }
-    .a-actions { display: flex; gap: 4px; justify-content: flex-end; }
-    .a-btn {
-      background: var(--gray-100); border: none; border-radius: 6px;
-      padding: 5px 9px; cursor: pointer; font-size: .8rem; color: var(--gray-600);
-      font-family: var(--font); transition: all .15s;
-    }
-    .a-btn:hover { background: var(--red-soft); color: var(--red-primary); }
-    .a-btn.del:hover { background: #FEE; color: #c00; }
-
-    .group-row td {
-      background: linear-gradient(90deg, #FAFAFA, white);
-      font-weight: 700; font-size: .85rem; color: var(--red-primary);
-      padding: 8px 14px; border-bottom: 2px solid var(--red-soft);
-    }
-    .group-row .grp-total {
-      float: right; color: var(--gray-600); font-size: .82rem; font-weight: 700;
+    .ast-section-spacer { flex: 1; }
+    .ast-tip {
+      font-size: .8rem; color: var(--gray-600); padding-bottom: 8px;
+      font-style: italic;
     }
 
-    .empty-table {
-      text-align: center; padding: 50px 24px; color: var(--gray-400);
+    /* ════ Spreadsheet table ════ */
+    .ast-table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 6px; }
+    .ast-table thead th {
+      padding: 14px 8px 12px; vertical-align: bottom; text-align: center;
+      font-size: .82rem; font-weight: 700; color: var(--gray-700);
+      line-height: 1.3; border-bottom: 1.5px solid var(--ast-divider);
     }
-    .empty-table .et-icon { font-size: 2.8rem; margin-bottom: 10px; }
-    .empty-table p { font-size: .95rem; }
+    .ast-table thead th.col-name { text-align: left; padding-left: 0; }
+    .ast-table thead th .col-line2 { display: block; }
+    .ast-table tbody td {
+      padding: 8px 6px; vertical-align: middle;
+      border-bottom: 1px dashed #EAEEF4;
+    }
+    .ast-table tbody tr:hover { background: #FAFBFD; }
+    .ast-table .col-name {
+      width: 26%; min-width: 200px; padding-left: 4px;
+    }
+    .ast-row-name {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .98rem; font-weight: 700; color: #222;
+    }
+    .ast-row-icon { font-size: 1rem; opacity: .85; }
+    .ast-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--ast-blue-soft); color: var(--ast-blue);
+      font-size: .68rem; font-weight: 700; cursor: help;
+      font-family: serif; font-style: italic;
+    }
+
+    /* ════ Input cells (underline style) ════ */
+    .ast-cell {
+      position: relative; padding: 0 4px;
+    }
+    .ast-input {
+      width: 100%; box-sizing: border-box;
+      border: none; outline: none;
+      background: transparent;
+      font-family: var(--font); font-weight: 700; font-size: .95rem;
+      color: #222; text-align: right;
+      padding: 6px 6px 4px;
+      border-bottom: 1px solid var(--ast-divider);
+      transition: border-color .15s, background .15s;
+    }
+    .ast-input:hover { border-bottom-color: var(--ast-blue-light); background: #F6F9FE; }
+    .ast-input:focus {
+      border-bottom-color: var(--ast-blue); background: var(--ast-blue-soft);
+      border-bottom-width: 2px; padding-bottom: 3px;
+    }
+    .ast-input.has-val { color: var(--ast-blue); }
+    .ast-input::placeholder { color: #C5CCDB; font-weight: 500; }
+
+    .ast-input-pct {
+      max-width: 80px; text-align: right;
+    }
+    .ast-input-yr {
+      max-width: 60px; text-align: right;
+    }
+    .ast-pct-wrap, .ast-yr-wrap {
+      display: inline-flex; align-items: baseline; gap: 4px;
+      justify-content: flex-end; width: 100%;
+    }
+    .ast-pct-suffix { color: var(--gray-500); font-size: .82rem; font-weight: 600; }
+
+    /* Empty cell placeholder (when type doesn't use this field) — no underline */
+    .ast-cell-empty {
+      display: block; width: 100%; height: 26px;
+    }
+
+    /* PVD badge (📊) next to name */
+    .ast-row-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 4px;
+      background: var(--ast-blue-soft); color: var(--ast-blue);
+      font-size: .82rem; margin-left: 4px;
+      cursor: help; transition: all .15s;
+    }
+    .ast-row-badge:hover { background: var(--ast-blue); color: white; }
+
+    /* Custom row — name input + delete */
+    .ast-cust-row td.col-name { padding-left: 0; }
+    .ast-cust-name {
+      flex: 1; min-width: 100px;
+      font-family: var(--font); font-weight: 700; font-size: .95rem;
+      border: none; outline: none; background: transparent;
+      border-bottom: 1px solid var(--ast-divider);
+      padding: 4px 6px; color: var(--ast-blue);
+    }
+    .ast-cust-name::placeholder { color: #C5CCDB; font-weight: 500; }
+    .ast-cust-name:hover { border-bottom-color: var(--ast-blue-light); background: #F6F9FE; }
+    .ast-cust-name:focus { border-bottom-color: var(--ast-blue); background: var(--ast-blue-soft); border-bottom-width: 2px; padding-bottom: 3px; }
+    .ast-cust-del {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: none; background: #FEE2E2; color: #DC3545;
+      cursor: pointer; font-size: .82rem; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-right: 6px; flex-shrink: 0;
+      transition: all .15s;
+    }
+    .ast-cust-del:hover { background: #DC3545; color: white; transform: scale(1.1); }
+
+    /* "+ Add row" buttons (below fixed rows, before totals) */
+    .ast-addrow-row td {
+      padding: 14px 8px 12px;
+      border-bottom: 2px dashed var(--ast-divider);
+    }
+    .ast-addrow-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; border: none; cursor: pointer;
+      padding: 4px 0;
+      font-family: var(--font); font-weight: 700; font-size: .92rem;
+      color: var(--ast-blue);
+      margin-right: 28px;
+    }
+    .ast-addrow-btn:hover { color: var(--ast-blue-light); }
+    .ast-addrow-btn .ast-addrow-plus {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--ast-blue); color: white;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; font-weight: 700; line-height: 1;
+    }
+
+    /* FV cell — computed (read-only, underlined value) */
+    .ast-fv {
+      display: block; width: 100%; text-align: right;
+      font-family: var(--font); font-weight: 800; font-size: .95rem;
+      color: var(--ast-blue); padding: 6px 6px 4px;
+      border-bottom: 1px solid var(--ast-divider);
+    }
+    .ast-fv.empty { color: #C5CCDB; font-weight: 500; }
+
+    /* Action column — "นำไปใช้กับ" picker */
+    .ast-action-cell { width: 56px; text-align: center; padding: 0 8px; }
+    .ast-apply-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid var(--gray-400); background: white;
+      cursor: pointer; color: var(--gray-500);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.05rem; font-weight: 700; transition: all .15s;
+      line-height: 1;
+    }
+    .ast-apply-btn:hover { border-color: var(--ast-blue); color: var(--ast-blue); background: var(--ast-blue-soft); transform: scale(1.05); }
+    .ast-apply-btn.assigned { border-color: var(--ast-blue); color: var(--ast-blue); background: var(--ast-blue-soft); }
+
+    /* Apply-to modal */
+    .ast-apply-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .ast-apply-overlay.open { display: flex; }
+    .ast-apply-card {
+      background: white; border-radius: 16px; padding: 24px 28px;
+      width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .ast-apply-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .ast-apply-head h3 {
+      font-size: 1.15rem; font-weight: 800; color: var(--ast-blue); margin: 0;
+    }
+    .ast-apply-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gray-100); border: none; cursor: pointer;
+      font-size: 1rem; color: var(--gray-600);
+    }
+    .ast-apply-close:hover { background: var(--gray-200); }
+    .ast-apply-options { display: flex; flex-direction: column; gap: 10px; }
+    .ast-apply-opt {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; background: white;
+      border: 1.5px solid var(--gast-divider, #C8D2E5);
+      border-radius: 100px; cursor: pointer;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--ast-blue); transition: all .15s;
+      text-align: left;
+    }
+    .ast-apply-opt:hover { background: var(--ast-blue-soft); border-color: var(--ast-blue); transform: translateX(2px); }
+    .ast-apply-opt.active { background: var(--ast-blue-soft); border-color: var(--ast-blue); }
+    .ast-apply-opt-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1.5px solid var(--ast-blue); color: var(--ast-blue);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0; background: white;
+    }
+    .ast-apply-opt-icon.muted {
+      border-color: var(--gray-400); color: var(--gray-500);
+    }
+
+    /* ════ Totals + Add buttons row ════ */
+    .ast-actions-row {
+      display: flex; align-items: center; gap: 18px;
+      padding: 14px 4px 8px; flex-wrap: wrap;
+    }
+    .ast-add-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--ast-blue);
+      border: none; padding: 6px 10px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .92rem;
+    }
+    .ast-add-btn:hover { color: var(--ast-blue-light); }
+    .ast-add-btn .ast-plus {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--ast-blue); color: white;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700;
+    }
+
+    .ast-total-row {
+      border-top: 2px solid var(--ast-divider); padding-top: 12px; margin-top: 4px;
+    }
+    .ast-total-row td {
+      padding: 12px 6px; font-weight: 800; font-size: 1rem; color: var(--ast-blue);
+      text-align: right; border-bottom: none;
+      border-top: 2px solid var(--ast-divider);
+    }
+    .ast-total-row td.col-name { text-align: left; color: var(--ast-blue); padding-left: 4px; font-size: 1.05rem; }
+    .ast-total-num {
+      display: inline-block; border-bottom: 2px solid var(--ast-blue);
+      padding: 0 4px 2px;
+    }
+
+    /* ════ Tooltip ════ */
+    .ast-tooltip {
+      position: absolute; z-index: 80; bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #222; color: white; padding: 8px 12px;
+      border-radius: 8px; font-size: .8rem; font-weight: 500; line-height: 1.45;
+      max-width: 260px; min-width: 180px; pointer-events: none;
+      opacity: 0; transition: all .15s; box-shadow: 0 6px 20px rgba(0,0,0,.2);
+      white-space: normal; text-align: left;
+    }
+    .ast-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 6px solid transparent; border-top-color: #222;
+    }
+    .ast-info:hover + .ast-tooltip,
+    .ast-info:focus + .ast-tooltip {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+    .ast-info-wrap { position: relative; display: inline-block; }
+
+    /* Mini formula chip next to PVD */
+    .ast-formula-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 1px 5px; background: var(--ast-blue-soft); color: var(--ast-blue);
+      border-radius: 4px; font-size: .7rem; font-weight: 700; cursor: help;
+      margin-left: 2px;
+    }
+
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client p { font-size: 1rem; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media(max-width: 980px) {
+      .ast-wrap { padding: 18px 14px 14px; overflow-x: auto; }
+      .ast-table { min-width: 880px; }
+    }
 
     /* Modal */
     .modal-overlay {
@@ -200,6 +415,15 @@
       .assets-table th:nth-child(5), .assets-table td:nth-child(5) { display: none; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -263,7 +487,7 @@
       <div class="feature-hero-row">
         <div>
           <h2>💎 สินทรัพย์ลูกค้า</h2>
-          <p>บันทึกสินทรัพย์ทุกประเภท พร้อมคำนวณมูลค่าอนาคตอัตโนมัติ</p>
+          <p>กรอกข้อมูลสินทรัพย์แต่ละประเภท — มูลค่าอนาคต (FV) คำนวณอัตโนมัติ</p>
         </div>
         <div class="client-pick">
           <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
@@ -366,6 +590,17 @@
   </div>
 </div>
 
+<!-- Apply-to modal -->
+<div class="ast-apply-overlay" id="ast-apply-modal" onclick="if(event.target===this)closeApplyModal()">
+  <div class="ast-apply-card">
+    <div class="ast-apply-head">
+      <h3>นำไปใช้กับ</h3>
+      <button class="ast-apply-close" onclick="closeApplyModal()" title="ปิด">✕</button>
+    </div>
+    <div class="ast-apply-options" id="ast-apply-options"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -402,25 +637,63 @@ function getAssets() {
    ASSET TYPES
 ═══════════════════════════════════════════ */
 const ASSET_TYPES = {
-  cash:       { icon:'💵', label:'เงินสด',           color:'#16A085', group:'liquid'    },
-  deposit:    { icon:'💰', label:'เงินฝาก',         color:'#0E76A8', group:'liquid'    },
-  bond:       { icon:'📜', label:'ตราสารหนี้',       color:'#5DADE2', group:'liquid'    },
-  pvd:        { icon:'🏢', label:'PVD',              color:'#28a745', group:'investment'},
-  rmf:        { icon:'🌱', label:'RMF',              color:'#27AE60', group:'investment'},
-  ltf:        { icon:'📈', label:'LTF',              color:'#16A085', group:'investment'},
-  ssf:        { icon:'🌿', label:'SSF',              color:'#1ABC9C', group:'investment'},
-  thaiesg:    { icon:'🌍', label:'ThaiESG',          color:'#52BE80', group:'investment'},
-  mutual:     { icon:'🏦', label:'กองทุนรวม',       color:'#8E44AD', group:'investment'},
-  unitlinked: { icon:'🔗', label:'Unit Linked',     color:'#7B2FF7', group:'investment'},
-  realestate: { icon:'🏠', label:'อสังหาริมทรัพย์', color:'#E67E22', group:'personal'  },
-  stock:      { icon:'📊', label:'หุ้น',             color:'#D35400', group:'investment'},
-  other:      { icon:'📦', label:'อื่นๆ',           color:'#7F8C8D', group:'personal'  },
+  cash:       { icon:'💵', label:'เงินสด',                 color:'#16A085', group:'liquid'    },
+  deposit:    { icon:'💰', label:'เงินฝาก',               color:'#0E76A8', group:'liquid'    },
+  bond:       { icon:'📜', label:'ตราสารหนี้',             color:'#5DADE2', group:'liquid'    },
+  annuity:    { icon:'🛡️', label:'ประกันบำนาญ',          color:'#1F3D7A', group:'investment'},
+  pvd:        { icon:'🏢', label:'กองทุนสำรองเลี้ยงชีพ', color:'#28a745', group:'investment'},
+  rmf:        { icon:'🌱', label:'RMF',                    color:'#27AE60', group:'investment'},
+  ltf:        { icon:'📈', label:'LTF',                    color:'#16A085', group:'investment'},
+  ssf:        { icon:'🌿', label:'SSF',                    color:'#1ABC9C', group:'investment'},
+  thaiesg:    { icon:'🌍', label:'ThaiESG',                color:'#52BE80', group:'investment'},
+  mutual:     { icon:'🏦', label:'กองทุนรวม',             color:'#8E44AD', group:'investment'},
+  unitlinked: { icon:'🔗', label:'Unit Linked',           color:'#7B2FF7', group:'investment'},
+  realestate: { icon:'🏠', label:'ค่าเช่าอสังหาริมทรัพย์', color:'#E67E22', group:'personal'  },
+  stock:      { icon:'📊', label:'หุ้นสามัญ',              color:'#D35400', group:'investment'},
+  other:      { icon:'📦', label:'อื่นๆ',                  color:'#7F8C8D', group:'personal'  },
 };
 const GROUP_LABELS = {
   liquid:     '💧 สินทรัพย์สภาพคล่อง',
   investment: '📈 สินทรัพย์เพื่อการลงทุน',
   personal:   '🏠 สินทรัพย์ใช้ส่วนตัว',
 };
+
+/* ════════════════════════════════════════════
+   ROW_ORDER — ลำดับแถวคงที่ในตาราง (ตาม UI Planista)
+═══════════════════════════════════════════ */
+const ROW_ORDER = [
+  { type: 'deposit',    info: 'เงินฝากธนาคาร ออมทรัพย์ ฝากประจำ — ปลอดภัย, ผลตอบแทนต่ำ' },
+  { type: 'bond',       info: 'พันธบัตรรัฐบาล / หุ้นกู้เอกชน — ผลตอบแทนปานกลาง' },
+  { type: 'annuity',    info: 'ประกันแบบบำนาญ — จ่ายบำนาญรายเดือนหลังเกษียณ ลดหย่อนภาษีได้' },
+  { type: 'pvd',        info: 'กองทุนสำรองเลี้ยงชีพ (PVD) — นายจ้างจ่ายสมทบให้ ลดหย่อนภาษีได้ ≤15% รายได้' },
+  { type: 'rmf',        info: 'Retirement Mutual Fund — ถือ ≥5 ปีและขายตอนอายุ 55+ ลดหย่อนได้ ≤30% รายได้' },
+  { type: 'ltf',        info: 'Long-Term Equity Fund — สิทธิลดหย่อนสิ้นสุดปี 2562 (legacy)' },
+  { type: 'ssf',        info: 'Super Savings Fund — ถือ ≥10 ปี ลดหย่อนได้ ≤30% รายได้' },
+  { type: 'thaiesg',    info: 'Thai ESG Fund — ถือ ≥5 ปี ลดหย่อนได้ ≤30% รายได้ max 300K' },
+  { type: 'mutual',     info: 'กองทุนรวมทั่วไป — หุ้น/ตราสารหนี้/ผสม ไม่ได้ลดหย่อนภาษี' },
+  { type: 'unitlinked', info: 'ประกันชีวิตควบการลงทุน — รวมความคุ้มครอง + ผลตอบแทน' },
+  { type: 'realestate', info: 'อสังหาริมทรัพย์ที่ปล่อยเช่า — ใส่กระแสเงินสดรับ/เดือน' },
+  { type: 'stock',      info: 'หุ้นสามัญในตลาดหลักทรัพย์ — ผลตอบแทนสูง ความเสี่ยงสูง' },
+];
+
+/* ════════════════════════════════════════════
+   FIELD VISIBILITY per asset type
+   - FV-type (red): standard fields, computes FV
+   - Cash-flow type (blue): no term/FV, has cashFlow input
+   - PVD (green): no contribution input (employer-managed), badge 📊
+═══════════════════════════════════════════ */
+const ROW_FIELDS_BY_TYPE = {
+  /* defaults (FV-type / red) */
+  _default:   { contrib: true,  term: true,  fv: true,  cashFlow: false, badge: '' },
+  /* Cash-flow type (blue) */
+  annuity:    { contrib: true,  term: false, fv: false, cashFlow: true,  badge: '' },
+  realestate: { contrib: true,  term: false, fv: false, cashFlow: true,  badge: '' },
+  /* PVD (green) — employer-managed contribution */
+  pvd:        { contrib: false, term: true,  fv: true,  cashFlow: false, badge: '📊' },
+};
+function _rowFields(type) {
+  return Object.assign({}, ROW_FIELDS_BY_TYPE._default, ROW_FIELDS_BY_TYPE[type] || {});
+}
 
 /* ════════════════════════════════════════════
    STATE
@@ -488,7 +761,207 @@ function onClientChange(cid) {
 }
 
 /* ════════════════════════════════════════════
-   RENDER
+   NUMBER HELPERS — comma format for inline inputs
+═══════════════════════════════════════════ */
+function _astParseNum(str) {
+  if (str == null) return 0;
+  const n = Number(String(str).replace(/[^\d.\-]/g,''));
+  return isFinite(n) ? n : 0;
+}
+function _astFmtNum(n) {
+  if (!n || !isFinite(n)) return '';
+  return Math.round(Number(n)).toLocaleString('th-TH');
+}
+function _astFmtFV(n) {
+  if (!n || !isFinite(n)) return '';
+  return Number(n) >= 1000
+    ? Math.round(Number(n)).toLocaleString('th-TH', { maximumFractionDigits: 2 })
+    : Number(n).toFixed(2);
+}
+
+/* ════════════════════════════════════════════
+   DATA HELPERS — primary asset per type
+═══════════════════════════════════════════ */
+function getPrimaryAssetOfType(type) {
+  return getAssets().find(a => a.type === type) || null;
+}
+
+/* Read aggregated values for a type — sum across all assets of same type
+   (handle legacy data where user might have multiple of same type) */
+/* Normalize annual contribution: convert monthly → annual */
+function _annualContrib(a) {
+  const v = Number(a.contribution || 0);
+  return a.contribFreq === 'monthly' ? v * 12 : v;
+}
+
+function getRowData(type) {
+  /* Exclude custom rows (have customCategory) — they render separately */
+  const list = getAssets().filter(a => a.type === type && !a.customCategory);
+  if (list.length === 0) return { currentValue: 0, contribution: 0, expectedReturn: 0, term: 0, cashFlow: 0, appliedTo: null, count: 0 };
+  if (list.length === 1) {
+    const a = list[0];
+    return {
+      currentValue: Number(a.currentValue || 0),
+      contribution: _annualContrib(a),   /* normalize to annual */
+      expectedReturn: Number(a.expectedReturn || 0),
+      term: Number(a.term || 0),
+      cashFlow: Number(a.cashFlow || 0),
+      appliedTo: a.appliedTo || null,
+      count: 1,
+    };
+  }
+  /* Multiple — sum currentValue/contribution/cashFlow; weighted avg return; max term;
+     appliedTo = first non-null (used for icon display) */
+  const sumCV = list.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const wR = sumCV > 0
+    ? list.reduce((s,a) => s + Number(a.currentValue||0) * Number(a.expectedReturn||0), 0) / sumCV
+    : 0;
+  return {
+    currentValue: sumCV,
+    contribution: list.reduce((s,a) => s + _annualContrib(a), 0),   /* normalize each */
+    expectedReturn: wR,
+    term: Math.max(...list.map(a => Number(a.term||0))),
+    cashFlow: list.reduce((s,a) => s + Number(a.cashFlow||0), 0),
+    appliedTo: (list.find(a => a.appliedTo) || {}).appliedTo || null,
+    count: list.length,
+  };
+}
+
+/* ════════════════════════════════════════════
+   APPLY-TO MODAL — เลือก "นำไปใช้กับ" แผนเกษียณ/แผนการศึกษาบุตร/ไม่ระบุ
+═══════════════════════════════════════════ */
+let _astApplyType = null;
+const APPLY_OPTIONS = [
+  { value: 'retire',    icon: '🛋️', label: 'แผนเกษียณ' },
+  { value: 'education', icon: '🎓', label: 'แผนการศึกษาบุตร' },
+  { value: null,        icon: '−',  label: 'ไม่ระบุ', muted: true },
+];
+
+function openApplyModal(type) {
+  _astApplyType = type;
+  const d = getRowData(type);
+  const cur = d.appliedTo;
+  const opts = document.getElementById('ast-apply-options');
+  /* Use data-value attribute + event delegation — avoids JSON.stringify quote escape issues */
+  opts.innerHTML = APPLY_OPTIONS.map(o => `
+    <button class="ast-apply-opt ${cur === o.value ? 'active' : ''}"
+            data-value="${o.value === null ? '' : o.value}">
+      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.icon}</span>
+      <span>${o.label}</span>
+    </button>
+  `).join('');
+  /* Wire click handlers via JS (not inline) */
+  opts.querySelectorAll('.ast-apply-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-value');
+      setApplyTo(v === '' ? null : v);
+    });
+  });
+  document.getElementById('ast-apply-modal').classList.add('open');
+}
+
+function closeApplyModal() {
+  document.getElementById('ast-apply-modal').classList.remove('open');
+  _astApplyType = null;
+}
+
+function setApplyTo(value) {
+  const type = _astApplyType;
+  if (!type) { closeApplyModal(); return; }
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.assets) return;
+    /* Apply to ALL assets of this type (matches getRowData aggregation) */
+    c.assets.forEach(a => {
+      if (a.type === type) {
+        if (value === null) delete a.appliedTo;
+        else a.appliedTo = value;
+      }
+    });
+  });
+  closeApplyModal();
+  render();
+}
+
+function onCellChange(type, field, rawValue) {
+  let value;
+  if (field === 'expectedReturn' || field === 'term') value = Number(rawValue) || 0;
+  else value = _astParseNum(rawValue);
+
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.assets) c.assets = [];
+    let a = c.assets.find(x => x.type === type);
+    if (!a) {
+      const t = ASSET_TYPES[type] || ASSET_TYPES.other;
+      a = {
+        id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        type, name: t.label,
+        currentValue: 0, contribution: 0, contribFreq: 'annual',
+        expectedReturn: 0, term: 0, cashFlow: 0,
+        createdAt: new Date().toISOString(),
+      };
+      c.assets.push(a);
+    }
+    a[field] = value;
+    if (!a.contribFreq) a.contribFreq = 'annual';
+  });
+  /* Update FV cell + totals in-place (no full re-render to preserve focus) */
+  updateRowFV(type);
+  updateTotals();
+}
+
+function clearRow(type) {
+  const data = getRowData(type);
+  if (data.count === 0) return;
+  const t = ASSET_TYPES[type] || ASSET_TYPES.other;
+  if (!confirm(`ล้างค่าทั้งหมดของ "${t.label}"?`)) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c && c.assets) c.assets = c.assets.filter(a => a.type !== type);
+  });
+  render();
+}
+
+function updateRowFV(type) {
+  /* Sum FV per-asset using each asset's own contribFreq — matches updateTotals exactly.
+     This handles legacy data where assets may have different freqs. */
+  const list = getAssets().filter(a => a.type === type && !a.customCategory);
+  const fv = list.reduce((s, a) => s + calcFV(
+    a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq||'annual'), 0);
+  const cell = document.querySelector(`[data-fv-type="${type}"]`);
+  if (cell) {
+    /* Show FV when value > 0 (including term=0 case where FV = currentValue) */
+    if (fv > 0) {
+      cell.textContent = _astFmtFV(fv);
+      cell.classList.remove('empty');
+    } else {
+      cell.textContent = '';
+      cell.classList.add('empty');
+    }
+  }
+  const btn = document.querySelector(`[data-clear-type="${type}"]`);
+  if (btn) btn.classList.toggle('has-val', list.length > 0);
+}
+
+function updateTotals() {
+  const assets = getAssets();
+  const tCV      = assets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  /* Normalize contribution to annual — match what's shown in "ออมเพิ่มต่อปี" column */
+  const tContrib = assets.reduce((s,a) => s + _annualContrib(a), 0);
+  const tFV      = assets.reduce((s,a) => s + calcFV(
+    a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq||'annual'), 0);
+  const tCF      = assets.reduce((s,a) => s + Number(a.cashFlow||0), 0);
+  const setIf = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ? _astFmtNum(val) : '—'; };
+  setIf('t-cv', tCV);
+  setIf('t-contrib', tContrib);
+  setIf('t-fv', tFV);
+  setIf('t-cf', tCF);
+}
+
+/* ════════════════════════════════════════════
+   RENDER — spreadsheet style
 ═══════════════════════════════════════════ */
 function render() {
   const wrap = document.getElementById('content-wrap');
@@ -500,136 +973,324 @@ function render() {
     return;
   }
 
-  const assets = getAssets();
-  const totalCurrent = assets.reduce((s,a) => s + Number(a.currentValue||0), 0);
-  const totalFV      = assets.reduce((s,a) => s + calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq), 0);
-  /* Average return: คำนวณเฉพาะสินทรัพย์ liquid + investment (ไม่รวม personal/อสังหาฯ ที่มักไม่ได้ระบุ yield)
-     ป้องกันค่าเฉลี่ยถูกเจือจาง */
-  const yieldAssets = assets.filter(a => {
-    const g = (ASSET_TYPES[a.type] || {}).group;
-    return g === 'liquid' || g === 'investment';
-  });
-  const yieldTotal = yieldAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
-  const avgReturn  = yieldTotal > 0
-    ? yieldAssets.reduce((s,a) => s + Number(a.currentValue||0) * Number(a.expectedReturn||0), 0) / yieldTotal
-    : 0;
-
   wrap.innerHTML = `
-    <!-- Summary cards -->
-    <div class="summary-grid">
-      <div class="sum-card lc-blue">
-        <div class="sum-lbl">มูลค่าปัจจุบัน</div>
-        <div class="sum-val">${fmt(totalCurrent)}</div>
-        <div class="sum-sub">${assets.length} รายการ</div>
+    <div class="ast-wrap">
+      <div class="ast-section-head">
+        <div class="ast-section-icon">👛</div>
+        <div class="ast-section-title">สินทรัพย์</div>
+        <div class="ast-section-spacer"></div>
+        <div class="ast-tip">💡 กดในช่องเพื่อแก้ไข — FV คำนวณอัตโนมัติ</div>
       </div>
-      <div class="sum-card lc-green">
-        <div class="sum-lbl">ผลตอบแทนเฉลี่ย</div>
-        <div class="sum-val">${avgReturn.toFixed(2)}%</div>
-        <div class="sum-sub">เฉพาะสินทรัพย์ทางการเงิน · ถ่วงน้ำหนักด้วยมูลค่า</div>
-      </div>
-      <div class="sum-card lc-orange">
-        <div class="sum-lbl">มูลค่าอนาคต (FV)</div>
-        <div class="sum-val">${fmt(totalFV)}</div>
-        <div class="sum-sub">รวม FV ทุกรายการ</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-lbl">ผลตอบแทนสุทธิ</div>
-        <div class="sum-val" style="color:#28a745;">+${fmt(totalFV - totalCurrent)}</div>
-        <div class="sum-sub">${totalCurrent > 0 ? '+' + ((totalFV-totalCurrent)/totalCurrent*100).toFixed(1) + '%' : '—'}</div>
-      </div>
-    </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <span class="toolbar-title">รายการสินทรัพย์</span>
-      <div class="filter-chips">
-        <button class="fchip ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">ทั้งหมด</button>
-        <button class="fchip ${currentFilter==='liquid'?'active':''}" onclick="setFilter('liquid')">💧 สภาพคล่อง</button>
-        <button class="fchip ${currentFilter==='investment'?'active':''}" onclick="setFilter('investment')">📈 ลงทุน</button>
-        <button class="fchip ${currentFilter==='personal'?'active':''}" onclick="setFilter('personal')">🏠 ใช้ส่วนตัว</button>
-      </div>
-      <div class="toolbar-spacer"></div>
-      <button class="btn-add" onclick="openModal()">+ เพิ่มสินทรัพย์</button>
+      <table class="ast-table">
+        <thead>
+          <tr>
+            <th class="col-name"></th>
+            <th>มูลค่า<span class="col-line2">ปัจจุบัน</span></th>
+            <th>ออมเพิ่ม<span class="col-line2">ต่อปี</span></th>
+            <th>ผล<span class="col-line2">ตอบแทน</span></th>
+            <th>ระยะ<span class="col-line2">เวลา</span></th>
+            <th>มูลค่า<span class="col-line2">อนาคต</span></th>
+            <th>กระแส<span class="col-line2">เงินสดรับ</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ROW_ORDER.map(renderRow).join('')}
+          ${getCustomRows().map(renderCustomRow).join('')}
+          <tr class="ast-addrow-row">
+            <td colspan="8">
+              <button class="ast-addrow-btn" onclick="addCustomRow('fv')" title="เพิ่มแถวประเภทมูลค่าอนาคต (FV)">
+                <span class="ast-addrow-plus">+</span>
+                <span>มูลค่าอนาคต</span>
+              </button>
+              <button class="ast-addrow-btn" onclick="addCustomRow('cf')" title="เพิ่มแถวประเภทกระแสเงินสดรับ">
+                <span class="ast-addrow-plus">+</span>
+                <span>กระแสเงินสดรับ</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="ast-total-row">
+            <td class="col-name">รวม</td>
+            <td><span class="ast-total-num" id="t-cv">—</span></td>
+            <td><span class="ast-total-num" id="t-contrib">—</span></td>
+            <td></td>
+            <td></td>
+            <td><span class="ast-total-num" id="t-fv">—</span></td>
+            <td><span class="ast-total-num" id="t-cf">—</span></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
+  `;
+  /* Hydrate FV cells + totals on first paint */
+  ROW_ORDER.forEach(r => updateRowFV(r.type));
+  getCustomRows().forEach(a => updateCustomRowFV(a.id));
+  updateTotals();
+}
 
-    <!-- Table -->
-    <div class="assets-table">
-      ${renderTable(assets)}
-    </div>
+/* ════════════════════════════════════════════
+   CUSTOM ROWS — user-added rows via "+มูลค่าอนาคต" / "+กระแสเงินสดรับ"
+   Stored as assets with type='other' + customCategory='fv'|'cf'
+═══════════════════════════════════════════ */
+function getCustomRows() {
+  return getAssets().filter(a => a.customCategory === 'fv' || a.customCategory === 'cf');
+}
+
+function addCustomRow(category) {
+  if (!selectedClientId) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.assets) c.assets = [];
+    c.assets.push({
+      id: 'cust-' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      type: 'other',
+      customCategory: category,
+      name: '',
+      currentValue: 0, contribution: 0, contribFreq: 'annual',
+      expectedReturn: 0, term: 0, cashFlow: 0,
+      createdAt: new Date().toISOString(),
+    });
+  });
+  render();
+}
+
+function deleteCustomRow(id) {
+  if (!confirm('ลบรายการนี้?')) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (c && c.assets) c.assets = c.assets.filter(a => a.id !== id);
+  });
+  render();
+}
+
+function onCustomCellChange(id, field, value) {
+  let v;
+  if (field === 'expectedReturn' || field === 'term') v = Number(value) || 0;
+  else if (field === 'name') v = String(value || '');
+  else v = _astParseNum(value);
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.assets) return;
+    const a = c.assets.find(x => x.id === id);
+    if (!a) return;
+    a[field] = v;
+    if (!a.contribFreq) a.contribFreq = 'annual';
+  });
+  updateCustomRowFV(id);
+  updateTotals();
+}
+
+function updateCustomRowFV(id) {
+  const a = getAssets().find(x => x.id === id);
+  if (!a || a.customCategory !== 'fv') return;
+  const fv = calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq||'annual');
+  const cell = document.querySelector(`[data-fv-cust="${id}"]`);
+  if (cell) {
+    /* Show FV when value > 0 (term=0 → FV = currentValue) */
+    if (fv > 0) {
+      cell.textContent = _astFmtFV(fv);
+      cell.classList.remove('empty');
+    } else {
+      cell.textContent = '';
+      cell.classList.add('empty');
+    }
+  }
+}
+
+function renderCustomRow(a) {
+  const isFV = a.customCategory === 'fv';
+  const cv = a.currentValue || ''; const co = a.contribution || '';
+  const er = a.expectedReturn || ''; const tm = a.term || '';
+  const cf = a.cashFlow || '';
+  const cvFmt = cv ? _astFmtNum(cv) : '';
+  const coFmt = co ? _astFmtNum(co) : '';
+  const cfFmt = cf ? _astFmtNum(cf) : '';
+  const empty = `<span class="ast-cell-empty"></span>`;
+  return `
+    <tr class="ast-cust-row" data-cust-id="${a.id}">
+      <td class="col-name">
+        <span class="ast-row-name" style="display:flex; align-items:center; gap:4px;">
+          <button class="ast-cust-del" onclick="deleteCustomRow('${a.id}')" title="ลบแถว">×</button>
+          <input type="text" class="ast-cust-name" value="${(a.name||'').replace(/"/g,'&quot;')}"
+                 placeholder="${isFV ? 'ชื่อรายการ (มูลค่าอนาคต)' : 'ชื่อรายการ (กระแสเงินสดรับ)'}"
+                 onchange="onCustomCellChange('${a.id}','name',this.value)">
+        </span>
+      </td>
+      <td class="ast-cell">
+        <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
+               value="${cvFmt}" placeholder="—"
+               onfocus="this.value='${cv||''}'; this.select();"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onchange="onCustomCellChange('${a.id}','currentValue',this.value)">
+      </td>
+      <td class="ast-cell">
+        <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
+               value="${coFmt}" placeholder="—"
+               onfocus="this.value='${co||''}'; this.select();"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onchange="onCustomCellChange('${a.id}','contribution',this.value)">
+      </td>
+      <td class="ast-cell">
+        <span class="ast-pct-wrap">
+          <input type="number" class="ast-input ast-input-pct ${er?'has-val':''}" step="0.01"
+                 value="${er}" placeholder="—"
+                 onchange="onCustomCellChange('${a.id}','expectedReturn',this.value)">
+          <span class="ast-pct-suffix">%</span>
+        </span>
+      </td>
+      <td class="ast-cell">
+        ${isFV ? `
+          <span class="ast-yr-wrap">
+            <input type="number" class="ast-input ast-input-yr ${tm?'has-val':''}" step="1" min="0"
+                   value="${tm}" placeholder="—"
+                   onchange="onCustomCellChange('${a.id}','term',this.value)">
+          </span>
+        ` : empty}
+      </td>
+      <td class="ast-cell">
+        ${isFV ? `<span class="ast-fv empty" data-fv-cust="${a.id}"></span>` : empty}
+      </td>
+      <td class="ast-cell">
+        ${!isFV ? `
+          <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
+                 value="${cfFmt}" placeholder="—"
+                 onfocus="this.value='${cf||''}'; this.select();"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onchange="onCustomCellChange('${a.id}','cashFlow',this.value)">
+        ` : empty}
+      </td>
+      <td class="ast-action-cell">
+        <button class="ast-apply-btn ${a.appliedTo?'assigned':''}"
+                onclick="openApplyModalForCustom('${a.id}')"
+                title="นำไปใช้กับ...">${
+          a.appliedTo==='retire' ? '🛋️' : a.appliedTo==='education' ? '🎓' : '−'
+        }</button>
+      </td>
+    </tr>
   `;
 }
 
-function renderTable(assets) {
-  const filtered = currentFilter === 'all'
-    ? assets
-    : assets.filter(a => (ASSET_TYPES[a.type]||ASSET_TYPES.other).group === currentFilter);
-
-  if (filtered.length === 0) {
-    return `<div class="empty-table">
-      <div class="et-icon">📭</div>
-      <p>ยังไม่มีสินทรัพย์${currentFilter !== 'all' ? 'ในหมวดนี้' : ''}</p>
-      <p style="font-size:.83rem;margin-top:6px;color:var(--gray-400);">
-        กดปุ่ม "เพิ่มสินทรัพย์" เพื่อเริ่มต้น
-      </p>
-    </div>`;
-  }
-
-  // Group by group (liquid/investment/personal)
-  const grouped = {};
-  filtered.forEach(a => {
-    const g = (ASSET_TYPES[a.type]||ASSET_TYPES.other).group;
-    if (!grouped[g]) grouped[g] = [];
-    grouped[g].push(a);
-  });
-
-  let html = `<table>
-    <thead>
-      <tr>
-        <th>ประเภท</th>
-        <th>ชื่อ</th>
-        <th style="text-align:right;">มูลค่าปัจจุบัน</th>
-        <th style="text-align:right;">ผลตอบแทน</th>
-        <th style="text-align:right;">ระยะเวลา</th>
-        <th style="text-align:right;">FV</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>`;
-
-  ['liquid','investment','personal'].forEach(g => {
-    if (!grouped[g]) return;
-    const groupTotal = grouped[g].reduce((s,a) => s + Number(a.currentValue||0), 0);
-    const groupFV    = grouped[g].reduce((s,a) => s + calcFV(a.currentValue,a.expectedReturn,a.term,a.contribution,a.contribFreq), 0);
-    html += `<tr class="group-row"><td colspan="7">
-      ${GROUP_LABELS[g]}
-      <span class="grp-total">${fmt(groupTotal)} → ${fmt(groupFV)}</span>
-    </td></tr>`;
-
-    grouped[g].forEach(a => {
-      const t = ASSET_TYPES[a.type] || ASSET_TYPES.other;
-      const fv = calcFV(a.currentValue, a.expectedReturn, a.term, a.contribution, a.contribFreq);
-      html += `<tr>
-        <td><span class="a-type-pill" style="background:${t.color}22;color:${t.color}">${t.icon} ${t.label}</span></td>
-        <td>
-          <div class="a-name">${(a.name||'—').replace(/</g,'&lt;')}</div>
-          ${a.note ? `<div class="a-note">${a.note.replace(/</g,'&lt;')}</div>` : ''}
-        </td>
-        <td class="a-num">${fmt(a.currentValue||0)}</td>
-        <td class="a-num">${a.expectedReturn ? a.expectedReturn + '%' : '—'}</td>
-        <td class="a-num">${a.term ? a.term + ' ปี' : '—'}</td>
-        <td class="a-num green">${fmt(fv)}</td>
-        <td>
-          <div class="a-actions">
-            <button class="a-btn" onclick="openModal('${a.id}')" title="แก้ไข">✏️</button>
-            <button class="a-btn del" onclick="deleteAsset('${a.id}')" title="ลบ">🗑️</button>
-          </div>
-        </td>
-      </tr>`;
+/* Apply-to modal for custom rows — different target (id, not type) */
+function openApplyModalForCustom(id) {
+  _astApplyType = '__cust:' + id;   /* prefix to indicate custom */
+  const a = getAssets().find(x => x.id === id);
+  const cur = a ? a.appliedTo : null;
+  const opts = document.getElementById('ast-apply-options');
+  opts.innerHTML = APPLY_OPTIONS.map(o => `
+    <button class="ast-apply-opt ${cur === o.value ? 'active' : ''}"
+            data-value="${o.value === null ? '' : o.value}">
+      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.icon}</span>
+      <span>${o.label}</span>
+    </button>
+  `).join('');
+  opts.querySelectorAll('.ast-apply-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-value');
+      setApplyToCustom(id, v === '' ? null : v);
     });
   });
+  document.getElementById('ast-apply-modal').classList.add('open');
+}
 
-  html += '</tbody></table>';
-  return html;
+function setApplyToCustom(id, value) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c || !c.assets) return;
+    const a = c.assets.find(x => x.id === id);
+    if (!a) return;
+    if (value === null) delete a.appliedTo;
+    else a.appliedTo = value;
+  });
+  closeApplyModal();
+  render();
+}
+
+function renderRow(row) {
+  const t = ASSET_TYPES[row.type] || ASSET_TYPES.other;
+  const d = getRowData(row.type);
+  const f = _rowFields(row.type);   /* field visibility per type */
+  const has = d.count > 0;
+  const cv = d.currentValue || '';
+  const co = d.contribution || '';
+  const er = d.expectedReturn || '';
+  const tm = d.term || '';
+  const cf = d.cashFlow || '';
+  const cvFmt = cv ? _astFmtNum(cv) : '';
+  const coFmt = co ? _astFmtNum(co) : '';
+  const cfFmt = cf ? _astFmtNum(cf) : '';
+  /* Helper to render an empty cell (no input, just a dashed line placeholder) */
+  const empty = `<span class="ast-cell-empty"></span>`;
+  return `
+    <tr data-row="${row.type}">
+      <td class="col-name">
+        <span class="ast-row-name">
+          <span class="ast-row-icon">${t.icon}</span>${t.label}
+          <span class="ast-info-wrap">
+            <span class="ast-info" tabindex="0">i</span>
+            <span class="ast-tooltip">${row.info}</span>
+          </span>
+          ${f.badge ? `<span class="ast-row-badge" title="กองทุนสำรองเลี้ยงชีพ — นายจ้างจ่ายสมทบ">${f.badge}</span>` : ''}
+        </span>
+      </td>
+      <td class="ast-cell">
+        <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
+               value="${cvFmt}" placeholder="—"
+               onfocus="this.value='${cv||''}'; this.select();"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onchange="onCellChange('${row.type}','currentValue',this.value)">
+      </td>
+      <td class="ast-cell">
+        ${f.contrib ? `
+          <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
+                 value="${coFmt}" placeholder="—"
+                 onfocus="this.value='${co||''}'; this.select();"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onchange="onCellChange('${row.type}','contribution',this.value)">
+        ` : empty}
+      </td>
+      <td class="ast-cell">
+        <span class="ast-pct-wrap">
+          <input type="number" class="ast-input ast-input-pct ${er?'has-val':''}" step="0.01"
+                 value="${er}" placeholder="—"
+                 onchange="onCellChange('${row.type}','expectedReturn',this.value)">
+          <span class="ast-pct-suffix">%</span>
+        </span>
+      </td>
+      <td class="ast-cell">
+        ${f.term ? `
+          <span class="ast-yr-wrap">
+            <input type="number" class="ast-input ast-input-yr ${tm?'has-val':''}" step="1" min="0"
+                   value="${tm}" placeholder="—"
+                   onchange="onCellChange('${row.type}','term',this.value)">
+          </span>
+        ` : empty}
+      </td>
+      <td class="ast-cell">
+        ${f.fv ? `<span class="ast-fv empty" data-fv-type="${row.type}"></span>` : empty}
+      </td>
+      <td class="ast-cell">
+        ${f.cashFlow ? `
+          <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
+                 value="${cfFmt}" placeholder="—"
+                 onfocus="this.value='${cf||''}'; this.select();"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onchange="onCellChange('${row.type}','cashFlow',this.value)">
+        ` : empty}
+      </td>
+      <td class="ast-action-cell">
+        <button class="ast-apply-btn ${d.appliedTo?'assigned':''}" data-apply-type="${row.type}"
+                onclick="openApplyModal('${row.type}')"
+                title="${d.appliedTo==='retire'?'นำไปใช้กับแผนเกษียณ':d.appliedTo==='education'?'นำไปใช้กับแผนการศึกษาบุตร':'นำไปใช้กับ...'}">${
+          d.appliedTo==='retire' ? '🛋️' : d.appliedTo==='education' ? '🎓' : '−'
+        }</button>
+      </td>
+    </tr>
+  `;
 }
 
 function setFilter(f) {

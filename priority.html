@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,12 +23,20 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override — indigo accent ════ */
+    :root {
+      --p2-indigo:       #3B43A8;
+      --p2-indigo-light: #6B72C9;
+      --p2-indigo-soft:  #EEF0F9;
+      --p2-yellow:       #F5C242;
+      --p2-yellow-dark:  #D4A032;
+    }
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -40,6 +49,167 @@
       border: none; border-radius: 8px; padding: 7px 14px;
       font-family: var(--font); font-weight: 700; font-size: .9rem;
       min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ NEW layout — 7 vertical sliders ════ */
+    .p2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 24px 28px 28px;
+      margin-bottom: 18px;
+    }
+    .p2-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 26px;
+    }
+    .p2-head-icon {
+      width: 70px; height: 70px; border-radius: 12px;
+      border: 3px solid var(--p2-indigo); color: var(--p2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; flex-shrink: 0;
+    }
+    .p2-head-title {
+      font-size: 1.6rem; font-weight: 800; color: var(--p2-indigo);
+      letter-spacing: -0.01em;
+    }
+
+    .p2-grid-wrap {
+      display: grid; gap: 12px;
+      grid-template-columns: 90px repeat(7, 1fr) 60px;
+      align-items: end;
+      padding: 8px 4px;
+    }
+
+    /* Category column */
+    .p2-cat {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px;
+    }
+    .p2-cat-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 3px solid var(--p2-indigo); color: var(--p2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; background: white;
+    }
+    .p2-cat-name {
+      font-size: .82rem; font-weight: 700; color: var(--p2-indigo);
+      text-align: center; line-height: 1.35;
+      min-height: 50px;
+    }
+    .p2-cat-sub {
+      display: block; font-size: .76rem; font-weight: 600; color: #555;
+    }
+
+    /* HIGH/MED/LOW labels — left column */
+    .p2-labels-col {
+      display: flex; flex-direction: column; justify-content: space-between;
+      align-items: stretch; gap: 12px;
+      height: 200px; padding: 6px 0;
+    }
+    .p2-level-lbl {
+      border: 2px solid var(--p2-indigo);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: .92rem; font-weight: 800; color: var(--p2-indigo);
+      background: white; text-align: center;
+    }
+
+    /* Slider — vertical pill with 3 dots */
+    .p2-slider {
+      position: relative; height: 200px; width: 100%;
+      display: flex; justify-content: center;
+      padding: 6px 0;
+    }
+    .p2-track {
+      position: absolute; left: 50%; top: 6px; bottom: 6px;
+      transform: translateX(-50%);
+      width: 18px;
+      background: var(--p2-indigo);
+      border-radius: 100px;
+    }
+    .p2-dot {
+      position: absolute; left: 50%;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--p2-indigo);
+      cursor: pointer;
+      transition: all .2s;
+      z-index: 2;
+      transform: translateX(-50%);
+    }
+    .p2-dot.on {
+      background: var(--p2-yellow);
+      box-shadow: 0 0 0 3px white, 0 3px 8px rgba(245,194,66,.5);
+    }
+    .p2-dot-high { top: 6px; }
+    .p2-dot-med  { top: 50%; transform: translate(-50%, -50%); }
+    .p2-dot-low  { bottom: 6px; }
+
+    /* Rank circle (below each slider) */
+    .p2-rank {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid #888; background: white;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 800; color: #333;
+      cursor: pointer; transition: all .15s;
+      margin: 0 auto;
+    }
+    .p2-rank:hover { border-color: var(--p2-indigo); background: var(--p2-indigo-soft); }
+    .p2-rank.active { border-color: var(--p2-indigo); color: var(--p2-indigo); background: white; }
+
+    /* Reset button — yellow circular arrow */
+    .p2-reset-col {
+      display: flex; justify-content: center;
+    }
+    .p2-reset-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--p2-yellow); color: white; border: none;
+      cursor: pointer; font-size: 1.4rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      transition: all .15s;
+    }
+    .p2-reset-btn:hover { background: var(--p2-yellow-dark); transform: rotate(-60deg); }
+
+    /* Bottom investment rows */
+    .p2-invest {
+      display: grid; grid-template-columns: 1fr 480px auto;
+      gap: 14px; align-items: center;
+      padding: 14px 8px;
+    }
+    .p2-invest + .p2-invest { padding-top: 8px; }
+    .p2-invest-lbl {
+      text-align: right; font-size: 1.1rem; font-weight: 800; color: #222;
+    }
+    .p2-invest-pill {
+      display: flex; align-items: center; justify-content: flex-end;
+      background: white; border: 1.5px solid #444;
+      border-radius: 100px; padding: 8px 22px;
+      min-height: 42px;
+    }
+    .p2-invest-pill input {
+      width: 100%; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--p2-indigo); text-align: right;
+    }
+    .p2-invest-unit {
+      font-size: 1.05rem; font-weight: 800; color: #222;
+    }
+
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media (max-width: 1100px) {
+      .p2-grid-wrap { grid-template-columns: 70px repeat(7, 1fr) 50px; gap: 6px; }
+      .p2-cat-icon { width: 56px; height: 56px; font-size: 1.4rem; }
+      .p2-cat-name { font-size: .72rem; min-height: 56px; }
+      .p2-invest { grid-template-columns: 1fr 1fr auto; }
+    }
+    @media (max-width: 720px) {
+      .p2-wrap { padding: 18px 12px; overflow-x: auto; }
+      .p2-grid-wrap { min-width: 700px; }
     }
 
     /* Summary strip */
@@ -178,6 +348,15 @@
       .pri-control { min-width: unset; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -287,62 +466,13 @@ function fmtShort(n) {
    7 PRIORITIES — definition + auto-calc functions
 ═══════════════════════════════════════════ */
 const PRIORITIES = [
-  {
-    key: 'emergency',
-    icon: '🚨',
-    name: 'กองทุนฉุกเฉิน',
-    desc: '3-6 เท่าของรายจ่าย/เดือน เป็นเงินฝากสภาพคล่อง',
-    color: '#DC3545',
-    defaultWeight: 'high',
-  },
-  {
-    key: 'lifeIns',
-    icon: '☂️',
-    name: 'ประกันชีวิต',
-    desc: 'ทุนคุ้มครองครอบคลุมหนี้สิน + ความรับผิดชอบ',
-    color: '#9B59B6',
-    defaultWeight: 'high',
-  },
-  {
-    key: 'healthIns',
-    icon: '⚕️',
-    name: 'ประกันสุขภาพ',
-    desc: 'ป้องกันค่ารักษาที่ทำลายเงินออม',
-    color: '#3498DB',
-    defaultWeight: 'high',
-  },
-  {
-    key: 'retirement',
-    icon: '👴',
-    name: 'การเกษียณ',
-    desc: 'เป้าหมายเงินเกษียณ ฿' + 'ตามรายได้',
-    color: '#16A085',
-    defaultWeight: 'med',
-  },
-  {
-    key: 'education',
-    icon: '🎓',
-    name: 'การศึกษาบุตร',
-    desc: 'ค่าเล่าเรียนของบุตรในอนาคต',
-    color: '#F39C12',
-    defaultWeight: 'med',
-  },
-  {
-    key: 'goals',
-    icon: '🎯',
-    name: 'เป้าหมายชีวิต',
-    desc: 'บ้าน/รถ/ท่องเที่ยว/ธุรกิจ/อื่นๆ',
-    color: '#E67E22',
-    defaultWeight: 'low',
-  },
-  {
-    key: 'wealth',
-    icon: '📈',
-    name: 'ลงทุนเสริมความมั่งคั่ง',
-    desc: 'ลงทุนระยะยาวเพื่อเงินต้นเติบโต',
-    color: '#27AE60',
-    defaultWeight: 'low',
-  },
+  { key:'retire',     icon:'🛋️', name:'เกษียณ',         sub:'อิสรภาพ<br>ทางการเงิน',     defaultWeight:'med' },
+  { key:'education',  icon:'🎓', name:'ค่าเล่าเรียนบุตร', sub:'ระดับ<br>มหาวิทยาลัย',     defaultWeight:'high' },
+  { key:'lifeIns',    icon:'☂️', name:'คุ้มครองชีวิต',   sub:'รายได้<br>ครอบครัว',       defaultWeight:'med' },
+  { key:'healthIns',  icon:'➕', name:'ประกันสุขภาพ',   sub:'โรคร้ายแรง<br>อุบัติเหตุ',  defaultWeight:'high' },
+  { key:'tax',        icon:'✂️', name:'วางแผนภาษี',    sub:'บุคคล<br>นิติบุคคล',        defaultWeight:'high' },
+  { key:'longInvest', icon:'📈', name:'ลงทุนระยะยาว',   sub:'เพื่อบรรลุ<br>เป้าหมาย',     defaultWeight:'low' },
+  { key:'lumpSum',    icon:'💧', name:'บริหารเงินก้อน', sub:'สร้างกระแส<br>เงินสด',      defaultWeight:'high' },
 ];
 
 const WEIGHT_VALUES = { high: 3, med: 2, low: 1 };
@@ -423,7 +553,7 @@ function computePriorityNeed(client, key) {
       }
       const targetCorpus = annualIncome * 0.7 * 25;
       const currentRetire = (client.assets||[])
-        .filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type))
+        .filter(a => ['pvd','rmf','ssf','thaiesg','annuity'].includes(a.type) || a.appliedTo === 'retire')
         .reduce((s,a) => s + Number(a.currentValue||0), 0);
       /* FV ของเงินที่มี (return 5%/ปี) */
       const fvCurrent = currentRetire * Math.pow(1.05, yearsToRetire);
@@ -539,130 +669,137 @@ function render() {
     </div>`;
     return;
   }
-
   const client = getCurrent();
   if (!client) { wrap.innerHTML = '<div class="no-client">ไม่พบข้อมูลลูกค้า</div>'; return; }
 
   const weights = getPriorities(client);
-  /* คำนวณ ideal monthly + actual distribution */
-  const items = PRIORITIES.map(p => {
-    const need = computePriorityNeed(client, p.key);
-    const w = weights[p.key];
-    return { ...p, ...need, weight: w, weightVal: WEIGHT_VALUES[w] };
-  });
+  const ranks = getRanks(client);
+  const investMonthly = Number(client.investMonthly || 0);
+  const investLump = Number(client.investLump || 0);
 
-  /* รายได้ - รายจ่าย = surplus available/เดือน */
-  const cf = client.cashflow || {};
-  const monthlyIncome = Number(cf.income||0);
-  const monthlyExp    = Number(cf.expFixed||0) + Number(cf.expVariable||0) + Number(cf.expDebt||0);
-  const surplus       = Math.max(monthlyIncome - monthlyExp, 0);
-
-  /* รวม monthly ตาม ideal (ทุก priority ที่มี gap) */
-  const totalIdealMonthly = items.reduce((s,i) => s + (i.monthly || 0), 0);
-
-  /* คำนวณ allocation: ถ้า surplus < ideal → distribute by weight
-     ถ้า surplus >= ideal → ทุกคนได้ครบ + เหลือแบ่งกันตาม weight (extra) */
-  let allocation = {};
-  if (totalIdealMonthly === 0) {
-    items.forEach(i => allocation[i.key] = 0);
-  } else if (surplus >= totalIdealMonthly) {
-    /* enough — give each its ideal */
-    items.forEach(i => allocation[i.key] = i.monthly);
-  } else {
-    /* not enough — distribute by weight × ideal */
-    const totalWeightedNeed = items.reduce((s,i) => s + (i.monthly * i.weightVal), 0);
-    items.forEach(i => {
-      allocation[i.key] = totalWeightedNeed > 0
-        ? (i.monthly * i.weightVal / totalWeightedNeed) * surplus
-        : 0;
-    });
-  }
-
-  const totalAlloc = Object.values(allocation).reduce((s,v) => s+v, 0);
-  const fundedPct = totalIdealMonthly > 0 ? Math.min(totalAlloc/totalIdealMonthly*100, 100) : 0;
-  const surplusOk = surplus >= totalIdealMonthly;
-
-  /* Render */
   wrap.innerHTML = `
-    <div class="tip-card">
-      💡 <b>วิธีใช้:</b> ปรับน้ำหนัก HIGH/MEDIUM/LOW ให้แต่ละเป้าหมาย
-      ระบบจะแนะนำการกระจายเงินออม/เดือนตามความสำคัญ
-      หากเงินเหลือไม่พอจ่ายทุกเป้าหมาย จะแบ่งให้เป้าหมายที่สำคัญกว่าก่อน
-    </div>
+    <div class="p2-wrap">
+      <!-- Header -->
+      <div class="p2-head">
+        <div class="p2-head-icon">☑↓</div>
+        <div class="p2-head-title">ลำดับความสำคัญ</div>
+      </div>
 
-    <!-- Summary strip -->
-    <div class="summary-strip">
-      <div class="ss-card">
-        <div class="ss-lbl">💰 รายได้/เดือน</div>
-        <div class="ss-val">${fmt(monthlyIncome)}</div>
-      </div>
-      <div class="ss-card">
-        <div class="ss-lbl">🛒 รายจ่ายจำเป็น/เดือน</div>
-        <div class="ss-val">${fmt(monthlyExp)}</div>
-        <div class="ss-sub">คงที่+ผันแปร+ผ่อน</div>
-      </div>
-      <div class="ss-card ${surplusOk ? 'surplus':'deficit'}">
-        <div class="ss-lbl">💵 เงินที่ออม/ลงทุนได้</div>
-        <div class="ss-val ${surplusOk?'green':'red'}">${fmt(surplus)}</div>
-        <div class="ss-sub">${monthlyIncome > 0 ? Math.round(surplus/monthlyIncome*100) : 0}% ของรายได้</div>
-      </div>
-      <div class="ss-card ${surplusOk ? 'surplus':'deficit'}">
-        <div class="ss-lbl">🎯 เป้าหมายต้องการ/เดือน</div>
-        <div class="ss-val">${fmt(totalIdealMonthly)}</div>
-        <div class="ss-sub">${surplusOk ? '✅ พอ' : '⚠️ ขาด '+fmt(totalIdealMonthly-surplus)}</div>
-      </div>
-    </div>
-
-    <!-- Priority cards (table-like layout) -->
-    <div class="pri-grid">
-      <div class="pri-head">
+      <!-- Category icons row -->
+      <div class="p2-grid-wrap">
         <div></div>
-        <div>เป้าหมาย</div>
-        <div>สถานะ</div>
-        <div class="col-c">ความสำคัญ</div>
-        <div class="col-r">แนะนำ/เดือน</div>
+        ${PRIORITIES.map(p => `
+          <div class="p2-cat">
+            <div class="p2-cat-icon">${p.icon}</div>
+            <div class="p2-cat-name">${p.name}<br><span class="p2-cat-sub">${p.sub}</span></div>
+          </div>
+        `).join('')}
+        <div></div>
       </div>
-      ${items.map(i => renderPriorityCard(i, allocation[i.key])).join('')}
-    </div>
 
-    <!-- Distribution -->
-    <div class="dist-card">
-      <h3>📊 การกระจายเงินออม/ลงทุน/เดือน (แนะนำ)</h3>
-      ${totalAlloc > 0 ? renderDistribution(items, allocation, totalAlloc) : '<p style="color:var(--gray-500);text-align:center;padding:20px;">ยังไม่มีเป้าหมายที่ต้องการเงินออม</p>'}
+      <!-- Slider row (HIGH/MED/LOW labels + 7 sliders + reset) -->
+      <div class="p2-grid-wrap" style="align-items:center;">
+        <div class="p2-labels-col">
+          <div class="p2-level-lbl">HIGH</div>
+          <div class="p2-level-lbl">MED</div>
+          <div class="p2-level-lbl">LOW</div>
+        </div>
+        ${PRIORITIES.map(p => {
+          const lv = weights[p.key];
+          return `
+            <div class="p2-slider">
+              <div class="p2-track"></div>
+              <div class="p2-dot p2-dot-high ${lv==='high'?'on':''}" onclick="setWeight('${p.key}','high')"></div>
+              <div class="p2-dot p2-dot-med  ${lv==='med' ?'on':''}" onclick="setWeight('${p.key}','med')"></div>
+              <div class="p2-dot p2-dot-low  ${lv==='low' ?'on':''}" onclick="setWeight('${p.key}','low')"></div>
+            </div>
+          `;
+        }).join('')}
+        <div class="p2-reset-col">
+          <button class="p2-reset-btn" onclick="resetPriorities()" title="รีเซ็ตค่าทั้งหมด">↺</button>
+        </div>
+      </div>
+
+      <!-- Rank row -->
+      <div class="p2-grid-wrap" style="align-items:center; margin-top:8px;">
+        <div></div>
+        ${PRIORITIES.map(p => `
+          <div style="text-align:center;">
+            <div class="p2-rank ${(ranks[p.key]||0)>0?'active':''}" onclick="cycleRank('${p.key}')" title="คลิกเพื่อตั้งลำดับ (0-7)">${ranks[p.key] || 0}</div>
+          </div>
+        `).join('')}
+        <div></div>
+      </div>
+
+      <!-- Investment fields -->
+      <div style="margin-top:24px; padding-top:18px; border-top:1.5px dashed #DDD;">
+        <div class="p2-invest">
+          <div class="p2-invest-lbl">เงินลงทุนต่อเดือน</div>
+          <div class="p2-invest-pill">
+            <input type="text" inputmode="decimal" class="money-fmt"
+              value="${investMonthly > 0 ? Number(investMonthly).toLocaleString('th-TH') : ''}"
+              placeholder="0"
+              onchange="saveInvest('monthly', parseMoney(this))">
+          </div>
+          <div class="p2-invest-unit">บาท</div>
+        </div>
+        <div class="p2-invest">
+          <div class="p2-invest-lbl">เงินต้นที่พร้อมลงทุน</div>
+          <div class="p2-invest-pill">
+            <input type="text" inputmode="decimal" class="money-fmt"
+              value="${investLump > 0 ? Number(investLump).toLocaleString('th-TH') : ''}"
+              placeholder="0"
+              onchange="saveInvest('lump', parseMoney(this))">
+          </div>
+          <div class="p2-invest-unit">บาท</div>
+        </div>
+      </div>
     </div>
   `;
+  if (window.refreshAllMoneyInputs) refreshAllMoneyInputs();
 }
 
-function renderPriorityCard(p, alloc) {
-  const wCls = `w-${p.weight}`;
-  const statusText = p.status === 'ok'
-    ? `<span class="pri-status ok">✅ เพียงพอแล้ว</span>`
-    : p.status === 'gap'
-      ? `<span class="pri-status gap">⚠️ ขาด ${fmtShort(p.gap)}</span>`
-      : `<span class="pri-status no-data">— ยังไม่มีข้อมูล</span>`;
+/* ════════════════════════════════════════════
+   STATE HELPERS
+═══════════════════════════════════════════ */
+function getRanks(client) {
+  const saved = (client && client.priorityRank) || {};
+  const out = {};
+  PRIORITIES.forEach(p => { out[p.key] = Number(saved[p.key] || 0); });
+  return out;
+}
 
-  return `
-    <div class="pri-card ${wCls}">
-      <div class="pri-icon" style="background:${p.color}22;" title="${p.desc}">${p.icon}</div>
-      <div class="pri-name-col">
-        <div class="pri-name">${p.name}</div>
-        <div class="pri-desc">${p.desc}</div>
-      </div>
-      <div class="pri-status-col">
-        ${statusText}
-        ${p.detail ? `<div class="pri-detail">${p.detail}</div>` : ''}
-      </div>
-      <div class="pri-weight-row">
-        <button class="pri-weight-btn w-high ${p.weight==='high'?'active':''}" onclick="setWeight('${p.key}','high')">HIGH</button>
-        <button class="pri-weight-btn w-med ${p.weight==='med'?'active':''}" onclick="setWeight('${p.key}','med')">MEDIUM</button>
-        <button class="pri-weight-btn w-low ${p.weight==='low'?'active':''}" onclick="setWeight('${p.key}','low')">LOW</button>
-      </div>
-      <div class="pri-monthly">
-        <div class="pri-monthly-lbl">แนะนำ/เดือน</div>
-        <div class="pri-monthly-val">${fmt(alloc || 0)}</div>
-      </div>
-    </div>
-  `;
+function cycleRank(key) {
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    if (!c.priorityRank) c.priorityRank = {};
+    const cur = Number(c.priorityRank[key] || 0);
+    /* cycle 0 → 1 → 2 → ... → 7 → 0 */
+    c.priorityRank[key] = (cur + 1) % (PRIORITIES.length + 1);
+  });
+  render();
+}
+
+function saveInvest(field, value) {
+  const v = Number(value) || 0;
+  const dbField = field === 'monthly' ? 'investMonthly' : 'investLump';
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    c[dbField] = v;
+  });
+}
+
+function resetPriorities() {
+  if (!confirm('รีเซ็ตค่าลำดับความสำคัญทั้งหมด?')) return;
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    c.priorities = {};
+    c.priorityRank = {};
+  });
+  render();
 }
 
 function renderDistribution(items, allocation, totalAlloc) {

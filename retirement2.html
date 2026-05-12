@@ -1,0 +1,1169 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — สรุปแผนเกษียณ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    :root {
+      --r3-indigo:       #3B43A8;
+      --r3-indigo-light: #6B72C9;
+      --r3-indigo-soft:  #EEF0F9;
+      --r3-red:          #DC3545;
+      --r3-orange:       #F5C242;
+    }
+
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
+    }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
+    .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ Outer wrap ════ */
+    .r3-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 28px 32px;
+      margin-bottom: 18px;
+    }
+    .r3-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 28px; flex-wrap: wrap;
+    }
+    .r3-head-icon {
+      width: 70px; height: 70px; border-radius: 50%;
+      border: 3px solid var(--r3-indigo); color: var(--r3-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; background: white;
+    }
+    .r3-head-title {
+      font-size: 1.6rem; font-weight: 800; color: var(--r3-indigo);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .r3-head-icon-chart {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--r3-indigo); color: white; font-size: 1rem;
+      cursor: pointer; border: none; transition: all .15s;
+      position: relative;
+    }
+    .r3-head-icon-chart:hover { background: var(--r3-indigo-light); transform: scale(1.05); }
+    .r3-head-icon-chart::after {
+      content: '+'; position: absolute; right: -3px; bottom: -3px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--r3-yellow, #F5C242); color: #2B2B2B;
+      font-size: .7rem; font-weight: 800; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid white;
+    }
+
+    /* ════ Confirmation modal ════ */
+    .r3-confirm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 200;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .r3-confirm-overlay.open { display: flex; }
+    .r3-confirm-card {
+      background: white; border-radius: 16px;
+      padding: 30px 36px 26px; max-width: 440px; width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .r3-confirm-title {
+      font-size: 1.3rem; font-weight: 800; color: #222;
+      margin-bottom: 22px;
+    }
+    .r3-confirm-actions {
+      display: flex; gap: 14px; justify-content: center;
+    }
+    .r3-confirm-btn {
+      padding: 10px 32px; border: none; border-radius: 10px;
+      font-family: var(--font); font-weight: 800; font-size: 1.05rem;
+      cursor: pointer; min-width: 90px;
+      transition: all .15s;
+    }
+    .r3-confirm-btn.yes {
+      background: var(--r3-indigo); color: white;
+    }
+    .r3-confirm-btn.yes:hover { background: var(--r3-indigo-light); transform: translateY(-1px); }
+    .r3-confirm-btn.no {
+      background: var(--t3-gray-pill, #E5E5E5); color: #444;
+    }
+    .r3-confirm-btn.no:hover { background: #D5D5D5; }
+    .r3-head-spacer { flex: 1; }
+    .r3-head-mid {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .r3-head-mid-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 2.5px solid var(--r3-indigo); color: var(--r3-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; background: white;
+    }
+    .r3-head-mid-lbl {
+      font-size: .82rem; color: var(--r3-indigo); font-weight: 700;
+    }
+    .r3-sim-btn {
+      padding: 10px 20px; border-radius: 100px;
+      background: white; color: var(--r3-indigo);
+      border: 2px solid var(--r3-indigo);
+      font-family: var(--font); font-weight: 700; font-size: .92rem;
+      cursor: pointer; transition: all .15s;
+    }
+    .r3-sim-btn:hover { background: var(--r3-indigo); color: white; }
+
+    /* ════ Simulator modal — full-screen sandbox ════ */
+    .r3-sim-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 210; align-items: flex-start; justify-content: center; padding: 24px 16px;
+      overflow-y: auto;
+    }
+    .r3-sim-overlay.open { display: flex; }
+    .r3-sim-card {
+      background: white; border-radius: 16px; width: 100%; max-width: 1100px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3); overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .r3-sim-header {
+      background: var(--r3-yellow); color: #2B2B2B;
+      padding: 12px 22px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .r3-sim-header h3 { margin: 0; font-size: 1.2rem; font-weight: 800; }
+    .r3-sim-close {
+      background: transparent; border: none; color: #2B2B2B; cursor: pointer;
+      font-size: 1.4rem; font-weight: 700; line-height: 1; padding: 0 4px;
+    }
+    .r3-sim-subtitle {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 16px 0 8px;
+    }
+    .r3-sim-subtitle-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 2.5px solid var(--r3-indigo); color: var(--r3-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; background: white;
+    }
+    .r3-sim-subtitle-text {
+      font-size: 1.05rem; font-weight: 800; color: var(--r3-indigo);
+    }
+    .r3-sim-body { padding: 8px 18px 22px; }
+
+    /* Editable input inside sim cards/nodes */
+    .r3-sim-input {
+      border: none; outline: none; background: transparent;
+      font-family: var(--font); font-weight: 800;
+      color: var(--r3-indigo); text-align: center;
+      width: 100%; padding: 0;
+      border-bottom: 1.5px solid var(--r3-indigo);
+      transition: border-color .15s;
+    }
+    .r3-sim-input:focus { border-bottom-color: var(--r3-yellow); }
+    .r3-sim-input::-webkit-outer-spin-button,
+    .r3-sim-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    /* size variants */
+    .r3-sim-input.age {
+      font-size: 1.5rem; width: 68px;
+      border-bottom: none;   /* no underline for age circles — circle border is enough */
+    }
+    .r3-sim-input.pct { font-size: 1rem; width: 60px; }
+    .r3-sim-input.money {
+      font-size: .95rem; width: 130px; max-width: 100%;
+      display: block; margin: 2px auto;
+    }
+
+    /* Edit-only ring around editable nodes — visual cue */
+    .r3-sim-editable {
+      box-shadow: 0 0 0 2px rgba(245,194,66,.4);
+    }
+    .r3-sim-card-edit-hint {
+      font-size: .68rem; color: #888; font-style: italic; margin-top: 2px;
+    }
+
+    @media (max-width: 900px) {
+      .r3-sim-card { max-width: 100%; }
+      .r3-sim-body { padding: 4px 8px 18px; overflow-x: auto; }
+    }
+
+    /* ════ Timeline grid ════ */
+    .r3-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 18px; padding: 8px 12px 0; min-height: 480px;
+    }
+    .r3-col {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; position: relative;
+    }
+    .r3-col-lbl {
+      font-size: .92rem; color: #555; font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* Node row — line behind */
+    .r3-node-wrap {
+      width: 100%; height: 80px; display: flex; align-items: center;
+      justify-content: center; position: relative;
+    }
+    /* Connecting line: span across all columns at node-center height */
+    .r3-grid::before {
+      content: '';
+      position: absolute; left: 60px; right: 60px; top: 90px;
+      height: 2.5px; background: var(--r3-indigo); z-index: 0;
+      /* will be positioned via parent's relative */
+    }
+    .r3-grid { position: relative; }
+
+    .r3-node-age, .r3-node-period {
+      position: relative; z-index: 1; background: white;
+      color: var(--r3-indigo); font-weight: 800;
+      border: 2.5px solid var(--r3-indigo);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .r3-node-age {
+      width: 72px; height: 72px; border-radius: 50%;
+      font-size: 1.5rem;
+    }
+    .r3-node-period {
+      padding: 14px 22px; border-radius: 10px;
+      font-size: 1.4rem; min-width: 70px;
+    }
+
+    /* Cards stack below node */
+    .r3-cards {
+      display: flex; flex-direction: column; gap: 10px;
+      width: 100%; align-items: stretch; padding: 0 4px;
+      position: relative;
+    }
+    .r3-card {
+      background: white; border: 2px solid var(--r3-indigo);
+      border-radius: 14px; padding: 12px 12px;
+      text-align: center; min-height: 56px;
+      display: flex; flex-direction: column; justify-content: center; gap: 2px;
+      position: relative;
+    }
+    .r3-card-title {
+      font-size: .82rem; color: #222; font-weight: 600;
+      line-height: 1.3;
+    }
+    .r3-card-val {
+      font-size: 1rem; font-weight: 800; color: var(--r3-indigo);
+      letter-spacing: -0.01em;
+    }
+    .r3-card-sub { font-size: .76rem; color: #222; font-weight: 600; margin-top: -2px; }
+
+    .r3-card-red {
+      background: var(--r3-red); border-color: var(--r3-red);
+    }
+    .r3-card-red .r3-card-title,
+    .r3-card-red .r3-card-val,
+    .r3-card-red .r3-card-sub { color: white; }
+
+    .r3-card-orange {
+      background: var(--r3-orange); border-color: var(--r3-orange);
+    }
+    .r3-card-orange .r3-card-title,
+    .r3-card-orange .r3-card-val,
+    .r3-card-orange .r3-card-sub { color: #2B2B2B; }
+
+    .r3-fingerprint {
+      width: 64px; height: 64px; margin: 8px auto 0;
+      border-radius: 50%; background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem;
+    }
+
+    /* Progress bar at bottom */
+    .r3-progress-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 28px 24px;
+    }
+    .r3-progress-bar {
+      flex: 1; height: 14px; border-radius: 100px;
+      background: white; border: 1.5px solid #DDD;
+      overflow: hidden; position: relative;
+    }
+    .r3-progress-fill {
+      height: 100%; background: linear-gradient(90deg, #28a745, #6BCB77);
+      transition: width .4s ease;
+    }
+    .r3-progress-pct {
+      font-size: 1.2rem; font-weight: 800; color: #28a745;
+      min-width: 50px; text-align: right;
+    }
+    .r3-progress-pct.gap { color: var(--r3-red); }
+
+    .no-client {
+      text-align: center; padding: 60px 20px; color: var(--gray-500);
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    @media (max-width: 1100px) {
+      .r3-grid { overflow-x: auto; }
+      .r3-wrap { padding: 20px 14px 24px; }
+    }
+  </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item active" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item" onclick="location.href='policies.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-row">
+        <div>
+          <h2>🛋️ สรุปแผนเกษียณ</h2>
+          <p>ภาพรวม 2 ช่วง — ก่อนเกษียณ + หลังเกษียณ</p>
+        </div>
+        <div class="client-pick">
+          <div class="cp-mini-avatar" id="cp-mini-avatar">👤</div>
+          <select id="client-select" onchange="onClientChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div id="content-wrap"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Confirmation modal — pull data from assets -->
+<div class="r3-confirm-overlay" id="r3-pull-modal" onclick="if(event.target===this)cancelPull()">
+  <div class="r3-confirm-card">
+    <div class="r3-confirm-title">ดึงข้อมูลหน้าสินทรัพย์มาใช้</div>
+    <div class="r3-confirm-actions">
+      <button class="r3-confirm-btn yes" onclick="confirmPull()">ใช่</button>
+      <button class="r3-confirm-btn no" onclick="cancelPull()">ไม่ใช่</button>
+    </div>
+  </div>
+</div>
+
+<!-- Simulator modal — interactive sandbox -->
+<div class="r3-sim-overlay" id="r3-sim-modal" onclick="if(event.target===this)closeSimulator()">
+  <div class="r3-sim-card">
+    <div class="r3-sim-header">
+      <h3>Simulator</h3>
+      <button class="r3-sim-close" onclick="closeSimulator()" title="ปิด">✕</button>
+    </div>
+    <div class="r3-sim-subtitle">
+      <div class="r3-sim-subtitle-icon">🛋️</div>
+      <div class="r3-sim-subtitle-text">เกษียณอายุ – Simulator</div>
+    </div>
+    <div class="r3-sim-body" id="r3-sim-body"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   STORAGE — shared with retirement.html
+═══════════════════════════════════════════ */
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function updateUser(fn) {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const idx = users.findIndex(x => x.id === _uid);
+  if (idx === -1) return;
+  if (!users[idx].data) users[idx].data = {};
+  fn(users[idx]);
+  localStorage.setItem('aia_users', JSON.stringify(users));
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId) || null; }
+
+let selectedClientId = null;
+
+const DEFAULT_PLAN = {
+  retireAge: 60, lifeExpectancy: 85, incomePctAfterRetire: 70,
+  annualSpend: 0, inflationRate: 3, expectedReturn: 5,
+  returnBefore: 4, returnAfter: 3,
+  preserveCapital: false, withdrawalRate: 4,
+  monthlyContribution: 0, note: '',
+};
+function getPlan(client) {
+  const s = (client && client.retirementPlan) || {};
+  const retireAge = s.retireAge != null ? s.retireAge :
+    (client && client.retirementAge ? Number(client.retirementAge) : DEFAULT_PLAN.retireAge);
+  const er = s.expectedReturn ?? DEFAULT_PLAN.expectedReturn;
+  return {
+    retireAge:            Number(retireAge),
+    lifeExpectancy:       Number(s.lifeExpectancy ?? DEFAULT_PLAN.lifeExpectancy),
+    incomePctAfterRetire: Number(s.incomePctAfterRetire ?? DEFAULT_PLAN.incomePctAfterRetire),
+    annualSpend:          Number(s.annualSpend ?? 0),
+    inflationRate:        Number(s.inflationRate ?? DEFAULT_PLAN.inflationRate),
+    expectedReturn:       Number(er),
+    returnBefore:         Number(s.returnBefore ?? er),
+    returnAfter:          Number(s.returnAfter ?? Math.max(er - 1, 1)),
+    preserveCapital:      !!s.preserveCapital,
+    withdrawalRate:       Number(s.withdrawalRate ?? DEFAULT_PLAN.withdrawalRate),
+    monthlyContribution:  Number(s.monthlyContribution ?? 0),
+  };
+}
+function ageNow(dob) {
+  if (!dob) return null;
+  return (new Date() - new Date(dob)) / (365.25*24*3600*1000);
+}
+function annualContribOf(a) {
+  const v = Number(a.contribution || 0);
+  return a.contribFreq === 'monthly' ? v * 12 : v;
+}
+function getDerivedData(client) {
+  const annualIncome = Number(client.income) ||
+    (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
+  const retireAssets = (client.assets || []).filter(a => ['pvd','rmf','ssf','thaiesg','annuity'].includes(a.type));
+  const currentSavings = retireAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const currentMonthlyContrib = retireAssets.reduce((s,a) => s + annualContribOf(a), 0) / 12;
+  return { annualIncome, currentSavings, currentMonthlyContrib };
+}
+
+/* ════════════════════════════════════════════
+   FORMATTERS
+═══════════════════════════════════════════ */
+function fmt(n) {
+  if (!isFinite(n) || n == null) return '—∞';
+  if (n === 0) return '0';
+  return Math.round(n).toLocaleString('th-TH');
+}
+function fmtFixed(n, d) {
+  if (!isFinite(n) || n == null) return '—∞';
+  return n.toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtPct(n) {
+  if (!isFinite(n) || n == null) return '—';
+  return n.toFixed(1) + ' %';
+}
+
+/* ════════════════════════════════════════════
+   CALCULATE — timeline values
+═══════════════════════════════════════════ */
+function compute(client) {
+  const plan = getPlan(client);
+  const derived = getDerivedData(client);
+  const currentAge = ageNow(client.dob);
+  if (currentAge == null) return null;
+
+  const yearsBefore = Math.max(plan.retireAge - currentAge, 0);
+  const yearsAfter  = Math.max(plan.lifeExpectancy - plan.retireAge, 1);
+
+  const annualSpendNow = plan.annualSpend > 0
+    ? plan.annualSpend
+    : derived.annualIncome * (plan.incomePctAfterRetire / 100);
+
+  const annualSpendAtRetire = annualSpendNow * Math.pow(1 + plan.inflationRate/100, yearsBefore);
+
+  /* Target corpus at retirement */
+  let targetCorpus;
+  if (plan.preserveCapital && plan.withdrawalRate > 0) {
+    targetCorpus = annualSpendAtRetire / (plan.withdrawalRate / 100);
+  } else {
+    const realRate = (1 + plan.returnAfter/100) / (1 + plan.inflationRate/100) - 1;
+    targetCorpus = Math.abs(realRate) < 0.0001
+      ? annualSpendAtRetire * yearsAfter
+      : annualSpendAtRetire * (1 - Math.pow(1 + realRate, -yearsAfter)) / realRate;
+  }
+
+  /* FV ของเงินที่มี + ออม/เดือน ตอนเกษียณ */
+  const rB = plan.returnBefore / 100;
+  const fvCurrent = derived.currentSavings * Math.pow(1 + rB, yearsBefore);
+  const monthly = plan.monthlyContribution || 0;
+  const annualContrib = monthly * 12;
+  let fvContrib = 0;
+  if (yearsBefore > 0 && annualContrib > 0) {
+    fvContrib = Math.abs(rB) < 0.0001
+      ? annualContrib * yearsBefore
+      : annualContrib * (Math.pow(1 + rB, yearsBefore) - 1) / rB;
+  }
+  const fvTotal = fvCurrent + fvContrib;
+  const gap = targetCorpus - fvTotal;
+
+  /* เก็บเงินเพิ่ม/ปี เพื่อปิด gap */
+  let reqAnnual = 0;
+  if (gap > 0 && yearsBefore > 0) {
+    if (Math.abs(rB) < 0.0001) {
+      reqAnnual = gap / yearsBefore;
+    } else {
+      const fvFactor = (Math.pow(1 + rB, yearsBefore) - 1) / rB;
+      reqAnnual = gap / fvFactor;
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     ANNUAL INCOME AFTER RETIREMENT — กระแสเงินสดรับ/ปี หลังเกษียณ
+     ดึงจาก assets ที่:
+     - type ∈ ['annuity', 'realestate']  (มี cashFlow field โดยธรรมชาติ)
+     - หรือ appliedTo === 'retire'        (user tag แบบ manual)
+     cashFlow ใน assets เก็บเป็น "บาท/เดือน" → × 12 ได้รายปี
+  ═══════════════════════════════════════════ */
+  const incomeAssets = (client.assets || []).filter(a =>
+    ['annuity','realestate'].includes(a.type) || a.appliedTo === 'retire');
+  const annualIncomeAfter = incomeAssets.reduce((s,a) => s + Number(a.cashFlow||0), 0) * 12;
+  const cashFlowGap = Math.max(annualSpendAtRetire - annualIncomeAfter, 0);
+
+  /* เงินที่เหลือตอนสิ้นสุดอายุขัย (simulate draw-down)
+     - เริ่มจาก fvTotal
+     - ทุกปี: หัก (yearSpend - yearIncome) ออก แล้วลงทุนต่อ
+     - ไม่ clamp ที่ 0 → ติดลบได้ (= กองทุนหมดก่อน lifeExpectancy) */
+  const rA = plan.returnAfter / 100;
+  let balance = fvTotal;
+  for (let y = 0; y < yearsAfter; y++) {
+    const yearSpend  = annualSpendAtRetire * Math.pow(1 + plan.inflationRate/100, y);
+    const yearIncome = annualIncomeAfter;   /* คงที่ — pension/rental ไม่ปรับ inflation */
+    const draw = yearSpend - yearIncome;
+    balance = (balance - draw) * (1 + rA);  /* ไม่ clamp — ติดลบได้ */
+  }
+  const remaining = balance;
+
+  const completionPct = targetCorpus > 0
+    ? Math.max(0, Math.min(100, (fvTotal / targetCorpus) * 100))
+    : 0;
+
+  return {
+    currentAge: Math.floor(currentAge),
+    retireAge: plan.retireAge,
+    lifeExpectancy: plan.lifeExpectancy,
+    yearsBefore: Math.round(yearsBefore),
+    yearsAfter: Math.round(yearsAfter),
+    annualSpendNow, annualSpendAtRetire,
+    targetCorpus, fvTotal, gap, reqAnnual, remaining,
+    annualIncomeAfter, cashFlowGap,
+    returnBefore: plan.returnBefore,
+    returnAfter: plan.returnAfter,
+    inflationRate: plan.inflationRate,
+    withdrawalRate: plan.preserveCapital ? plan.withdrawalRate : 0,
+    completionPct,
+  };
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* ════════════════════════════════════════════
+   PULL FROM ASSETS — modal confirmation
+═══════════════════════════════════════════ */
+function openPullModal() {
+  if (!selectedClientId) return;
+  document.getElementById('r3-pull-modal').classList.add('open');
+}
+function cancelPull() {
+  document.getElementById('r3-pull-modal').classList.remove('open');
+}
+/* ════════════════════════════════════════════
+   SIMULATOR — interactive what-if sandbox
+   - State copy, no mutation of client data
+   - All circled fields editable, recompute live
+═══════════════════════════════════════════ */
+let simState = null;
+
+function openSimulator() {
+  if (!selectedClientId) return;
+  const client = getCurrent();
+  if (!client) return;
+  const calc = compute(client);
+  if (!calc) return;
+  const plan = getPlan(client);
+  simState = {
+    currentAge:    calc.currentAge,
+    retireAge:     calc.retireAge,
+    lifeExpectancy: calc.lifeExpectancy,
+    returnBefore:  calc.returnBefore,
+    fvAtRetire:    Math.round(calc.fvTotal),
+    annualSpend:   Math.round(calc.annualSpendNow),
+    inflationRate: calc.inflationRate,
+    returnAfter:   calc.returnAfter,
+    extraIncomeAfter: Math.round(calc.annualIncomeAfter || 0),
+    /* Hidden state — copy from plan, not editable in UI but used in calc for consistency */
+    preserveCapital: !!plan.preserveCapital,
+    withdrawalRate:  Number(plan.withdrawalRate || 4),
+  };
+  document.getElementById('r3-sim-modal').classList.add('open');
+  renderSimulator();
+}
+
+function closeSimulator() {
+  document.getElementById('r3-sim-modal').classList.remove('open');
+  simState = null;
+}
+
+function updateSim(field, value) {
+  if (!simState) return;
+  simState[field] = Number(value) || 0;
+  renderSimulator();
+}
+
+function computeSim(s) {
+  const yearsBefore = Math.max(s.retireAge - s.currentAge, 0);
+  const yearsAfter = Math.max(s.lifeExpectancy - s.retireAge, 1);
+  const annualSpendAtRetire = s.annualSpend * Math.pow(1 + s.inflationRate/100, yearsBefore);
+
+  /* Target corpus — match main compute() logic
+     - preserveCapital mode: targetCorpus = annualSpend / withdrawalRate (e.g. 4% rule)
+     - else: PV annuity @ real rate (draw down until lifeExpectancy) */
+  let targetCorpus;
+  if (s.preserveCapital && s.withdrawalRate > 0) {
+    targetCorpus = annualSpendAtRetire / (s.withdrawalRate / 100);
+  } else {
+    const realRate = (1 + s.returnAfter/100) / (1 + s.inflationRate/100) - 1;
+    targetCorpus = Math.abs(realRate) < 0.0001
+      ? annualSpendAtRetire * yearsAfter
+      : annualSpendAtRetire * (1 - Math.pow(1 + realRate, -yearsAfter)) / realRate;
+  }
+
+  /* Gap at retirement (after fvAtRetire) — signed (negative = surplus) */
+  const gap = targetCorpus - s.fvAtRetire;
+
+  /* Required annual additional savings during years before retirement, grown at returnBefore */
+  const r = s.returnBefore / 100;
+  let reqAnnual = 0;
+  if (gap > 0 && yearsBefore > 0) {
+    if (Math.abs(r) < 0.0001) reqAnnual = gap / yearsBefore;
+    else {
+      const fvFactor = (Math.pow(1 + r, yearsBefore) - 1) / r;
+      reqAnnual = gap / fvFactor;
+    }
+  }
+
+  /* Cash flow gap after retirement = annualSpendAtRetire − extraIncomeAfter */
+  const cashFlowGap = Math.max(annualSpendAtRetire - s.extraIncomeAfter, 0);
+
+  /* Remaining at lifeExpectancy — simulate drawdown (same logic as main compute) */
+  const rA = s.returnAfter / 100;
+  let balance = s.fvAtRetire;
+  for (let y = 0; y < yearsAfter; y++) {
+    const yearSpend  = annualSpendAtRetire * Math.pow(1 + s.inflationRate/100, y);
+    const yearIncome = s.extraIncomeAfter;
+    const draw = yearSpend - yearIncome;
+    balance = (balance - draw) * (1 + rA);   /* allow negative */
+  }
+  const remaining = balance;
+
+  return { yearsBefore, yearsAfter, annualSpendAtRetire, targetCorpus, gap, reqAnnual, cashFlowGap, remaining };
+}
+
+function renderSimulator() {
+  if (!simState) return;
+  const s = simState;
+  const r = computeSim(s);
+  const body = document.getElementById('r3-sim-body');
+  body.innerHTML = `
+    <div class="r3-grid">
+      <!-- Column 1: current age -->
+      <div class="r3-col">
+        <div class="r3-col-lbl">อายุ</div>
+        <div class="r3-node-wrap">
+          <div class="r3-node-age r3-sim-editable">
+            <input class="r3-sim-input age" type="number" min="0" max="120" value="${s.currentAge}"
+              onchange="updateSim('currentAge', this.value)"
+              onkeydown="_simKey(event)">
+          </div>
+        </div>
+        <div class="r3-cards">
+          <div class="r3-card">
+            <div class="r3-card-title">จำนวนเงิน<br>ที่ต้องการใช้</div>
+            <input class="r3-sim-input money" type="text" inputmode="decimal"
+              value="${_simFmtVal(s.annualSpend)}"
+              onfocus="_simFocus(this)"
+              oninput="_simInput(this)"
+              onkeydown="_simKey(event)"
+              onblur="_simBlur(this, 'annualSpend')">
+            <div class="r3-card-sub">ต่อปี</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: years before -->
+      <div class="r3-col">
+        <div class="r3-col-lbl">ระยะเวลา</div>
+        <div class="r3-node-wrap"><div class="r3-node-period">${r.yearsBefore}</div></div>
+        <div class="r3-cards">
+          <div class="r3-card ${r.reqAnnual > 0.5 ? 'r3-card-red' : ''}">
+            <div class="r3-card-title">เก็บเงินเพิ่มปีละ</div>
+            <div class="r3-card-val">${r.reqAnnual > 0.5 ? _fmt(r.reqAnnual) : '—'}</div>
+          </div>
+          <div class="r3-card r3-sim-editable">
+            <div class="r3-card-title">ผลตอบแทน</div>
+            <span style="display:inline-flex;align-items:center;gap:4px;justify-content:center;">
+              <input class="r3-sim-input pct" type="number" min="0" max="20" step="0.1" value="${s.returnBefore}"
+                onchange="updateSim('returnBefore', this.value)"
+                onkeydown="_simKey(event)">
+              <span style="color:var(--r3-indigo);font-weight:800;">%</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: retire age -->
+      <div class="r3-col">
+        <div class="r3-col-lbl">อายุ</div>
+        <div class="r3-node-wrap">
+          <div class="r3-node-age r3-sim-editable">
+            <input class="r3-sim-input age" type="number" min="30" max="100" value="${s.retireAge}"
+              onchange="updateSim('retireAge', this.value)"
+              onkeydown="_simKey(event)">
+          </div>
+        </div>
+        <div class="r3-cards">
+          <div class="r3-card">
+            <div class="r3-card-title">กองทุนเกษียณ</div>
+            <div class="r3-card-val">${_fmt(r.targetCorpus)}</div>
+          </div>
+          <div class="r3-card r3-sim-editable">
+            <div class="r3-card-title">เตรียมไว้แล้ว</div>
+            <input class="r3-sim-input money" type="text" inputmode="decimal"
+              value="${_simFmtVal(s.fvAtRetire)}"
+              onfocus="_simFocus(this)"
+              oninput="_simInput(this)"
+              onkeydown="_simKey(event)"
+              onblur="_simBlur(this, 'fvAtRetire')">
+          </div>
+          <div class="r3-card ${r.gap > 0.5 ? 'r3-card-orange' : ''}">
+            <div class="r3-card-title">${r.gap > 0.5 ? 'ต้องเตรียมเพิ่ม' : '✓ เกินเป้า'}</div>
+            <div class="r3-card-val">${r.gap > 0.5 ? _fmt(r.gap) : _fmt(-r.gap)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 4: years after -->
+      <div class="r3-col">
+        <div class="r3-col-lbl">ระยะเวลา</div>
+        <div class="r3-node-wrap"><div class="r3-node-period">${r.yearsAfter}</div></div>
+        <div class="r3-cards">
+          <div class="r3-card">
+            <div class="r3-card-title">กระแสเงินสด<br>ที่ต้องมี</div>
+            <div class="r3-card-val">${_fmtFix(r.annualSpendAtRetire, 2)}</div>
+            <div class="r3-card-sub">ต่อปี</div>
+          </div>
+          <div class="r3-card r3-sim-editable">
+            <div class="r3-card-title">อัตราเงินเฟ้อ</div>
+            <span style="display:inline-flex;align-items:center;gap:4px;justify-content:center;">
+              <input class="r3-sim-input pct" type="number" min="0" max="15" step="0.1" value="${s.inflationRate}"
+                onchange="updateSim('inflationRate', this.value)"
+                onkeydown="_simKey(event)">
+              <span style="color:var(--r3-indigo);font-weight:800;">%</span>
+            </span>
+          </div>
+          <div class="r3-card r3-sim-editable">
+            <div class="r3-card-title">ผลตอบแทน</div>
+            <span style="display:inline-flex;align-items:center;gap:4px;justify-content:center;">
+              <input class="r3-sim-input pct" type="number" min="0" max="20" step="0.1" value="${s.returnAfter}"
+                onchange="updateSim('returnAfter', this.value)"
+                onkeydown="_simKey(event)">
+              <span style="color:var(--r3-indigo);font-weight:800;">%</span>
+            </span>
+          </div>
+          <div class="r3-card r3-sim-editable">
+            <div class="r3-card-title">เตรียมไว้แล้ว</div>
+            <input class="r3-sim-input money" type="text" inputmode="decimal"
+              value="${_simFmtVal(s.extraIncomeAfter)}"
+              onfocus="_simFocus(this)"
+              oninput="_simInput(this)"
+              onkeydown="_simKey(event)"
+              onblur="_simBlur(this, 'extraIncomeAfter')">
+            <div class="r3-card-sub">ต่อปี</div>
+          </div>
+          <div class="r3-card ${r.cashFlowGap > 0.5 ? 'r3-card-orange' : ''}">
+            <div class="r3-card-title">${r.cashFlowGap > 0.5 ? 'ต้องเตรียมเพิ่ม' : '✓ ครบ'}</div>
+            <div class="r3-card-val">${_fmtFix(r.cashFlowGap, 2)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 5: life expectancy -->
+      <div class="r3-col">
+        <div class="r3-col-lbl">อายุ</div>
+        <div class="r3-node-wrap">
+          <div class="r3-node-age r3-sim-editable">
+            <input class="r3-sim-input age" type="number" min="50" max="120" value="${s.lifeExpectancy}"
+              onchange="updateSim('lifeExpectancy', this.value)"
+              onkeydown="_simKey(event)">
+          </div>
+        </div>
+        <div class="r3-cards">
+          <div class="r3-fingerprint">👆</div>
+          <div class="r3-card ${r.remaining < 0 ? 'r3-card-orange' : ''}">
+            <div class="r3-card-title">สิ้นสุดกองทุน<br>เงินที่เหลือ</div>
+            <div class="r3-card-val">${
+              !isFinite(r.remaining) ? '—∞'
+              : r.remaining < 0 ? '-' + _fmt(Math.abs(r.remaining))
+              : _fmt(r.remaining)
+            }</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* small format helpers for simulator (re-use fmt logic) */
+function _fmt(n) { return (!isFinite(n) || n == null) ? '—' : Math.round(Number(n)).toLocaleString('th-TH'); }
+function _fmtFix(n, d) { return (!isFinite(n) || n == null) ? '—' : Number(n).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+
+/* Money input UX — commas ALWAYS visible, even while typing.
+   - Display: "600,000"
+   - Focus: select all (keep commas)
+   - Input: live re-format with commas, preserve cursor position
+   - Enter / Blur: save raw value → re-render */
+function _simFmtVal(n) {
+  const v = Number(n) || 0;
+  return v > 0 ? v.toLocaleString('th-TH') : '0';
+}
+function _simFocus(el) {
+  /* Select all so user can replace by typing — keep comma format */
+  el.select();
+}
+function _simInput(el) {
+  /* Live re-format: strip non-digits → parse → format with comma → preserve cursor */
+  const oldVal = String(el.value);
+  const sel = el.selectionStart || 0;
+  /* Count digits before old cursor position (for cursor restoration) */
+  const before = oldVal.substring(0, sel);
+  const digitsBefore = (before.match(/\d/g) || []).length;
+  /* Strip non-digits-or-dot, parse */
+  const raw = oldVal.replace(/[^\d.]/g, '');
+  if (raw === '' || raw === '.') { el.value = raw; return; }
+  const n = parseFloat(raw);
+  if (isNaN(n)) return;
+  const formatted = n.toLocaleString('th-TH', { maximumFractionDigits: 10 });
+  el.value = formatted;
+  /* Restore cursor: place after Nth digit in formatted string */
+  let pos = formatted.length, count = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (/\d/.test(formatted[i])) count++;
+    if (count >= digitsBefore) { pos = i + 1; break; }
+  }
+  el.setSelectionRange(pos, pos);
+}
+function _simBlur(el, field) {
+  /* parse raw value → save → re-render */
+  const raw = String(el.value).replace(/[^\d.]/g, '');
+  updateSim(field, raw);
+}
+function _simKey(e) {
+  /* Enter → blur (triggers _simBlur) */
+  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+}
+
+function confirmPull() {
+  /* รวม monthly contribution จาก assets ที่ใช้ในการเกษียณ:
+       - type ใน [pvd, rmf, ssf, thaiesg, annuity]
+       - หรือ appliedTo === 'retire'
+     → set เป็น plan.monthlyContribution (รายเดือน)
+     → ตั้ง flag c.retirementPullFromAssets = true เพื่อให้ retirement.html รู้ว่า user pull ค่าแล้ว */
+  updateUser(u => {
+    const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
+    if (!c) return;
+    const retireAssets = (c.assets||[]).filter(a =>
+      ['pvd','rmf','ssf','thaiesg','annuity'].includes(a.type) || a.appliedTo === 'retire');
+    const monthly = retireAssets.reduce((s,a) => {
+      const v = Number(a.contribution || 0);
+      return s + (a.contribFreq === 'monthly' ? v : v/12);
+    }, 0);
+    if (!c.retirementPlan) c.retirementPlan = {};
+    c.retirementPlan.monthlyContribution = Math.round(monthly);
+    c.retirementPullFromAssets = true;
+  });
+  cancelPull();
+  render();
+}
+
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+  const client = getCurrent();
+  const calc = compute(client);
+  if (!calc) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">⚠️</div>
+      <p><b>ยังไม่ได้กรอกวันเกิด</b><br>
+      <a href="clients.html">ไปกรอกข้อมูล →</a></p>
+    </div>`;
+    return;
+  }
+
+  /* card colors:
+     - gap > 0  → orange (warning, ต้องเตรียมเพิ่ม)
+     - reqAnnual > 0 → red (urgent, must save more)
+     - remaining < 0 → orange (สิ้นสุดกองทุนติดลบ)
+  */
+  const hasGap = calc.gap > 0.5;
+  const hasReq = calc.reqAnnual > 0.5;
+  const remainingNegative = !isFinite(calc.remaining) || calc.remaining < 0;
+  const remainingInfinite = !isFinite(calc.remaining);
+
+  wrap.innerHTML = `
+    <div class="r3-wrap">
+      <!-- Header -->
+      <div class="r3-head">
+        <div class="r3-head-icon">🛋️</div>
+        <div class="r3-head-title">
+          เกษียณ
+          <button class="r3-head-icon-chart" onclick="openPullModal()" title="ดึงข้อมูลหน้าสินทรัพย์มาใช้">📊</button>
+        </div>
+        <div class="r3-head-spacer"></div>
+        <div class="r3-head-mid">
+          <div class="r3-head-mid-icon">🛋️</div>
+          <div class="r3-head-mid-lbl">หลังเกษียณ</div>
+        </div>
+        <div class="r3-head-spacer"></div>
+        <button class="r3-sim-btn" onclick="openSimulator()">Simulator</button>
+      </div>
+
+      <!-- Timeline 5 columns -->
+      <div class="r3-grid">
+        <!-- Column 1: current age -->
+        <div class="r3-col">
+          <div class="r3-col-lbl">อายุ</div>
+          <div class="r3-node-wrap"><div class="r3-node-age">${calc.currentAge}</div></div>
+          <div class="r3-cards">
+            <div class="r3-card">
+              <div class="r3-card-title">จำนวนเงิน<br>ที่ต้องการใช้</div>
+              <div class="r3-card-val">${fmt(calc.annualSpendNow)}</div>
+              <div class="r3-card-sub">ต่อปี</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: years before retirement -->
+        <div class="r3-col">
+          <div class="r3-col-lbl">ระยะเวลา</div>
+          <div class="r3-node-wrap"><div class="r3-node-period">${calc.yearsBefore}</div></div>
+          <div class="r3-cards">
+            <div class="r3-card ${hasReq ? 'r3-card-red' : ''}">
+              <div class="r3-card-title">เก็บเงินเพิ่มปีละ</div>
+              <div class="r3-card-val">${hasReq ? fmt(calc.reqAnnual) : '—'}</div>
+            </div>
+            <div class="r3-card">
+              <div class="r3-card-title">ผลตอบแทน</div>
+              <div class="r3-card-val">${fmtPct(calc.returnBefore)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: retirement age -->
+        <div class="r3-col">
+          <div class="r3-col-lbl">อายุ</div>
+          <div class="r3-node-wrap"><div class="r3-node-age">${calc.retireAge}</div></div>
+          <div class="r3-cards">
+            <div class="r3-card">
+              <div class="r3-card-title">กองทุนเกษียณ</div>
+              <div class="r3-card-val">${fmt(calc.targetCorpus)}</div>
+            </div>
+            <div class="r3-card">
+              <div class="r3-card-title">เตรียมไว้แล้ว</div>
+              <div class="r3-card-val">${fmt(calc.fvTotal)}</div>
+            </div>
+            <div class="r3-card ${hasGap ? 'r3-card-orange' : ''}">
+              <div class="r3-card-title">${hasGap ? 'ต้องเตรียมเพิ่ม' : '✓ เกินเป้า'}</div>
+              <div class="r3-card-val">${hasGap ? fmt(calc.gap) : fmt(-calc.gap)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 4: years after retirement -->
+        <div class="r3-col">
+          <div class="r3-col-lbl">ระยะเวลา</div>
+          <div class="r3-node-wrap"><div class="r3-node-period">${calc.yearsAfter}</div></div>
+          <div class="r3-cards">
+            <div class="r3-card">
+              <div class="r3-card-title">กระแสเงินสดที่ต้องมี</div>
+              <div class="r3-card-val">${fmtFixed(calc.annualSpendAtRetire, 2)}</div>
+              <div class="r3-card-sub">ต่อปี</div>
+            </div>
+            <div class="r3-card">
+              <div class="r3-card-title">อัตราเงินเฟ้อ</div>
+              <div class="r3-card-val">${fmtPct(calc.inflationRate)}</div>
+            </div>
+            <div class="r3-card">
+              <div class="r3-card-title">ผลตอบแทน</div>
+              <div class="r3-card-val">${fmtPct(calc.returnAfter)}</div>
+            </div>
+            <div class="r3-card">
+              <div class="r3-card-title">เตรียมไว้แล้ว</div>
+              <div class="r3-card-val">${fmt(calc.annualIncomeAfter)}</div>
+              <div class="r3-card-sub">ต่อปี</div>
+            </div>
+            <div class="r3-card ${calc.cashFlowGap > 0.5 ? 'r3-card-orange' : ''}">
+              <div class="r3-card-title">${calc.cashFlowGap > 0.5 ? 'ต้องเตรียมเพิ่ม' : '✓ พอ'}</div>
+              <div class="r3-card-val">${fmtFixed(calc.cashFlowGap, 2)}</div>
+              <div class="r3-card-sub">ต่อปี</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 5: life expectancy -->
+        <div class="r3-col">
+          <div class="r3-col-lbl">อายุ</div>
+          <div class="r3-node-wrap"><div class="r3-node-age">${calc.lifeExpectancy}</div></div>
+          <div class="r3-cards">
+            <div class="r3-fingerprint">👆</div>
+            <div class="r3-card ${remainingNegative ? 'r3-card-orange' : ''}">
+              <div class="r3-card-title">สิ้นสุดกองทุน<br>เงินที่เหลือ</div>
+              <div class="r3-card-val">${remainingInfinite ? '—∞' : (calc.remaining < 0 ? '-' + fmt(Math.abs(calc.remaining)) : fmt(calc.remaining))}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="r3-progress-row">
+        <div class="r3-progress-bar">
+          <div class="r3-progress-fill" style="width:${calc.completionPct}%"></div>
+        </div>
+        <div class="r3-progress-pct ${calc.gap > 0 ? 'gap' : ''}">${calc.completionPct.toFixed(0)}%</div>
+      </div>
+    </div>
+  `;
+}
+
+function initSidebar() {
+  const u = getUser();
+  const p = u.profile || {};
+  const name = ((u.firstName||'') + (u.lastName ? ' '+u.lastName : '')).trim() || 'Agent';
+  const initial = (u.firstName || 'A').charAt(0).toUpperCase();
+  const sbAv = document.getElementById('sb-avatar');
+  const sbNm = document.getElementById('sb-name');
+  if (sbNm) sbNm.textContent = name;
+  if (sbAv) {
+    if (p.photo) {
+      sbAv.style.backgroundImage = `url('${p.photo}')`;
+      sbAv.style.backgroundSize = 'cover'; sbAv.style.backgroundPosition = 'center';
+      sbAv.classList.add('has-photo'); sbAv.textContent = '';
+    } else { sbAv.textContent = initial; }
+  }
+}
+
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+(function init() {
+  initSidebar();
+  initClientSelect();
+  render();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'aia_users') { initClientSelect(); render(); }
+  });
+})();
+</script>
+</body>
+</html>

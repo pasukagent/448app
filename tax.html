@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -23,15 +24,133 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override — indigo accent ════ */
+    :root {
+      --t2-indigo:       #3B43A8;
+      --t2-indigo-light: #6B72C9;
+      --t2-indigo-soft:  #EEF0F9;
+      --t2-red:          #DC3545;
+      --t2-gray-pill:    #E5E5E5;
+    }
+
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 32px 32px 40px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
     }
-    .feature-hero h2 { font-size: 1.6rem; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .8; font-size: .95rem; }
-    .content-area { max-width: 1000px; margin: 0 auto; padding: 32px 24px 60px; }
+    .feature-hero h2 { font-size: 1.4rem; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
+    .content-area { max-width: 1000px; margin: 0 auto; padding: 24px 24px 60px; }
 
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    /* ════ NEW: Income pill-table (per Planista screenshot 11.4) ════ */
+    .t2-card {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 24px 28px;
+      margin-bottom: 18px;
+    }
+    .t2-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .t2-table thead th {
+      padding: 10px 10px 16px; vertical-align: bottom;
+      font-family: var(--font);
+    }
+    .t2-table thead th.col-name { text-align: left; }
+    .t2-table thead th.col-num { text-align: center; }
+    .t2-th-label {
+      font-size: 1.05rem; font-weight: 800; color: var(--t2-indigo);
+    }
+    .t2-th-label-it {
+      font-size: .9rem; font-style: italic; color: #888;
+      font-weight: 500; display: block; margin-bottom: 2px;
+    }
+    .t2-info {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--t2-indigo); color: white;
+      font-size: .7rem; font-weight: 700; cursor: help;
+      font-style: italic; font-family: serif;
+      vertical-align: middle; margin-left: 2px;
+    }
+    .t2-add-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #BFC3D0; color: white; border: none;
+      cursor: pointer; font-size: 1rem; font-weight: 700; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .12s; vertical-align: middle; margin-left: 6px;
+    }
+    .t2-add-btn:hover { background: var(--t2-indigo); }
+
+    .t2-table tbody td {
+      padding: 8px 10px; vertical-align: middle;
+    }
+    .t2-table tbody td.col-name {
+      font-size: 1rem; font-weight: 600; color: #222;
+      padding-left: 4px;
+    }
+    .t2-cell { text-align: center; padding: 6px 8px; }
+    .t2-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: white; border: 1.5px solid #444;
+      border-radius: 100px; padding: 6px 18px;
+      min-width: 160px; height: 40px;
+    }
+    .t2-pill input {
+      width: 100%; border: none; outline: none; background: transparent;
+      font-family: var(--font); font-size: 1rem; font-weight: 700;
+      color: var(--t2-indigo); text-align: center;
+    }
+    .t2-pill input::-webkit-outer-spin-button,
+    .t2-pill input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .t2-pill.readonly {
+      background: var(--t2-gray-pill); border-color: var(--t2-gray-pill);
+    }
+    .t2-pill.readonly span,
+    .t2-pill.readonly input {
+      color: #444; font-weight: 700;
+    }
+    .t2-pill.empty {
+      border-style: dashed; opacity: .35;
+    }
+    .t2-pill.empty span { color: transparent; }
+    .t2-pill-text {
+      font-size: .9rem; font-weight: 700; color: #444;
+      white-space: nowrap;
+    }
+
+    /* Total row */
+    .t2-table tfoot td {
+      padding: 14px 10px 4px; vertical-align: middle;
+      font-size: 1.2rem; font-weight: 800;
+      text-align: center; color: var(--t2-indigo);
+    }
+    .t2-table tfoot td.col-name {
+      text-align: left; font-size: 1.15rem; padding-left: 4px;
+    }
+
+    /* Final summary */
+    .t2-final {
+      display: flex; align-items: center; justify-content: center; gap: 24px;
+      padding: 22px 0 8px; flex-wrap: wrap;
+      border-top: 2px dashed #DDD; margin-top: 14px;
+    }
+    .t2-final-lbl {
+      font-size: 1.3rem; font-weight: 800; color: #222;
+    }
+    .t2-final-val {
+      font-size: 1.6rem; font-weight: 800; color: var(--t2-red);
+      min-width: 100px; text-align: center;
+    }
+    .t2-final-unit {
+      font-size: 1.2rem; font-weight: 700; color: #222;
+    }
+
+    @media (max-width: 980px) {
+      .content-area { padding: 18px 12px 40px; }
+      .t2-card { padding: 18px 14px; overflow-x: auto; }
+      .t2-table { min-width: 720px; }
+    }
+
+    .two-col { display: block; }   /* tax.html shows income table only; deductions moved to tax2.html */
 
     .calc-card {
       background: white; border-radius: var(--radius); padding: 26px;
@@ -325,6 +444,15 @@
     }
     .no-client-banner a { color: var(--red-primary); font-weight: 700; }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -391,100 +519,116 @@
       <!-- ── LEFT: Input ── -->
       <div style="display:flex;flex-direction:column;gap:18px;">
 
-        <!-- Income — 40(1) to 40(8) -->
-        <div class="calc-card">
-          <h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span>💵 รายได้ทั้งปี ตามมาตรา 40</span>
-            <button type="button" class="info-icon-btn" onclick="showTaxInfoModal()" title="ดูตารางสรุปค่าใช้จ่ายตามประเภทเงินได้">ℹ️</button>
-          </h3>
-          <p style="font-size:.78rem;color:var(--gray-500);margin-bottom:14px;">
-            เลือกประเภทรายได้ตามประมวลรัษฎากร · กดไอคอน ℹ️ เพื่อดูตารางหักค่าใช้จ่าย
-          </p>
+        <!-- Income — 40(1) to 40(8) — Pill table per Planista screenshot -->
+        <div class="t2-card">
+          <table class="t2-table" id="t2-income-table">
+            <thead>
+              <tr>
+                <th class="col-name">
+                  <span class="t2-th-label">ประเภทเงินได้</span>
+                  <button type="button" class="t2-add-btn" onclick="showTaxInfoModal()" title="ดูตารางสรุปค่าใช้จ่ายตามประเภทเงินได้">+</button>
+                </th>
+                <th class="col-num"><span class="t2-th-label">รายรับ</span></th>
+                <th class="col-num">
+                  <span class="t2-th-label-it">หักค่าใช้จ่าย <span class="t2-info" title="หักตามอัตราเหมา (% ของรายรับ) — สูงสุดตามกฎหมาย">i</span></span>
+                  <span class="t2-th-label">เหมา</span>
+                </th>
+                <th class="col-num">
+                  <span class="t2-th-label-it">หักค่าใช้จ่าย <span class="t2-info" title="หักตามจริง (ต้องมีหลักฐาน) — ใส่ค่าจริง ระบบจะเลือกค่าที่สูงกว่าระหว่างเหมา/จริงให้อัตโนมัติ">i</span></span>
+                  <span class="t2-th-label">ตามจริง</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 40(1) เงินเดือน -->
+              <tr>
+                <td class="col-name">40 (1) เงินเดือน</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-salary" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-1">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill empty"><span>—</span></div></td>
+              </tr>
+              <!-- 40(2) ค่านายหน้า — combined cap with 40(1) -->
+              <tr>
+                <td class="col-name">40 (2) ค่านายหน้า, เงินประจำ</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-2" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span class="t2-pill-text">(1) + (2) ≤ 100,000</span></div></td>
+                <td class="t2-cell"><div class="t2-pill empty"><span>—</span></div></td>
+              </tr>
+              <!-- 40(3) ลิขสิทธิ์ -->
+              <tr>
+                <td class="col-name">40 (3) ลิขสิทธิ์</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-3" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-3">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-3-actual" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+              </tr>
+              <!-- 40(4) ดอกเบี้ย, เงินปันผล — no deduction -->
+              <tr>
+                <td class="col-name">40 (4) ดอกเบี้ย, เงินปันผล</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-4" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill empty"><span>—</span></div></td>
+                <td class="t2-cell"><div class="t2-pill empty"><span>—</span></div></td>
+              </tr>
+              <!-- 40(5) ค่าเช่า -->
+              <tr>
+                <td class="col-name">40 (5) รายได้ค่าเช่าทรัพย์สิน</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-5" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-5">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-5-actual" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+              </tr>
+              <!-- 40(6) วิชาชีพอิสระ -->
+              <tr>
+                <td class="col-name">
+                  40 (6) วิชาชีพอิสระ
+                  <label style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:500;color:var(--t2-indigo);margin-left:8px;">
+                    <input id="i-40-6-medical" type="checkbox" onchange="calculate()" style="width:auto;margin:0;">
+                    <span>แพทย์ 60%</span>
+                  </label>
+                </td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-6" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-6">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-6-actual" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+              </tr>
+              <!-- 40(7) รับเหมาก่อสร้าง -->
+              <tr>
+                <td class="col-name">40 (7) รับเหมาก่อสร้าง</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-7" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-7">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-7-actual" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+              </tr>
+              <!-- 40(8) อื่นๆ -->
+              <tr>
+                <td class="col-name">40 (8) อื่นๆ</td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-8" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+                <td class="t2-cell"><div class="t2-pill readonly"><span id="t2-exp-8">0</span></div></td>
+                <td class="t2-cell"><div class="t2-pill"><input id="i-40-8-actual" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()"></div></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="col-name">รวม</td>
+                <td><span id="t2-sum-income">0</span></td>
+                <td><span id="t2-sum-exp-rate">0</span></td>
+                <td><span id="t2-sum-exp-actual">0</span></td>
+              </tr>
+            </tfoot>
+          </table>
 
-          <div class="section-label">📋 40(1) — เงินเดือน/ค่าจ้าง</div>
-          <div class="input-row">
-            <label>เงินเดือนรวม (12 เดือน) <span>หัก 50% ไม่เกิน 100,000</span></label>
-            <input id="i-salary" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-          <div class="input-row">
-            <label>โบนัส / OT / เบี้ยขยัน <span>หักรวมกับ 40(1)</span></label>
-            <input id="i-bonus" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
+          <!-- Final summary -->
+          <div class="t2-final">
+            <div class="t2-final-lbl">รวมเงินได้หลังหักค่าใช้จ่าย</div>
+            <div class="t2-final-val" id="t2-final-net">0</div>
+            <div class="t2-final-unit">บาท</div>
           </div>
 
-          <div class="section-label">💼 40(2) — รายได้จากตำแหน่งหน้าที่</div>
-          <div class="input-row">
-            <label>ค่าตอบแทน, ค่านายหน้า <span>หัก 50% รวม 40(1) ไม่เกิน 100,000</span></label>
-            <input id="i-40-2" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">©️ 40(3) — ค่าลิขสิทธิ์/Goodwill</div>
-          <div class="input-row">
-            <label>รายได้ลิขสิทธิ์ <span>หัก 50% ไม่เกิน 100,000</span></label>
-            <input id="i-40-3" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">💰 40(4) — ดอกเบี้ย/ปันผล</div>
-          <div class="input-row">
-            <label>ดอกเบี้ย, เงินปันผล <span>ไม่หักค่าใช้จ่าย</span></label>
-            <input id="i-40-4" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">🏠 40(5) — ค่าเช่าทรัพย์สิน</div>
-          <div class="input-row">
-            <label>ค่าเช่าบ้าน/ที่ดิน <span>หักได้ 30% (อาคาร 30%)</span></label>
-            <input id="i-40-5" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">⚕️ 40(6) — วิชาชีพอิสระ</div>
-          <div class="input-row">
-            <label>แพทย์, ทนาย, สถาปนิก, วิศวกร <span>หัก 30% (แพทย์ 60%)</span></label>
-            <input id="i-40-6" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-          <div class="input-row">
-            <label style="display:flex;align-items:center;gap:6px;font-weight:400;">
-              <input id="i-40-6-medical" type="checkbox" onchange="calculate()" style="width:auto;margin:0;">
-              <span style="font-size:.85rem;">เป็นแพทย์ (หัก 60% แทน 30%)</span>
-            </label>
-          </div>
-
-          <div class="section-label">🛠️ 40(7) — รับเหมาก่อสร้าง</div>
-          <div class="input-row">
-            <label>ผู้รับเหมา <span>หัก 60% หรือตามจริง</span></label>
-            <input id="i-40-7" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">🏪 40(8) — ค้าขาย/ธุรกิจอื่น</div>
-          <div class="input-row">
-            <label>ขายของ, ค้าขาย, ธุรกิจ <span>หัก 60% หรือตามจริง</span></label>
-            <input id="i-40-8" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <!-- Expense method toggle -->
-          <div class="section-label">⚙️ วิธีหักค่าใช้จ่าย (40(5)-(8))</div>
-          <div style="display:flex;gap:8px;margin-bottom:14px;">
-            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;">
-              <input type="radio" name="exp-method" value="rate" checked onchange="calculate()" style="width:auto;margin:0;">
-              <span>📊 หักเหมา (ตามอัตรา %)</span>
-            </label>
-            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;">
-              <input type="radio" name="exp-method" value="actual" onchange="calculate()" style="width:auto;margin:0;">
-              <span>📝 หักตามจริง</span>
-            </label>
-          </div>
-          <div class="input-row" id="actual-expense-row" style="display:none;">
-            <label>ค่าใช้จ่ายตามจริง (40(5)-(8) รวม) <span>ต้องมีหลักฐานครบ</span></label>
-            <input id="i-actual-expense" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
-
-          <div class="section-label">➕ รายได้อื่นๆ ที่ไม่เข้าหมวด</div>
-          <div class="input-row">
-            <label>เบ็ดเตล็ด <span>ไม่หักค่าใช้จ่าย</span></label>
-            <input id="i-other" class="money-fmt" inputmode="decimal" value="0" min="0" placeholder="0" oninput="calculate()">
-          </div>
+          <!-- Legacy inputs (hidden) — keep for calculate() compat -->
+          <input type="hidden" id="i-bonus" value="0">
+          <input type="hidden" id="i-other" value="0">
+          <input type="hidden" id="i-actual-expense" value="0">
+          <input type="hidden" name="exp-method" value="rate">
         </div>
 
-        <!-- Deductions -->
-        <div class="calc-card">
+        <!-- Deductions — HIDDEN (moved to tax2.html) — inputs kept for backward-compat (calculate() + plan_summary read them) -->
+        <div class="calc-card" style="display:none;">
           <h3>✂️ ค่าลดหย่อน</h3>
 
           <div class="section-label">ส่วนตัวและครอบครัว</div>
@@ -545,11 +689,11 @@
 
         </div>
 
-        <button class="btn btn-primary calc-btn" onclick="calculate()">🧮 คำนวณภาษี</button>
+        <button class="btn btn-primary calc-btn" onclick="calculate()" style="display:none;">🧮 คำนวณภาษี</button>
       </div>
 
-      <!-- ── RIGHT: Result ── -->
-      <div>
+      <!-- ── RIGHT: Result — HIDDEN (moved to tax2.html or beyond) ── -->
+      <div style="display:none;">
         <div class="result-card">
           <div class="result-header">
             <h3>ภาษีที่ต้องชำระ</h3>
@@ -824,12 +968,13 @@
     const incOther = val('i-other');                    // outside
 
     const isMedical = document.getElementById('i-40-6-medical') && document.getElementById('i-40-6-medical').checked;
-    const expMethod = document.querySelector('input[name="exp-method"]:checked');
-    const useActual = expMethod && expMethod.value === 'actual';
 
-    // Toggle actual expense input visibility
-    const actualRow = document.getElementById('actual-expense-row');
-    if (actualRow) actualRow.style.display = useActual ? '' : 'none';
+    // ─── Per-row actual expense overrides (NEW UI: ตามจริง column) ───
+    const act3 = val('i-40-3-actual');
+    const act5 = val('i-40-5-actual');
+    const act6 = val('i-40-6-actual');
+    const act7 = val('i-40-7-actual');
+    const act8 = val('i-40-8-actual');
 
     // ─── Expense by section ───
     // 40(1)+(2)+(3): combined cap 50% not exceeding 100,000
@@ -839,27 +984,42 @@
     // 40(4): no expense deduction
     const exp4 = 0;
 
-    // 40(5)-(8): rate-based or actual
-    let exp5, exp6, exp7, exp8;
-    if (useActual) {
-      const totalActual = val('i-actual-expense');
-      const baseTotal = inc5 + inc6 + inc7 + inc8;
-      // Allocate proportionally
-      if (baseTotal > 0) {
-        exp5 = totalActual * inc5 / baseTotal;
-        exp6 = totalActual * inc6 / baseTotal;
-        exp7 = totalActual * inc7 / baseTotal;
-        exp8 = totalActual * inc8 / baseTotal;
-      } else { exp5 = exp6 = exp7 = exp8 = 0; }
-    } else {
-      exp5 = inc5 * 0.30;             // ค่าเช่า 30%
-      exp6 = inc6 * (isMedical ? 0.60 : 0.30); // วิชาชีพอิสระ 30% (แพทย์ 60%)
-      exp7 = inc7 * 0.60;             // รับเหมา 60%
-      exp8 = inc8 * 0.60;             // ขายของ 60%
-    }
+    // 40(5)-(8): rate-based, with per-row "ตามจริง" override if higher
+    const exp5Rate = inc5 * 0.30;                             // ค่าเช่า 30%
+    const exp6Rate = inc6 * (isMedical ? 0.60 : 0.30);        // วิชาชีพอิสระ 30% (แพทย์ 60%)
+    const exp7Rate = inc7 * 0.60;                             // รับเหมา 60%
+    const exp8Rate = inc8 * 0.60;                             // ขายของ 60%
+    /* ใช้ "ตามจริง" ถ้าใส่ค่า > 0, ไม่งั้น default เป็น "เหมา" — ผู้ใช้เลือกที่สูงกว่าได้ */
+    const exp5 = act5 > 0 ? act5 : exp5Rate;
+    const exp6 = act6 > 0 ? act6 : exp6Rate;
+    const exp7 = act7 > 0 ? act7 : exp7Rate;
+    const exp8 = act8 > 0 ? act8 : exp8Rate;
+    /* useActual stays for backward-compat metadata only */
+    const useActual = (act3 + act5 + act6 + act7 + act8) > 0;
+
+    // Update readonly "เหมา" cells in the new pill table
+    const setIfExists = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = Math.round(v).toLocaleString('th-TH'); };
+    setIfExists('t2-exp-1', expSalaryGroup);
+    /* 40(2)/40(3) share the same cap pool — just display the same group cap rounded for ref */
+    /* 40(3) has its own "เหมา" display equal to its 50% capped portion (UI hint, true allocation handled by group) */
+    const exp3Rate = Math.min(inc3 * 0.5, Math.max(100000 - Math.min((inc1+inc2)*0.5, 100000), 0));
+    setIfExists('t2-exp-3', exp3Rate);
+    setIfExists('t2-exp-5', exp5Rate);
+    setIfExists('t2-exp-6', exp6Rate);
+    setIfExists('t2-exp-7', exp7Rate);
+    setIfExists('t2-exp-8', exp8Rate);
+
     const expense = expSalaryGroup + exp4 + exp5 + exp6 + exp7 + exp8;
 
     const income = incSalaryGroup + inc4 + inc5 + inc6 + inc7 + inc8 + incOther;
+
+    /* Update new pill-table totals + final summary */
+    const sumExpRate = expSalaryGroup + exp4 + exp5Rate + exp6Rate + exp7Rate + exp8Rate;
+    const sumExpActual = act3 + act5 + act6 + act7 + act8;
+    setIfExists('t2-sum-income', income);
+    setIfExists('t2-sum-exp-rate', sumExpRate);
+    setIfExists('t2-sum-exp-actual', sumExpActual);
+    setIfExists('t2-final-net', Math.max(income - expense, 0));
 
     // Cap each deduction at legal max
     // เบี้ยประกันชีวิต: ใช้ healthIns ที่ capped แล้วเพื่อให้สรุป "100K ร่วมกัน" ถูกต้อง
@@ -1243,6 +1403,12 @@
       isMedical: !!(document.getElementById('i-40-6-medical') && document.getElementById('i-40-6-medical').checked),
       expMethod: expMethodEl ? expMethodEl.value : 'rate',
       actualExp: v('i-actual-expense'),
+      /* NEW per-row actual (Planista 11.4) */
+      act403: v('i-40-3-actual'),
+      act405: v('i-40-5-actual'),
+      act406: v('i-40-6-actual'),
+      act407: v('i-40-7-actual'),
+      act408: v('i-40-8-actual'),
       // Deductions
       personal:  v('d-personal'),
       spouse:    v('d-spouse'),
@@ -1566,6 +1732,13 @@
     if (ti.expMethod === 'actual' && actEl) actEl.checked = true;
     else if (rateEl) rateEl.checked = true;
     document.getElementById('i-actual-expense').value = ti.actualExp != null ? ti.actualExp : 0;
+    /* NEW per-row actual (Planista 11.4) */
+    const setActIf = (id, v) => { const el = document.getElementById(id); if (el) el.value = v != null ? v : 0; };
+    setActIf('i-40-3-actual', ti.act403);
+    setActIf('i-40-5-actual', ti.act405);
+    setActIf('i-40-6-actual', ti.act406);
+    setActIf('i-40-7-actual', ti.act407);
+    setActIf('i-40-8-actual', ti.act408);
 
     // 2) Personal/family deductions
     document.getElementById('d-personal').value = ti.personal != null ? ti.personal : 60000;
@@ -1648,6 +1821,7 @@
 
   function resetTaxInputs() {
     ['i-salary','i-bonus','i-other','i-40-2','i-40-3','i-40-4','i-40-5','i-40-6','i-40-7','i-40-8','i-actual-expense',
+     'i-40-3-actual','i-40-5-actual','i-40-6-actual','i-40-7-actual','i-40-8-actual',
      'd-spouse','d-child','d-life-ins','d-health-ins','d-parent-ins','d-annuity','d-pvd','d-rmf','d-ssf','d-donate']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = 0; });
     // Clear try-deduct comparison "+ เพิ่มเติม" inputs (placeholder = 0)

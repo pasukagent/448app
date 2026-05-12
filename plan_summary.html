@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -186,7 +188,413 @@
       background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
     }
     .no-client .nc-icon { font-size: 3rem; margin-bottom: 14px; }
+
+    /* ════ NEW simplified summary layout — indigo theme per screenshot 14 ════ */
+    :root {
+      --ps2-indigo:       #3B43A8;
+      --ps2-indigo-soft:  #EEF0F9;
+      --ps2-red:          #DC3545;
+      --ps2-yellow:       #F5C242;
+    }
+    .ps2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 26px 32px 28px;
+      margin-bottom: 18px;
+    }
+    .ps2-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 24px;
+    }
+    .ps2-head-icon {
+      width: 70px; height: 70px; border-radius: 50%;
+      border: 3px solid var(--ps2-indigo); color: var(--ps2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem; flex-shrink: 0; background: white;
+    }
+    .ps2-head-title {
+      font-size: 1.7rem; font-weight: 800; color: var(--ps2-indigo);
+      letter-spacing: -0.01em;
+    }
+    .ps2-head-spacer { flex: 1; }
+    .ps2-create-btn {
+      padding: 10px 22px; border-radius: 100px;
+      background: white; color: var(--ps2-indigo);
+      border: 2px solid var(--ps2-indigo);
+      font-family: var(--font); font-weight: 800; font-size: .95rem;
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .ps2-create-btn:hover { background: var(--ps2-indigo); color: white; }
+
+    .ps2-body {
+      display: grid; grid-template-columns: 440px 1fr;
+      gap: 30px; align-items: center;
+    }
+    @media (max-width: 980px) {
+      .ps2-body { grid-template-columns: 1fr; }
+    }
+
+    .ps2-prog-list { display: flex; flex-direction: column; gap: 4px; }
+    .ps2-prog-row {
+      display: grid; grid-template-columns: 130px 1fr 70px 140px;
+      gap: 14px; align-items: center;
+      padding: 12px 0;
+    }
+    .ps2-prog-name {
+      font-size: 1.05rem; font-weight: 700; color: var(--ps2-indigo);
+    }
+    .ps2-prog-bar {
+      height: 22px; border: 1.5px solid #888;
+      border-radius: 100px; background: white; overflow: hidden;
+      position: relative;
+    }
+    .ps2-prog-fill {
+      height: 100%; background: var(--ps2-red);
+      border-radius: 100px;
+      transition: width .4s;
+    }
+    .ps2-prog-pct {
+      font-size: 1rem; font-weight: 800; color: var(--ps2-red);
+      text-align: right;
+    }
+    .ps2-prog-amt {
+      font-size: 1rem; font-weight: 800; color: var(--ps2-indigo);
+      text-align: right;
+    }
+    .ps2-prog-amt.empty { color: var(--ps2-red); }
+
+    .ps2-pyramid-btn {
+      margin-top: 18px; padding: 12px 22px;
+      background: linear-gradient(135deg, #FFD180, var(--ps2-yellow));
+      color: white; border: none; border-radius: 100px;
+      font-family: var(--font); font-weight: 800; font-size: .95rem;
+      cursor: pointer; transition: all .2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .ps2-pyramid-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,194,66,.4); }
+
+    /* ════ Create Plan File — button in hero ════ */
+    .createfile-btn {
+      background: rgba(255,255,255,.95); color: var(--red-primary);
+      border: none; border-radius: 10px; padding: 10px 16px;
+      font-family: var(--font); font-weight: 800; font-size: .92rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .15s;
+    }
+    .createfile-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+
+    /* ════ Plan File Modal ════ */
+    .pf-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      z-index: 120; align-items: center; justify-content: center; padding: 20px;
+    }
+    .pf-overlay.open { display: flex; }
+    .pf-modal {
+      background: white; border-radius: 18px; max-width: 880px; width: 100%;
+      max-height: 92vh; overflow: hidden;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .pf-header {
+      padding: 18px 24px; border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .pf-header h3 { font-size: 1.15rem; font-weight: 800; color: var(--gray-800); margin: 0; }
+    .pf-header .pf-sub { font-size: .82rem; color: var(--gray-500); margin-top: 2px; }
+    .pf-close {
+      background: var(--gray-100); border: none; width: 34px; height: 34px;
+      border-radius: 50%; font-size: 1rem; cursor: pointer; flex-shrink: 0;
+    }
+    .pf-close:hover { background: var(--gray-200); }
+
+    .pf-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+    .pf-footer {
+      padding: 14px 24px; border-top: 1px solid var(--gray-100);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--gray-50);
+    }
+    .pf-btn {
+      padding: 10px 18px; border: none; border-radius: 10px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; transition: all .15s;
+    }
+    .pf-btn-primary { background: var(--red-primary); color: white; }
+    .pf-btn-primary:hover { background: var(--red-dark); }
+    .pf-btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+    .pf-btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+    .pf-btn-secondary:hover { background: var(--gray-200); }
+    .pf-btn-success { background: #28a745; color: white; }
+    .pf-btn-success:hover { background: #1f8838; }
+
+    /* selection list */
+    .pf-toolbar {
+      display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .pf-toolbar button {
+      background: var(--gray-100); border: none; padding: 6px 12px; border-radius: 8px;
+      font-family: var(--font); font-weight: 700; font-size: .82rem; cursor: pointer;
+      color: var(--gray-700);
+    }
+    .pf-toolbar button:hover { background: var(--gray-200); }
+    .pf-section-list {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    @media (max-width: 680px) { .pf-section-list { grid-template-columns: 1fr; } }
+    .pf-section-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border: 1.5px solid var(--gray-100);
+      border-radius: 10px; cursor: pointer; transition: all .15s;
+      background: white; user-select: none;
+    }
+    .pf-section-item:hover { border-color: var(--red-primary); background: #FFF5F5; }
+    .pf-section-item input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: var(--red-primary); cursor: pointer; flex-shrink: 0;
+    }
+    .pf-section-item .pf-si-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .pf-section-item .pf-si-name { font-weight: 700; font-size: .9rem; color: var(--gray-800); }
+    .pf-section-item.pf-checked { border-color: var(--red-primary); background: #FFF5F5; }
+
+    /* preview content */
+    .pf-preview-wrap {
+      background: var(--gray-50); padding: 20px; border-radius: 12px;
+      max-height: 60vh; overflow-y: auto;
+    }
+    .pf-document {
+      background: white; padding: 36px 40px; max-width: 780px; margin: 0 auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08); border-radius: 4px;
+      font-family: var(--font); color: #222; line-height: 1.55;
+    }
+    .pf-doc-head {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 3px solid var(--red-primary); padding-bottom: 14px; margin-bottom: 22px;
+    }
+    .pf-doc-head .pf-doc-brand { font-size: 1.4rem; font-weight: 800; color: var(--red-primary); }
+    .pf-doc-head .pf-doc-tag { font-size: .85rem; color: var(--gray-500); margin-top: 2px; }
+    .pf-doc-head .pf-doc-meta { text-align: right; font-size: .82rem; color: var(--gray-600); }
+    .pf-doc-title {
+      font-size: 1.1rem; font-weight: 800; color: var(--gray-800);
+      margin-bottom: 14px;
+    }
+    .pf-doc-title .pf-doc-client {
+      display: block; font-size: 1.3rem; font-weight: 800; color: var(--red-primary); margin-top: 4px;
+    }
+    .pf-doc-section { margin-bottom: 26px; page-break-inside: avoid; }
+    .pf-doc-section h4 {
+      font-size: 1.02rem; font-weight: 800; color: var(--red-primary);
+      border-left: 4px solid var(--red-primary); padding-left: 10px;
+      margin-bottom: 12px;
+    }
+    .pf-doc-table {
+      width: 100%; border-collapse: collapse; font-size: .88rem;
+    }
+    .pf-doc-table th, .pf-doc-table td {
+      padding: 7px 10px; border-bottom: 1px solid #E5E7EB; text-align: left;
+    }
+    .pf-doc-table th {
+      background: #F9FAFB; font-weight: 700; color: var(--gray-700); font-size: .82rem;
+    }
+    .pf-doc-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pf-doc-table td.pos { color: #28a745; font-weight: 700; }
+    .pf-doc-table td.neg { color: #DC3545; font-weight: 700; }
+    .pf-doc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 22px;
+      font-size: .9rem;
+    }
+    .pf-doc-grid .pf-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #E5E7EB; padding: 5px 0; }
+    .pf-doc-grid .pf-row span:first-child { color: var(--gray-600); }
+    .pf-doc-grid .pf-row span:last-child { font-weight: 700; color: var(--gray-800); }
+    .pf-doc-progress {
+      display: grid; grid-template-columns: 130px 1fr 60px; gap: 12px;
+      align-items: center; padding: 8px 0;
+    }
+    .pf-doc-progress + .pf-doc-progress { border-top: 1px dashed #E5E7EB; }
+    .pf-doc-progress .pdp-lbl { font-weight: 700; font-size: .9rem; color: var(--gray-800); }
+    .pf-doc-progress .pdp-bar { height: 12px; background: #E5E7EB; border-radius: 6px; overflow: hidden; }
+    .pf-doc-progress .pdp-fill { height: 100%; border-radius: 6px; }
+    .pf-doc-progress .pdp-fill.s-good { background: #28a745; }
+    .pf-doc-progress .pdp-fill.s-med  { background: #F39C12; }
+    .pf-doc-progress .pdp-fill.s-bad  { background: #DC3545; }
+    .pf-doc-progress .pdp-pct { text-align: right; font-weight: 800; font-size: .9rem; }
+    .pf-doc-progress .pdp-pct.s-good { color: #28a745; }
+    .pf-doc-progress .pdp-pct.s-med  { color: #F39C12; }
+    .pf-doc-progress .pdp-pct.s-bad  { color: #DC3545; }
+    .pf-doc-foot {
+      margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--gray-200);
+      font-size: .76rem; color: var(--gray-500); text-align: center;
+    }
+    .pf-doc-radar { display: block; margin: 0 auto; max-width: 360px; }
+    .pf-empty { padding: 30px; text-align: center; color: var(--gray-500); font-style: italic; font-size: .88rem; }
+
+    /* ════ COVER PAGE ════ */
+    .pf-cover {
+      position: relative; max-width: 780px; margin: 0 auto 18px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF5F5 60%, #FFEBEB 100%);
+      min-height: 1050px; padding: 0; overflow: hidden;
+      border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      display: flex; flex-direction: column;
+      page-break-after: always; break-after: page;
+      font-family: var(--font); color: #222;
+    }
+    .pf-cover-stripe {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 16px 40px;
+      display: flex; align-items: baseline; gap: 14px;
+    }
+    .pf-cover-brand {
+      font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em;
+    }
+    .pf-cover-brand-sub {
+      font-size: .9rem; opacity: .85; font-weight: 600; letter-spacing: 0.04em;
+    }
+    .pf-cover-body {
+      flex: 1; padding: 60px 50px 30px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      gap: 14px;
+    }
+    .pf-cover-icon {
+      font-size: 4.5rem; line-height: 1; margin-bottom: 6px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.08));
+    }
+    .pf-cover-eyebrow {
+      font-size: .82rem; font-weight: 700; letter-spacing: 0.28em;
+      color: var(--red-primary); margin-bottom: -4px;
+    }
+    .pf-cover-title {
+      font-size: 2.4rem; font-weight: 800; color: #1a1a1a;
+      letter-spacing: -0.01em; margin-bottom: 4px;
+    }
+    .pf-cover-divider {
+      width: 64px; height: 4px; background: var(--red-primary);
+      border-radius: 3px; margin: 18px 0;
+    }
+    .pf-cover-prep-for {
+      font-size: .85rem; color: var(--gray-500); font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .pf-cover-client {
+      font-size: 2.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2; padding: 0 20px;
+    }
+    .pf-cover-client-sub {
+      font-size: .95rem; color: var(--gray-600); font-weight: 600;
+      margin-top: -4px;
+    }
+    .pf-cover-date {
+      font-size: .92rem; color: var(--gray-700); line-height: 1.7;
+      padding: 8px 16px; background: white; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    }
+    .pf-cover-date b { color: var(--red-primary); font-size: .8rem; letter-spacing: 0.08em; }
+    .pf-cover-foot {
+      background: rgba(255,255,255,.7); border-top: 3px solid var(--red-primary);
+      padding: 18px 40px; backdrop-filter: blur(4px);
+    }
+    .pf-cover-foot-row {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .pf-cover-agent-photo {
+      width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+      background-size: cover; background-position: center;
+      border: 3px solid var(--red-primary); background-color: var(--gray-100);
+    }
+    .pf-cover-agent-initial {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; font-weight: 800; color: var(--red-primary);
+      background-color: #FFEBEB;
+    }
+    .pf-cover-agent-text { flex: 1; line-height: 1.5; }
+    .pf-cover-by {
+      font-size: .72rem; color: var(--gray-500); font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .pf-cover-agent-name { font-size: 1.1rem; font-weight: 800; color: #1a1a1a; }
+    .pf-cover-agent-role { font-size: .82rem; color: var(--gray-600); }
+    .pf-cover-agent-contact { font-size: .82rem; color: var(--gray-700); margin-top: 2px; }
+
+    /* ════ AGENT PROFILE PAGE ════ */
+    .pf-agent-page {
+      max-width: 780px; margin: 0 auto;
+      page-break-before: always; break-before: page;
+      padding: 30px 0;
+    }
+    .pf-agent-card {
+      background: white; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+    .pf-agent-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 30px 40px;
+      display: flex; align-items: center; gap: 22px;
+    }
+    .pf-agent-photo {
+      width: 110px; height: 110px; border-radius: 50%; flex-shrink: 0;
+      background-size: cover; background-position: center;
+      border: 4px solid rgba(255,255,255,.95);
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      background-color: rgba(255,255,255,.15);
+    }
+    .pf-agent-initial {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem; font-weight: 800; color: var(--red-primary);
+      background-color: white;
+    }
+    .pf-agent-hero-text { flex: 1; line-height: 1.4; }
+    .pf-agent-eyebrow {
+      font-size: .78rem; font-weight: 700; opacity: .85;
+      letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .pf-agent-name { font-size: 1.6rem; font-weight: 800; }
+    .pf-agent-nick { font-size: 1rem; font-weight: 500; opacity: .8; margin-left: 6px; }
+    .pf-agent-role { font-size: .98rem; opacity: .92; margin-top: 2px; }
+    .pf-agent-unit { font-size: .82rem; opacity: .8; margin-top: 2px; }
+
+    .pf-agent-section { padding: 22px 40px; border-bottom: 1px solid #F1F1F1; }
+    .pf-agent-section:last-of-type { border-bottom: none; }
+    .pf-agent-sec-title {
+      font-size: .95rem; font-weight: 800; color: var(--red-primary);
+      margin-bottom: 14px; padding-left: 10px;
+      border-left: 4px solid var(--red-primary);
+    }
+    .pf-agent-contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px;
+    }
+    .pf-agent-contact-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; background: #F9FAFB; border-radius: 8px;
+    }
+    .pf-agent-contact-ico { font-size: 1.2rem; flex-shrink: 0; }
+    .pf-agent-contact-lbl { font-size: .72rem; color: var(--gray-500); font-weight: 700; letter-spacing: 0.04em; }
+    .pf-agent-contact-val { font-size: .92rem; color: #1a1a1a; font-weight: 700; word-break: break-word; }
+
+    .pf-agent-message {
+      padding: 24px 40px 28px; background: #FFF8F8;
+      position: relative;
+    }
+    .pf-agent-quote-mark {
+      position: absolute; top: 8px; left: 30px; font-size: 4rem; line-height: 1;
+      color: var(--red-primary); opacity: .25; font-family: serif;
+    }
+    .pf-agent-message p {
+      font-size: .92rem; line-height: 1.7; color: var(--gray-700);
+      position: relative; z-index: 1; margin: 0 0 6px;
+    }
+    .pf-agent-message p b { color: var(--red-primary); }
+    .pf-agent-sign {
+      margin-top: 12px; font-style: italic; font-weight: 700;
+      color: var(--gray-800); text-align: right;
+    }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -260,6 +668,21 @@
       <div id="content-wrap"></div>
     </div>
   </main>
+</div>
+
+<!-- Plan File Modal -->
+<div class="pf-overlay" id="pf-modal" onclick="if(event.target===this)closePlanFileModal()">
+  <div class="pf-modal">
+    <div class="pf-header">
+      <div>
+        <h3 id="pf-title">📄 สร้างไฟล์สรุปแผน</h3>
+        <div class="pf-sub" id="pf-subtitle">เลือกหัวข้อที่ต้องการรวมในไฟล์</div>
+      </div>
+      <button class="pf-close" onclick="closePlanFileModal()" title="ปิด">✕</button>
+    </div>
+    <div class="pf-body" id="pf-body"></div>
+    <div class="pf-footer" id="pf-footer"></div>
+  </div>
 </div>
 
 <!-- Pyramid Modal -->
@@ -353,7 +776,7 @@ function _psRetireCalc(client) {
   const plan = _psRetirePlan(client);
   const annualIncome = Number(client.income) ||
     (client.cashflow && Number(client.cashflow.income) ? Number(client.cashflow.income) * 12 : 0);
-  const retireAssets = (client.assets || []).filter(a => ['pvd','rmf','ssf','thaiesg'].includes(a.type));
+  const retireAssets = (client.assets || []).filter(a => ['pvd','rmf','ssf','thaiesg','annuity'].includes(a.type) || a.appliedTo === 'retire');
   const currentSavings = retireAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
   const currentMonthlyContrib = retireAssets.reduce((s,a) => s + _psAnnualContrib(a), 0) / 12;
   const totalMonthly = (plan.monthlyContribution || 0) + currentMonthlyContrib;
@@ -394,7 +817,21 @@ const _PS_EDU_COST = {
   master:[120000,300000,1500000], phd:[200000,500000,2500000],
 };
 const _PS_LVL_IDX = { economy:0, medium:1, premium:2 };
-function _psChildEdu(child) {
+/* Sum assets tagged "นำไปใช้กับ การศึกษาบุตร" → แบ่งเท่าๆ ต่อบุตร (sync กับ education.html) */
+function _psEduAssetPerChild(client) {
+  if (!client) return { lump: 0, monthly: 0 };
+  const children = client.children || [];
+  if (children.length === 0) return { lump: 0, monthly: 0 };
+  const eduAssets = (client.assets || []).filter(a => a.appliedTo === 'education');
+  const lump = eduAssets.reduce((s,a) => s + Number(a.currentValue||0), 0);
+  const monthly = eduAssets.reduce((s,a) => {
+    const v = Number(a.contribution||0);
+    return s + (a.contribFreq === 'monthly' ? v : v/12);
+  }, 0);
+  return { lump: lump / children.length, monthly: monthly / children.length };
+}
+
+function _psChildEdu(child, client) {
   const age = _psAgeNow(child.dob || child.birthdate);
   const level = child.level || 'medium';
   const lvIdx = _PS_LVL_IDX[level] != null ? _PS_LVL_IDX[level] : 1;
@@ -420,8 +857,9 @@ function _psChildEdu(child) {
     }
   });
   /* FV ของ savings (4%/yr — ตรงกับ education.html SAVINGS_RETURN) */
-  const eduSavings = Number(child.eduSavings || 0);
-  const eduMonthly = Number(child.eduMonthly || 0);
+  const _split = client ? _psEduAssetPerChild(client) : { lump:0, monthly:0 };
+  const eduSavings = Number(child.eduSavings || 0) + _split.lump;
+  const eduMonthly = Number(child.eduMonthly || 0) + _split.monthly;
   const yearsToFinish = Math.max(...['phd','master','bachelor','high','mid','primary','kinder']
     .map(k => { const s = _PS_EDU_STAGES.find(x=>x.key===k); return s.startAge + s.years - age; }), 0);
   const SR = 0.04, r_m = SR/12, n_m = yearsToFinish * 12;
@@ -506,7 +944,7 @@ function computeSummary(client) {
   const children = client.children || [];
   let eduTarget = 0, eduHave = 0;
   children.forEach(ch => {
-    const r = _psChildEdu(ch);
+    const r = _psChildEdu(ch, client);
     eduTarget += r.totalFuture;
     eduHave   += r.fvSavings;
   });
@@ -534,7 +972,7 @@ function computeSummary(client) {
     const yearsToRetire = Math.round(ytrRaw * 10) / 10;
     const incomeI = annualIncome * yearsToRetire;
     let educationE = 0;
-    children.forEach(ch => { educationE += _psChildEdu(ch).totalFuture; });
+    children.forEach(ch => { educationE += _psChildEdu(ch, client).totalFuture; });
     lifeNeed = debt + incomeI + educationE;
   } else {
     /* Simple: หนี้สิน + ความรับผิดชอบ */
@@ -657,44 +1095,59 @@ function render() {
   const overallStatus = statusOf(avgScore);
 
   wrap.innerHTML = `
-    <div class="status-strip">
-      <div class="status-card">
-        <div class="sc-icon">🎯</div>
-        <div class="sc-info">
-          <div class="sc-lbl">คะแนนรวม</div>
-          <div class="sc-val ${overallStatus === 'good' ? 'green' : overallStatus === 'med' ? 'orange' : 'red'}">${avgScore.toFixed(0)}/100</div>
-        </div>
-      </div>
-      <div class="status-card">
-        <div class="sc-icon">${avgScore >= 80 ? '🌟' : avgScore >= 40 ? '⭐' : '⚠️'}</div>
-        <div class="sc-info">
-          <div class="sc-lbl">สถานะแผน</div>
-          <div class="sc-val">${avgScore >= 80 ? 'ดีมาก' : avgScore >= 40 ? 'ปานกลาง' : 'ต้องปรับปรุง'}</div>
-        </div>
-      </div>
-      <div class="status-card">
-        <div class="sc-icon">✅</div>
-        <div class="sc-info">
-          <div class="sc-lbl">ครบถ้วน</div>
-          <div class="sc-val">${CATEGORIES.filter(c => summary[c.key].pct >= 80).length}/${CATEGORIES.length} หมวด</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="summary-layout">
-      <!-- LEFT: Pentagon Radar -->
-      <div class="radar-card">
-        ${renderRadar(summary)}
+    <div class="ps2-wrap">
+      <!-- Section header -->
+      <div class="ps2-head">
+        <div class="ps2-head-icon">📊</div>
+        <div class="ps2-head-title">สรุปแผน</div>
+        <div class="ps2-head-spacer"></div>
+        <button class="ps2-create-btn" onclick="openPlanFileModal()">
+          <span>📄</span><span>สร้างไฟล์สรุปแผน</span>
+        </button>
       </div>
 
-      <!-- RIGHT: Progress bars -->
-      <div class="progress-card">
-        ${CATEGORIES.map(cat => renderProgressRow(cat, summary[cat.key])).join('')}
-        <button class="pyramid-btn" onclick="openPyramid()">
-          <span style="font-size:1.4rem;">🔺</span>
+      <!-- Body: radar + progress bars -->
+      <div class="ps2-body">
+        <div>${renderRadar(summary)}</div>
+        <div class="ps2-prog-list">
+          ${CATEGORIES.map(cat => renderProgressRowNew(cat, summary[cat.key])).join('')}
+        </div>
+      </div>
+
+      <!-- Pyramid button -->
+      <div style="text-align:center; margin-top:10px;">
+        <button class="ps2-pyramid-btn" onclick="openPyramid()">
+          <span style="font-size:1.3rem;">🔺</span>
           <span>ดู Financial Pyramid (4 ชั้น)</span>
         </button>
       </div>
+    </div>
+  `;
+}
+
+/* New simplified progress row — single amount on right (gap or have) */
+function renderProgressRowNew(cat, data) {
+  const pct = data.pct;
+  const hasData = data.target > 0 || data.have > 0;
+  const pctText = isFinite(pct) ? pct.toFixed(2) + '%' : '0%';
+  /* Show amount: gap if > 0 (deficit), else "—∞" when no data, else have (already met) */
+  let amtText, amtCls = '';
+  if (!hasData) {
+    amtText = '—∞';
+    amtCls = 'empty';
+  } else if (data.gap > 0) {
+    amtText = fmt(data.gap).replace('฿','');
+  } else {
+    amtText = fmt(data.have).replace('฿','');
+  }
+  return `
+    <div class="ps2-prog-row">
+      <div class="ps2-prog-name">${cat.name}</div>
+      <div class="ps2-prog-bar">
+        <div class="ps2-prog-fill" style="width:${Math.max(Math.min(pct || 0, 100), 0)}%"></div>
+      </div>
+      <div class="ps2-prog-pct">${pctText}</div>
+      <div class="ps2-prog-amt ${amtCls}">${amtText}</div>
     </div>
   `;
 }
@@ -800,6 +1253,691 @@ function openPyramid() {
 
 function closePyramid() {
   document.getElementById('pyramid-modal').classList.remove('open');
+}
+
+/* ════════════════════════════════════════════
+   PLAN FILE MODAL — สร้างไฟล์สรุปแผน
+═══════════════════════════════════════════ */
+const PF_SECTIONS = [
+  { key: 'cover',     icon: '📕', name: 'หน้าปก' },
+  { key: 'client',    icon: '👤', name: 'ข้อมูลลูกค้า' },
+  { key: 'summary',   icon: '📋', name: 'สรุปแผน 5 หมวด' },
+  { key: 'pyramid',   icon: '🔺', name: 'Financial Pyramid' },
+  { key: 'cashflow',  icon: '💰', name: 'กระแสเงินสด' },
+  { key: 'networth',  icon: '⚖️', name: 'งบการเงิน' },
+  { key: 'retire',    icon: '🛋️', name: 'แผนเกษียณ' },
+  { key: 'education', icon: '🎓', name: 'แผนการศึกษาบุตร' },
+  { key: 'lifeIns',   icon: '☂️', name: 'แผนคุ้มครองชีวิต' },
+  { key: 'healthIns', icon: '⚕️', name: 'แผนประกันสุขภาพ' },
+  { key: 'tax',       icon: '✂️', name: 'แผนภาษี' },
+  { key: 'policies',  icon: '📊', name: 'รายการกรมธรรม์' },
+  { key: 'goals',     icon: '🎯', name: 'เป้าหมายชีวิต' },
+  { key: 'agent',     icon: '💼', name: 'Profile ตัวแทน' },
+];
+let _pfSelected = new Set(PF_SECTIONS.map(s => s.key));   /* default: ทั้งหมด */
+let _pfStep = 1;
+
+function openPlanFileModal() {
+  if (!selectedClientId) { alert('กรุณาเลือกลูกค้าก่อน'); return; }
+  _pfStep = 1;
+  renderPlanFileStep();
+  document.getElementById('pf-modal').classList.add('open');
+}
+function closePlanFileModal() {
+  document.getElementById('pf-modal').classList.remove('open');
+}
+
+function renderPlanFileStep() {
+  const body = document.getElementById('pf-body');
+  const foot = document.getElementById('pf-footer');
+  const title = document.getElementById('pf-title');
+  const sub   = document.getElementById('pf-subtitle');
+  if (_pfStep === 1) {
+    title.textContent = '📄 สร้างไฟล์สรุปแผน';
+    sub.textContent = 'เลือกหัวข้อที่ต้องการรวมในไฟล์';
+    body.innerHTML = `
+      <div class="pf-toolbar">
+        <button onclick="selectAllPlanSections()">☑ เลือกทั้งหมด</button>
+        <button onclick="deselectAllPlanSections()">☐ ยกเลิกทั้งหมด</button>
+        <span style="margin-left:auto; align-self:center; font-size:.82rem; color:var(--gray-500);">
+          เลือกแล้ว <b id="pf-count">${_pfSelected.size}</b>/${PF_SECTIONS.length} หัวข้อ
+        </span>
+      </div>
+      <div class="pf-section-list">
+        ${PF_SECTIONS.map(s => `
+          <label class="pf-section-item ${_pfSelected.has(s.key) ? 'pf-checked' : ''}" data-key="${s.key}">
+            <input type="checkbox" ${_pfSelected.has(s.key) ? 'checked' : ''}
+                   onchange="togglePlanSection('${s.key}', this.checked)">
+            <span class="pf-si-icon">${s.icon}</span>
+            <span class="pf-si-name">${s.name}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    foot.innerHTML = `
+      <button class="pf-btn pf-btn-secondary" onclick="closePlanFileModal()">ยกเลิก</button>
+      <button class="pf-btn pf-btn-primary" onclick="goToPlanPreview()" ${_pfSelected.size === 0 ? 'disabled' : ''}>
+        ตัวอย่างก่อนพิมพ์ →
+      </button>
+    `;
+  } else if (_pfStep === 2) {
+    title.textContent = '👁 ตัวอย่างไฟล์สรุปแผน';
+    sub.textContent = 'ตรวจสอบเนื้อหาก่อนดาวน์โหลด PDF';
+    const client = getCurrent();
+    body.innerHTML = `<div class="pf-preview-wrap"><div id="pf-document">${renderPlanPreview(client)}</div></div>`;
+    foot.innerHTML = `
+      <button class="pf-btn pf-btn-secondary" onclick="_pfStep=1; renderPlanFileStep();">← กลับไปแก้ไข</button>
+      <div style="display:flex; gap:8px;">
+        <button class="pf-btn pf-btn-secondary" onclick="window.print()">🖨️ พิมพ์</button>
+        <button class="pf-btn pf-btn-success" onclick="downloadPlanPDF()">📥 ดาวน์โหลด PDF</button>
+      </div>
+    `;
+  }
+}
+
+function togglePlanSection(key, checked) {
+  if (checked) _pfSelected.add(key); else _pfSelected.delete(key);
+  const item = document.querySelector(`.pf-section-item[data-key="${key}"]`);
+  if (item) item.classList.toggle('pf-checked', checked);
+  const cnt = document.getElementById('pf-count');
+  if (cnt) cnt.textContent = _pfSelected.size;
+  /* refresh footer "next" button state */
+  const nextBtn = document.querySelector('#pf-footer .pf-btn-primary');
+  if (nextBtn) nextBtn.disabled = _pfSelected.size === 0;
+}
+function selectAllPlanSections() {
+  _pfSelected = new Set(PF_SECTIONS.map(s => s.key));
+  renderPlanFileStep();
+}
+function deselectAllPlanSections() {
+  _pfSelected = new Set();
+  renderPlanFileStep();
+}
+function goToPlanPreview() {
+  if (_pfSelected.size === 0) return;
+  _pfStep = 2;
+  renderPlanFileStep();
+}
+
+/* ════════════════════════════════════════════
+   RENDER PREVIEW — build HTML document
+═══════════════════════════════════════════ */
+function renderPlanPreview(client) {
+  if (!client) return '<div class="pf-empty">ไม่มีข้อมูลลูกค้า</div>';
+  const summary = computeSummary(client);
+  const sel = _pfSelected;
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  const clientName = ((client.firstName||'') + ' ' + (client.lastName||'')).trim() || 'ไม่ระบุชื่อ';
+  const agent = getUser();
+  const agentName = ((agent.firstName||'') + ' ' + (agent.lastName||'')).trim() || 'AIA Agent';
+
+  const cover = sel.has('cover') ? _pfRenderCover(client, agent, dateStr) : '';
+
+  let sections = '';
+  if (sel.has('client'))    sections += _pfRenderClient(client);
+  if (sel.has('summary'))   sections += _pfRenderSummary(summary);
+  if (sel.has('pyramid'))   sections += _pfRenderPyramid(client, summary);
+  if (sel.has('cashflow'))  sections += _pfRenderCashflow(client);
+  if (sel.has('networth'))  sections += _pfRenderNetworth(client);
+  if (sel.has('retire'))    sections += _pfRenderRetire(client);
+  if (sel.has('education')) sections += _pfRenderEducation(client);
+  if (sel.has('lifeIns'))   sections += _pfRenderLifeIns(client, summary);
+  if (sel.has('healthIns')) sections += _pfRenderHealthIns(client, summary);
+  if (sel.has('tax'))       sections += _pfRenderTax(client, summary);
+  if (sel.has('policies'))  sections += _pfRenderPolicies(client);
+  if (sel.has('goals'))     sections += _pfRenderGoals(client);
+
+  const agentPage = sel.has('agent') ? _pfRenderAgent(agent, clientName) : '';
+
+  /* Body — render only if any non-cover/non-agent section is selected */
+  const hasBody = sections.length > 0;
+  const bodyHtml = hasBody ? `
+    <div class="pf-document">
+      <div class="pf-doc-head">
+        <div>
+          <div class="pf-doc-brand">448 Wealth Management Plan</div>
+          <div class="pf-doc-tag">สรุปแผนการเงินส่วนบุคคล</div>
+        </div>
+        <div class="pf-doc-meta">
+          วันที่: ${dateStr}<br>
+          ที่ปรึกษา: ${agentName}
+        </div>
+      </div>
+      <div class="pf-doc-title">
+        แผนการเงินสำหรับ
+        <span class="pf-doc-client">${clientName}</span>
+      </div>
+      ${sections}
+      <div class="pf-doc-foot">
+        เอกสารฉบับนี้สรุปจากข้อมูลที่บันทึกในระบบ ณ วันที่ ${dateStr} เท่านั้น
+        — ใช้เพื่อการประกอบการวางแผนการเงิน
+      </div>
+    </div>
+  ` : '';
+
+  /* Empty state */
+  if (!cover && !hasBody && !agentPage) {
+    return `<div class="pf-document"><div class="pf-empty">ยังไม่ได้เลือกหัวข้อ</div></div>`;
+  }
+
+  return cover + bodyHtml + agentPage;
+}
+
+/* —— per-section renderers —— */
+function _pfRenderCover(c, agent, dateStr) {
+  const clientName = ((c.firstName||'') + ' ' + (c.lastName||'')).trim() || 'ไม่ระบุชื่อ';
+  const age = _psAgeNow(c.dob);
+  const ageStr = age ? Math.floor(age) + ' ปี' : '';
+  const occ = c.occupation || c.job || '';
+  const ap = (agent && agent.profile) || {};
+  const agentName = ((agent.firstName||'') + ' ' + (agent.lastName||'')).trim() || 'AIA Agent';
+  const agentPhoto = ap.photo;
+  const aiaCode = ap.aiaCode || '';
+  const agentPhone = ap.phone || '';
+  const unit = ap.unit || '';
+  return `
+    <div class="pf-cover">
+      <div class="pf-cover-stripe">
+        <span class="pf-cover-brand">448</span>
+        <span class="pf-cover-brand-sub">Wealth Management Plan</span>
+      </div>
+      <div class="pf-cover-body">
+        <div class="pf-cover-icon">📊</div>
+        <div class="pf-cover-eyebrow">PERSONAL WEALTH PLAN</div>
+        <div class="pf-cover-title">สรุปแผนการเงิน</div>
+        <div class="pf-cover-divider"></div>
+        <div class="pf-cover-prep-for">จัดทำสำหรับ</div>
+        <div class="pf-cover-client">คุณ ${clientName}</div>
+        ${ageStr || occ ? `<div class="pf-cover-client-sub">${[ageStr, occ].filter(Boolean).join(' · ')}</div>` : ''}
+        <div class="pf-cover-divider"></div>
+        <div class="pf-cover-date"><b>วันที่จัดทำ</b><br>${dateStr}</div>
+      </div>
+      <div class="pf-cover-foot">
+        <div class="pf-cover-foot-row">
+          ${agentPhoto
+            ? `<div class="pf-cover-agent-photo" style="background-image:url('${agentPhoto}');"></div>`
+            : `<div class="pf-cover-agent-photo pf-cover-agent-initial">${(agentName.charAt(0)||'A').toUpperCase()}</div>`}
+          <div class="pf-cover-agent-text">
+            <div class="pf-cover-by">เรียบเรียงโดย</div>
+            <div class="pf-cover-agent-name">คุณ ${agentName}</div>
+            <div class="pf-cover-agent-role">
+              ตัวแทนประกันชีวิต AIA
+              ${aiaCode ? ` · รหัส ${aiaCode}` : ''}
+              ${unit ? ` · ${unit}` : ''}
+            </div>
+            ${agentPhone ? `<div class="pf-cover-agent-contact">📞 ${agentPhone}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderAgent(agent, clientName) {
+  const ap = (agent && agent.profile) || {};
+  const agentName = ((agent.firstName||'') + ' ' + (agent.lastName||'')).trim() || 'AIA Agent';
+  const nickname = ap.nickname || '';
+  const photo = ap.photo;
+  const phone = ap.phone || '';
+  const email = ap.email || '';
+  const lineId = ap.lineId || '';
+  const address = ap.address || '';
+  const aiaCode = ap.aiaCode || '';
+  const unit = ap.unit || '';
+  const licLife = ap.licLife || '';
+  const licLifeExp = ap.licLifeExp || '';
+  const licNonLife = ap.licNonLife || '';
+  const licNonLifeExp = ap.licNonLifeExp || '';
+
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' }) : '—';
+
+  const contactRows = [
+    phone   ? { ico:'📞', lbl:'โทรศัพท์',  val: phone } : null,
+    email   ? { ico:'📧', lbl:'อีเมล',     val: email } : null,
+    lineId  ? { ico:'💬', lbl:'LINE ID',   val: lineId } : null,
+    address ? { ico:'📍', lbl:'ที่อยู่',     val: address } : null,
+  ].filter(Boolean);
+
+  const licRows = [
+    licLife    ? { lbl:'ใบอนุญาตชีวิต',     num: licLife,    exp: fmtDate(licLifeExp) } : null,
+    licNonLife ? { lbl:'ใบอนุญาตวินาศภัย', num: licNonLife, exp: fmtDate(licNonLifeExp) } : null,
+    aiaCode    ? { lbl:'รหัสตัวแทน AIA',   num: aiaCode,    exp: unit||'—' } : null,
+  ].filter(Boolean);
+
+  return `
+    <div class="pf-agent-page">
+      <div class="pf-agent-card">
+        <div class="pf-agent-hero">
+          ${photo
+            ? `<div class="pf-agent-photo" style="background-image:url('${photo}');"></div>`
+            : `<div class="pf-agent-photo pf-agent-initial">${(agentName.charAt(0)||'A').toUpperCase()}</div>`}
+          <div class="pf-agent-hero-text">
+            <div class="pf-agent-eyebrow">ที่ปรึกษาทางการเงินของคุณ</div>
+            <div class="pf-agent-name">
+              คุณ ${agentName}
+              ${nickname ? `<span class="pf-agent-nick">(${nickname})</span>` : ''}
+            </div>
+            <div class="pf-agent-role">ตัวแทนประกันชีวิต AIA</div>
+            ${unit ? `<div class="pf-agent-unit">${unit}</div>` : ''}
+          </div>
+        </div>
+
+        ${contactRows.length ? `
+          <div class="pf-agent-section">
+            <div class="pf-agent-sec-title">📇 ติดต่อ</div>
+            <div class="pf-agent-contact-grid">
+              ${contactRows.map(r => `
+                <div class="pf-agent-contact-item">
+                  <span class="pf-agent-contact-ico">${r.ico}</span>
+                  <div>
+                    <div class="pf-agent-contact-lbl">${r.lbl}</div>
+                    <div class="pf-agent-contact-val">${r.val}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${licRows.length ? `
+          <div class="pf-agent-section">
+            <div class="pf-agent-sec-title">🛡️ ใบอนุญาต / รหัสตัวแทน</div>
+            <table class="pf-doc-table">
+              <thead><tr><th>ประเภท</th><th>เลขที่</th><th>หมดอายุ / สังกัด</th></tr></thead>
+              <tbody>
+                ${licRows.map(r => `<tr><td>${r.lbl}</td><td>${r.num}</td><td>${r.exp}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+
+        <div class="pf-agent-message">
+          <div class="pf-agent-quote-mark">"</div>
+          <p>ขอบคุณคุณ <b>${clientName}</b> ที่ให้ความไว้วางใจ
+          ทุกแผนในเอกสารฉบับนี้จัดทำขึ้นตามข้อมูลและเป้าหมายของคุณ
+          พร้อมให้คำปรึกษาและทบทวนแผนทุกช่วงเวลาสำคัญของชีวิต</p>
+          <p class="pf-agent-sign">— คุณ ${agentName}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderClient(c) {
+  const age = _psAgeNow(c.dob);
+  const ageStr = age ? Math.floor(age) + ' ปี' : '—';
+  const monthlyIncome = c.cashflow && c.cashflow.income ? Number(c.cashflow.income) : 0;
+  const annualIncome = Number(c.income) || monthlyIncome * 12;
+  const occ = c.occupation || c.job || '—';
+  const dobStr = c.dob ? new Date(c.dob).toLocaleDateString('th-TH') : '—';
+  return `
+    <div class="pf-doc-section">
+      <h4>👤 ข้อมูลลูกค้า</h4>
+      <div class="pf-doc-grid">
+        <div class="pf-row"><span>ชื่อ-นามสกุล</span><span>${((c.firstName||'')+' '+(c.lastName||'')).trim()||'—'}</span></div>
+        <div class="pf-row"><span>วันเกิด / อายุ</span><span>${dobStr} (${ageStr})</span></div>
+        <div class="pf-row"><span>อาชีพ</span><span>${occ}</span></div>
+        <div class="pf-row"><span>เบอร์โทร</span><span>${c.phone||'—'}</span></div>
+        <div class="pf-row"><span>อีเมล</span><span>${c.email||'—'}</span></div>
+        <div class="pf-row"><span>รายได้/เดือน</span><span>${fmt(monthlyIncome)}</span></div>
+        <div class="pf-row"><span>รายได้/ปี</span><span>${fmt(annualIncome)}</span></div>
+        <div class="pf-row"><span>โรงพยาบาลที่ใช้บริการ (Tier)</span><span>Tier ${c.trustedHospitalTier||2}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderSummary(summary) {
+  if (!summary) return '';
+  const validPcts = CATEGORIES.map(c => summary[c.key].pct).filter(p => isFinite(p));
+  const avg = validPcts.length ? validPcts.reduce((s,p)=>s+p,0)/validPcts.length : 0;
+  const rows = CATEGORIES.map(cat => {
+    const d = summary[cat.key];
+    const status = statusOf(d.pct);
+    const pctText = isFinite(d.pct) ? d.pct.toFixed(1)+'%' : '—';
+    return `
+      <div class="pf-doc-progress">
+        <div class="pdp-lbl">${cat.icon} ${cat.name}</div>
+        <div class="pdp-bar"><div class="pdp-fill s-${status}" style="width:${Math.max(Math.min(d.pct,100),0)}%"></div></div>
+        <div class="pdp-pct s-${status}">${pctText}</div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="pf-doc-section">
+      <h4>📋 สรุปแผน 5 หมวด — คะแนนรวม ${avg.toFixed(0)}/100</h4>
+      ${_pfRenderRadarSVG(summary)}
+      <div style="margin-top:14px;">${rows}</div>
+      <table class="pf-doc-table" style="margin-top:14px;">
+        <thead><tr><th>หมวด</th><th class="num">มี</th><th class="num">ต้องการ</th><th class="num">ขาดอีก</th></tr></thead>
+        <tbody>
+          ${CATEGORIES.map(cat => {
+            const d = summary[cat.key];
+            const gapCls = d.gap > 0 ? 'neg' : 'pos';
+            const gapTxt = d.gap > 0 ? fmt(d.gap) : '✓ ครบ';
+            return `<tr>
+              <td>${cat.icon} ${cat.name}</td>
+              <td class="num">${fmt(d.have)}</td>
+              <td class="num">${fmt(d.target)}</td>
+              <td class="num ${gapCls}">${gapTxt}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderRadarSVG(summary) {
+  /* simplified radar suitable for print */
+  const size = 320, cx = size/2, cy = size/2, R = 110;
+  let grid = '', axes = '', labels = '';
+  for (let i = 1; i <= 5; i++) {
+    const r = R*(i/5);
+    const pts = CATEGORIES.map(cat => {
+      const rad = cat.angle*Math.PI/180;
+      return [cx + r*Math.cos(rad), cy + r*Math.sin(rad)].join(',');
+    }).join(' ');
+    grid += `<polygon points="${pts}" fill="none" stroke="#D0D7E2" stroke-width="1"/>`;
+  }
+  CATEGORIES.forEach(cat => {
+    const rad = cat.angle*Math.PI/180;
+    axes += `<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(rad)}" y2="${cy+R*Math.sin(rad)}" stroke="#D0D7E2" stroke-width="1"/>`;
+    const lr = R+20, lx = cx+lr*Math.cos(rad), ly = cy+lr*Math.sin(rad);
+    labels += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="16">${cat.icon}</text>`;
+  });
+  const dataPts = CATEGORIES.map(cat => {
+    const pct = summary[cat.key].pct || 0;
+    const r = R*Math.min(pct,100)/100;
+    const rad = cat.angle*Math.PI/180;
+    return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)].join(',');
+  }).join(' ');
+  return `<svg class="pf-doc-radar" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    ${grid}${axes}
+    <polygon points="${dataPts}" fill="rgba(255,167,38,0.35)" stroke="#F39C12" stroke-width="2"/>
+    ${labels}
+  </svg>`;
+}
+
+function _pfRenderPyramid(client, summary) {
+  if (!summary) return '';
+  const layers = computePyramid(client, summary);
+  return `
+    <div class="pf-doc-section">
+      <h4>🔺 Financial Pyramid — โครงสร้างทางการเงิน 4 ชั้น</h4>
+      <table class="pf-doc-table">
+        <thead><tr><th style="width:60px;">ชั้น</th><th>หัวข้อ</th><th>รายละเอียด</th><th style="width:70px;">สถานะ</th></tr></thead>
+        <tbody>
+          ${layers.map(l => `
+            <tr>
+              <td>${l.icon} L${l.layer}</td>
+              <td><b>${l.title}</b></td>
+              <td>${l.desc}</td>
+              <td class="${l.ok?'pos':'neg'}">${l.ok?'✓ ผ่าน':'✗ ยังไม่ผ่าน'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderCashflow(c) {
+  const cf = c.cashflow || {};
+  const inc = Number(cf.income||0);
+  const fixed = Number(cf.expFixed||0);
+  const variable = Number(cf.expVariable||0);
+  const debt = Number(cf.expDebt||0);
+  const totalExp = fixed + variable + debt;
+  const surplus = inc - totalExp;
+  return `
+    <div class="pf-doc-section">
+      <h4>💰 กระแสเงินสด (ต่อเดือน)</h4>
+      <table class="pf-doc-table">
+        <tbody>
+          <tr><td>รายได้รวม</td><td class="num pos">${fmt(inc)}</td></tr>
+          <tr><td>รายจ่ายคงที่</td><td class="num">${fmt(fixed)}</td></tr>
+          <tr><td>รายจ่ายผันแปร</td><td class="num">${fmt(variable)}</td></tr>
+          <tr><td>ผ่อนหนี้</td><td class="num">${fmt(debt)}</td></tr>
+          <tr><td><b>รายจ่ายรวม</b></td><td class="num"><b>${fmt(totalExp)}</b></td></tr>
+          <tr><td><b>เหลือ/ขาด</b></td><td class="num ${surplus>=0?'pos':'neg'}"><b>${fmt(surplus)}</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderNetworth(c) {
+  const assets = c.assets || [];
+  const liabilities = c.liabilities || [];
+  const totalAssets = assets.reduce((s,a)=>s+Number(a.currentValue||0),0);
+  const totalLiab = liabilities.reduce((s,l)=>s+Number(l.principal||0),0);
+  const networth = totalAssets - totalLiab;
+  const assetRows = assets.length ? assets.slice(0,12).map(a => `
+    <tr><td>${a.name||a.type||'—'}</td><td>${a.type||'—'}</td><td class="num">${fmt(a.currentValue||0)}</td></tr>
+  `).join('') : '<tr><td colspan="3" style="text-align:center;color:#999;">— ไม่มีสินทรัพย์ —</td></tr>';
+  const liabRows = liabilities.length ? liabilities.slice(0,12).map(l => `
+    <tr><td>${l.name||l.type||'—'}</td><td>${l.type||'—'}</td><td class="num">${fmt(l.principal||0)}</td></tr>
+  `).join('') : '<tr><td colspan="3" style="text-align:center;color:#999;">— ไม่มีหนี้สิน —</td></tr>';
+  return `
+    <div class="pf-doc-section">
+      <h4>⚖️ งบการเงิน</h4>
+      <div class="pf-doc-grid" style="margin-bottom:12px;">
+        <div class="pf-row"><span>สินทรัพย์รวม</span><span style="color:#28a745;">${fmt(totalAssets)}</span></div>
+        <div class="pf-row"><span>หนี้สินรวม</span><span style="color:#DC3545;">${fmt(totalLiab)}</span></div>
+        <div class="pf-row"><span><b>มูลค่าสุทธิ (Net Worth)</b></span><span><b style="color:${networth>=0?'#28a745':'#DC3545'};">${fmt(networth)}</b></span></div>
+      </div>
+      <table class="pf-doc-table">
+        <thead><tr><th>สินทรัพย์</th><th>ประเภท</th><th class="num">มูลค่า</th></tr></thead>
+        <tbody>${assetRows}</tbody>
+      </table>
+      <table class="pf-doc-table" style="margin-top:10px;">
+        <thead><tr><th>หนี้สิน</th><th>ประเภท</th><th class="num">ยอดคงเหลือ</th></tr></thead>
+        <tbody>${liabRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderRetire(c) {
+  const plan = _psRetirePlan(c);
+  const calc = _psRetireCalc(c);
+  const age = _psAgeNow(c.dob);
+  return `
+    <div class="pf-doc-section">
+      <h4>🛋️ แผนเกษียณ</h4>
+      <div class="pf-doc-grid">
+        <div class="pf-row"><span>อายุปัจจุบัน</span><span>${age?Math.floor(age):'—'} ปี</span></div>
+        <div class="pf-row"><span>อายุที่ต้องการเกษียณ</span><span>${plan.retireAge} ปี</span></div>
+        <div class="pf-row"><span>อายุขัยที่คาดการณ์</span><span>${plan.lifeExpectancy} ปี</span></div>
+        <div class="pf-row"><span>รายได้ที่ต้องการหลังเกษียณ</span><span>${plan.incomePctAfterRetire}%</span></div>
+        <div class="pf-row"><span>เงินเฟ้อ</span><span>${plan.inflationRate}%/ปี</span></div>
+        <div class="pf-row"><span>ผลตอบแทนคาดหวัง</span><span>${plan.expectedReturn}%/ปี</span></div>
+        <div class="pf-row"><span>เป้าหมายเงินก้อน</span><span style="color:#DC3545;">${fmt(calc.target)}</span></div>
+        <div class="pf-row"><span>คาดว่าจะมี</span><span style="color:#28a745;">${fmt(calc.have)}</span></div>
+        <div class="pf-row"><span><b>ยังขาด</b></span><span><b style="color:#DC3545;">${fmt(calc.gap)}</b></span></div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderEducation(c) {
+  const children = c.children || [];
+  if (children.length === 0) {
+    return `<div class="pf-doc-section"><h4>🎓 แผนการศึกษาบุตร</h4><div class="pf-empty">ยังไม่มีข้อมูลบุตร</div></div>`;
+  }
+  const rows = children.map(ch => {
+    const r = _psChildEdu(ch, c);
+    const age = _psAgeNow(ch.dob || ch.birthdate);
+    const gap = Math.max(r.totalFuture - r.fvSavings, 0);
+    return `<tr>
+      <td>${ch.name||'—'}</td>
+      <td class="num">${age?Math.floor(age):'—'}</td>
+      <td>${ch.level||'medium'}</td>
+      <td class="num">${fmt(r.totalFuture)}</td>
+      <td class="num">${fmt(r.fvSavings)}</td>
+      <td class="num ${gap>0?'neg':'pos'}">${gap>0?fmt(gap):'✓ ครบ'}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="pf-doc-section">
+      <h4>🎓 แผนการศึกษาบุตร (${children.length} คน)</h4>
+      <table class="pf-doc-table">
+        <thead><tr><th>ชื่อ</th><th class="num">อายุ</th><th>ระดับ</th><th class="num">ค่าใช้จ่ายรวม</th><th class="num">FV เงินออม</th><th class="num">ขาด</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderLifeIns(c, summary) {
+  const d = summary ? summary.lifeIns : null;
+  const li = c.lifeInputs || {};
+  const method = li.method === 'dime' ? 'DIME Method' : 'Simple Method';
+  if (!d) return '';
+  return `
+    <div class="pf-doc-section">
+      <h4>☂️ แผนคุ้มครองชีวิต — ${method}</h4>
+      <div class="pf-doc-grid">
+        <div class="pf-row"><span>ความคุ้มครองที่ต้องการ</span><span>${fmt(d.target)}</span></div>
+        <div class="pf-row"><span>ความคุ้มครอง + ทรัพย์สินสภาพคล่อง</span><span>${fmt(d.have)}</span></div>
+        <div class="pf-row"><span>ความคุ้มครองพอ</span><span>${d.pct.toFixed(1)}%</span></div>
+        <div class="pf-row"><span><b>ยังขาด</b></span><span><b style="color:${d.gap>0?'#DC3545':'#28a745'};">${d.gap>0?fmt(d.gap):'✓ ครบ'}</b></span></div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderHealthIns(c, summary) {
+  const d = summary ? summary.healthIns : null;
+  if (!d) return '';
+  const tier = c.trustedHospitalTier || 2;
+  const hi = c.healthInputs || {};
+  return `
+    <div class="pf-doc-section">
+      <h4>⚕️ แผนประกันสุขภาพ — Tier ${tier}</h4>
+      <div class="pf-doc-grid">
+        <div class="pf-row"><span>วงเงินที่ต้องการ (IPD)</span><span>${fmt(d.target)}</span></div>
+        <div class="pf-row"><span>วงเงินที่มี</span><span>${fmt(d.have)}</span></div>
+        <div class="pf-row"><span>เบี้ยประกันสุขภาพ/ปี (ปัจจุบัน)</span><span>${fmt(Number(hi.premium||0))}</span></div>
+        <div class="pf-row"><span>ความคุ้มครองพอ</span><span>${d.pct.toFixed(1)}%</span></div>
+        <div class="pf-row"><span><b>ยังขาด</b></span><span><b style="color:${d.gap>0?'#DC3545':'#28a745'};">${d.gap>0?fmt(d.gap):'✓ ครบ'}</b></span></div>
+      </div>
+    </div>
+  `;
+}
+
+function _pfRenderTax(c, summary) {
+  const d = summary ? summary.tax : null;
+  if (!d) return '';
+  const ti = c.taxInputs || {};
+  const hi = c.healthInputs || {};
+  const healthAmt = ti.healthIns != null ? Number(ti.healthIns) : Number(hi.premium||0);
+  return `
+    <div class="pf-doc-section">
+      <h4>✂️ แผนภาษี — ลดหย่อน</h4>
+      <div class="pf-doc-grid" style="margin-bottom:10px;">
+        <div class="pf-row"><span>เพดานรวม (สูงสุดที่ใช้ได้)</span><span>${fmt(d.target)}</span></div>
+        <div class="pf-row"><span>ใช้ลดหย่อนแล้ว</span><span>${fmt(d.have)}</span></div>
+        <div class="pf-row"><span>เหลือ Cap ใช้ได้</span><span style="color:${d.gap>0?'#F39C12':'#28a745'};">${fmt(d.gap)}</span></div>
+      </div>
+      <table class="pf-doc-table">
+        <thead><tr><th>รายการ</th><th class="num">ใช้แล้ว</th></tr></thead>
+        <tbody>
+          <tr><td>ประกันชีวิต</td><td class="num">${fmt(ti.lifeIns||0)}</td></tr>
+          <tr><td>ประกันสุขภาพ</td><td class="num">${fmt(healthAmt)}</td></tr>
+          <tr><td>ประกันบิดามารดา</td><td class="num">${fmt(ti.parentIns||0)}</td></tr>
+          <tr><td>เบี้ยบำนาญ</td><td class="num">${fmt(ti.annuity||0)}</td></tr>
+          <tr><td>PVD / กบข.</td><td class="num">${fmt(ti.pvd||0)}</td></tr>
+          <tr><td>RMF</td><td class="num">${fmt(ti.rmf||0)}</td></tr>
+          <tr><td>SSF</td><td class="num">${fmt(ti.ssf||0)}</td></tr>
+          <tr><td>ThaiESG</td><td class="num">${fmt(ti.thaiesg||0)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderPolicies(c) {
+  const policies = c.policies || [];
+  if (policies.length === 0) {
+    return `<div class="pf-doc-section"><h4>📊 รายการกรมธรรม์</h4><div class="pf-empty">ยังไม่มีกรมธรรม์</div></div>`;
+  }
+  const rows = policies.map(p => {
+    const cov = Number(p.lifeCoverage || p.coverage || 0);
+    return `<tr>
+      <td>${p.name||'—'}</td>
+      <td>${p.type||'—'}</td>
+      <td>${p.company||'—'}</td>
+      <td class="num">${fmt(cov)}</td>
+      <td class="num">${fmt(p.annualPremium || p.premium || 0)}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="pf-doc-section">
+      <h4>📊 รายการกรมธรรม์ (${policies.length} ฉบับ)</h4>
+      <table class="pf-doc-table">
+        <thead><tr><th>กรมธรรม์</th><th>ประเภท</th><th>บริษัท</th><th class="num">ทุนชีวิต</th><th class="num">เบี้ย/ปี</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _pfRenderGoals(c) {
+  const goals = c.lifeGoals || c.financialGoals || [];
+  if (goals.length === 0) {
+    return `<div class="pf-doc-section"><h4>🎯 เป้าหมายชีวิต</h4><div class="pf-empty">ยังไม่มีเป้าหมาย</div></div>`;
+  }
+  const rows = goals.map(g => `
+    <tr>
+      <td>${g.icon||'🎯'} ${g.name||'—'}</td>
+      <td class="num">${fmt(g.targetAmount||g.amount||0)}</td>
+      <td class="num">${g.targetAge||g.targetYear||'—'}</td>
+      <td>${g.priority||'—'}</td>
+    </tr>
+  `).join('');
+  return `
+    <div class="pf-doc-section">
+      <h4>🎯 เป้าหมายชีวิต (${goals.length} รายการ)</h4>
+      <table class="pf-doc-table">
+        <thead><tr><th>เป้าหมาย</th><th class="num">จำนวน</th><th class="num">อายุ/ปี</th><th>ความสำคัญ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════
+   PDF EXPORT — html2pdf.js
+═══════════════════════════════════════════ */
+function downloadPlanPDF() {
+  const el = document.getElementById('pf-document');
+  if (!el) { alert('ไม่พบเอกสาร'); return; }
+  const client = getCurrent();
+  const clientName = ((client.firstName||'') + '-' + (client.lastName||'')).trim() || 'client';
+  const dateTag = new Date().toISOString().slice(0,10);
+  const filename = `plan-summary-${clientName}-${dateTag}.pdf`;
+  const btn = document.querySelector('#pf-footer .pf-btn-success');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้าง PDF...'; }
+  const opts = {
+    margin: [10, 8, 12, 8],
+    filename,
+    image: { type: 'jpeg', quality: 0.96 },
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'], avoid: '.pf-doc-section' },
+  };
+  html2pdf().set(opts).from(el).save()
+    .then(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 ดาวน์โหลด PDF'; }
+    })
+    .catch(err => {
+      console.error('PDF generation error', err);
+      alert('สร้าง PDF ไม่สำเร็จ: ' + (err.message||err));
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 ดาวน์โหลด PDF'; }
+    });
 }
 
 /* ════════════════════════════════════════════

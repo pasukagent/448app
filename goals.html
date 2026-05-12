@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -22,13 +23,19 @@
     const fbAuth = firebase.auth();
   </script>
   <style>
+    /* ════ Brand override — indigo accent ════ */
+    :root {
+      --g2-indigo:       #3B43A8;
+      --g2-indigo-light: #6B72C9;
+      --g2-indigo-soft:  #EEF0F9;
+    }
     .feature-hero {
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-      color: white; padding: 28px 30px 36px; margin-bottom: -20px;
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
     .feature-hero-left { flex: 1; min-width: 240px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -41,6 +48,116 @@
       border: none; border-radius: 8px; padding: 7px 14px;
       font-family: var(--font); font-weight: 700; font-size: .9rem;
       min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ Launchpad layout ════ */
+    .g2-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 28px 32px 32px;
+      margin-bottom: 18px;
+    }
+    .g2-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 32px;
+    }
+    .g2-head-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid var(--g2-indigo); color: var(--g2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; flex-shrink: 0; background: white;
+    }
+    .g2-head-title {
+      font-size: 1.7rem; font-weight: 800; color: var(--g2-indigo);
+      letter-spacing: -0.01em;
+    }
+    /* 4x2 grid of large icon buttons */
+    .g2-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 28px 24px; padding: 8px 0 16px;
+    }
+    .g2-tile {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; padding: 8px;
+      transition: transform .15s;
+      background: transparent; border: none;
+      font-family: var(--font);
+    }
+    .g2-tile:hover { transform: translateY(-2px); }
+    .g2-tile:active { transform: translateY(0); }
+    .g2-tile-icon {
+      width: 130px; height: 130px; border-radius: 50%;
+      border: 3px solid var(--g2-indigo); color: var(--g2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; background: white;
+      transition: all .15s;
+      position: relative;
+    }
+    .g2-tile:hover .g2-tile-icon {
+      background: var(--g2-indigo-soft);
+      box-shadow: 0 8px 20px rgba(59,67,168,.18);
+    }
+    .g2-tile.has-goal .g2-tile-icon::after {
+      content: ''; position: absolute; top: 6px; right: 6px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #28a745; border: 3px solid white;
+    }
+    .g2-tile-count {
+      position: absolute; top: 0; right: 0;
+      background: var(--g2-indigo); color: white;
+      font-size: .72rem; font-weight: 800;
+      min-width: 22px; height: 22px;
+      border-radius: 100px; padding: 0 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 2px solid white;
+    }
+    .g2-tile-label {
+      font-size: 1.05rem; font-weight: 700; color: var(--g2-indigo);
+      text-align: center;
+    }
+
+    /* ════ Existing goals list below grid ════ */
+    .g2-list-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px; padding: 14px 0 12px;
+      border-top: 1.5px dashed #DDD;
+    }
+    .g2-list-title {
+      font-size: 1.05rem; font-weight: 800; color: #222;
+    }
+    .g2-list-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .g2-list-card {
+      background: var(--g2-indigo-soft); border: 1.5px solid var(--g2-indigo);
+      border-radius: 12px; padding: 12px 14px;
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .g2-list-card:hover { background: white; box-shadow: 0 4px 12px rgba(59,67,168,.15); }
+    .g2-list-card-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: white; color: var(--g2-indigo);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .g2-list-card-text { flex: 1; min-width: 0; }
+    .g2-list-card-name {
+      font-size: .92rem; font-weight: 700; color: #222;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .g2-list-card-meta { font-size: .76rem; color: var(--g2-indigo); margin-top: 2px; }
+    .g2-list-empty {
+      grid-column: 1/-1; text-align: center;
+      padding: 24px; color: #999; font-size: .9rem; font-style: italic;
+    }
+
+    @media (max-width: 980px) {
+      .g2-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .g2-grid { grid-template-columns: repeat(2, 1fr); }
+      .g2-tile-icon { width: 100px; height: 100px; font-size: 3rem; }
     }
 
     /* Summary */
@@ -251,6 +368,15 @@
       .type-grid { grid-template-columns: repeat(2,1fr); }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D0021B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <div class="app-layout">
@@ -433,12 +559,16 @@ const GOAL_TYPES = {
   car:       { icon:'🚗', label:'ซื้อรถ',       cls:'t-car',       cat:'ขนส่ง' },
   travel:    { icon:'✈️', label:'ท่องเที่ยว',  cls:'t-travel',    cat:'ไลฟ์สไตล์' },
   shop:      { icon:'🛍️', label:'ช้อปปิ้ง',    cls:'t-shop',      cat:'ไลฟ์สไตล์' },
-  business:  { icon:'💼', label:'ธุรกิจ',       cls:'t-business',  cat:'การลงทุน' },
-  portfolio: { icon:'📈', label:'พอร์ตลงทุน',  cls:'t-portfolio', cat:'การลงทุน' },
+  business:  { icon:'💼', label:'เงินทุนธุรกิจ', cls:'t-business',  cat:'การลงทุน' },
+  portfolio: { icon:'📈', label:'พอร์ตการลงทุน',cls:'t-portfolio', cat:'การลงทุน' },
+  family:    { icon:'💳', label:'ค่าใช้จ่ายครอบครัว', cls:'t-family', cat:'ครอบครัว' },
   emergency: { icon:'🛡️', label:'กองทุนฉุกเฉิน',cls:'t-emergency',cat:'ความปลอดภัย' },
   retire:    { icon:'👴', label:'เกษียณ',       cls:'t-retire',    cat:'อนาคต' },
   other:     { icon:'📌', label:'อื่นๆ',        cls:'t-other',     cat:'ทั่วไป' },
 };
+
+/* Launchpad — 7 ประเภทคงที่ + 1 "เพิ่มรายการใหม่" (custom) */
+const LAUNCHPAD_TYPES = ['home','car','shop','travel','business','portfolio','family'];
 
 let selectedClientId = null;
 let editingGoalId = null;
@@ -582,61 +712,88 @@ function render() {
         })
     : goals.filter(g => g.type === currentFilter);
 
+  /* Count + check existence per type for the launchpad */
+  const countByType = {};
+  goals.forEach(g => {
+    const k = g.type || 'other';
+    countByType[k] = (countByType[k] || 0) + 1;
+  });
+
   wrap.innerHTML = `
-    <!-- Summary -->
-    <div class="summary-grid">
-      <div class="summary-card lc-blue">
-        <div class="sc-lbl">🎯 เป้าหมายทั้งหมด</div>
-        <div class="sc-val">${goals.length}</div>
-        <div class="sc-sub">รายการ</div>
+    <div class="g2-wrap">
+      <!-- Header -->
+      <div class="g2-head">
+        <div class="g2-head-icon">🐷</div>
+        <div class="g2-head-title">ออม/ลงทุน เพื่อเป้าหมายอื่นๆ</div>
       </div>
-      <div class="summary-card">
-        <div class="sc-lbl">💰 ยอดรวมที่ต้องการ</div>
-        <div class="sc-val cost">${fmtShort(totalTarget)}</div>
-        <div class="sc-sub">รวมทุกเป้าหมาย</div>
+
+      <!-- 4x2 launchpad grid -->
+      <div class="g2-grid">
+        ${LAUNCHPAD_TYPES.map(type => {
+          const t = GOAL_TYPES[type];
+          const count = countByType[type] || 0;
+          return `
+            <button class="g2-tile ${count > 0 ? 'has-goal' : ''}" onclick="openLaunchpad('${type}')">
+              <div class="g2-tile-icon">
+                ${t.icon}
+                ${count > 0 ? `<span class="g2-tile-count">${count}</span>` : ''}
+              </div>
+              <div class="g2-tile-label">${t.label}</div>
+            </button>
+          `;
+        }).join('')}
+        <!-- 8th tile: เพิ่มรายการใหม่ -->
+        <button class="g2-tile" onclick="openGoalModal()">
+          <div class="g2-tile-icon">＋</div>
+          <div class="g2-tile-label">เพิ่มรายการใหม่</div>
+        </button>
       </div>
-      <div class="summary-card lc-green">
-        <div class="sc-lbl">✅ มีอยู่แล้ว</div>
-        <div class="sc-val green">${fmtShort(totalCurrent)}</div>
-        <div class="sc-sub">${totalTarget > 0 ? Math.round(totalCurrent/totalTarget*100) + '%' : '0%'} ของยอด</div>
+
+      <!-- Existing goals — quick edit list -->
+      <div class="g2-list-head">
+        <div class="g2-list-title">🎯 เป้าหมายของคุณ (${goals.length})</div>
+        ${goals.length > 0 ? `<button class="btn-add-goal" onclick="openGoalModal()" style="padding:6px 14px; border:none; border-radius:8px; background:var(--g2-indigo); color:white; cursor:pointer; font-family:var(--font); font-weight:700; font-size:.86rem;">+ เพิ่มเป้าหมาย</button>` : ''}
       </div>
-      <div class="summary-card lc-orange">
-        <div class="sc-lbl">📅 ออมต่อเดือนรวม</div>
-        <div class="sc-val">${fmtShort(totalMonthly)}</div>
-        <div class="sc-sub">${achievedCount}/${goals.length} เป้าหมายพร้อม</div>
+      <div class="g2-list-grid">
+        ${goals.length === 0
+          ? `<div class="g2-list-empty">ยังไม่มีเป้าหมาย — คลิกไอคอนด้านบนเพื่อสร้างเป้าหมายแรก</div>`
+          : goals.map(g => {
+              const t = GOAL_TYPES[g.type] || GOAL_TYPES.other;
+              const target = inflatedTarget(g);
+              const yr = yearsTo(g.deadline);
+              const yrStr = yr > 0 ? `อีก ${yr.toFixed(1)} ปี` : (yr === 0 ? 'ครบกำหนด' : 'เลยกำหนด');
+              return `
+                <div class="g2-list-card" onclick="openGoalModal('${g.id}')" title="แก้ไข">
+                  <div class="g2-list-card-icon">${t.icon}</div>
+                  <div class="g2-list-card-text">
+                    <div class="g2-list-card-name">${escapeHtml(g.name || t.label)}</div>
+                    <div class="g2-list-card-meta">${fmtShort(target)} · ${yrStr}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')
+        }
       </div>
     </div>
-
-    <!-- Filter -->
-    <div class="filter-bar">
-      <span class="filter-title">กรอง:</span>
-      <button class="fchip ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">📋 ทั้งหมด</button>
-      <button class="fchip ${currentFilter==='achieved'?'active':''}" onclick="setFilter('achieved')">✅ พร้อมแล้ว</button>
-      <button class="fchip ${currentFilter==='risk'?'active':''}" onclick="setFilter('risk')">⚠️ ยังไม่พอ</button>
-      <button class="fchip ${currentFilter==='home'?'active':''}" onclick="setFilter('home')">🏠 บ้าน</button>
-      <button class="fchip ${currentFilter==='car'?'active':''}" onclick="setFilter('car')">🚗 รถ</button>
-      <button class="fchip ${currentFilter==='travel'?'active':''}" onclick="setFilter('travel')">✈️ ท่องเที่ยว</button>
-      <button class="fchip ${currentFilter==='shop'?'active':''}" onclick="setFilter('shop')">🛍️ ช้อป</button>
-      <button class="fchip ${currentFilter==='business'?'active':''}" onclick="setFilter('business')">💼 ธุรกิจ</button>
-      <button class="fchip ${currentFilter==='portfolio'?'active':''}" onclick="setFilter('portfolio')">📈 พอร์ต</button>
-      <button class="fchip ${currentFilter==='emergency'?'active':''}" onclick="setFilter('emergency')">🆘 ฉุกเฉิน</button>
-      <button class="fchip ${currentFilter==='retire'?'active':''}" onclick="setFilter('retire')">👴 เกษียณ</button>
-      <div class="toolbar-spacer"></div>
-      <button class="btn-add-goal" onclick="openGoalModal()">+ เพิ่มเป้าหมาย</button>
-    </div>
-
-    <!-- Goals -->
-    ${filteredGoals.length === 0
-      ? `<div class="empty-goals">
-          <div class="ec-icon">🎯</div>
-          <p style="font-size:1rem;color:var(--gray-700);font-weight:700;margin-bottom:6px;">
-            ${goals.length === 0 ? 'ยังไม่มีเป้าหมาย' : 'ไม่พบเป้าหมายในหมวดนี้'}
-          </p>
-          <p style="font-size:.88rem;">${goals.length === 0 ? 'กดปุ่ม "+ เพิ่มเป้าหมาย" เพื่อเริ่มวางแผน' : 'ลองเปลี่ยน filter ดูค่ะ'}</p>
-        </div>`
-      : `<div class="goals-grid">${filteredGoals.map(g => renderGoalCard(g)).join('')}</div>`
-    }
   `;
+}
+
+/* คลิกไอคอน launchpad — ถ้าประเภทนี้มี goal เดียว → แก้ไข, มีหลาย → เพิ่มใหม่ของประเภทนี้,
+   ไม่มี → เพิ่มใหม่ของประเภทนี้ */
+function openLaunchpad(type) {
+  const goals = getGoals().filter(g => g.type === type);
+  if (goals.length === 1) {
+    openGoalModal(goals[0].id);
+  } else {
+    /* Open modal as new + pre-select type */
+    openGoalModal();
+    /* Defer to ensure modal is rendered */
+    setTimeout(() => {
+      if (typeof selectGoalTypeByKey === 'function') selectGoalTypeByKey(type);
+      const nameEl = document.getElementById('gf-name');
+      if (nameEl && !nameEl.value) nameEl.value = (GOAL_TYPES[type] || {}).label || '';
+    }, 50);
+  }
 }
 
 function renderGoalCard(g) {

@@ -65,8 +65,120 @@ if ('serviceWorker' in navigator
     } catch (e) { av.innerHTML = '👤'; }
   }
 
+  /* ════════════════════════════════════════════
+     COLLAPSE / EXPAND sidebar — Option A (slide out fully)
+     - บันทึก state ใน localStorage (sync ทุกหน้า)
+     - inject ปุ่ม toggle + reopen handle ลงในทุกหน้า
+  ═══════════════════════════════════════════ */
+  const COLLAPSE_KEY = 'aia_sidebar_collapsed';
+
+  function applyCollapseState() {
+    const collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+    const sb = document.querySelector('.app-sidebar');
+    const main = document.querySelector('.app-main');
+    if (!sb || !main) return;
+    sb.classList.toggle('collapsed', collapsed);
+    main.classList.toggle('expanded', collapsed);
+    const handle = document.getElementById('sb-reopen-handle');
+    if (handle) handle.classList.toggle('visible', collapsed);
+  }
+
+  function toggleSidebar() {
+    const cur = localStorage.getItem(COLLAPSE_KEY) === '1';
+    localStorage.setItem(COLLAPSE_KEY, cur ? '0' : '1');
+    applyCollapseState();
+  }
+  window.toggleSidebar = toggleSidebar;
+
+  function injectCollapseUI() {
+    const sb = document.querySelector('.app-sidebar');
+    if (!sb || document.getElementById('sb-collapse-btn')) return;
+    /* Toggle button — top-right of sidebar, inside the logo area */
+    const logo = sb.querySelector('.sb-logo-area');
+    if (logo) {
+      const btn = document.createElement('button');
+      btn.id = 'sb-collapse-btn';
+      btn.className = 'sb-collapse-btn';
+      btn.title = 'ซ่อนเมนู (Ctrl+B)';
+      btn.innerHTML = '◀';
+      btn.onclick = toggleSidebar;
+      logo.appendChild(btn);
+    }
+    /* Reopen handle — floating button at left edge when collapsed */
+    if (!document.getElementById('sb-reopen-handle')) {
+      const handle = document.createElement('button');
+      handle.id = 'sb-reopen-handle';
+      handle.className = 'sb-reopen-handle';
+      handle.title = 'เปิดเมนู (Ctrl+B)';
+      handle.innerHTML = '▶';
+      handle.onclick = toggleSidebar;
+      document.body.appendChild(handle);
+    }
+    applyCollapseState();
+  }
+
+  /* Keyboard shortcut: Ctrl+B / Cmd+B */
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      toggleSidebar();
+    }
+  });
+
+  /* ════════════════════════════════════════════
+     FULLSCREEN TOGGLE — ซ่อน tab bar/address bar/taskbar
+     - คลิกปุ่ม ⛶ ที่มุมขวาบน หรือกด F11 (browser default)
+     - Esc ออกจาก fullscreen (browser default)
+     - sync icon ตาม state จริง (event fullscreenchange)
+  ═══════════════════════════════════════════ */
+  const FS_ICON_ENTER = '⛶';   /* expand glyph */
+  const FS_ICON_EXIT  = '🗗';   /* restore glyph */
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  function toggleFullscreen() {
+    if (isFullscreen()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    } else {
+      const root = document.documentElement;
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (req) {
+        req.call(root).catch(err => {
+          console.warn('Fullscreen denied:', err && err.message);
+          alert('Browser ปฏิเสธคำขอ fullscreen — ลองกด F11 แทนครับ');
+        });
+      }
+    }
+  }
+  window.toggleFullscreen = toggleFullscreen;
+
+  function updateFsIcon() {
+    const btn = document.getElementById('sb-fullscreen-btn');
+    if (!btn) return;
+    btn.innerHTML = isFullscreen() ? FS_ICON_EXIT : FS_ICON_ENTER;
+    btn.title = isFullscreen() ? 'ออกจาก fullscreen (Esc)' : 'เต็มจอ (F11)';
+  }
+
+  function injectFullscreenBtn() {
+    if (document.getElementById('sb-fullscreen-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'sb-fullscreen-btn';
+    btn.className = 'sb-fullscreen-btn';
+    btn.innerHTML = FS_ICON_ENTER;
+    btn.title = 'เต็มจอ (F11)';
+    btn.onclick = toggleFullscreen;
+    document.body.appendChild(btn);
+    document.addEventListener('fullscreenchange', updateFsIcon);
+    document.addEventListener('webkitfullscreenchange', updateFsIcon);
+  }
+
   function init() {
     restore();
+    injectCollapseUI();
+    injectFullscreenBtn();
     const sb = document.querySelector('.app-sidebar');
     if (sb) {
       sb.addEventListener('click', (e) => {
@@ -75,6 +187,11 @@ if ('serviceWorker' in navigator
     }
     window.addEventListener('beforeunload', save);
     window.addEventListener('pagehide', save);
+
+    /* sync collapse state across tabs */
+    window.addEventListener('storage', (e) => {
+      if (e.key === COLLAPSE_KEY) applyCollapseState();
+    });
 
     /* ป้องกัน wheel เปลี่ยนค่า number input ที่ focus อยู่
        (browser default — scroll mouse บน number input ที่ focus = ค่าขึ้น/ลง)
