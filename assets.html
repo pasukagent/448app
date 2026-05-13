@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,10 +25,10 @@
   <style>
     /* ════ Brand override for THIS page — blue accent (spreadsheet style) ════ */
     :root {
-      --ast-blue:       #1F3D7A;
-      --ast-blue-light: #4A6FAB;
-      --ast-blue-soft:  #E8EEF7;
-      --ast-divider:    #C8D2E5;
+      --ast-blue:       #0F1A2F;
+      --ast-blue-light: #3A4F75;
+      --ast-blue-soft:  #F0F2F7;
+      --ast-divider:    #C0C8D6;
     }
 
     .feature-hero {
@@ -122,7 +122,7 @@
       border-bottom: 1px solid var(--ast-divider);
       transition: border-color .15s, background .15s;
     }
-    .ast-input:hover { border-bottom-color: var(--ast-blue-light); background: #F6F9FE; }
+    .ast-input:hover { border-bottom-color: var(--ast-blue-light); background: #F8F9FB; }
     .ast-input:focus {
       border-bottom-color: var(--ast-blue); background: var(--ast-blue-soft);
       border-bottom-width: 2px; padding-bottom: 3px;
@@ -167,7 +167,7 @@
       padding: 4px 6px; color: var(--ast-blue);
     }
     .ast-cust-name::placeholder { color: #C5CCDB; font-weight: 500; }
-    .ast-cust-name:hover { border-bottom-color: var(--ast-blue-light); background: #F6F9FE; }
+    .ast-cust-name:hover { border-bottom-color: var(--ast-blue-light); background: #F8F9FB; }
     .ast-cust-name:focus { border-bottom-color: var(--ast-blue); background: var(--ast-blue-soft); border-bottom-width: 2px; padding-bottom: 3px; }
     .ast-cust-del {
       width: 22px; height: 22px; border-radius: 50%;
@@ -249,7 +249,7 @@
     .ast-apply-opt {
       display: flex; align-items: center; gap: 14px;
       padding: 12px 14px; background: white;
-      border: 1.5px solid var(--gast-divider, #C8D2E5);
+      border: 1.5px solid var(--gast-divider, #C0C8D6);
       border-radius: 100px; cursor: pointer;
       font-family: var(--font); font-size: 1rem; font-weight: 700;
       color: var(--ast-blue); transition: all .15s;
@@ -417,7 +417,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -637,21 +637,28 @@ function getAssets() {
    ASSET TYPES
 ═══════════════════════════════════════════ */
 const ASSET_TYPES = {
-  cash:       { icon:'💵', label:'เงินสด',                 color:'#16A085', group:'liquid'    },
-  deposit:    { icon:'💰', label:'เงินฝาก',               color:'#0E76A8', group:'liquid'    },
-  bond:       { icon:'📜', label:'ตราสารหนี้',             color:'#5DADE2', group:'liquid'    },
-  annuity:    { icon:'🛡️', label:'ประกันบำนาญ',          color:'#1F3D7A', group:'investment'},
-  pvd:        { icon:'🏢', label:'กองทุนสำรองเลี้ยงชีพ', color:'#28a745', group:'investment'},
-  rmf:        { icon:'🌱', label:'RMF',                    color:'#27AE60', group:'investment'},
-  ltf:        { icon:'📈', label:'LTF',                    color:'#16A085', group:'investment'},
-  ssf:        { icon:'🌿', label:'SSF',                    color:'#1ABC9C', group:'investment'},
-  thaiesg:    { icon:'🌍', label:'ThaiESG',                color:'#52BE80', group:'investment'},
-  mutual:     { icon:'🏦', label:'กองทุนรวม',             color:'#8E44AD', group:'investment'},
-  unitlinked: { icon:'🔗', label:'Unit Linked',           color:'#7B2FF7', group:'investment'},
-  realestate: { icon:'🏠', label:'ค่าเช่าอสังหาริมทรัพย์', color:'#E67E22', group:'personal'  },
-  stock:      { icon:'📊', label:'หุ้นสามัญ',              color:'#D35400', group:'investment'},
-  other:      { icon:'📦', label:'อื่นๆ',                  color:'#7F8C8D', group:'personal'  },
+  cash:       { icon:'💵', svg:'cash',       label:'เงินสด',                 color:'#16A085', group:'liquid'    },
+  deposit:    { icon:'💰', svg:'deposit',    label:'เงินฝาก',               color:'#0E76A8', group:'liquid'    },
+  bond:       { icon:'📜', svg:'bond',       label:'ตราสารหนี้',             color:'#5DADE2', group:'liquid'    },
+  annuity:    { icon:'🛡️', svg:'shield',     label:'ประกันบำนาญ',          color:'#0F1A2F', group:'investment'},
+  pvd:        { icon:'🏢', svg:'building',   label:'กองทุนสำรองเลี้ยงชีพ', color:'#28a745', group:'investment'},
+  rmf:        { icon:'🌱', svg:'seedling',   label:'RMF',                    color:'#27AE60', group:'investment'},
+  ltf:        { icon:'📈', svg:'trendingUp', label:'LTF',                    color:'#16A085', group:'investment'},
+  ssf:        { icon:'🌿', svg:'leaf',       label:'SSF',                    color:'#1ABC9C', group:'investment'},
+  thaiesg:    { icon:'🌍', svg:'globe',      label:'ThaiESG',                color:'#52BE80', group:'investment'},
+  mutual:     { icon:'🏦', svg:'bank',       label:'กองทุนรวม',             color:'#8E44AD', group:'investment'},
+  unitlinked: { icon:'🔗', svg:'link',       label:'Unit Linked',           color:'#7B2FF7', group:'investment'},
+  realestate: { icon:'🏠', svg:'house',      label:'ค่าเช่าอสังหาริมทรัพย์', color:'#E67E22', group:'personal'  },
+  stock:      { icon:'📊', svg:'chartBar',   label:'หุ้นสามัญ',              color:'#D35400', group:'investment'},
+  other:      { icon:'📦', svg:'box',        label:'อื่นๆ',                  color:'#7F8C8D', group:'personal'  },
 };
+/* Render asset row icon — SVG (red theme) if IconLib loaded, fallback to emoji */
+function _renderAssetIcon(t) {
+  if (window.IconLib && t.svg) {
+    return window.IconLib.getIcon(t.svg, { size: 20 });
+  }
+  return t.icon;
+}
 const GROUP_LABELS = {
   liquid:     '💧 สินทรัพย์สภาพคล่อง',
   investment: '📈 สินทรัพย์เพื่อการลงทุน',
@@ -832,10 +839,20 @@ function getRowData(type) {
 ═══════════════════════════════════════════ */
 let _astApplyType = null;
 const APPLY_OPTIONS = [
-  { value: 'retire',    icon: '🛋️', label: 'แผนเกษียณ' },
-  { value: 'education', icon: '🎓', label: 'แผนการศึกษาบุตร' },
-  { value: null,        icon: '−',  label: 'ไม่ระบุ', muted: true },
+  { value: 'retire',    icon: '🛋️', svg: 'sofa',      label: 'แผนเกษียณ' },
+  { value: 'education', icon: '🎓', svg: 'education', label: 'แผนการศึกษาบุตร' },
+  { value: null,        icon: '−',  svg: null,        label: 'ไม่ระบุ', muted: true },
 ];
+/* Render apply-to icon — SVG if IconLib loaded, fallback to emoji */
+function _renderApplyIcon(value, size) {
+  size = size || 18;
+  if (!window.IconLib) {
+    return value === 'retire' ? '🛋️' : value === 'education' ? '🎓' : '−';
+  }
+  if (value === 'retire')    return window.IconLib.getIcon('sofa',      { size });
+  if (value === 'education') return window.IconLib.getIcon('education', { size });
+  return '−';
+}
 
 function openApplyModal(type) {
   _astApplyType = type;
@@ -846,7 +863,7 @@ function openApplyModal(type) {
   opts.innerHTML = APPLY_OPTIONS.map(o => `
     <button class="ast-apply-opt ${cur === o.value ? 'active' : ''}"
             data-value="${o.value === null ? '' : o.value}">
-      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.icon}</span>
+      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.svg && window.IconLib ? window.IconLib.getIcon(o.svg, { size: 22 }) : o.icon}</span>
       <span>${o.label}</span>
     </button>
   `).join('');
@@ -976,7 +993,7 @@ function render() {
   wrap.innerHTML = `
     <div class="ast-wrap">
       <div class="ast-section-head">
-        <div class="ast-section-icon">👛</div>
+        <div class="ast-section-icon">${window.IconLib ? window.IconLib.getIcon('wallet', { size: 38 }) : '👛'}</div>
         <div class="ast-section-title">สินทรัพย์</div>
         <div class="ast-section-spacer"></div>
         <div class="ast-tip">💡 กดในช่องเพื่อแก้ไข — FV คำนวณอัตโนมัติ</div>
@@ -1167,9 +1184,7 @@ function renderCustomRow(a) {
       <td class="ast-action-cell">
         <button class="ast-apply-btn ${a.appliedTo?'assigned':''}"
                 onclick="openApplyModalForCustom('${a.id}')"
-                title="นำไปใช้กับ...">${
-          a.appliedTo==='retire' ? '🛋️' : a.appliedTo==='education' ? '🎓' : '−'
-        }</button>
+                title="นำไปใช้กับ...">${_renderApplyIcon(a.appliedTo)}</button>
       </td>
     </tr>
   `;
@@ -1184,7 +1199,7 @@ function openApplyModalForCustom(id) {
   opts.innerHTML = APPLY_OPTIONS.map(o => `
     <button class="ast-apply-opt ${cur === o.value ? 'active' : ''}"
             data-value="${o.value === null ? '' : o.value}">
-      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.icon}</span>
+      <span class="ast-apply-opt-icon ${o.muted ? 'muted' : ''}">${o.svg && window.IconLib ? window.IconLib.getIcon(o.svg, { size: 22 }) : o.icon}</span>
       <span>${o.label}</span>
     </button>
   `).join('');
@@ -1229,7 +1244,7 @@ function renderRow(row) {
     <tr data-row="${row.type}">
       <td class="col-name">
         <span class="ast-row-name">
-          <span class="ast-row-icon">${t.icon}</span>${t.label}
+          <span class="ast-row-icon">${_renderAssetIcon(t)}</span>${t.label}
           <span class="ast-info-wrap">
             <span class="ast-info" tabindex="0">i</span>
             <span class="ast-tooltip">${row.info}</span>
@@ -1285,9 +1300,7 @@ function renderRow(row) {
       <td class="ast-action-cell">
         <button class="ast-apply-btn ${d.appliedTo?'assigned':''}" data-apply-type="${row.type}"
                 onclick="openApplyModal('${row.type}')"
-                title="${d.appliedTo==='retire'?'นำไปใช้กับแผนเกษียณ':d.appliedTo==='education'?'นำไปใช้กับแผนการศึกษาบุตร':'นำไปใช้กับ...'}">${
-          d.appliedTo==='retire' ? '🛋️' : d.appliedTo==='education' ? '🎓' : '−'
-        }</button>
+                title="${d.appliedTo==='retire'?'นำไปใช้กับแผนเกษียณ':d.appliedTo==='education'?'นำไปใช้กับแผนการศึกษาบุตร':'นำไปใช้กับ...'}">${_renderApplyIcon(d.appliedTo)}</button>
       </td>
     </tr>
   `;

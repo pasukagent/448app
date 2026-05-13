@@ -17,20 +17,25 @@
 @keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
 
 :root {
-  --red-primary:   #D0021B;
-  --red-dark:      #9B0013;
-  --red-light:     #FF4D6A;
-  --red-soft:      #FFF0F2;
-  --red-mid:       #FFD6DC;
+  /* AIA Prestige theme — navy + gold (variable names kept for compatibility) */
+  --red-primary:   #1F2D4F;   /* deep navy */
+  --red-dark:      #0F1A2F;   /* darker navy */
+  --red-light:     #3A4F75;   /* lighter navy */
+  --red-soft:      #F0F2F7;   /* very soft navy bg */
+  --red-mid:       #D4DAE6;   /* mid navy */
+  --gold-primary:  #C9A961;   /* champagne gold accent */
+  --gold-dark:     #9C7F47;   /* warm bronze */
+  --gold-soft:     #F5EDD9;
+  --gold-light:    #D4BA82;   /* lighter gold for highlights */
   --white:         #FFFFFF;
   --gray-100:      #F8F9FA;
   --gray-200:      #E9ECEF;
   --gray-400:      #ADB5BD;
   --gray-600:      #6C757D;
   --gray-800:      #343A40;
-  --shadow-sm:     0 2px 8px rgba(208,2,27,.12);
-  --shadow-md:     0 4px 20px rgba(208,2,27,.18);
-  --shadow-lg:     0 8px 40px rgba(208,2,27,.22);
+  --shadow-sm:     0 2px 8px rgba(31,45,79,.12);
+  --shadow-md:     0 4px 20px rgba(31,45,79,.18);
+  --shadow-lg:     0 8px 40px rgba(31,45,79,.22);
   --radius:        16px;
   --radius-sm:     10px;
   --font:          'Sarabun', 'Prompt', sans-serif;
@@ -514,6 +519,140 @@ footer span { color: var(--red-primary); font-weight: 700; }
   pointer-events: auto;
 }
 .sb-reopen-handle:hover { background: var(--red-dark); width: 32px; }
+
+/* ════════════════════════════════════════════
+   SVG ICON LIBRARY — modern flat icons
+   ใช้ผ่าน icons.js — เปลี่ยนสีด้วย color (currentColor)
+═══════════════════════════════════════════ */
+.svg-icon {
+  display: inline-block; vertical-align: -3px;
+  flex-shrink: 0;
+}
+/* sidebar icons — red filled, follows .app-sb-item color */
+.app-sb-item .sb-ico.has-svg-icon { color: inherit; }
+.app-sb-item .sb-ico .svg-icon { width: 18px; height: 18px; }
+
+/* Circular badge version — สำหรับ page header icons */
+.svg-icon-circle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--red-soft); color: var(--red-primary);
+  flex-shrink: 0;
+}
+.svg-icon-circle .svg-icon { width: 30px; height: 30px; }
+.svg-icon-circle.large {
+  width: 76px; height: 76px;
+}
+.svg-icon-circle.large .svg-icon { width: 40px; height: 40px; }
+
+/* Small inline icon (for row labels in tables/lists) */
+.svg-icon-sm {
+  width: 18px; height: 18px;
+}
+.svg-icon-inline {
+  width: 16px; height: 16px; vertical-align: -2px; margin-right: 6px;
+  color: var(--red-primary);
+}
+
+/* ════════════════════════════════════════════
+   AIA PRESTIGE — GOLD ACCENTS
+   เติม gold/bronze บน navy ให้ดูพรีเมียม + อบอุ่นขึ้น
+═══════════════════════════════════════════ */
+
+/* Hero gradient stripe — bottom diagonal gold accent (Prestige Handbook style) */
+.feature-hero {
+  position: relative;
+  overflow: hidden;
+}
+.feature-hero::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 20px;
+  background: linear-gradient(120deg,
+    transparent 0%, transparent 25%,
+    var(--gold-dark) 30%, var(--gold-primary) 55%,
+    var(--gold-light) 75%, transparent 92%, transparent 100%);
+  pointer-events: none;
+}
+.feature-hero::after {
+  content: ''; position: absolute; bottom: 20px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+  pointer-events: none;
+}
+.feature-hero > * { position: relative; z-index: 1; }
+
+/* Primary CTA — gold gradient with navy text (premium pop) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-primary)) !important;
+  color: var(--red-primary) !important;
+  border: 1.5px solid var(--gold-primary) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.3);
+  font-weight: 800 !important;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark)) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(156,127,71,.35) !important;
+}
+
+/* Active sidebar item — gold left border accent */
+.app-sb-item.active {
+  position: relative;
+  background: var(--red-soft);
+  color: var(--red-primary);
+  font-weight: 700;
+}
+.app-sb-item.active::before {
+  content: ''; position: absolute; left: -2px; top: 4px; bottom: 4px;
+  width: 3px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+}
+
+/* Flow next button (→) — gold gradient (sticky bottom bar CTA) */
+.flow-nav-btn.next,
+.flow-next-btn,
+[class*="flow-btn"][class*="next"],
+[class*="-next-btn"]:not([class*="prev"]) {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-primary)) !important;
+  color: var(--red-primary) !important;
+  border-color: var(--gold-primary) !important;
+  font-weight: 800 !important;
+}
+.flow-nav-btn.next:hover,
+.flow-next-btn:hover {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark)) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(156,127,71,.35) !important;
+}
+
+/* Page header circles — luxury navy bg + gold border + gold icon (premium feel) */
+.ast-section-icon,
+.r2-section-icon,
+.r3-head-icon,
+.e2-head-icon,
+.e3-head-icon,
+.li2-head-icon,
+.g2-head-icon,
+.ps2-head-icon,
+.p2-head-icon {
+  background: linear-gradient(135deg, var(--red-primary), var(--red-dark)) !important;
+  border: 2.5px solid var(--gold-primary) !important;
+  color: var(--gold-primary) !important;
+  box-shadow: 0 4px 12px rgba(31,45,79,.25), inset 0 0 0 2px rgba(201,169,97,.15);
+}
+/* health-insurance uses square icon — keep square but apply gold theme */
+.hi2-head-icon {
+  background: linear-gradient(135deg, var(--red-primary), var(--red-dark)) !important;
+  border: 2.5px solid var(--gold-primary) !important;
+  color: var(--gold-primary) !important;
+}
+
+/* Decorative gold underline for section titles (subtle) */
+.app-sb-lbl {
+  color: var(--gold-dark) !important;
+  position: relative;
+}
 
 /* Sticky topbar */
 .app-topbar {

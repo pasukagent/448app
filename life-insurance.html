@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,9 +25,9 @@
   <style>
     /* ════ Brand override — indigo accent ════ */
     :root {
-      --li2-indigo:       #3B43A8;
-      --li2-indigo-light: #6B72C9;
-      --li2-indigo-soft:  #EEF0F9;
+      --li2-indigo:       #1F2D4F;
+      --li2-indigo-light: #3A4F75;
+      --li2-indigo-soft:  #F0F2F7;
       --li2-red:          #DC3545;
     }
     .feature-hero {
@@ -360,7 +360,7 @@
 
     .li-total-strip {
       margin-top: 12px; padding: 12px 14px; border-radius: 10px;
-      background: linear-gradient(90deg, var(--red-soft), #FFF5F5);
+      background: linear-gradient(90deg, var(--red-soft), #F4F6FA);
       display: flex; justify-content: space-between; align-items: center;
       font-size: .92rem;
     }
@@ -438,7 +438,7 @@
       border-radius: 9px; transition: width .4s ease;
     }
     .progress-bar-fill.warn { background: linear-gradient(90deg, #FF8C00, #FFB347); }
-    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #FF6B6B); }
+    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #C9A961); }
 
     /* Existing policies preview */
     .policies-preview {
@@ -486,7 +486,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -1031,7 +1031,7 @@ function render() {
     <div class="li2-wrap">
       <!-- Header -->
       <div class="li2-head">
-        <div class="li2-head-icon">☂</div>
+        <div class="li2-head-icon">${window.IconLib ? window.IconLib.getIcon('umbrella', { size: 38 }) : '☂'}</div>
         <div class="li2-head-title">ประกันชีวิต</div>
         <div class="li2-head-spacer"></div>
         <a class="li2-link-btn" href="policies.html">สรุปประกัน</a>

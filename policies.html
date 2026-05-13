@@ -9,7 +9,7 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -185,7 +185,7 @@
     }
     .ns-good { background: #E8F5E9; color: #28a745; }
     .ns-warn { background: #FFF3E0; color: #FF8C00; }
-    .ns-bad  { background: #FEE2E2; color: #DC3545; }
+    .ns-bad  { background: #F0F2F7; color: #1F2D4F; }
     .nc-toggle, .hgc-toggle { font-size: .85rem; color: var(--gray-400); transition: transform .2s; margin-left: 8px; }
     .nc-toggle.open, .hgc-toggle.open { transform: rotate(180deg); }
 
@@ -202,7 +202,7 @@
       padding: 10px 14px; background: var(--gray-100); border-radius: 10px;
       border-left: 4px solid var(--gray-300);
     }
-    .nc-row.cat-debt   { border-left-color: #DC3545; }
+    .nc-row.cat-debt   { border-left-color: #1F2D4F; }
     .nc-row.cat-income { border-left-color: #FF8C00; }
     .nc-row.cat-edu    { border-left-color: #7B2FF7; }
     .nc-row.cat-final  { border-left-color: #0E76A8; }
@@ -218,7 +218,7 @@
     .nc-row input:focus { outline: none; border-color: var(--red-primary); }
 
     .nc-result {
-      background: linear-gradient(135deg, #FFF5F5, #FFEDF1);
+      background: linear-gradient(135deg, #F4F6FA, #FFEDF1);
       border-radius: 10px; padding: 18px; border: 1.5px solid var(--red-soft);
     }
     .nc-result h4 { font-size: .85rem; font-weight: 800; color: var(--red-primary); margin-bottom: 12px; }
@@ -236,7 +236,7 @@
       padding: 12px; border-radius: 8px; font-size: .9rem; font-weight: 700;
       text-align: center;
     }
-    .nc-gap-strip.bad  { background: #FEE2E2; color: #DC3545; }
+    .nc-gap-strip.bad  { background: #F0F2F7; color: #1F2D4F; }
     .nc-gap-strip.good { background: #E8F5E9; color: #28a745; }
 
     /* ─── Phase 3.4 — Health Coverage Gap ─── */
@@ -263,7 +263,7 @@
     }
     .ht-status.s-good { background: #E8F5E9; color: #28a745; }
     .ht-status.s-warn { background: #FFF3E0; color: #FF8C00; }
-    .ht-status.s-bad  { background: #FEE2E2; color: #DC3545; }
+    .ht-status.s-bad  { background: #F0F2F7; color: #1F2D4F; }
 
     .hgc-stat-row {
       display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px;
@@ -336,7 +336,7 @@
       font-size: .8rem; transition: all .2s; flex-shrink: 0;
     }
     .tbl-btn.view:hover { border-color: var(--red-primary); background: var(--red-soft); }
-    .tbl-btn.del:hover  { border-color: #FF4D4D; background: #FFF0F0; }
+    .tbl-btn.del:hover  { border-color: #FF4D4D; background: #F0F2F7; }
 
     /* ─── ADD POLICY FORM ─── */
     /* ─── Policy Form (Modal style — Phase 3.3 redesign) ─── */
@@ -486,11 +486,11 @@
       border: none; border-radius: 30px; cursor: pointer;
       font-family: var(--font); font-weight: 700; font-size: .92rem;
       transition: all .15s;
-      box-shadow: 0 3px 10px rgba(208,2,27,.25);
+      box-shadow: 0 3px 10px rgba(31,45,79,.25);
     }
     .rider-add-btn:hover {
       background: var(--red-dark);
-      box-shadow: 0 4px 14px rgba(208,2,27,.4);
+      box-shadow: 0 4px 14px rgba(31,45,79,.4);
       transform: translateY(-1px);
     }
     .rider-add-btn .ra-plus {
@@ -588,16 +588,16 @@
     .gap-item  { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--radius-sm); border: 1.5px solid; }
     .gap-item.ok     { border-color: #C3E6CB; background: #F0FFF4; }
     .gap-item.warn   { border-color: #FFE08A; background: #FFFBF0; }
-    .gap-item.danger { border-color: #FFB3B3; background: #FFF0F0; }
+    .gap-item.danger { border-color: #D4BA82; background: #F0F2F7; }
     .gap-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .gap-item.ok .gap-dot     { background: #28a745; }
     .gap-item.warn .gap-dot   { background: #FFA500; }
-    .gap-item.danger .gap-dot { background: #DC3545; }
+    .gap-item.danger .gap-dot { background: #1F2D4F; }
     .gap-label  { font-weight: 700; font-size: .88rem; flex: 1; }
     .gap-status { font-size: .75rem; padding: 2px 10px; border-radius: 50px; font-weight: 700; }
     .gap-item.ok .gap-status     { background: #C3E6CB; color: #155724; }
     .gap-item.warn .gap-status   { background: #FFE08A; color: #856404; }
-    .gap-item.danger .gap-status { background: #FFB3B3; color: #721C24; }
+    .gap-item.danger .gap-status { background: #D4BA82; color: #721C24; }
     .gap-desc { font-size: .75rem; color: var(--gray-600); margin-top: 2px; }
 
     .cost-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -612,7 +612,7 @@
     .expiry-section-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .alert-list { display: flex; flex-direction: column; gap: 8px; }
     .alert-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--radius-sm); background: #FFFBF0; border: 1px solid #FFE08A; }
-    .alert-row.expired { background: #FFF0F0; border-color: #FFB3B3; }
+    .alert-row.expired { background: #F0F2F7; border-color: #D4BA82; }
     .alert-ico  { font-size: 1.1rem; }
     .alert-info { flex: 1; }
     .alert-name { font-weight: 700; font-size: .88rem; }
@@ -686,12 +686,12 @@
     }
     .spider-leg-item.ok     { border-left-color: #28a745; background: #F0FFF4; }
     .spider-leg-item.warn   { border-left-color: #FFA500; background: #FFFBF0; }
-    .spider-leg-item.danger { border-left-color: #DC3545; background: #FFF0F0; }
+    .spider-leg-item.danger { border-left-color: #1F2D4F; background: #F0F2F7; }
     .spider-leg-label { flex: 1; font-weight: 700; font-size: .85rem; }
     .spider-leg-pct { font-size: .82rem; font-weight: 800; }
     .spider-leg-item.ok .spider-leg-pct     { color: #28a745; }
     .spider-leg-item.warn .spider-leg-pct   { color: #FFA500; }
-    .spider-leg-item.danger .spider-leg-pct { color: #DC3545; }
+    .spider-leg-item.danger .spider-leg-pct { color: #1F2D4F; }
     .spider-leg-sub { font-size: .72rem; color: var(--gray-500); margin-top: 2px; }
     @media(max-width: 768px) {
       .spider-card-inner { grid-template-columns: 1fr; }
@@ -744,14 +744,14 @@
     .endorse-meta { font-size: .76rem; color: var(--gray-600); margin-top: 2px; line-height: 1.5; }
     .endorse-amt  { font-size: .82rem; font-weight: 700; color: var(--red-primary); margin-top: 3px; }
     .endorse-del  { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--gray-200); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; transition: all .2s; }
-    .endorse-del:hover { border-color: #FF4D4D; background: #FFF0F0; }
+    .endorse-del:hover { border-color: #FF4D4D; background: #F0F2F7; }
     .endorse-edit { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--gray-200); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; transition: all .2s; }
     .endorse-edit:hover { border-color: var(--red-primary); background: var(--red-soft); }
     .endorse-actions { display: flex; gap: 5px; flex-shrink: 0; }
     .endorse-empty { color: var(--gray-400); font-size: .85rem; text-align: center; padding: 14px 0; }
     /* Release doc date badge */
     .release-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 50px; margin-top: 5px; }
-    .release-badge.overdue { background: #FFF0F0; color: #C0021B; border: 1px solid #FFB3B3; }
+    .release-badge.overdue { background: #F0F2F7; color: #1F2D4F; border: 1px solid #D4BA82; }
     .release-badge.soon    { background: #FFF8E6; color: #B45309; border: 1px solid #FCD34D; }
     .release-badge.ok      { background: #F0FFF4; color: #276749; border: 1px solid #9AE6B4; }
     .endorse-add-form { display: none; background: var(--gray-100); border-radius: var(--radius-sm); padding: 16px; margin-top: 10px; }
@@ -773,8 +773,8 @@
     .fg2 label { font-size: .82rem; font-weight: 600; color: var(--gray-800); }
     .fg2 input, .fg2 select { padding: 9px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: .9rem; font-family: var(--font); background: white; transition: all .2s; }
     .fg2 input:focus, .fg2 select:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft); }
-    .fg2 input.invalid, .fg2 select.invalid { border-color: #DC3545; }
-    .form-error { margin-top: 12px; background: #FFF0F0; border: 1px solid #FFB3B3; border-radius: 8px; padding: 9px 14px; font-size: .85rem; color: #C0021B; display: none; }
+    .fg2 input.invalid, .fg2 select.invalid { border-color: #1F2D4F; }
+    .form-error { margin-top: 12px; background: #F0F2F7; border: 1px solid #D4BA82; border-radius: 8px; padding: 9px 14px; font-size: .85rem; color: #1F2D4F; display: none; }
 
     /* ─── BACK BUTTON ─── */
     .btn-back { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,.85); border: 1.5px solid rgba(255,255,255,.4); background: transparent; padding: 7px 16px; border-radius: 50px; font-size: .85rem; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all .2s; }
@@ -832,7 +832,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -1141,7 +1141,7 @@
               </div>
             </div>
 
-            <div id="p-error" style="display:none;margin-top:14px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#C0021B;"></div>
+            <div id="p-error" style="display:none;margin-top:14px;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#1F2D4F;"></div>
 
             <div class="pf-save-row">
               <button class="pf-save-btn" onclick="addPolicy()">บันทึก</button>
@@ -1450,7 +1450,7 @@
           </tbody>
         </table>
 
-        <div id="ep-error" style="display:none;margin-top:12px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#C0021B;"></div>
+        <div id="ep-error" style="display:none;margin-top:12px;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:9px 14px;font-size:.85rem;color:#1F2D4F;"></div>
       </div><!-- /modal-edit-mode -->
 
       <!-- Section 6: สลักหลังกรมธรรม์ -->
@@ -1482,7 +1482,7 @@
             </div>
           </div>
           <div class="fg" style="margin-top:10px;"><label>หมายเหตุ / รายละเอียด</label><input id="en-note" type="text" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></div>
-          <div id="en-error" style="display:none;margin-top:8px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:8px 12px;font-size:.82rem;color:#C0021B;"></div>
+          <div id="en-error" style="display:none;margin-top:8px;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:8px 12px;font-size:.82rem;color:#1F2D4F;"></div>
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button class="btn btn-primary" id="en-save-btn" onclick="saveEndorsementForm()" style="padding:8px 16px;font-size:.85rem;">💾 บันทึก</button>
             <button class="btn btn-outline" onclick="toggleEndorseForm()" style="padding:8px 16px;font-size:.85rem;">ยกเลิก</button>
@@ -1552,7 +1552,7 @@
     </div>
     <div class="client-modal-footer">
       <div class="delete-zone" id="cm-delete-zone" style="display:none;">
-        <button class="btn" onclick="confirmDeleteClient(editingClientId)" style="background:#FFF0F0;color:#C0021B;border:1.5px solid #FFB3B3;padding:8px 16px;font-size:.82rem;border-radius:50px;">🗑️ ลบลูกค้านี้</button>
+        <button class="btn" onclick="confirmDeleteClient(editingClientId)" style="background:#F0F2F7;color:#1F2D4F;border:1.5px solid #D4BA82;padding:8px 16px;font-size:.82rem;border-radius:50px;">🗑️ ลบลูกค้านี้</button>
       </div>
       <button class="btn btn-outline" onclick="closeClientModal()" style="padding:9px 20px;font-size:.88rem;">ยกเลิก</button>
       <button class="btn btn-primary" onclick="saveClient()" style="padding:9px 20px;font-size:.88rem;">💾 บันทึก</button>
@@ -2235,10 +2235,10 @@ function renderSpiderChart(policies) {
         {
           label: 'ความคุ้มครองปัจจุบัน (%)',
           data: pctValues,
-          backgroundColor: 'rgba(208,2,27,0.12)',
-          borderColor: '#D0021B',
+          backgroundColor: 'rgba(31,45,79,0.12)',
+          borderColor: '#1F2D4F',
           borderWidth: 2.5,
-          pointBackgroundColor: '#D0021B',
+          pointBackgroundColor: '#1F2D4F',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 5,
@@ -3039,7 +3039,7 @@ function openDetail(i) {
     const totalDays = Math.round((endDt - startDt) / 86400000);
     document.getElementById('md-duration').textContent = Math.round(totalDays/365) + ' ปี (' + totalDays.toLocaleString('th-TH') + ' วัน)';
     if (expired) {
-      document.getElementById('md-remaining').innerHTML = `<span style="color:#DC3545;">หมดอายุแล้ว ${Math.abs(diffDays)} วัน</span>`;
+      document.getElementById('md-remaining').innerHTML = `<span style="color:#1F2D4F;">หมดอายุแล้ว ${Math.abs(diffDays)} วัน</span>`;
     } else {
       document.getElementById('md-remaining').textContent = diffDays !== null ? diffDays.toLocaleString('th-TH') + ' วัน' : '—';
     }
@@ -4386,8 +4386,8 @@ document.addEventListener('keydown', e => {
 
 /* ตัวแปร/constants ของ Phase 3.3 + 3.4 — ต้องประกาศก่อน init เพื่อกัน TDZ error
    เมื่อ init เรียก showDetail → renderNeedsAnalysis/renderHealthGap ใช้ตัวแปรเหล่านี้ */
-let needsCardOpen  = true;
-let healthCardOpen = true;
+let needsCardOpen  = false;   /* collapsed by default — user expands on click */
+let healthCardOpen = false;
 
 // Hospital tiers (typical Thai healthcare costs)
 const HOSPITAL_TIERS = [

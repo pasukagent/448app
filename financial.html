@@ -9,7 +9,7 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -474,7 +474,7 @@
       transition: border-color .15s;
     }
     .cf-input-row.cf-income      { border-left-color: #28a745; }
-    .cf-input-row.cf-fixed       { border-left-color: #DC3545; }
+    .cf-input-row.cf-fixed       { border-left-color: #1F2D4F; }
     .cf-input-row.cf-variable    { border-left-color: #FF8C00; }
     .cf-input-row.cf-debt        { border-left-color: #9B59B6; }
     .cf-input-row.cf-savings     { border-left-color: #0E76A8; }
@@ -492,7 +492,7 @@
 
     .cf-summary-strip {
       margin-top: 16px; padding: 14px 18px; border-radius: 10px;
-      background: linear-gradient(135deg, #FFF5F5, white);
+      background: linear-gradient(135deg, #F4F6FA, white);
       border: 1.5px solid var(--red-soft);
       display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
     }
@@ -500,7 +500,7 @@
     .cf-strip-lbl { font-size: .73rem; color: var(--gray-500); font-weight: 600; }
     .cf-strip-val { font-size: 1.15rem; font-weight: 800; color: var(--gray-800); margin-top: 2px; }
     .cf-strip-val.green { color: #28a745; }
-    .cf-strip-val.red   { color: #DC3545; }
+    .cf-strip-val.red   { color: #1F2D4F; }
 
     /* Pie chart */
     .pie-col {
@@ -546,7 +546,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -820,7 +820,7 @@
             <input id="g-deadline" type="date">
           </div>
         </div>
-        <div id="g-error" style="display:none;margin-top:12px;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;"></div>
+        <div id="g-error" style="display:none;margin-top:12px;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#1F2D4F;"></div>
         <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="addGoal()">💾 บันทึกเป้าหมาย</button>
           <button class="btn btn-outline" onclick="clearGoalForm()">ล้างข้อมูล</button>
@@ -932,7 +932,7 @@ let selectedClientId   = null;
 let timelineChartInst  = null;
 
 const GOAL_COLORS = [
-  '#D0021B','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
+  '#1F2D4F','#3498DB','#2ECC71','#F39C12','#9B59B6','#E67E22','#1ABC9C','#E74C3C','#2980B9','#27AE60'
 ];
 let activeGoalIdx    = -1;
 
@@ -1182,11 +1182,11 @@ function renderTimelineChart(goals) {
       ctx.beginPath();
       ctx.moveTo(tx, chartArea.top);
       ctx.lineTo(tx, chartArea.bottom);
-      ctx.strokeStyle = '#D0021B';
+      ctx.strokeStyle = '#1F2D4F';
       ctx.lineWidth   = 2;
       ctx.setLineDash([5, 3]);
       ctx.stroke();
-      ctx.fillStyle = '#D0021B';
+      ctx.fillStyle = '#1F2D4F';
       ctx.font = 'bold 10px Sarabun, sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText('วันนี้', tx + 4, chartArea.top + 12);
@@ -1514,7 +1514,7 @@ document.addEventListener('keydown', e => {
    CASHFLOW (Phase 2.2)
 ═══════════════════════════════════════════════ */
 const CF_COLORS = {
-  expFixed:    { color: '#DC3545', label: 'รายจ่ายคงที่',   icon: '🏠' },
+  expFixed:    { color: '#1F2D4F', label: 'รายจ่ายคงที่',   icon: '🏠' },
   expVariable: { color: '#FF8C00', label: 'รายจ่ายผันแปร', icon: '🛒' },
   expDebt:     { color: '#9B59B6', label: 'ผ่อนหนี้',        icon: '💳' },
   expSavings:  { color: '#0E76A8', label: 'ออม/ลงทุน',     icon: '🪙' },

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,9 +25,9 @@
   <style>
     /* ════ Brand override for THIS page — indigo accent ════ */
     :root {
-      --edu-indigo:       #3B43A8;
-      --edu-indigo-light: #6B72C9;
-      --edu-indigo-soft:  #EEF0F9;
+      --edu-indigo:       #1F2D4F;
+      --edu-indigo-light: #3A4F75;
+      --edu-indigo-soft:  #F0F2F7;
       --edu-yellow:       #F5C242;
       --edu-red:          #DC3545;
     }
@@ -369,7 +369,7 @@
       overflow: hidden;
     }
     .child-head {
-      background: linear-gradient(135deg, #FFF5F5, #FFEDF1);
+      background: linear-gradient(135deg, #F4F6FA, #FFEDF1);
       padding: 18px 22px; display: flex; align-items: center; gap: 14px;
       border-bottom: 1px solid var(--red-soft);
     }
@@ -563,7 +563,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -1076,7 +1076,7 @@ function render() {
     <div class="e2-wrap">
       <!-- Header -->
       <div class="e2-head">
-        <div class="e2-head-icon">🎓</div>
+        <div class="e2-head-icon">${window.IconLib ? window.IconLib.getIcon('education', { size: 38 }) : '🎓'}</div>
         <div class="e2-head-text">
           <div class="e2-head-title">การศึกษาบุตร</div>
           <div class="e2-head-sub">
@@ -1372,7 +1372,7 @@ function renderChildCard(child, plan) {
           onchange="updateChildCost('${child.id}','${custKey}',parseMoney(this))"
           title="${isCustom ? 'แก้ไขเอง — กดปุ่ม ↺ เพื่อรีเซ็ต' : 'ค่าเริ่มต้น'}"
           oncontextmenu="event.preventDefault();resetChildCost('${child.id}','${custKey}')"
-          style="width:130px;padding:5px 8px;border:1.5px solid ${isCustom ? 'var(--red-primary)' : 'var(--gray-200)'};border-radius:6px;font-family:var(--font);font-size:.85rem;text-align:right;background:${isCustom ? '#FFF8F8' : 'white'};">
+          style="width:130px;padding:5px 8px;border:1.5px solid ${isCustom ? 'var(--red-primary)' : 'var(--gray-200)'};border-radius:6px;font-family:var(--font);font-size:.85rem;text-align:right;background:${isCustom ? '#F8F9FB' : 'white'};">
         ${isCustom ? `<button onclick="resetChildCost('${child.id}','${custKey}')" title="รีเซ็ตเป็นค่าเริ่มต้น" style="margin-left:4px;padding:3px 7px;border:1.5px solid var(--red-primary);background:white;color:var(--red-primary);border-radius:5px;cursor:pointer;font-family:var(--font);font-size:.85rem;line-height:1;">↺</button>` : ''}
         <span style="font-size:.72rem;color:var(--gray-400);">/ปี</span>
       </td>

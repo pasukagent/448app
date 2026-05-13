@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,9 +25,9 @@
   <style>
     /* ════ Brand override — indigo accent ════ */
     :root {
-      --hi2-indigo:       #3B43A8;
-      --hi2-indigo-light: #6B72C9;
-      --hi2-indigo-soft:  #EEF0F9;
+      --hi2-indigo:       #1F2D4F;
+      --hi2-indigo-light: #3A4F75;
+      --hi2-indigo-soft:  #F0F2F7;
       --hi2-red:          #DC3545;
     }
 
@@ -303,7 +303,7 @@
       border-radius: 9px; transition: width .4s ease;
     }
     .progress-bar-fill.warn { background: linear-gradient(90deg, #FF8C00, #FFB347); }
-    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #FF6B6B); }
+    .progress-bar-fill.bad  { background: linear-gradient(90deg, #DC3545, #C9A961); }
 
     /* Hospital picker modal */
     .modal-overlay {
@@ -402,7 +402,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -861,7 +861,7 @@ function render() {
     <div class="hi2-wrap">
       <!-- Header -->
       <div class="hi2-head">
-        <div class="hi2-head-icon">➕</div>
+        <div class="hi2-head-icon">${window.IconLib ? window.IconLib.getIcon('medical2', { size: 38 }) : '➕'}</div>
         <div class="hi2-head-title">ประกันสุขภาพ</div>
       </div>
 
@@ -958,7 +958,7 @@ function renderCoverageRowNew(row, prepared, finalRec, autoPrep) {
 function renderCoverageRow(row, prepared, finalRec, customRec) {
   const isCustom = customRec[row.key] != null;
   const customStyle = isCustom
-    ? 'border-color:var(--red-primary);background:#FFF8F8;color:var(--red-primary);font-weight:700;'
+    ? 'border-color:var(--red-primary);background:#F8F9FB;color:var(--red-primary);font-weight:700;'
     : '';
   const customTitle = isCustom ? 'แก้ไขเอง — กดปุ่ม "↺ รีเซ็ต" ด้านบนเพื่อกลับเป็นค่าแนะนำ' : 'ค่าแนะนำอัตโนมัติ — แก้ไขได้';
 

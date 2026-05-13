@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,9 +25,9 @@
   <style>
     /* ════ Brand override — indigo accent ════ */
     :root {
-      --p2-indigo:       #3B43A8;
-      --p2-indigo-light: #6B72C9;
-      --p2-indigo-soft:  #EEF0F9;
+      --p2-indigo:       #1F2D4F;
+      --p2-indigo-light: #3A4F75;
+      --p2-indigo-soft:  #F0F2F7;
       --p2-yellow:       #F5C242;
       --p2-yellow-dark:  #D4A032;
     }
@@ -350,7 +350,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -681,7 +681,7 @@ function render() {
     <div class="p2-wrap">
       <!-- Header -->
       <div class="p2-head">
-        <div class="p2-head-icon">☑↓</div>
+        <div class="p2-head-icon">${window.IconLib ? window.IconLib.getIcon('priority', { size: 38 }) : '☑↓'}</div>
         <div class="p2-head-title">ลำดับความสำคัญ</div>
       </div>
 

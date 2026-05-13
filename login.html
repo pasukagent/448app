@@ -97,7 +97,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -197,11 +197,11 @@
       </div>
       <div class="form-footer">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-          <input type="checkbox" style="accent-color:#D0021B;"> จดจำฉัน
+          <input type="checkbox" style="accent-color:#1F2D4F;"> จดจำฉัน
         </label>
         <a href="#" onclick="showForgot()">ลืมรหัสผ่าน?</a>
       </div>
-      <div id="login-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <div id="login-error" style="display:none;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#1F2D4F;margin-bottom:12px;"></div>
       <button class="btn btn-primary login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
       <p style="text-align:center;margin-top:20px;font-size:.88rem;color:var(--gray-600);">
         ยังไม่มีบัญชี? <a href="#" onclick="switchTab('register')" style="color:var(--red-primary);font-weight:700;">สมัครสมาชิกฟรี</a>
@@ -254,7 +254,7 @@
         <input type="checkbox" id="terms">
         <label for="terms">ฉันยอมรับ <a href="#">ข้อตกลงการใช้งาน</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a></label>
       </div>
-      <div id="reg-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <div id="reg-error" style="display:none;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#1F2D4F;margin-bottom:12px;"></div>
       <button class="btn btn-primary login-btn" onclick="doRegister()">สมัครสมาชิกฟรี</button>
       <p style="text-align:center;margin-top:16px;font-size:.88rem;color:var(--gray-600);">
         มีบัญชีแล้ว? <a href="#" onclick="switchTab('login')" style="color:var(--red-primary);font-weight:700;">เข้าสู่ระบบ</a>
@@ -270,7 +270,7 @@
         <label>อีเมล</label>
         <input id="forgot-email" type="email" placeholder="example@email.com">
       </div>
-      <div id="forgot-error" style="display:none;background:#FFF0F0;border:1px solid #FFB3B3;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#C0021B;margin-bottom:12px;"></div>
+      <div id="forgot-error" style="display:none;background:#F0F2F7;border:1px solid #D4BA82;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#1F2D4F;margin-bottom:12px;"></div>
       <div id="forgot-ok" style="display:none;background:#F0FFF4;border:1px solid #9AE6B4;border-radius:8px;padding:10px 14px;font-size:.88rem;color:#276749;margin-bottom:12px;">
         📧 ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว — กรุณาตรวจสอบกล่องจดหมายของคุณ
       </div>
@@ -518,5 +518,5 @@
     window.location.href = 'dashboard.html';
   });
 </script>
-</body>
+<script src="icons.js"></script></body>
 </html>

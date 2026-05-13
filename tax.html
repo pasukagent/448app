@@ -9,7 +9,7 @@
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -26,9 +26,9 @@
   <style>
     /* ════ Brand override — indigo accent ════ */
     :root {
-      --t2-indigo:       #3B43A8;
-      --t2-indigo-light: #6B72C9;
-      --t2-indigo-soft:  #EEF0F9;
+      --t2-indigo:       #1F2D4F;
+      --t2-indigo-light: #3A4F75;
+      --t2-indigo-soft:  #F0F2F7;
       --t2-red:          #DC3545;
       --t2-gray-pill:    #E5E5E5;
     }
@@ -202,10 +202,10 @@
     .rate-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 16px; }
     .rate-table th { background: var(--red-soft); color: var(--red-primary); padding: 8px 12px; text-align: left; font-weight: 700; }
     .rate-table td { padding: 8px 12px; border-bottom: 1px solid var(--gray-100); }
-    .rate-table tr.active-bracket { background: #FFF0F2; font-weight: 700; }
+    .rate-table tr.active-bracket { background: #F0F2F7; font-weight: 700; }
     .rate-table tr.active-bracket td { color: var(--red-primary); }
     .rate-table tr.current-bracket {
-      background: linear-gradient(90deg, #FEE2E2, #FFF0F2) !important;
+      background: linear-gradient(90deg, #FEE2E2, #F0F2F7) !important;
       box-shadow: inset 3px 0 0 var(--red-primary);
     }
     .rate-table tr.current-bracket td:first-child { font-weight: 800; }
@@ -233,7 +233,7 @@
       background: var(--gray-100); border-radius: var(--radius-sm); padding: 12px 16px;
       transition: background .15s;
     }
-    .history-item:hover { background: #FFF8F8; }
+    .history-item:hover { background: #F8F9FB; }
     .history-item .h-info { flex: 1; min-width: 0; }
     .history-item .h-year { font-weight: 700; font-size: .9rem; }
     .history-item .h-tax  { font-size: 1rem; font-weight: 800; color: var(--red-primary); white-space: nowrap; }
@@ -252,7 +252,7 @@
       padding: 6px 12px; border-radius: 6px; margin-top: 8px; width: 100%;
       transition: all .15s;
     }
-    .history-clear-all:hover { border-color: #c00; color: #c00; background: #FFF5F5; }
+    .history-clear-all:hover { border-color: #c00; color: #c00; background: #F4F6FA; }
 
     /* Info button */
     .info-icon-btn {
@@ -446,7 +446,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">

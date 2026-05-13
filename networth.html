@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="money-input.js"></script>
   <script>
     firebase.initializeApp({
@@ -55,7 +55,7 @@
     }
     .nw-side-val { font-size: 1.8rem; font-weight: 800; }
     .nw-asset-val { color: #28a745; }
-    .nw-debt-val  { color: #DC3545; }
+    .nw-debt-val  { color: #1F2D4F; }
     .nw-side-sub  { font-size: .8rem; color: var(--gray-400); margin-top: 2px; }
     .nw-eq {
       display: flex; flex-direction: column; align-items: center;
@@ -78,7 +78,7 @@
     .nw-bar-seg.s-liquid     { background: #0E76A8; }
     .nw-bar-seg.s-investment { background: #28a745; }
     .nw-bar-seg.s-personal   { background: #E67E22; }
-    .nw-bar-seg.s-short      { background: #DC3545; }
+    .nw-bar-seg.s-short      { background: #1F2D4F; }
     .nw-bar-seg.s-long       { background: #C0392B; }
     .nw-bar-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: .78rem; color: var(--gray-600); }
     .nw-bar-legend .lg { display: flex; align-items: center; gap: 5px; }
@@ -105,7 +105,7 @@
     }
     .sub-hd .sh-amt { color: var(--gray-700); font-size: .85rem; }
     .sub-hd.l-asset { color: #28a745; }
-    .sub-hd.l-debt  { color: #DC3545; }
+    .sub-hd.l-debt  { color: #1F2D4F; }
 
     .row-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
     .row-line {
@@ -194,7 +194,7 @@
       background: #FFF3E0; border-left: 3px solid #FF8C00; color: #8B5A00;
       font-size: .8rem; line-height: 1.5;
     }
-    .lp-warn.severe { background: #FEE2E2; border-left-color: #DC3545; color: #B02030; }
+    .lp-warn.severe { background: #F0F2F7; border-left-color: #1F2D4F; color: #B02030; }
 
     .calc-info {
       background: var(--red-soft); border-radius: 8px; padding: 10px 14px;
@@ -223,7 +223,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -515,7 +515,7 @@ function render() {
       </div>
       <div class="nw-eq">
         <div class="nw-eq-lbl">ความมั่งคั่งสุทธิ</div>
-        <div class="nw-eq-val" style="color:${netWorth >= 0 ? 'var(--red-primary)' : '#DC3545'}">${fmt(netWorth)}</div>
+        <div class="nw-eq-val" style="color:${netWorth >= 0 ? 'var(--red-primary)' : '#1F2D4F'}">${fmt(netWorth)}</div>
         <div class="nw-eq-pct">${debtRatioLabel}</div>
       </div>
       <div class="nw-side">
@@ -547,7 +547,7 @@ function render() {
         ${sumLong > 0 ? `<div class="nw-bar-seg s-long" style="flex:${sumLong}">${(sumLong/sumLiabs*100).toFixed(0)}%</div>`:''}
       </div>
       <div class="nw-bar-legend">
-        <div class="lg"><span class="lg-dot" style="background:#DC3545"></span> ระยะสั้น ${fmt(sumShort)}</div>
+        <div class="lg"><span class="lg-dot" style="background:#1F2D4F"></span> ระยะสั้น ${fmt(sumShort)}</div>
         <div class="lg"><span class="lg-dot" style="background:#C0392B"></span> ระยะยาว ${fmt(sumLong)}</div>
       </div>
     </div>` : ''}

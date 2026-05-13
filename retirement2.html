@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script>
     firebase.initializeApp({
@@ -23,9 +23,9 @@
   </script>
   <style>
     :root {
-      --r3-indigo:       #3B43A8;
-      --r3-indigo-light: #6B72C9;
-      --r3-indigo-soft:  #EEF0F9;
+      --r3-indigo:       #1F2D4F;
+      --r3-indigo-light: #3A4F75;
+      --r3-indigo-soft:  #F0F2F7;
       --r3-red:          #DC3545;
       --r3-orange:       #F5C242;
     }
@@ -335,7 +335,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -1014,14 +1014,14 @@ function render() {
     <div class="r3-wrap">
       <!-- Header -->
       <div class="r3-head">
-        <div class="r3-head-icon">🛋️</div>
+        <div class="r3-head-icon">${window.IconLib ? window.IconLib.getIcon('sofa', { size: 38 }) : '🛋️'}</div>
         <div class="r3-head-title">
           เกษียณ
           <button class="r3-head-icon-chart" onclick="openPullModal()" title="ดึงข้อมูลหน้าสินทรัพย์มาใช้">📊</button>
         </div>
         <div class="r3-head-spacer"></div>
         <div class="r3-head-mid">
-          <div class="r3-head-mid-icon">🛋️</div>
+          <div class="r3-head-mid-icon">${window.IconLib ? window.IconLib.getIcon('sofa', { size: 26 }) : '🛋️'}</div>
           <div class="r3-head-mid-lbl">หลังเกษียณ</div>
         </div>
         <div class="r3-head-spacer"></div>

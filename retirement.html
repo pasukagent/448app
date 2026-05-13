@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script src="flow-nav.js"></script>
   <script src="money-input.js"></script>
   <script>
@@ -25,10 +25,10 @@
   <style>
     /* ════ Brand override for THIS page — indigo accent ════ */
     :root {
-      --ret-indigo:       #3B43A8;
-      --ret-indigo-light: #6B72C9;
-      --ret-indigo-pill:  #D4D7EB;
-      --ret-indigo-soft:  #EEF0F9;
+      --ret-indigo:       #1F2D4F;
+      --ret-indigo-light: #3A4F75;
+      --ret-indigo-pill:  #D4DAE6;
+      --ret-indigo-soft:  #F0F2F7;
       --ret-yellow:       #F5C242;
     }
 
@@ -342,7 +342,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -755,7 +755,7 @@ function render() {
     <!-- ════ NEW PILL-STYLE FORM (per Planista screenshot) ════ -->
     <div class="r2-wrap">
       <div class="r2-section-head">
-        <div class="r2-section-icon">🛋️</div>
+        <div class="r2-section-icon">${window.IconLib ? window.IconLib.getIcon('sofa', { size: 38 }) : '🛋️'}</div>
         <div class="r2-section-title">เกษียณ</div>
       </div>
 
@@ -883,52 +883,6 @@ function render() {
       </div>
     </div>
 
-    <div class="ret-layout">
-
-      <!-- Results -->
-      <div class="ret-results">
-        <div class="stats-strip">
-          <div class="stat-card target">
-            <div class="stat-lbl">🎯 เป้าหมายเงินก้อน</div>
-            <div class="stat-val">${fmt(calc.targetCorpus)}</div>
-            <div class="stat-sub">เพื่อใช้ ${calc.yearsAfterRetire.toFixed(0)} ปี หลังเกษียณ</div>
-          </div>
-          <div class="stat-card have">
-            <div class="stat-lbl">💎 จะมีตอนเกษียณ</div>
-            <div class="stat-val">${fmt(calc.fvTotal)}</div>
-            <div class="stat-sub">FV ของเงินที่มี + ออมตามแผน</div>
-          </div>
-          <div class="stat-card gap ${calc.gap === 0 ? 'is-ok':''}">
-            <div class="stat-lbl">${calc.gap === 0 ? '✅ ครบ' : '⚠️ ขาดอีก'}</div>
-            <div class="stat-val ${calc.gap === 0 ? 'green':'red'}">${calc.gap === 0 ? fmt(calc.fvTotal - calc.targetCorpus) + ' (เกิน)' : fmt(calc.gap)}</div>
-            <div class="stat-sub">${calc.gap === 0 ? 'ตามเป้าแล้ว!' : 'ต้องเพิ่ม'}</div>
-          </div>
-          <div class="stat-card monthly">
-            <div class="stat-lbl">💪 ต้องออม/เดือน</div>
-            <div class="stat-val">${fmt(calc.requiredMonthly + (plan.monthlyContribution || 0))}</div>
-            <div class="stat-sub">${plan.monthlyContribution > 0 ? 'รวมที่ออมอยู่ ' + fmt(plan.monthlyContribution) : 'ปัจจุบันยังไม่ออม'}</div>
-          </div>
-        </div>
-
-        <!-- Chart -->
-        <div class="chart-card">
-          <h3>📈 กราฟการสะสมเงินจนถึงเกษียณ</h3>
-          <p class="ch-sub">${calc.yearsToRetire.toFixed(0)} ปี · เริ่มจาก ${fmt(derived.currentSavings)} → ${fmt(calc.fvTotal)}</p>
-          ${renderChart(calc, plan.retireAge)}
-          <div class="chart-legend">
-            <div class="leg-item"><span class="leg-line" style="background:#28a745;"></span> เงินสะสมตามแผน</div>
-            <div class="leg-item"><span class="leg-line" style="background:#DC3545;border-style:dashed;border-top:2px dashed #DC3545;background:transparent;"></span> เป้าหมาย ${fmt(calc.targetCorpus)}</div>
-            <div class="leg-item"><span class="leg-dot" style="background:#1976D2;"></span> ปีเกษียณ</div>
-          </div>
-        </div>
-
-        <!-- Year table -->
-        <div class="year-table-wrap">
-          <h3>📋 ตารางการสะสมเงินรายปี</h3>
-          ${renderYearTable(calc, currentAge)}
-        </div>
-      </div>
-    </div>
   `;
 }
 

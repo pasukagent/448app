@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="sidebar-scroll.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
@@ -43,7 +43,7 @@
 
     /* Health Score Card */
     .score-card {
-      background: linear-gradient(135deg, #FFF5F5, white);
+      background: linear-gradient(135deg, #F4F6FA, white);
       border-radius: var(--radius); padding: 24px 28px; margin-bottom: 22px;
       box-shadow: var(--shadow-sm);
       display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;
@@ -76,7 +76,7 @@
     }
     .ratio-card.s-good     { border-top-color: #28a745; }
     .ratio-card.s-medium   { border-top-color: #FF8C00; }
-    .ratio-card.s-bad      { border-top-color: #DC3545; }
+    .ratio-card.s-bad      { border-top-color: #1F2D4F; }
     .ratio-card.s-no-data  { border-top-color: var(--gray-300); }
 
     .rc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -87,7 +87,7 @@
     }
     .rc-status.s-good     { background: #E8F5E9; color: #28a745; }
     .rc-status.s-medium   { background: #FFF3E0; color: #FF8C00; }
-    .rc-status.s-bad      { background: #FEE2E2; color: #DC3545; }
+    .rc-status.s-bad      { background: #F0F2F7; color: #1F2D4F; }
     .rc-status.s-no-data  { background: var(--gray-100); color: var(--gray-500); }
 
     .rc-value-row {
@@ -99,7 +99,7 @@
     }
     .rc-value.s-good     { color: #28a745; }
     .rc-value.s-medium   { color: #FF8C00; }
-    .rc-value.s-bad      { color: #DC3545; }
+    .rc-value.s-bad      { color: #1F2D4F; }
     .rc-value.s-no-data  { color: var(--gray-400); }
     .rc-unit { font-size: .85rem; color: var(--gray-500); font-weight: 600; }
     .rc-target {
@@ -111,7 +111,7 @@
     /* Gauge bar */
     .gauge {
       position: relative; height: 14px;
-      background: linear-gradient(to right, #FEE2E2 0%, #FFF3E0 33%, #E8F5E9 66%, #C8E6C9 100%);
+      background: linear-gradient(to right, #F0F2F7 0%, #FFF3E0 33%, #E8F5E9 66%, #C8E6C9 100%);
       border-radius: 8px; overflow: hidden;
     }
     .gauge-needle {
@@ -136,7 +136,7 @@
     }
     .rc-tip.s-good { background: #E8F5E9; color: #1B6E2F; }
     .rc-tip.s-medium { background: #FFF3E0; color: #B96A00; }
-    .rc-tip.s-bad { background: #FEE2E2; color: #8B1A1A; }
+    .rc-tip.s-bad { background: #F0F2F7; color: #8B1A1A; }
     .rc-tip strong { display: block; margin-bottom: 3px; }
 
     /* Cashflow input quick-edit (when no data) */
@@ -163,7 +163,7 @@
   </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#D0021B">
+  <meta name="theme-color" content="#1F2D4F">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -437,7 +437,7 @@ function render() {
   const score = valid.length === 0 ? 0 : Math.round(
     valid.reduce((s,r) => s + (r.status === 'good' ? 100 : r.status === 'medium' ? 60 : 30), 0) / valid.length
   );
-  const scoreColor = score >= 80 ? '#28a745' : score >= 50 ? '#FF8C00' : score > 0 ? '#DC3545' : 'var(--gray-300)';
+  const scoreColor = score >= 80 ? '#28a745' : score >= 50 ? '#FF8C00' : score > 0 ? '#1F2D4F' : 'var(--gray-300)';
   const scoreLabel = score >= 80 ? 'ดีเยี่ยม' : score >= 50 ? 'พอใช้' : score > 0 ? 'ต้องปรับปรุง' : '—';
 
   let html = `
@@ -568,7 +568,7 @@ function renderRatio(opts) {
 
   // For reversed gauges, flip bar gradient
   const barStyle = reverse
-    ? 'background: linear-gradient(to right, #C8E6C9 0%, #E8F5E9 33%, #FFF3E0 66%, #FEE2E2 100%);'
+    ? 'background: linear-gradient(to right, #C8E6C9 0%, #E8F5E9 33%, #FFF3E0 66%, #F0F2F7 100%);'
     : '';
 
   return `<div class="ratio-card ${cls}">

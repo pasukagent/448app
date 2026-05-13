@@ -2,8 +2,9 @@
 *.png
 *.mp4
 
-# Exception: PWA icons (required for install)
+# Exception: PWA icons + icon library PNGs (required for app)
 !icon-*.png
+!icon_*.png
 
 # OS files
 .DS_Store

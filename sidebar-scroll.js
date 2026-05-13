@@ -125,9 +125,18 @@ if ('serviceWorker' in navigator
     }
   });
 
+  /* Auto-replace emoji sidebar icons → SVG (sleek Planista-style)
+     ต้องโหลด icons.js ก่อน script นี้ (เช็คว่ามี window.IconLib) */
+  function replaceSidebarIcons() {
+    if (!window.IconLib) return;
+    /* sidebar icons — replace <span class="sb-ico">emoji</span> → SVG */
+    window.IconLib.autoReplaceIcons('.app-sb-item .sb-ico');
+  }
+
   function init() {
     restore();
     injectCollapseUI();
+    replaceSidebarIcons();
     const sb = document.querySelector('.app-sidebar');
     if (sb) {
       sb.addEventListener('click', (e) => {
