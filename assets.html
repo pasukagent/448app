@@ -1141,14 +1141,14 @@ function renderCustomRow(a) {
       <td class="ast-cell">
         <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
                value="${cvFmt}" placeholder="—"
-               onfocus="this.value='${cv||''}'; this.select();"
+               onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                onchange="onCustomCellChange('${a.id}','currentValue',this.value)">
       </td>
       <td class="ast-cell">
         <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
                value="${coFmt}" placeholder="—"
-               onfocus="this.value='${co||''}'; this.select();"
+               onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                onchange="onCustomCellChange('${a.id}','contribution',this.value)">
       </td>
@@ -1176,7 +1176,7 @@ function renderCustomRow(a) {
         ${!isFV ? `
           <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
                  value="${cfFmt}" placeholder="—"
-                 onfocus="this.value='${cf||''}'; this.select();"
+                 onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                  onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                  onchange="onCustomCellChange('${a.id}','cashFlow',this.value)">
         ` : empty}
@@ -1255,7 +1255,7 @@ function renderRow(row) {
       <td class="ast-cell">
         <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
                value="${cvFmt}" placeholder="—"
-               onfocus="this.value='${cv||''}'; this.select();"
+               onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                onchange="onCellChange('${row.type}','currentValue',this.value)">
       </td>
@@ -1263,7 +1263,7 @@ function renderRow(row) {
         ${f.contrib ? `
           <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
                  value="${coFmt}" placeholder="—"
-                 onfocus="this.value='${co||''}'; this.select();"
+                 onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                  onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                  onchange="onCellChange('${row.type}','contribution',this.value)">
         ` : empty}
@@ -1292,7 +1292,7 @@ function renderRow(row) {
         ${f.cashFlow ? `
           <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
                  value="${cfFmt}" placeholder="—"
-                 onfocus="this.value='${cf||''}'; this.select();"
+                 onfocus="this.value=this.value.replace(/,/g,''); this.select();"
                  onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
                  onchange="onCellChange('${row.type}','cashFlow',this.value)">
         ` : empty}

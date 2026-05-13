@@ -503,8 +503,31 @@ function getPlan(client) {
   };
 }
 
+/* Commit any dirty input BEFORE render() ทำลาย DOM.
+   Race condition: user พิมพ์ใน field A ยังไม่ blur → กดปุ่มที่ trigger savePlanField('B')
+   → render() ทำลาย DOM → ค่าพิมพ์ใน A หายไปทั้ง storage และ display
+   Fix: blur active element (real browsers ยิง change event ถ้า value เปลี่ยน) +
+        guard `_committing` กัน recursion เพราะ onchange ของ input → savePlanField อีกรอบ */
+let _committing = false;
+function _commitDirtyInputs() {
+  if (_committing) return;
+  _committing = true;
+  try {
+    const ae = document.activeElement;
+    if (ae && ae.tagName === 'INPUT') {
+      /* In real browsers, blur fires change if value differs from focus snapshot.
+         Also dispatch change explicitly for robustness (covers JS-set values). */
+      ae.dispatchEvent(new Event('change', { bubbles: true }));
+      if (ae.blur) ae.blur();
+    }
+  } finally {
+    _committing = false;
+  }
+}
+
 function savePlanField(field, value) {
   if (!selectedClientId) return;
+  _commitDirtyInputs();
   /* String fields (note) — save as-is */
   if (field === 'note') {
     updateUser(u => {
