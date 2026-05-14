@@ -1133,13 +1133,13 @@ function render() {
             ${childResults.map(r => `
               <div class="e2-result-row">
                 <div class="e2-result-name">${escapeHtml(r.child.name || 'บุตร')}</div>
-                <div class="e2-result-val">${(r.total || 0).toLocaleString('th-TH', { maximumFractionDigits: 1 })}</div>
+                <div class="e2-result-val">${Math.round(r.total || 0).toLocaleString('th-TH')}</div>
                 <div class="e2-result-unit">บาท</div>
               </div>
             `).join('')}
             <div class="e2-result-row">
               <div class="e2-result-name total">รวม</div>
-              <div class="e2-result-val total">${(grandTotal || 0).toLocaleString('th-TH', { maximumFractionDigits: 1 })}</div>
+              <div class="e2-result-val total">${Math.round(grandTotal || 0).toLocaleString('th-TH')}</div>
               <div class="e2-result-unit total">บาท</div>
             </div>
             <div class="e2-result-foot">
