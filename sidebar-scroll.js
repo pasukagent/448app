@@ -133,10 +133,42 @@ if ('serviceWorker' in navigator
     window.IconLib.autoReplaceIcons('.app-sb-item .sb-ico');
   }
 
+  /* ════════════════════════════════════════════
+     iOS/iPad onchange RELIABILITY FIX (global, all pages)
+     ปัญหา: iOS Safari/PWA บางครั้งไม่ยิง `change` event เมื่อ input blur
+     ไปยัง tap target (เช่นปุ่ม) ขณะ keyboard เปิด → typed values หายไป.
+     Fix: snapshot value ตอน focus + dispatch `change` explicitly ตอน blur
+     ถ้า value เปลี่ยน → onchange handler ของหน้านั้นๆ ทำงาน save ทันที.
+     Capture phase (3rd arg = true) เพื่อจับ focus/blur ของทุก input/textarea
+     (focus/blur ไม่ bubble แต่ capture จับได้)
+  ═══════════════════════════════════════════ */
+  function installIosOnchangeFix() {
+    const FOCUS_VAL = '_iosFocusVal';
+    document.addEventListener('focus', (e) => {
+      const el = e.target;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+        el[FOCUS_VAL] = el.value;
+      }
+    }, true);
+    document.addEventListener('blur', (e) => {
+      const el = e.target;
+      if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+      if (el[FOCUS_VAL] === undefined) return;
+      const oldVal = el[FOCUS_VAL];
+      delete el[FOCUS_VAL];
+      if (oldVal !== el.value) {
+        /* Value changed during focus — บังคับ fire change.
+           ถ้า browser ยิงเองอยู่แล้ว → onchange จะรัน 2 ครั้ง (idempotent save) */
+        try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+      }
+    }, true);
+  }
+
   function init() {
     restore();
     injectCollapseUI();
     replaceSidebarIcons();
+    installIosOnchangeFix();
     const sb = document.querySelector('.app-sidebar');
     if (sb) {
       sb.addEventListener('click', (e) => {
