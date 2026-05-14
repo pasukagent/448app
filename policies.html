@@ -168,6 +168,132 @@
     /* ─── TABLE CARD ─── */
     .table-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 20px; overflow: hidden; }
 
+    /* ════ Phase 4 — Detailed Policy Summary (Planista-style) ════ */
+    .pds-card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      padding: 24px 28px; margin-bottom: 20px;
+    }
+    .pds-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1.5px solid #E5E7EB;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .pds-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .pds-title { font-size: 1.25rem; font-weight: 800; color: #1F2D4F; }
+    .pds-subtitle { font-size: .88rem; color: var(--gray-600); }
+    .pds-pdf-btn {
+      background: white; color: #1F2D4F; border: 2px solid #1F2D4F;
+      border-radius: 100px; padding: 8px 22px; cursor: pointer;
+      font-family: var(--font); font-weight: 800; font-size: .92rem;
+      transition: all .15s;
+    }
+    .pds-pdf-btn:hover { background: #1F2D4F; color: white; transform: translateY(-1px); }
+    .pds-body {
+      display: grid; grid-template-columns: 1fr 360px; gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .pds-body { grid-template-columns: 1fr; } }
+    /* Left column — aggregate totals */
+    .pds-section { margin-bottom: 18px; }
+    .pds-section-title {
+      font-style: italic; font-weight: 800; color: #1F2D4F;
+      font-size: 1.05rem; margin-bottom: 10px;
+    }
+    .pds-line {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px dotted #E5E7EB; gap: 12px;
+    }
+    .pds-line:last-child { border-bottom: none; }
+    .pds-line-lbl { color: #333; font-size: .92rem; }
+    .pds-line-val { color: #DC3545; font-weight: 700; font-size: .95rem; white-space: nowrap; }
+    /* Right column — Healthcare Card */
+    .pds-hcc {
+      background: linear-gradient(135deg, #1F2D4F, #0F1A2F); color: white;
+      border-radius: 14px; padding: 22px 24px;
+      box-shadow: 0 8px 24px rgba(31,45,79,.25);
+    }
+    .pds-hcc-head {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 14px; margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .pds-hcc-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(255,255,255,.18); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+    .pds-hcc-name { font-weight: 800; font-size: 1.05rem; line-height: 1.2; }
+    .pds-hcc-sub  { font-size: .82rem; opacity: .85; margin-top: 2px; color: var(--gold-primary, #C9A961); font-weight: 800; }
+    .pds-hcc-line {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 4px 0; gap: 8px; font-size: .82rem;
+    }
+    .pds-hcc-line-lbl { opacity: .9; }
+    .pds-hcc-line-val { font-weight: 800; white-space: nowrap; }
+    .pds-hcc-foot {
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.15);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pds-hcc-foot-avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+    .pds-hcc-foot-text { flex: 1; font-size: .78rem; }
+    .pds-hcc-foot-text .lbl { opacity: .75; font-size: .7rem; }
+    /* Per-policy detail blocks */
+    .pds-policies { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .pds-pol {
+      background: #FAFBFC; border: 1px solid #E5E7EB;
+      border-radius: 12px; padding: 18px 22px;
+    }
+    .pds-pol-head {
+      display: grid; grid-template-columns: 50px repeat(6, 1fr); gap: 12px;
+      align-items: center; padding-bottom: 12px;
+      border-bottom: 1px solid #E5E7EB; margin-bottom: 12px;
+      font-size: .85rem;
+    }
+    .pds-pol-num {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #1F2D4F; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem;
+    }
+    .pds-pol-head-col { display: flex; flex-direction: column; gap: 2px; }
+    .pds-pol-head-lbl { font-style: italic; font-size: .76rem; color: var(--gray-500); }
+    .pds-pol-head-val { font-weight: 700; color: #1F2D4F; font-size: .92rem; }
+    .pds-pol-fields {
+      display: grid; grid-template-columns: 200px 1fr; gap: 4px 14px;
+      font-size: .88rem;
+    }
+    .pds-pol-fields .lbl { color: #333; padding: 3px 0; }
+    .pds-pol-fields .val { color: #DC3545; font-weight: 700; padding: 3px 0; }
+    .pds-pol-rider-title {
+      grid-column: 1/-1; font-weight: 800; color: #1F2D4F;
+      margin-top: 10px; padding-top: 10px; border-top: 1px dashed #DDD;
+    }
+    @media (max-width: 720px) {
+      .pds-pol-head { grid-template-columns: 40px 1fr; gap: 8px; }
+      .pds-pol-head-col { font-size: .85rem; }
+      .pds-pol-fields { grid-template-columns: 1fr; }
+    }
+
+    /* Floating back button (bottom-left) */
+    .pds-back-fab {
+      position: fixed; bottom: 24px; left: 280px;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: white; color: #1F2D4F;
+      border: 2.5px solid #1F2D4F;
+      cursor: pointer; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(31,45,79,.18);
+      transition: all .15s; z-index: 30;
+    }
+    .pds-back-fab:hover {
+      background: #1F2D4F; color: white;
+      transform: translateY(-2px); box-shadow: 0 6px 16px rgba(31,45,79,.3);
+    }
+    :root[data-sb-collapsed="1"] .pds-back-fab { left: 24px; }
+    @media (max-width: 768px) { .pds-back-fab { left: 24px; } }
+
     /* ─── Phase 3.3 — Life Needs Analysis ─── */
     .needs-card, .health-gap-card {
       background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm);
@@ -984,11 +1110,12 @@
         <div class="cib-family" id="cib-family" style="display:none;"></div>
       </div>
 
-      <!-- ═════ PHASE 3.3 — Life Insurance Needs Analysis ═════ -->
-      <div id="needs-analysis-section"></div>
+      <!-- ═════ PHASE 4 — Detailed Policy Summary (Planista-style) ═════ -->
+      <div id="policy-detail-summary"></div>
 
-      <!-- ═════ PHASE 3.4 — Health Coverage Gap Analysis ═════ -->
-      <div id="health-gap-section"></div>
+      <!-- Hidden legacy containers kept so existing renderNeedsAnalysis/HealthGap calls do not throw -->
+      <div id="needs-analysis-section" style="display:none;"></div>
+      <div id="health-gap-section" style="display:none;"></div>
 
       <!-- Main Table Card -->
       <div class="table-card">
@@ -1760,8 +1887,7 @@ function showDetail(cid) {
   document.getElementById('view-detail').style.display = '';
   initClientSelect();
   render();
-  renderNeedsAnalysis();
-  renderHealthGap();
+  renderPolicyDetailSummary();
 }
 
 /* Top-right client picker — sync กับ currentClientId
@@ -1966,6 +2092,7 @@ function render() {
   }
 
   renderTable(policies);
+  renderPolicyDetailSummary();   /* Planista-style detail (replaces needs/health analysis) */
 
   const hasData = policies.length > 0;
   document.getElementById('spider-card').style.display   = hasData ? 'block' : 'none';
@@ -1997,6 +2124,187 @@ function getRiderCoverageByCategory(p, category) {
   if (category === 'income'     && p.riderIncomeDaily)               total += Number(p.riderIncomeDaily || 0);
   if (category === 'disability' && p.riderDisabilityMonthly)         total += Number(p.riderDisabilityMonthly || 0);
   return total;
+}
+
+/* ════════════════════════════════════════════
+   POLICY DETAIL SUMMARY (Planista-style report)
+═══════════════════════════════════════════ */
+function _pdsSumField(policies, field) {
+  return policies.reduce((s, p) => s + Number(p[field] || 0), 0);
+}
+function _pdsSumRiderType(policies, riderType, field) {
+  return policies.reduce((s, p) => {
+    return s + ((p.riders || []).reduce((rs, r) => {
+      if (r.type === riderType) rs += Number(r[field] || 0);
+      return rs;
+    }, 0));
+  }, 0);
+}
+function _pdsFmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString('th-TH');
+}
+
+function renderPolicyDetailSummary() {
+  const wrap = document.getElementById('policy-detail-summary');
+  if (!wrap) return;
+  const client = getCurrentClient ? getCurrentClient() : null;
+  const policies = (client && client.policies) || [];
+
+  if (policies.length === 0) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  /* === สัญญาหลัก aggregates === */
+  const lifeCov   = _pdsSumField(policies, 'lifeCoverage');
+  const disability= _pdsSumField(policies, 'riderDisabilityMonthly')
+                  + _pdsSumRiderType(policies, 'disability', 'disabilityAmt');
+  const pa        = _pdsSumField(policies, 'riderAccidentCov')
+                  + _pdsSumRiderType(policies, 'accident', 'deathByAccident');
+  const cashRet   = policies.reduce((s, p) => s + Number((p.endowmentData && p.endowmentData.totalCashReturn) || 0), 0);
+  const annuity   = policies.reduce((s, p) => s + Number(p.annuityTotalPayout || 0), 0);
+  const ulBenefit = policies.reduce((s, p) => s + Number(p.unitLinkedBenefit || 0), 0);
+  const mainPrem  = _pdsSumField(policies, 'premium');
+
+  /* === สัญญาเพิ่มเติม aggregates (riders) === */
+  const roomDaily = _pdsSumRiderType(policies, 'medical', 'roomBoard');
+  const treatPer  = _pdsSumRiderType(policies, 'medical', 'perVisit');
+  const treatYear = _pdsSumRiderType(policies, 'medical', 'perYear');
+  const opdPer    = _pdsSumRiderType(policies, 'medical', 'opdPerVisit');
+  const opdYear   = _pdsSumRiderType(policies, 'medical', 'opdPerYear');
+  const incomeDay = _pdsSumRiderType(policies, 'income',   'dailyComp');
+  const accidentWk= _pdsSumRiderType(policies, 'accident', 'partialDisability');
+  const ciMild    = _pdsSumRiderType(policies, 'critical', 'ciMildModerate');
+  const ciSevere  = _pdsSumRiderType(policies, 'critical', 'ciSevere');
+  const ciDeath   = _pdsSumRiderType(policies, 'critical', 'ciDeath');
+  const riderPrem = policies.reduce((s, p) => s + ((p.riders || []).reduce((rs, r) => rs + Number(r.premium || 0), 0)), 0);
+
+  const clientName = (client && (client.firstName + ' ' + (client.lastName || ''))).trim() || 'ลูกค้า';
+  const agentName  = (client && client.agentName) || 'ตัวแทนบริการ';
+  const agentRole  = (client && client.agentRole) || '—';
+
+  const left = `
+    <div>
+      <div class="pds-section">
+        <div class="pds-section-title">สัญญาหลัก</div>
+        <div class="pds-line"><span class="pds-line-lbl">คุ้มครองชีวิตรวม</span>            <span class="pds-line-val">${_pdsFmt(lifeCov)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">คุ้มครองทุพพลภาพรวม</span>        <span class="pds-line-val">${_pdsFmt(disability)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">คุ้มครองชีวิตจากอุบัติเหตุรวม (PA)</span><span class="pds-line-val">${_pdsFmt(pa)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">เงินคืนจากประกันสะสมทรัพย์รวม</span><span class="pds-line-val">${_pdsFmt(cashRet)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">เงินบำนาญจากประกันบำนาญรวม</span>    <span class="pds-line-val">${_pdsFmt(annuity)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ผลประโยชน์จาก Unit Linked</span>     <span class="pds-line-val">${_pdsFmt(ulBenefit)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">เบี้ยฯสัญญาหลักรวม</span>             <span class="pds-line-val">${_pdsFmt(mainPrem)}</span></div>
+      </div>
+      <div class="pds-section">
+        <div class="pds-section-title">สัญญาเพิ่มเติม</div>
+        <div class="pds-line"><span class="pds-line-lbl">ค่าห้องรวม</span>                    <span class="pds-line-val">${_pdsFmt(roomDaily)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อครั้ง</span>              <span class="pds-line-val">${_pdsFmt(treatPer)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อปี</span>                  <span class="pds-line-val">${_pdsFmt(treatYear)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อครั้ง</span>             <span class="pds-line-val">${_pdsFmt(opdPer)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อปี</span>                <span class="pds-line-val">${_pdsFmt(opdYear)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ชดเชยรายได้ต่อวัน</span>             <span class="pds-line-val">${_pdsFmt(incomeDay)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ชดเชยอุบัติเหตุบางส่วน (ต่อสัปดาห์)</span><span class="pds-line-val">${_pdsFmt(accidentWk)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ชดเชยโรคร้ายแรงระยะต้น-กลาง</span>  <span class="pds-line-val">${_pdsFmt(ciMild)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ชดเชยโรคร้ายแรงระยะรุนแรง</span>     <span class="pds-line-val">${_pdsFmt(ciSevere)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">เสียชีวิตจากโรคร้ายแรง</span>        <span class="pds-line-val">${_pdsFmt(ciDeath)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">เบี้ยฯสัญญาเพิ่มเติมรวม</span>         <span class="pds-line-val">${_pdsFmt(riderPrem)}</span></div>
+      </div>
+    </div>
+  `;
+
+  const right = `
+    <div class="pds-hcc">
+      <div class="pds-hcc-head">
+        <div class="pds-hcc-avatar">👤</div>
+        <div>
+          <div class="pds-hcc-name">${clientName}</div>
+          <div class="pds-hcc-sub">Healthcare Card</div>
+        </div>
+      </div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">คุ้มครองชีวิต</span><span class="pds-hcc-line-val">${_pdsFmt(lifeCov)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่าห้องรวม</span><span class="pds-hcc-line-val">${_pdsFmt(roomDaily)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(treatPer)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(treatYear)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(opdPer)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(opdYear)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยรายได้ต่อวัน</span><span class="pds-hcc-line-val">${_pdsFmt(incomeDay)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยอุบัติเหตุบางส่วน</span><span class="pds-hcc-line-val">${_pdsFmt(accidentWk)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยโรคร้ายแรงระยะต้น-กลาง</span><span class="pds-hcc-line-val">${_pdsFmt(ciMild)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยโรคร้ายแรงระยะรุนแรง</span><span class="pds-hcc-line-val">${_pdsFmt(ciSevere)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">เสียชีวิตจากโรคร้ายแรง</span><span class="pds-hcc-line-val">${_pdsFmt(ciDeath)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ทุพพลภาพ</span><span class="pds-hcc-line-val">${_pdsFmt(disability)}</span></div>
+      <div class="pds-hcc-foot">
+        <div class="pds-hcc-foot-avatar">👤</div>
+        <div class="pds-hcc-foot-text">
+          <div class="lbl">ตัวแทนบริการ</div>
+          <div><b>${agentName}</b></div>
+          <div style="opacity:.75;font-size:.72rem;">${agentRole}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  /* Per-policy detail blocks */
+  const polBlocks = policies.map((p, i) => {
+    const riderType = (p.riders && p.riders.length) ? p.riders[0].type : '';
+    const hasRider = !!(p.riders && p.riders.length) || !!p.riderHealthCov;
+    let firstRiderHtml = '';
+    const r = (p.riders || [])[0];
+    if (r) {
+      const riderTitle = r.type === 'medical' ? 'ค่ารักษาพยาบาล'
+                       : r.type === 'critical' ? 'โรคร้ายแรง'
+                       : r.type === 'accident' ? 'อุบัติเหตุ'
+                       : r.type === 'income' ? 'ชดเชยรายได้'
+                       : r.type === 'disability' ? 'ทุพพลภาพ'
+                       : 'สัญญาเพิ่มเติม';
+      firstRiderHtml = `
+        <div class="pds-pol-rider-title">1. สัญญาเพิ่มเติม ${riderTitle}</div>
+        ${r.name ? `<div class="lbl">ชื่อแบบ</div><div class="val">${r.name}</div>` : ''}
+        ${r.roomBoard ? `<div class="lbl">ค่าห้อง ค่าอาหาร</div><div class="val">${_pdsFmt(r.roomBoard)}</div>` : ''}
+        ${r.perVisit ? `<div class="lbl">วงเงินค่ารักษาต่อครั้ง</div><div class="val">${_pdsFmt(r.perVisit)}</div>` : ''}
+        ${r.perYear ? `<div class="lbl">วงเงินค่ารักษาต่อปี</div><div class="val">${_pdsFmt(r.perYear)}</div>` : ''}
+        ${r.opdPerVisit ? `<div class="lbl">ผู้ป่วยนอกต่อครั้ง</div><div class="val">${_pdsFmt(r.opdPerVisit)}</div>` : ''}
+        ${r.opdPerYear ? `<div class="lbl">ผู้ป่วยนอกต่อปี</div><div class="val">${_pdsFmt(r.opdPerYear)}</div>` : ''}
+        ${r.premium ? `<div class="lbl">เบี้ยประกันต่อปี</div><div class="val">${_pdsFmt(r.premium)}</div>` : ''}
+        ${r.end ? `<div class="lbl">วันที่ชำระเบี้ยครั้งสุดท้าย</div><div class="val">${fmtDate ? fmtDate(r.end) : r.end}</div>` : ''}
+      `;
+    }
+    return `
+      <div class="pds-pol">
+        <div class="pds-pol-head">
+          <div class="pds-pol-num">${i + 1}</div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">หมายเลขกรมธรรม์</span><span class="pds-pol-head-val">${p.number || '—'}</span></div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">แบบประกัน</span><span class="pds-pol-head-val">${p.name || '—'}</span></div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">ประเภท</span><span class="pds-pol-head-val">${p.type || '—'}</span></div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">บริษัท</span><span class="pds-pol-head-val">${p.company || '—'}</span></div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">คุ้มครองชีวิต</span><span class="pds-pol-head-val">${_pdsFmt(p.lifeCoverage || 0)}</span></div>
+          <div class="pds-pol-head-col"><span class="pds-pol-head-lbl">สัญญาเพิ่มเติม</span><span class="pds-pol-head-val">${hasRider ? 'มี' : 'ไม่มี'}</span></div>
+        </div>
+        <div class="pds-pol-fields">
+          <div class="lbl">คุ้มครองสูงสุดถึงอายุ</div><div class="val">${_pdsFmt(p.maxCoverageAge || 0)} ปี</div>
+          <div class="lbl">เบี้ยประกัน</div><div class="val">${_pdsFmt(p.premium || 0)}</div>
+          <div class="lbl">วันที่เริ่ม</div><div class="val">${p.start ? (typeof fmtDate==='function' ? fmtDate(p.start) : p.start) : '—'}</div>
+          <div class="lbl">ระยะเวลาชำระเบี้ย</div><div class="val">${_pdsFmt(p.premiumYears || 0)} ปี</div>
+          <div class="lbl">วันที่ชำระเบี้ยครั้งสุดท้าย</div><div class="val">${p.end ? (typeof fmtDate==='function' ? fmtDate(p.end) : p.end) : '—'}</div>
+          ${firstRiderHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="pds-card">
+      <div class="pds-head">
+        <div class="pds-title-wrap">
+          <div class="pds-title">สรุปประกัน</div>
+          <div class="pds-subtitle">รายการ (ทั้งหมด ${policies.length} ฉบับ)</div>
+        </div>
+        <button class="pds-pdf-btn" onclick="window.print()">สร้าง PDF</button>
+      </div>
+      <div class="pds-body">${left}${right}</div>
+      <div class="pds-policies">${polBlocks}</div>
+    </div>
+  `;
 }
 
 // ─── POLICY TABLE ───
@@ -4911,5 +5219,10 @@ function updateTrustedHospital(tier) {
 
 </script>
 <div id="save-toast"></div>
+
+<!-- Floating back button (bottom-left) — กลับไป policies_summary.html -->
+<button class="pds-back-fab" onclick="location.href='policies_summary.html'" title="กลับ สรุปประกัน">
+  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+</button>
 </body>
 </html>
