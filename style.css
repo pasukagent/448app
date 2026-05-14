@@ -468,15 +468,25 @@ footer span { color: var(--red-primary); font-weight: 700; }
   max-width: calc(100vw - 240px);
   display: flex; flex-direction: column; min-height: 100vh;
   min-width: 0; overflow-x: hidden; /* clip ทุกอย่างที่ล้น */
-  transition: margin-left .28s ease, width .28s ease, max-width .28s ease;
+  /* transition moved to .anim-ready (กัน flicker ตอน initial load) */
 }
 
-/* ════ Sidebar COLLAPSE (Option A — slide out fully) ════ */
-.app-sidebar {
-  transition: transform .28s ease;
+/* ════ Sidebar COLLAPSE (Option A — slide out fully) ════
+   2 ชั้นป้องกัน flicker:
+   1. [data-sb-collapsed="1"] บน <html> — set ก่อน first paint ด้วย
+      inline script ใน <head> → sidebar render เป็น collapsed ทันทีไม่กะพริบ
+   2. .anim-ready บน sidebar/main — JS เพิ่มหลัง first paint แล้ว
+      เพื่อ enable transition สำหรับ user-initiated toggle (ไม่ใช่ initial)
+*/
+.app-sidebar.anim-ready,
+.app-main.anim-ready {
+  transition: transform .28s ease, margin-left .28s ease, width .28s ease, max-width .28s ease;
 }
-.app-sidebar.collapsed { transform: translateX(-100%); }
-.app-main.expanded {
+/* both selectors keep sidebar/main in collapsed state */
+.app-sidebar.collapsed,
+:root[data-sb-collapsed="1"] .app-sidebar { transform: translateX(-100%); }
+.app-main.expanded,
+:root[data-sb-collapsed="1"] .app-main {
   margin-left: 0;
   width: 100vw;
   max-width: 100vw;

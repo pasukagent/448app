@@ -74,6 +74,9 @@ if ('serviceWorker' in navigator
 
   function applyCollapseState() {
     const collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+    /* sync html attribute (set by inline <head> script BEFORE first paint) */
+    if (collapsed) document.documentElement.setAttribute('data-sb-collapsed', '1');
+    else            document.documentElement.removeAttribute('data-sb-collapsed');
     const sb = document.querySelector('.app-sidebar');
     const main = document.querySelector('.app-main');
     if (!sb || !main) return;
@@ -81,6 +84,22 @@ if ('serviceWorker' in navigator
     main.classList.toggle('expanded', collapsed);
     const handle = document.getElementById('sb-reopen-handle');
     if (handle) handle.classList.toggle('visible', collapsed);
+  }
+
+  /* Enable transitions AFTER initial state is applied — กัน flicker ตอนเปลี่ยนหน้า:
+     ถ้า transition active ตั้งแต่ first paint, sidebar จะ animate จาก default
+     (visible) → collapsed ทุกครั้งที่โหลดหน้าใหม่ที่ user เคย collapsed ไว้.
+     เพิ่ม .anim-ready class หลัง first paint เสร็จ — transitions ทำงานเฉพาะ
+     ตอน user toggle เท่านั้น (ไม่ใช่ตอน initial render). */
+  function enableTransitionsAfterFirstPaint() {
+    const sb = document.querySelector('.app-sidebar');
+    const main = document.querySelector('.app-main');
+    if (!sb || !main) return;
+    /* requestAnimationFrame x2 = หลัง first paint */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      sb.classList.add('anim-ready');
+      main.classList.add('anim-ready');
+    }));
   }
 
   function toggleSidebar() {
@@ -169,6 +188,7 @@ if ('serviceWorker' in navigator
     injectCollapseUI();
     replaceSidebarIcons();
     installIosOnchangeFix();
+    enableTransitionsAfterFirstPaint();
     const sb = document.querySelector('.app-sidebar');
     if (sb) {
       sb.addEventListener('click', (e) => {
