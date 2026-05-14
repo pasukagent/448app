@@ -242,13 +242,30 @@
     /* Per-policy detail blocks */
     .pds-policies { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; }
     .pds-pol {
-      background: #FFFFFF; border: 1px solid #E5E7EB;
+      background: #FAFBFC; border: 1px solid #E5E7EB;
       border-radius: 12px; padding: 18px 22px;
     }
-    .pds-pol-rider-title + .lbl,
-    .pds-pol-rider-title ~ .lbl,
-    .pds-pol-rider-title ~ .val {
-      background: #FBFCFE;   /* even-lighter background for rider sub-section */
+    /* Rider sub-section wrapper — lighter than policy box but not pure white */
+    .pds-pol-riders {
+      background: #FCFDFE;          /* อ่อนกว่า .pds-pol เล็กน้อย — แต่ไม่ขาวเต็ม */
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 12px -8px -8px;        /* extend slightly past policy fields edge */
+      border: 1px solid #EEF1F6;
+    }
+    .pds-pol-riders .pds-pol-rider-title:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+    .pds-pol-riders .pds-pol-rider-fields {
+      display: grid; grid-template-columns: 200px 1fr; gap: 4px 14px;
+      font-size: .88rem;
+    }
+    .pds-pol-riders .pds-pol-rider-fields .lbl { color: #333; padding: 3px 0; }
+    .pds-pol-riders .pds-pol-rider-fields .val { color: #DC3545; font-weight: 700; padding: 3px 0; }
+    @media (max-width: 720px) {
+      .pds-pol-riders .pds-pol-rider-fields { grid-template-columns: 1fr; }
     }
     .pds-pol-head {
       display: grid; grid-template-columns: 50px repeat(6, 1fr); gap: 12px;
@@ -2299,17 +2316,18 @@ function renderPolicyDetailSummary() {
     return lines.join('');
   }
 
-  /* Render ALL riders for this policy */
+  /* Render ALL riders for this policy — wrapped in lighter-bg block */
   function _renderAllRiders(p) {
     const riders = (p.riders || []);
     if (riders.length === 0) return '';
-    return riders.map((r, idx) => {
+    const body = riders.map((r, idx) => {
       const title = RIDER_TYPE_NAMES[r.type] || 'สัญญาเพิ่มเติม';
       return `
         <div class="pds-pol-rider-title">${idx + 1}. สัญญาเพิ่มเติม ${title}</div>
-        ${_renderRiderFields(r)}
+        <div class="pds-pol-rider-fields">${_renderRiderFields(r)}</div>
       `;
     }).join('');
+    return `<div class="pds-pol-riders">${body}</div>`;
   }
 
   const polBlocks = policies.map((p, i) => {
@@ -2331,8 +2349,8 @@ function renderPolicyDetailSummary() {
           <div class="lbl">วันที่เริ่ม</div><div class="val">${p.start ? (typeof fmtDate==='function' ? fmtDate(p.start) : p.start) : '—'}</div>
           <div class="lbl">ระยะเวลาชำระเบี้ย</div><div class="val">${_pdsFmt(p.premiumYears || 0)} ปี</div>
           <div class="lbl">วันที่ชำระเบี้ยครั้งสุดท้าย</div><div class="val">${p.end ? (typeof fmtDate==='function' ? fmtDate(p.end) : p.end) : '—'}</div>
-          ${_renderAllRiders(p)}
         </div>
+        ${_renderAllRiders(p)}
       </div>
     `;
   }).join('');
