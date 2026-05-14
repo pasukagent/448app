@@ -762,6 +762,7 @@ function initClientSelect() {
 }
 
 function onClientChange(cid) {
+  _commitDirtyInputs();   /* save any unsaved typing before switching client */
   selectedClientId = cid;
   localStorage.setItem('aia_selectedClient', cid);
   render();
@@ -784,6 +785,25 @@ function _astFmtFV(n) {
   return Number(n) >= 1000
     ? Math.round(Number(n)).toLocaleString('th-TH', { maximumFractionDigits: 2 })
     : Number(n).toFixed(2);
+}
+
+/* Commit any focused (dirty) input BEFORE actions that trigger render() ทำลาย DOM.
+   เป็น race-condition guard — iOS Safari/PWA บางทีไม่ fire change บน blur ไปปุ่ม
+   → user typed value ใน input หายไปก่อนถูก save.
+   Fix: dispatch change explicitly + blur ก่อน openApplyModal / setApplyTo / etc. */
+let _astCommitting = false;
+function _commitDirtyInputs() {
+  if (_astCommitting) return;
+  _astCommitting = true;
+  try {
+    const ae = document.activeElement;
+    if (ae && ae.tagName === 'INPUT') {
+      ae.dispatchEvent(new Event('change', { bubbles: true }));
+      if (ae.blur) ae.blur();
+    }
+  } finally {
+    _astCommitting = false;
+  }
 }
 
 /* ════════════════════════════════════════════
@@ -855,6 +875,7 @@ function _renderApplyIcon(value, size) {
 }
 
 function openApplyModal(type) {
+  _commitDirtyInputs();   /* commit any typed-but-unsaved input first */
   _astApplyType = type;
   const d = getRowData(type);
   const cur = d.appliedTo;
@@ -1059,6 +1080,7 @@ function getCustomRows() {
 
 function addCustomRow(category) {
   if (!selectedClientId) return;
+  _commitDirtyInputs();   /* commit any typed-but-unsaved input first */
   updateUser(u => {
     const c = (u.data.clients||[]).find(x => x.id === selectedClientId);
     if (!c) return;
@@ -1192,6 +1214,7 @@ function renderCustomRow(a) {
 
 /* Apply-to modal for custom rows — different target (id, not type) */
 function openApplyModalForCustom(id) {
+  _commitDirtyInputs();   /* commit any typed-but-unsaved input first */
   _astApplyType = '__cust:' + id;   /* prefix to indicate custom */
   const a = getAssets().find(x => x.id === id);
   const cur = a ? a.appliedTo : null;
