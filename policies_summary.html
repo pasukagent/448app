@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>448 Wealth Management Plan — สรุปประกัน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1F2D4F">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="448 Wealth">
+  <meta name="mobile-web-app-capable" content="yes">
+  <script>(function(){try{if(localStorage.getItem('aia_sidebar_collapsed')==='1'){document.documentElement.setAttribute('data-sb-collapsed','1');}}catch(e){}})();</script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="icons.js"></script><script src="sidebar-scroll.js"></script>
+  <script src="flow-nav.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrHFBs56sJCT-WX6daZT1Br1vYYNclGD4",
+      authDomain: "app-d83ab.firebaseapp.com",
+      projectId: "app-d83ab",
+      storageBucket: "app-d83ab.firebasestorage.app",
+      messagingSenderId: "2200674251",
+      appId: "1:2200674251:web:0b240a123df2e5b86ea04e"
+    });
+    const fbAuth = firebase.auth();
+  </script>
+  <style>
+    :root {
+      --ps-indigo:       #1F2D4F;
+      --ps-indigo-light: #3A4F75;
+      --ps-indigo-soft:  #F0F2F7;
+      --ps-divider:      #C0C8D6;
+    }
+    .feature-hero {
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      color: white; padding: 22px 30px 28px; margin-bottom: -8px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .feature-hero h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .feature-hero p  { opacity: .85; font-size: .88rem; }
+    .feature-hero-left { flex: 1; min-width: 240px; }
+    .client-pick {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: 10px; padding: 6px 8px 6px 14px;
+    }
+    .client-pick label { font-size: .82rem; opacity: .85; color: white; }
+    .client-pick select {
+      background: rgba(255,255,255,.95); color: var(--gray-800);
+      border: none; border-radius: 8px; padding: 7px 14px;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+      min-width: 180px; cursor: pointer;
+    }
+
+    /* ════ Main wrap ════ */
+    .ps-wrap {
+      background: white; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 28px 32px 32px;
+      margin-bottom: 18px;
+    }
+    .ps-head {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 22px;
+    }
+    .ps-head-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid var(--ps-indigo); color: var(--ps-indigo);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; background: white;
+    }
+    .ps-head-title {
+      font-size: 1.7rem; font-weight: 800; color: var(--ps-indigo);
+      letter-spacing: -0.01em; flex: 1;
+    }
+    .ps-head-meta {
+      font-size: .92rem; color: var(--gray-600); font-weight: 700;
+    }
+
+    /* ════ Table ════ */
+    .ps-table-wrap { overflow-x: auto; margin: 8px 0 18px; }
+    .ps-table {
+      width: 100%; border-collapse: collapse; min-width: 800px;
+    }
+    .ps-table thead th {
+      padding: 14px 10px 12px; text-align: center;
+      font-size: .92rem; font-weight: 700; color: var(--ps-indigo);
+      border-bottom: 2px solid var(--ps-indigo);
+      background: var(--ps-indigo-soft);
+    }
+    .ps-table thead th:first-child { text-align: left; padding-left: 16px; }
+    .ps-table tbody td {
+      padding: 16px 10px; text-align: center;
+      font-size: 1rem; font-weight: 700; color: var(--ps-indigo);
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .ps-table tbody tr:last-child td { border-bottom: none; }
+    .ps-table tbody td:first-child { text-align: left; padding-left: 16px; }
+    .ps-table tbody tr:hover { background: var(--ps-indigo-soft); cursor: pointer; }
+    .ps-table .col-cov { color: var(--ps-indigo); font-weight: 800; }
+    .ps-table .rider-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: .82rem; font-weight: 700;
+    }
+    .ps-table .rider-badge.has { background: var(--gold-soft); color: var(--gold-dark); border: 1px solid var(--gold-primary); }
+    .ps-table .rider-badge.no { background: #F0F0F0; color: var(--gray-500); border: 1px solid #DDD; }
+
+    /* Empty state */
+    .ps-empty {
+      padding: 60px 24px; text-align: center; color: var(--gray-500);
+    }
+    .ps-empty-icon { font-size: 3rem; margin-bottom: 14px; opacity: .5; }
+    .ps-empty-text { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; color: var(--gray-700); }
+    .ps-empty-sub { font-size: .88rem; }
+
+    /* Add button */
+    .ps-add-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--ps-indigo); color: white; border: none;
+      cursor: pointer; font-size: 1.5rem; font-weight: 700; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all .15s; font-family: var(--font);
+      box-shadow: 0 2px 6px rgba(31,45,79,.2);
+    }
+    .ps-add-btn:hover {
+      background: var(--ps-indigo-light); transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(31,45,79,.3);
+    }
+
+    /* Bottom row — add + view report */
+    .ps-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-top: 12px; flex-wrap: wrap;
+    }
+    .ps-add-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ps-add-lbl {
+      font-size: .92rem; font-weight: 700; color: var(--ps-indigo);
+    }
+    .ps-report-btn {
+      background: white; color: var(--ps-indigo);
+      border: 2px solid var(--ps-indigo); border-radius: 100px;
+      padding: 10px 26px; font-family: var(--font);
+      font-weight: 800; font-size: 1rem; cursor: pointer;
+      transition: all .15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .ps-report-btn:hover {
+      background: var(--ps-indigo); color: white;
+      transform: translateY(-1px); box-shadow: 0 4px 12px rgba(31,45,79,.25);
+    }
+
+    .no-client {
+      background: white; border-radius: var(--radius); padding: 60px 30px;
+      text-align: center; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .no-client .nc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-client a { color: var(--red-primary); font-weight: 700; }
+
+    /* ════ Floating back button (bottom-left) ════ */
+    .ps-back-fab {
+      position: fixed; bottom: 24px; left: 280px;  /* offset for sidebar */
+      width: 56px; height: 56px; border-radius: 50%;
+      background: white; color: var(--ps-indigo);
+      border: 2.5px solid var(--ps-indigo);
+      cursor: pointer; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(31,45,79,.18);
+      transition: all .15s; z-index: 30;
+    }
+    .ps-back-fab:hover {
+      background: var(--ps-indigo); color: white;
+      transform: translateY(-2px); box-shadow: 0 6px 16px rgba(31,45,79,.3);
+    }
+    :root[data-sb-collapsed="1"] .ps-back-fab { left: 24px; }
+    @media (max-width: 768px) { .ps-back-fab { left: 24px; } }
+
+    @media (max-width: 720px) {
+      .feature-hero { padding: 18px 18px 22px; }
+      .ps-wrap { padding: 22px 16px 24px; }
+      .ps-head { gap: 12px; }
+      .ps-head-icon { width: 62px; height: 62px; }
+      .ps-head-title { font-size: 1.3rem; }
+      .ps-table thead th, .ps-table tbody td { padding: 10px 6px; font-size: .85rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sb-top-accent"></div>
+    <div class="sb-logo-area">
+      <div class="sb-brand">448</div>
+      <div class="sb-tagline">Wealth Management</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เมนูหลัก</div>
+      <div class="app-sb-item" onclick="location.href='dashboard.html'"><span class="sb-ico">🏠</span> หน้าแรก</div>
+      <div class="app-sb-item" onclick="location.href='clients.html'"><span class="sb-ico">👥</span> รายชื่อลูกค้า</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='financial.html'"><span class="sb-ico">💰</span> กระแสเงินสด</div>
+      <div class="app-sb-item" onclick="location.href='assets.html'"><span class="sb-ico">💎</span> สินทรัพย์</div>
+      <div class="app-sb-item" onclick="location.href='networth.html'"><span class="sb-ico">⚖️</span> งบการเงิน</div>
+      <div class="app-sb-item" onclick="location.href='ratios.html'"><span class="sb-ico">📐</span> อัตราส่วนการเงิน</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วางแผนชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='education.html'"><span class="sb-ico">🎓</span> การศึกษาบุตร</div>
+      <div class="app-sb-item" onclick="location.href='retirement.html'"><span class="sb-ico">🛋️</span> วางแผนเกษียณ</div>
+      <div class="app-sb-item" onclick="location.href='goals.html'"><span class="sb-ico">🎯</span> เป้าหมายชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='life-insurance.html'"><span class="sb-ico">☂️</span> ประกันชีวิต</div>
+      <div class="app-sb-item" onclick="location.href='health-insurance.html'"><span class="sb-ico">⚕️</span> ประกันสุขภาพ</div>
+      <div class="app-sb-item active" onclick="location.href='policies_summary.html'"><span class="sb-ico">📊</span> สรุปกรมธรรม์</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">วิเคราะห์และแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='priority.html'"><span class="sb-ico">🎯</span> ลำดับความสำคัญ</div>
+      <div class="app-sb-item" onclick="location.href='portfolio.html'"><span class="sb-ico">📈</span> พอร์ตแนะนำ</div>
+      <div class="app-sb-item" onclick="location.href='plan_summary.html'"><span class="sb-ico">📋</span> สรุปแผน</div>
+      <div class="app-sb-item" onclick="location.href='timeline.html'"><span class="sb-ico">⏳</span> Life Timeline</div>
+    </div>
+    <div class="app-sb-section">
+      <div class="app-sb-lbl">เครื่องมือ</div>
+      <div class="app-sb-item" onclick="location.href='tax.html'"><span class="sb-ico">🧾</span> คำนวณภาษี</div>
+      <div class="app-sb-item" onclick="location.href='appointments.html'"><span class="sb-ico">📅</span> นัดหมาย</div>
+      <div class="app-sb-item" onclick="location.href='guide.html'"><span class="sb-ico">📖</span> คู่มือการใช้งาน</div>
+    </div>
+    <div class="sb-bottom-area">
+      <div class="sb-profile-row" onclick="location.href='profile.html'">
+        <div class="sb-avatar-box" id="sb-avatar">P</div>
+        <div>
+          <div class="sb-profile-name" id="sb-name">Agent</div>
+          <div class="sb-profile-role">AIA · ดูโปรไฟล์</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main" style="overflow-y:auto;">
+    <div class="feature-hero">
+      <div class="feature-hero-left">
+        <h2>☂️ สรุปประกัน</h2>
+        <p>รายการกรมธรรม์ทั้งหมดของลูกค้า</p>
+      </div>
+      <div class="client-pick">
+        <div class="cp-mini-avatar" id="cp-mini-avatar" style="width:36px;height:36px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--red-primary);overflow:hidden;">👤</div>
+        <label for="client-select">ลูกค้า:</label>
+        <select id="client-select" onchange="onClientChange(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="container" id="content-wrap"></div>
+  </main>
+
+  <!-- Floating back button (bottom-left, like Planista) — back to life-insurance.html -->
+  <button class="ps-back-fab" onclick="location.href='life-insurance.html'" title="กลับ ประกันชีวิต">
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </button>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   AUTH + DATA HELPERS
+═══════════════════════════════════════════ */
+const _uid = localStorage.getItem('aia_currentUser');
+if (!_uid) location.href = 'login.html';
+
+let selectedClientId = null;
+
+function getUser() {
+  const users = JSON.parse(localStorage.getItem('aia_users') || '[]');
+  const u = users.find(x => x.id === _uid);
+  if (!u) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; return {}; }
+  return u;
+}
+function getClients() { return (getUser().data && getUser().data.clients) || []; }
+function getCurrent() { return getClients().find(c => c.id === selectedClientId); }
+function getPolicies() {
+  const c = getCurrent();
+  return (c && c.policies) || [];
+}
+
+function fmtBaht(n) {
+  if (!n) return '0';
+  return Math.round(Number(n)).toLocaleString('th-TH');
+}
+
+/* ════════════════════════════════════════════
+   CLIENT SELECTOR
+═══════════════════════════════════════════ */
+function initClientSelect() {
+  const sel = document.getElementById('client-select');
+  const clients = getClients();
+  if (clients.length === 0) {
+    sel.innerHTML = '<option value="">— ไม่มีลูกค้า —</option>'; return;
+  }
+  const stored = localStorage.getItem('aia_selectedClient');
+  selectedClientId = (stored && clients.find(c => c.id === stored)) ? stored : clients[0].id;
+  localStorage.setItem('aia_selectedClient', selectedClientId);
+  sel.innerHTML = clients.map(c =>
+    `<option value="${c.id}" ${c.id === selectedClientId ? 'selected':''}>${c.firstName||''} ${c.lastName||''}</option>`
+  ).join('');
+}
+function onClientChange(cid) {
+  selectedClientId = cid;
+  localStorage.setItem('aia_selectedClient', cid);
+  render();
+}
+
+/* Render policies summary table */
+function render() {
+  const wrap = document.getElementById('content-wrap');
+  if (!selectedClientId) {
+    wrap.innerHTML = `<div class="no-client">
+      <div class="nc-icon">👤</div>
+      <p>ยังไม่มีลูกค้า — <a href="clients.html">เพิ่มลูกค้า</a> ก่อน</p>
+    </div>`;
+    return;
+  }
+
+  const policies = getPolicies();
+
+  wrap.innerHTML = `
+    <div class="ps-wrap">
+      <div class="ps-head">
+        <div class="ps-head-icon">${window.IconLib ? window.IconLib.getIcon('umbrella', { size: 40 }) : '☂'}</div>
+        <div class="ps-head-title">ประกันชีวิต</div>
+        <div class="ps-head-meta">รายการทั้งหมด ${policies.length} ฉบับ</div>
+      </div>
+
+      ${policies.length === 0 ? `
+        <div class="ps-empty">
+          <div class="ps-empty-icon">📋</div>
+          <div class="ps-empty-text">ยังไม่มีกรมธรรม์</div>
+          <div class="ps-empty-sub">กดปุ่ม + ด้านล่างเพื่อเพิ่มกรมธรรม์</div>
+        </div>
+      ` : `
+        <div class="ps-table-wrap">
+          <table class="ps-table">
+            <thead>
+              <tr>
+                <th>หมายเลขกรมธรรม์</th>
+                <th>แบบประกัน</th>
+                <th>ประเภท</th>
+                <th>บริษัท</th>
+                <th>คุ้มครองชีวิต</th>
+                <th>สัญญาเพิ่มเติม</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${policies.map(p => {
+                const hasRiders = !!(p.riders && p.riders.length) || !!(p.endorsements && p.endorsements.length);
+                return `
+                  <tr onclick="goToDetail('${p.id||''}')">
+                    <td>${p.number || '—'}</td>
+                    <td>${p.name || '—'}</td>
+                    <td>${p.type || '—'}</td>
+                    <td>${p.company || '—'}</td>
+                    <td class="col-cov">${fmtBaht(p.lifeCoverage || p.coverage || 0)}</td>
+                    <td>
+                      <span class="rider-badge ${hasRiders ? 'has' : 'no'}">${hasRiders ? 'มี' : 'ไม่มี'}</span>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+
+      <div class="ps-actions">
+        <div class="ps-add-wrap">
+          <button class="ps-add-btn" onclick="goAddPolicy()" title="เพิ่มกรมธรรม์">+</button>
+          <span class="ps-add-lbl">เพิ่มกรมธรรม์</span>
+        </div>
+        <button class="ps-report-btn" onclick="location.href='policies.html'">
+          ${window.IconLib ? window.IconLib.getIcon('chart', { size: 18 }) : '📊'}
+          ดูรายงาน
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/* Navigate to policies.html and signal it to open the add modal */
+function goAddPolicy() {
+  sessionStorage.setItem('open_add_policy', '1');
+  location.href = 'policies.html';
+}
+
+/* Navigate to detailed policies view (which will show this policy's detail) */
+function goToDetail(policyId) {
+  if (policyId) sessionStorage.setItem('open_policy_detail', policyId);
+  location.href = 'policies.html';
+}
+
+/* ════════════════════════════════════════════
+   FIREBASE AUTH + INIT
+═══════════════════════════════════════════ */
+fbAuth.onAuthStateChanged(user => {
+  if (!user) { localStorage.removeItem('aia_currentUser'); location.href = 'login.html'; }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  initClientSelect();
+  render();
+});
+</script>
+</body>
+</html>

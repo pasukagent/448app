@@ -4451,6 +4451,24 @@ const _NA_LVL_IDX = { economy:0, medium:1, premium:2 };
   } else {
     showList();
   }
+
+  // 5. Honor signals from policies_summary.html (add new / open detail)
+  setTimeout(() => {
+    const openAdd = sessionStorage.getItem('open_add_policy');
+    if (openAdd === '1') {
+      sessionStorage.removeItem('open_add_policy');
+      if (typeof toggleForm === 'function') toggleForm();
+    }
+    const openDetailId = sessionStorage.getItem('open_policy_detail');
+    if (openDetailId) {
+      sessionStorage.removeItem('open_policy_detail');
+      const cl = (user.data.clients||[]).find(c => c.id === preselect);
+      if (cl && cl.policies) {
+        const idx = cl.policies.findIndex(p => p.id === openDetailId);
+        if (idx >= 0 && typeof openDetail === 'function') openDetail(idx);
+      }
+    }
+  }, 200);
 })();
 
 function showToast(msg) {
