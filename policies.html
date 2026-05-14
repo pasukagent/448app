@@ -242,8 +242,13 @@
     /* Per-policy detail blocks */
     .pds-policies { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; }
     .pds-pol {
-      background: #FAFBFC; border: 1px solid #E5E7EB;
+      background: #FFFFFF; border: 1px solid #E5E7EB;
       border-radius: 12px; padding: 18px 22px;
+    }
+    .pds-pol-rider-title + .lbl,
+    .pds-pol-rider-title ~ .lbl,
+    .pds-pol-rider-title ~ .val {
+      background: #FBFCFE;   /* even-lighter background for rider sub-section */
     }
     .pds-pol-head {
       display: grid; grid-template-columns: 50px repeat(6, 1fr); gap: 12px;
@@ -2169,7 +2174,7 @@ function renderPolicyDetailSummary() {
   /* === สัญญาเพิ่มเติม aggregates (riders) — ใช้ field names จริงตาม schema ของ form === */
   const roomDaily = _pdsSumRiderType(policies, 'medical', 'roomMeal');     /* not roomBoard */
   const treatPer  = _pdsSumRiderType(policies, 'medical', 'perVisit');
-  const treatYear = 0;  /* schema ไม่มี perYear สำหรับ medical — ไม่แสดง */
+  const treatYear = _pdsSumRiderType(policies, 'medical', 'perYear');      /* added per user request */
   const opdPer    = _pdsSumRiderType(policies, 'medical', 'opdPerVisit');
   const opdYear   = _pdsSumRiderType(policies, 'medical', 'opdPerYear');
   const incomeDay = _pdsSumRiderType(policies, 'income',   'dailyComp');
@@ -2199,6 +2204,7 @@ function renderPolicyDetailSummary() {
         <div class="pds-section-title">สัญญาเพิ่มเติม</div>
         <div class="pds-line"><span class="pds-line-lbl">ค่าห้องรวม</span>                    <span class="pds-line-val">${_pdsFmt(roomDaily)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อครั้ง</span>              <span class="pds-line-val">${_pdsFmt(treatPer)}</span></div>
+        <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อปี</span>                  <span class="pds-line-val">${_pdsFmt(treatYear)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อครั้ง</span>             <span class="pds-line-val">${_pdsFmt(opdPer)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อปี</span>                <span class="pds-line-val">${_pdsFmt(opdYear)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ชดเชยรายได้ต่อวัน</span>             <span class="pds-line-val">${_pdsFmt(incomeDay)}</span></div>
@@ -2223,6 +2229,7 @@ function renderPolicyDetailSummary() {
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">คุ้มครองชีวิต</span><span class="pds-hcc-line-val">${_pdsFmt(lifeCov)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่าห้องรวม</span><span class="pds-hcc-line-val">${_pdsFmt(roomDaily)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(treatPer)}</span></div>
+      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(treatYear)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(opdPer)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(opdYear)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยรายได้ต่อวัน</span><span class="pds-hcc-line-val">${_pdsFmt(incomeDay)}</span></div>
@@ -2263,6 +2270,7 @@ function renderPolicyDetailSummary() {
       if (r.nursingService) add('ค่าบริการพยาบาล', r.nursingService, true);
       if (r.treatmentType)  add('ค่ารักษาพยาบาลแบบ', r.treatmentType, true);
       add('วงเงินค่ารักษาต่อครั้ง', r.perVisit);
+      add('วงเงินค่ารักษาต่อปี',   r.perYear);
       add('ผู้ป่วยนอกต่อครั้ง', r.opdPerVisit);
       add('ผู้ป่วยนอกต่อปี',   r.opdPerYear);
     } else if (r.type === 'income') {
@@ -3823,13 +3831,18 @@ function renderRiderFields(r) {
         <select onchange="updateRiderField('${id}','treatmentType',this.value)">
           <option value="">โปรดเลือก</option>
           <option value="เหมาจ่าย" ${r.treatmentType === 'เหมาจ่าย' ? 'selected' : ''}>เหมาจ่าย</option>
-          <option value="รวมกับค่าห้อง" ${r.treatmentType === 'รวมกับค่าห้อง' ? 'selected' : ''}>รวมกับหมวดค่าห้อง</option>
+          <option value="ตามตาราง" ${r.treatmentType === 'ตามตาราง' ? 'selected' : ''}>ตามตาราง</option>
         </select>
       </div>
       <div class="pf-row">
         <label>วงเงินค่ารักษาต่อครั้ง</label>
         <input class="money-fmt" inputmode="decimal" value="${r.perVisit || ''}"
           onchange="updateRiderField('${id}','perVisit',parseMoney(this))">
+      </div>
+      <div class="pf-row">
+        <label>วงเงินค่ารักษาต่อปี</label>
+        <input class="money-fmt" inputmode="decimal" value="${r.perYear || ''}"
+          onchange="updateRiderField('${id}','perYear',parseMoney(this))">
       </div>
       <div class="pf-row">
         <label>ผู้ป่วยนอกต่อปี</label>
