@@ -788,19 +788,27 @@ function _astFmtFV(n) {
 }
 
 /* Commit any focused (dirty) input BEFORE actions that trigger render() ทำลาย DOM.
-   เป็น race-condition guard — iOS Safari/PWA บางทีไม่ fire change บน blur ไปปุ่ม
-   → user typed value ใน input หายไปก่อนถูก save.
-   Fix: dispatch change explicitly + blur ก่อน openApplyModal / setApplyTo / etc. */
+   iPad/iOS PWA quirk: tap ปุ่มขณะ keyboard เปิด → document.activeElement อาจไม่ใช่
+   input อีกแล้ว (เป็น body/button) ตอน click handler รัน → blur+change ของ input
+   ยังไม่ยิงเสร็จ → render() ทำลาย DOM → ค่าหาย.
+   Fix: trigger blur บน input ที่ focus อยู่ + dispatch change บน ทุก ast-input
+        เพื่อบังคับ save (onblur และ onchange ของ input handler จะ save) */
 let _astCommitting = false;
 function _commitDirtyInputs() {
   if (_astCommitting) return;
   _astCommitting = true;
   try {
+    /* 1) blur focused element (if any) — desktop path */
     const ae = document.activeElement;
-    if (ae && ae.tagName === 'INPUT') {
-      ae.dispatchEvent(new Event('change', { bubbles: true }));
-      if (ae.blur) ae.blur();
-    }
+    if (ae && ae.tagName === 'INPUT' && ae.blur) ae.blur();
+    /* 2) Force-fire blur + change ONLY on inputs that have a non-empty value.
+       กัน iOS quirk ที่ blur ไม่ยิงเมื่อ tap ไปปุ่ม — ป้องกัน save 0 ให้ empty inputs */
+    document.querySelectorAll('input.ast-input, input.ast-cust-name').forEach(el => {
+      const v = (el.value || '').trim();
+      if (v === '' || v === '0') return;   /* skip empty/zero — ไม่ pollute storage */
+      el.dispatchEvent(new Event('blur', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
   } finally {
     _astCommitting = false;
   }
@@ -1157,6 +1165,7 @@ function renderCustomRow(a) {
           <button class="ast-cust-del" onclick="deleteCustomRow('${a.id}')" title="ลบแถว">×</button>
           <input type="text" class="ast-cust-name" value="${(a.name||'').replace(/"/g,'&quot;')}"
                  placeholder="${isFV ? 'ชื่อรายการ (มูลค่าอนาคต)' : 'ชื่อรายการ (กระแสเงินสดรับ)'}"
+                 onblur="onCustomCellChange('${a.id}','name',this.value)"
                  onchange="onCustomCellChange('${a.id}','name',this.value)">
         </span>
       </td>
@@ -1164,20 +1173,21 @@ function renderCustomRow(a) {
         <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
                value="${cvFmt}" placeholder="—"
                onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCustomCellChange('${a.id}','currentValue',this.value);"
                onchange="onCustomCellChange('${a.id}','currentValue',this.value)">
       </td>
       <td class="ast-cell">
         <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
                value="${coFmt}" placeholder="—"
                onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCustomCellChange('${a.id}','contribution',this.value);"
                onchange="onCustomCellChange('${a.id}','contribution',this.value)">
       </td>
       <td class="ast-cell">
         <span class="ast-pct-wrap">
           <input type="number" class="ast-input ast-input-pct ${er?'has-val':''}" step="0.01"
                  value="${er}" placeholder="—"
+                 onblur="onCustomCellChange('${a.id}','expectedReturn',this.value)"
                  onchange="onCustomCellChange('${a.id}','expectedReturn',this.value)">
           <span class="ast-pct-suffix">%</span>
         </span>
@@ -1187,6 +1197,7 @@ function renderCustomRow(a) {
           <span class="ast-yr-wrap">
             <input type="number" class="ast-input ast-input-yr ${tm?'has-val':''}" step="1" min="0"
                    value="${tm}" placeholder="—"
+                   onblur="onCustomCellChange('${a.id}','term',this.value)"
                    onchange="onCustomCellChange('${a.id}','term',this.value)">
           </span>
         ` : empty}
@@ -1199,7 +1210,7 @@ function renderCustomRow(a) {
           <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
                  value="${cfFmt}" placeholder="—"
                  onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCustomCellChange('${a.id}','cashFlow',this.value);"
                  onchange="onCustomCellChange('${a.id}','cashFlow',this.value)">
         ` : empty}
       </td>
@@ -1279,7 +1290,7 @@ function renderRow(row) {
         <input type="text" class="ast-input ${cv?'has-val':''}" inputmode="decimal"
                value="${cvFmt}" placeholder="—"
                onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+               onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCellChange('${row.type}','currentValue',this.value);"
                onchange="onCellChange('${row.type}','currentValue',this.value)">
       </td>
       <td class="ast-cell">
@@ -1287,7 +1298,7 @@ function renderRow(row) {
           <input type="text" class="ast-input ${co?'has-val':''}" inputmode="decimal"
                  value="${coFmt}" placeholder="—"
                  onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCellChange('${row.type}','contribution',this.value);"
                  onchange="onCellChange('${row.type}','contribution',this.value)">
         ` : empty}
       </td>
@@ -1295,6 +1306,7 @@ function renderRow(row) {
         <span class="ast-pct-wrap">
           <input type="number" class="ast-input ast-input-pct ${er?'has-val':''}" step="0.01"
                  value="${er}" placeholder="—"
+                 onblur="onCellChange('${row.type}','expectedReturn',this.value)"
                  onchange="onCellChange('${row.type}','expectedReturn',this.value)">
           <span class="ast-pct-suffix">%</span>
         </span>
@@ -1304,6 +1316,7 @@ function renderRow(row) {
           <span class="ast-yr-wrap">
             <input type="number" class="ast-input ast-input-yr ${tm?'has-val':''}" step="1" min="0"
                    value="${tm}" placeholder="—"
+                   onblur="onCellChange('${row.type}','term',this.value)"
                    onchange="onCellChange('${row.type}','term',this.value)">
           </span>
         ` : empty}
@@ -1316,7 +1329,7 @@ function renderRow(row) {
           <input type="text" class="ast-input ${cf?'has-val':''}" inputmode="decimal"
                  value="${cfFmt}" placeholder="—"
                  onfocus="this.value=this.value.replace(/,/g,''); this.select();"
-                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):'';"
+                 onblur="this.value=this.value?Number(this.value.replace(/,/g,'')).toLocaleString('th-TH'):''; onCellChange('${row.type}','cashFlow',this.value);"
                  onchange="onCellChange('${row.type}','cashFlow',this.value)">
         ` : empty}
       </td>
