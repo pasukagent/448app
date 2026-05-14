@@ -2166,15 +2166,15 @@ function renderPolicyDetailSummary() {
   const ulBenefit = policies.reduce((s, p) => s + Number(p.unitLinkedBenefit || 0), 0);
   const mainPrem  = _pdsSumField(policies, 'premium');
 
-  /* === สัญญาเพิ่มเติม aggregates (riders) === */
-  const roomDaily = _pdsSumRiderType(policies, 'medical', 'roomBoard');
+  /* === สัญญาเพิ่มเติม aggregates (riders) — ใช้ field names จริงตาม schema ของ form === */
+  const roomDaily = _pdsSumRiderType(policies, 'medical', 'roomMeal');     /* not roomBoard */
   const treatPer  = _pdsSumRiderType(policies, 'medical', 'perVisit');
-  const treatYear = _pdsSumRiderType(policies, 'medical', 'perYear');
+  const treatYear = 0;  /* schema ไม่มี perYear สำหรับ medical — ไม่แสดง */
   const opdPer    = _pdsSumRiderType(policies, 'medical', 'opdPerVisit');
   const opdYear   = _pdsSumRiderType(policies, 'medical', 'opdPerYear');
   const incomeDay = _pdsSumRiderType(policies, 'income',   'dailyComp');
-  const accidentWk= _pdsSumRiderType(policies, 'accident', 'partialDisability');
-  const ciMild    = _pdsSumRiderType(policies, 'critical', 'ciMildModerate');
+  const accidentWk= _pdsSumRiderType(policies, 'accident', 'disPartial');  /* ทุพพลภาพบางส่วน */
+  const ciMild    = _pdsSumRiderType(policies, 'critical', 'ciEarly');     /* not ciMildModerate */
   const ciSevere  = _pdsSumRiderType(policies, 'critical', 'ciSevere');
   const ciDeath   = _pdsSumRiderType(policies, 'critical', 'ciDeath');
   const riderPrem = policies.reduce((s, p) => s + ((p.riders || []).reduce((rs, r) => rs + Number(r.premium || 0), 0)), 0);
@@ -2199,7 +2199,6 @@ function renderPolicyDetailSummary() {
         <div class="pds-section-title">สัญญาเพิ่มเติม</div>
         <div class="pds-line"><span class="pds-line-lbl">ค่าห้องรวม</span>                    <span class="pds-line-val">${_pdsFmt(roomDaily)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อครั้ง</span>              <span class="pds-line-val">${_pdsFmt(treatPer)}</span></div>
-        <div class="pds-line"><span class="pds-line-lbl">ค่ารักษาต่อปี</span>                  <span class="pds-line-val">${_pdsFmt(treatYear)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อครั้ง</span>             <span class="pds-line-val">${_pdsFmt(opdPer)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ผู้ป่วยนอกต่อปี</span>                <span class="pds-line-val">${_pdsFmt(opdYear)}</span></div>
         <div class="pds-line"><span class="pds-line-lbl">ชดเชยรายได้ต่อวัน</span>             <span class="pds-line-val">${_pdsFmt(incomeDay)}</span></div>
@@ -2224,7 +2223,6 @@ function renderPolicyDetailSummary() {
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">คุ้มครองชีวิต</span><span class="pds-hcc-line-val">${_pdsFmt(lifeCov)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่าห้องรวม</span><span class="pds-hcc-line-val">${_pdsFmt(roomDaily)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(treatPer)}</span></div>
-      <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ค่ารักษาต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(treatYear)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อครั้ง</span><span class="pds-hcc-line-val">${_pdsFmt(opdPer)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ผู้ป่วยนอกต่อปี</span><span class="pds-hcc-line-val">${_pdsFmt(opdYear)}</span></div>
       <div class="pds-hcc-line"><span class="pds-hcc-line-lbl">ชดเชยรายได้ต่อวัน</span><span class="pds-hcc-line-val">${_pdsFmt(incomeDay)}</span></div>
@@ -2245,30 +2243,69 @@ function renderPolicyDetailSummary() {
   `;
 
   /* Per-policy detail blocks */
-  const polBlocks = policies.map((p, i) => {
-    const riderType = (p.riders && p.riders.length) ? p.riders[0].type : '';
-    const hasRider = !!(p.riders && p.riders.length) || !!p.riderHealthCov;
-    let firstRiderHtml = '';
-    const r = (p.riders || [])[0];
-    if (r) {
-      const riderTitle = r.type === 'medical' ? 'ค่ารักษาพยาบาล'
-                       : r.type === 'critical' ? 'โรคร้ายแรง'
-                       : r.type === 'accident' ? 'อุบัติเหตุ'
-                       : r.type === 'income' ? 'ชดเชยรายได้'
-                       : r.type === 'disability' ? 'ทุพพลภาพ'
-                       : 'สัญญาเพิ่มเติม';
-      firstRiderHtml = `
-        <div class="pds-pol-rider-title">1. สัญญาเพิ่มเติม ${riderTitle}</div>
-        ${r.name ? `<div class="lbl">ชื่อแบบ</div><div class="val">${r.name}</div>` : ''}
-        ${r.roomBoard ? `<div class="lbl">ค่าห้อง ค่าอาหาร</div><div class="val">${_pdsFmt(r.roomBoard)}</div>` : ''}
-        ${r.perVisit ? `<div class="lbl">วงเงินค่ารักษาต่อครั้ง</div><div class="val">${_pdsFmt(r.perVisit)}</div>` : ''}
-        ${r.perYear ? `<div class="lbl">วงเงินค่ารักษาต่อปี</div><div class="val">${_pdsFmt(r.perYear)}</div>` : ''}
-        ${r.opdPerVisit ? `<div class="lbl">ผู้ป่วยนอกต่อครั้ง</div><div class="val">${_pdsFmt(r.opdPerVisit)}</div>` : ''}
-        ${r.opdPerYear ? `<div class="lbl">ผู้ป่วยนอกต่อปี</div><div class="val">${_pdsFmt(r.opdPerYear)}</div>` : ''}
-        ${r.premium ? `<div class="lbl">เบี้ยประกันต่อปี</div><div class="val">${_pdsFmt(r.premium)}</div>` : ''}
-        ${r.end ? `<div class="lbl">วันที่ชำระเบี้ยครั้งสุดท้าย</div><div class="val">${fmtDate ? fmtDate(r.end) : r.end}</div>` : ''}
-      `;
+  const RIDER_TYPE_NAMES = {
+    medical:   'ค่ารักษาพยาบาล',
+    income:    'ชดเชยรายได้',
+    critical:  'โรคร้ายแรง',
+    accident:  'อุบัติเหตุ',
+    disability:'ทุพพลภาพ',
+  };
+  /* Render fields specific to each rider type — ใช้ field names ตรงตาม schema ของ form */
+  function _renderRiderFields(r) {
+    const lines = [];
+    const add = (lbl, val, isText) => {
+      if (val == null || val === '' || (typeof val === 'number' && !val)) return;
+      lines.push(`<div class="lbl">${lbl}</div><div class="val">${isText ? val : _pdsFmt(val)}</div>`);
+    };
+    if (r.name) add('ชื่อแบบ', r.name, true);
+    if (r.type === 'medical') {
+      add('ค่าห้อง ค่าอาหาร', r.roomMeal);
+      if (r.nursingService) add('ค่าบริการพยาบาล', r.nursingService, true);
+      if (r.treatmentType)  add('ค่ารักษาพยาบาลแบบ', r.treatmentType, true);
+      add('วงเงินค่ารักษาต่อครั้ง', r.perVisit);
+      add('ผู้ป่วยนอกต่อครั้ง', r.opdPerVisit);
+      add('ผู้ป่วยนอกต่อปี',   r.opdPerYear);
+    } else if (r.type === 'income') {
+      add('ค่าชดเชยรายวัน', r.dailyComp);
+      add('ค่ายากลับบ้าน',  r.takeHomeMed);
+    } else if (r.type === 'critical') {
+      add('เสียชีวิต',                 r.ciDeath);
+      add('ระยะเริ่มต้น-ปานกลาง',     r.ciEarly);
+      add('ระยะรุนแรงสูงสุด',          r.ciSevere);
+      if (r.condition) add('เงื่อนไขเพิ่มเติม', r.condition, true);
+    } else if (r.type === 'accident') {
+      add('เสียชีวิตอุบัติเหตุ',       r.deathByAccident);
+      add('สูญเสียอวัยวะสูงสุด',       r.organLossMax);
+      if (Number(r.disComplete))  lines.push(`<div class="lbl">ทุพพลภาพสิ้นเชิง</div><div class="val">${_pdsFmt(r.disComplete)} ${r.disCompleteFreq || ''}</div>`);
+      if (Number(r.disPartial))   lines.push(`<div class="lbl">ทุพพลภาพบางส่วน</div><div class="val">${_pdsFmt(r.disPartial)} ${r.disPartialFreq || ''}</div>`);
+      if (Number(r.disPermanent)) lines.push(`<div class="lbl">ทุพพลภาพถาวรสิ้นเชิง</div><div class="val">${_pdsFmt(r.disPermanent)} ${r.disPermanentFreq || ''}</div>`);
+      if (Number(r.ipdComp))      lines.push(`<div class="lbl">เข้ารักษาเป็นผู้ป่วยใน</div><div class="val">${_pdsFmt(r.ipdComp)} ${r.ipdCompFreq || ''}</div>`);
+    } else if (r.type === 'disability') {
+      add('ทุพพลภาพ', r.disabilityAmt);
+      if (r.condition) add('เงื่อนไขเพิ่มเติม', r.condition, true);
     }
+    /* Common fields */
+    add('ชำระเบี้ยถึงอายุ',     r.payToAge);
+    add('คุ้มครองสูงสุดถึงอายุ', r.coverToAge);
+    add('เบี้ยประกันต่อปี',     r.premium);
+    return lines.join('');
+  }
+
+  /* Render ALL riders for this policy */
+  function _renderAllRiders(p) {
+    const riders = (p.riders || []);
+    if (riders.length === 0) return '';
+    return riders.map((r, idx) => {
+      const title = RIDER_TYPE_NAMES[r.type] || 'สัญญาเพิ่มเติม';
+      return `
+        <div class="pds-pol-rider-title">${idx + 1}. สัญญาเพิ่มเติม ${title}</div>
+        ${_renderRiderFields(r)}
+      `;
+    }).join('');
+  }
+
+  const polBlocks = policies.map((p, i) => {
+    const hasRider = !!(p.riders && p.riders.length) || !!p.riderHealthCov;
     return `
       <div class="pds-pol">
         <div class="pds-pol-head">
@@ -2286,7 +2323,7 @@ function renderPolicyDetailSummary() {
           <div class="lbl">วันที่เริ่ม</div><div class="val">${p.start ? (typeof fmtDate==='function' ? fmtDate(p.start) : p.start) : '—'}</div>
           <div class="lbl">ระยะเวลาชำระเบี้ย</div><div class="val">${_pdsFmt(p.premiumYears || 0)} ปี</div>
           <div class="lbl">วันที่ชำระเบี้ยครั้งสุดท้าย</div><div class="val">${p.end ? (typeof fmtDate==='function' ? fmtDate(p.end) : p.end) : '—'}</div>
-          ${firstRiderHtml}
+          ${_renderAllRiders(p)}
         </div>
       </div>
     `;
