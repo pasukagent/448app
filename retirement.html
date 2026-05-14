@@ -504,22 +504,26 @@ function getPlan(client) {
 }
 
 /* Commit any dirty input BEFORE render() ทำลาย DOM.
-   Race condition: user พิมพ์ใน field A ยังไม่ blur → กดปุ่มที่ trigger savePlanField('B')
-   → render() ทำลาย DOM → ค่าพิมพ์ใน A หายไปทั้ง storage และ display
-   Fix: blur active element (real browsers ยิง change event ถ้า value เปลี่ยน) +
-        guard `_committing` กัน recursion เพราะ onchange ของ input → savePlanField อีกรอบ */
+   iPad/iOS PWA quirk: tap ปุ่มขณะ keyboard เปิด → document.activeElement อาจไม่ใช่
+   input อีกแล้ว ตอน click handler รัน → blur/change ของ input ยังไม่ยิง.
+   Fix: ยิง blur+change บนทุก r2-pill input + textarea เพื่อบังคับ save ผ่าน
+        onblur/onchange handler ที่แต่ละ input set ไว้ */
 let _committing = false;
 function _commitDirtyInputs() {
   if (_committing) return;
   _committing = true;
   try {
+    /* 1) blur focused element first (desktop happy path) */
     const ae = document.activeElement;
-    if (ae && ae.tagName === 'INPUT') {
-      /* In real browsers, blur fires change if value differs from focus snapshot.
-         Also dispatch change explicitly for robustness (covers JS-set values). */
-      ae.dispatchEvent(new Event('change', { bubbles: true }));
-      if (ae.blur) ae.blur();
-    }
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA') && ae.blur) ae.blur();
+    /* 2) Force-fire blur + change on every r2-pill input + textarea.
+       Skip empty values to avoid noise (but allow "0" since some fields legitimately = 0) */
+    document.querySelectorAll('.r2-pill input, .r2-note-textarea').forEach(el => {
+      const v = (el.value || '').trim();
+      if (v === '') return;
+      el.dispatchEvent(new Event('blur', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
   } finally {
     _committing = false;
   }
@@ -789,6 +793,7 @@ function render() {
           <div class="r2-control">
             <div class="r2-pill">
               <input type="number" min="30" max="100" value="${plan.retireAge}"
+                onblur="savePlanField('retireAge', this.value)"
                 onchange="savePlanField('retireAge', this.value)">
               <span class="r2-pill-suffix">ปี</span>
             </div>
@@ -807,6 +812,7 @@ function render() {
                   ? plan.annualSpend
                   : (derived.annualIncome * plan.incomePctAfterRetire / 100)
                 ).toLocaleString('th-TH', { maximumFractionDigits: 0 })}"
+                onblur="savePlanField('annualSpend', parseMoney(this))"
                 onchange="savePlanField('annualSpend', parseMoney(this))">
               <span class="r2-pill-suffix">บาท</span>
             </div>
@@ -824,6 +830,7 @@ function render() {
           <div class="r2-control">
             <div class="r2-pill">
               <input type="number" min="0" max="15" step="0.1" value="${plan.inflationRate}"
+                onblur="savePlanField('inflationRate', this.value)"
                 onchange="savePlanField('inflationRate', this.value)">
               <span class="r2-pill-suffix">%</span>
             </div>
@@ -854,6 +861,7 @@ function render() {
           <div class="r2-control">
             <div class="r2-pill">
               <input type="number" min="0" max="20" step="0.1" value="${plan.returnBefore}"
+                onblur="savePlanField('returnBefore', this.value)"
                 onchange="savePlanField('returnBefore', this.value)">
               <span class="r2-pill-suffix">%</span>
             </div>
@@ -868,6 +876,7 @@ function render() {
           <div class="r2-control">
             <div class="r2-pill">
               <input type="number" min="0" max="20" step="0.1" value="${plan.returnAfter}"
+                onblur="savePlanField('returnAfter', this.value)"
                 onchange="savePlanField('returnAfter', this.value)">
               <span class="r2-pill-suffix">%</span>
             </div>
@@ -889,6 +898,7 @@ function render() {
             <div class="r2-pill" style="${plan.preserveCapital ? '' : 'opacity:.45;'}">
               <input type="number" min="0" max="20" step="0.1" value="${plan.withdrawalRate}"
                 ${plan.preserveCapital ? '' : 'disabled'}
+                onblur="savePlanField('withdrawalRate', this.value)"
                 onchange="savePlanField('withdrawalRate', this.value)">
               <span class="r2-pill-suffix">%</span>
             </div>
