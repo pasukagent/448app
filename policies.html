@@ -3846,7 +3846,7 @@ function renderRiderFields(r) {
       </div>
       <div class="pf-row">
         <label>ค่ารักษาพยาบาลแบบ</label>
-        <select onchange="updateRiderField('${id}','treatmentType',this.value)">
+        <select onchange="updateRiderField('${id}','treatmentType',this.value); renderRiders();">
           <option value="">โปรดเลือก</option>
           <option value="เหมาจ่าย" ${r.treatmentType === 'เหมาจ่าย' ? 'selected' : ''}>เหมาจ่าย</option>
           <option value="ตามตาราง" ${r.treatmentType === 'ตามตาราง' ? 'selected' : ''}>ตามตาราง</option>
@@ -3857,11 +3857,13 @@ function renderRiderFields(r) {
         <input class="money-fmt" inputmode="decimal" value="${r.perVisit || ''}"
           onchange="updateRiderField('${id}','perVisit',parseMoney(this))">
       </div>
+      ${r.treatmentType === 'เหมาจ่าย' ? `
       <div class="pf-row">
         <label>วงเงินค่ารักษาต่อปี</label>
         <input class="money-fmt" inputmode="decimal" value="${r.perYear || ''}"
           onchange="updateRiderField('${id}','perYear',parseMoney(this))">
       </div>
+      ` : ''}
       <div class="pf-row">
         <label>ผู้ป่วยนอกต่อปี</label>
         <input class="money-fmt" inputmode="decimal" value="${r.opdPerYear || ''}"
