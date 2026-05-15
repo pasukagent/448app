@@ -259,6 +259,8 @@
       max-width: 720px; width: 100%; padding: 24px 32px 26px;
       box-shadow: 0 20px 60px rgba(0,0,0,.3);
       position: relative;
+      box-sizing: border-box;       /* keep padding inside max-width */
+      overflow: hidden;             /* safety guard against any internal overflow */
     }
     .li2-parent-close {
       position: absolute; top: 12px; right: 16px;
@@ -267,17 +269,19 @@
     }
     .li2-parent-close:hover { color: #222; }
     .li2-parent-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
       margin-top: 14px;
     }
+    .li2-parent-col { min-width: 0; }   /* กัน 1fr column ขยายเกินจาก min-content ของ pill */
     .li2-parent-col-title {
       font-size: 1.2rem; font-weight: 800; color: #222;
       margin-bottom: 16px;
     }
     .li2-parent-row {
-      display: grid; grid-template-columns: 110px 1fr; gap: 8px;
+      display: grid; grid-template-columns: 90px 1fr; gap: 8px;
       align-items: center; margin-bottom: 12px;
     }
+    .li2-parent-row > * { min-width: 0; }   /* กัน inner grid item ขยายเกิน 1fr */
     .li2-parent-row label {
       font-size: 1rem; font-weight: 600; color: #222;
     }
@@ -285,6 +289,7 @@
       display: flex; align-items: center;
       border: 1.5px solid #222; border-radius: 100px;
       padding: 6px 14px; min-height: 36px; gap: 6px;
+      min-width: 0;       /* shrink ให้พอดี column track ได้ */
     }
     .li2-parent-pill input {
       flex: 1; min-width: 0; border: none; outline: none; background: transparent;
@@ -306,8 +311,10 @@
       color: #222; transition: all .15s;
     }
     .li2-parent-calc-btn:hover { background: var(--li2-indigo); color: white; border-color: var(--li2-indigo); }
-    @media (max-width: 680px) {
+    @media (max-width: 820px) {
       .li2-parent-grid { grid-template-columns: 1fr; gap: 18px; }
+      .li2-parent-card { padding: 22px 22px 24px; }
+      .li2-parent-row { grid-template-columns: 100px 1fr; }
     }
 
     /* Top section — debt + responsibility */
