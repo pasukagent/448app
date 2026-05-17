@@ -183,9 +183,124 @@ if ('serviceWorker' in navigator
     }, true);
   }
 
+  /* ════════════════════════════════════════════
+     FLOATING ACTION MENU — Timeline / Pyramid / Exit
+     แสดงในทุกหน้าของ flow (ทุกหน้าที่โหลด sidebar-scroll.js)
+     - กด toggle ลูกศรเพื่อหลบไปขอบจอ (state บันทึกใน localStorage)
+     - ปุ่ม Timeline = active เมื่ออยู่หน้า timeline.html
+     - Pyramid = placeholder (เปิดเร็วๆนี้)
+     - Exit = กลับ dashboard.html
+  ═══════════════════════════════════════════ */
+  const FMENU_KEY = 'aia_fmenu_collapsed';
+
+  function injectFmenuStyles() {
+    if (document.getElementById('fmenu-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'fmenu-styles';
+    style.textContent = `
+      .fmenu {
+        position: fixed; right: 14px; bottom: 80px; z-index: 90;
+        background: white; border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(0,0,0,.16);
+        padding: 6px 5px; display: flex; flex-direction: column; gap: 3px;
+        transition: transform .35s cubic-bezier(.2,.9,.3,1.05);
+        border: 1.5px solid #E5E7EB;
+        font-family: 'Sarabun', sans-serif;
+      }
+      .fmenu.collapsed { transform: translateX(calc(100% - 18px)); }
+      .fmenu.collapsed .fm-item { opacity: 0; pointer-events: none; }
+      .fmenu-toggle {
+        position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+        width: 22px; height: 44px; border-radius: 11px 0 0 11px;
+        background: #1F2D4F; color: white; border: none;
+        font-size: .85rem; font-weight: 800; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: -2px 2px 8px rgba(0,0,0,.16);
+        transition: all .25s; line-height: 1; padding: 0;
+        font-family: inherit;
+      }
+      .fmenu-toggle:hover { background: #2C3E61; }
+      .fmenu.collapsed .fmenu-toggle { transform: translateY(-50%) rotate(180deg); }
+      .fm-item {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 2px; padding: 6px 5px; border-radius: 9px;
+        background: white; border: none; cursor: pointer;
+        font-family: inherit; font-weight: 700; font-size: .62rem;
+        color: #374151; min-width: 52px;
+        transition: all .15s;
+      }
+      .fm-item:hover { background: #FDE8E8; color: #B02030; }
+      .fm-item.active { background: #E3F2FD; color: #1976D2; }
+      .fm-item .fm-ico {
+        width: 22px; height: 22px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .fm-item .fm-ico svg { width: 20px; height: 20px; }
+      .fm-item.fm-exit { color: #B02030; }
+      .fm-item.fm-exit:hover { background: #FFEBEE; }
+      .fm-divider { height: 1px; background: #E5E7EB; margin: 1px 5px; }
+      /* on small screens (mobile) — ขนาดเล็กลงนิดหน่อย */
+      @media (max-width: 600px) {
+        .fmenu { right: 8px; bottom: 64px; padding: 5px 4px; }
+        .fm-item { min-width: 46px; font-size: .58rem; padding: 5px 4px; }
+        .fm-item .fm-ico { width: 18px; height: 18px; }
+        .fm-item .fm-ico svg { width: 16px; height: 16px; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function injectFmenu() {
+    if (document.getElementById('fmenu')) return;
+    /* ตัดสินว่าหน้าไหน active — match path สุดท้าย */
+    const path = (location.pathname || '').toLowerCase();
+    const isTimeline = path.endsWith('timeline.html');
+    /* ใช้ SVG icons จาก IconLib (line-style เหมือน sidebar) — fallback เป็น emoji ถ้ายังไม่โหลด */
+    const ico = (name, emoji) => {
+      if (window.IconLib && window.IconLib.getIcon) {
+        const svg = window.IconLib.getIcon(name, { size: 20 });
+        if (svg) return svg;
+      }
+      return emoji;
+    };
+    const wrap = document.createElement('div');
+    wrap.id = 'fmenu';
+    wrap.className = 'fmenu';
+    wrap.innerHTML = `
+      <button class="fmenu-toggle" onclick="toggleFmenu()" title="ซ่อน/แสดง">‹</button>
+      <button class="fm-item ${isTimeline ? 'active' : ''}" onclick="location.href='timeline.html'" title="Timeline">
+        <span class="fm-ico">${ico('map', '🗺️')}</span>
+        <span>Timeline</span>
+      </button>
+      <button class="fm-item" onclick="alert('Pyramid view — เปิดเร็วๆนี้')" title="Pyramid">
+        <span class="fm-ico">${ico('pyramid', '🔺')}</span>
+        <span>Pyramid</span>
+      </button>
+      <div class="fm-divider"></div>
+      <button class="fm-item fm-exit" onclick="location.href='dashboard.html'" title="กลับหน้าแรก">
+        <span class="fm-ico">${ico('exit', '🚪')}</span>
+        <span>Exit</span>
+      </button>
+    `;
+    document.body.appendChild(wrap);
+    try {
+      if (localStorage.getItem(FMENU_KEY) === '1') wrap.classList.add('collapsed');
+    } catch(_) {}
+  }
+
+  function toggleFmenu() {
+    const m = document.getElementById('fmenu');
+    if (!m) return;
+    m.classList.toggle('collapsed');
+    try { localStorage.setItem(FMENU_KEY, m.classList.contains('collapsed') ? '1' : '0'); } catch(_) {}
+  }
+  window.toggleFmenu = toggleFmenu;
+
   function init() {
     restore();
     injectCollapseUI();
+    injectFmenuStyles();
+    injectFmenu();
     replaceSidebarIcons();
     installIosOnchangeFix();
     enableTransitionsAfterFirstPaint();

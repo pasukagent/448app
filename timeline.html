@@ -362,51 +362,7 @@
     }
     .ptl-empty .ptl-empty-add:hover { background: var(--red-dark); }
 
-    /* ════════════════════════════════════════════
-       FLOATING RIGHT-SIDE MENU — Timeline / Pyramid / Exit
-       slide to edge เมื่อกด toggle
-    ═══════════════════════════════════════════ */
-    .fmenu {
-      position: fixed; right: 18px; bottom: 96px; z-index: 90;
-      background: white; border-radius: 18px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.18);
-      padding: 10px 8px; display: flex; flex-direction: column; gap: 6px;
-      transition: transform .35s cubic-bezier(.2,.9,.3,1.05), opacity .25s;
-      border: 1.5px solid var(--gray-200);
-    }
-    .fmenu.collapsed {
-      transform: translateX(calc(100% - 22px));
-    }
-    .fmenu.collapsed .fm-item { opacity: 0; pointer-events: none; }
-    .fmenu-toggle {
-      position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
-      width: 28px; height: 56px; border-radius: 14px 0 0 14px;
-      background: #1F2D4F; color: white; border: none;
-      font-size: 1rem; font-weight: 800; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: -3px 3px 10px rgba(0,0,0,.18);
-      transition: all .25s;
-    }
-    .fmenu-toggle:hover { background: #2C3E61; }
-    .fmenu.collapsed .fmenu-toggle { transform: translateY(-50%) rotate(180deg); }
-    .fm-item {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 3px; padding: 10px 8px; border-radius: 12px;
-      background: white; border: none; cursor: pointer;
-      font-family: var(--font); font-weight: 700; font-size: .72rem;
-      color: var(--gray-700); min-width: 64px;
-      transition: all .15s;
-    }
-    .fm-item:hover { background: var(--red-soft); color: var(--red-primary); }
-    .fm-item.active { background: #E3F2FD; color: #1976D2; }
-    .fm-item .fm-ico {
-      width: 30px; height: 30px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-    }
-    .fm-item.fm-exit { color: #B02030; }
-    .fm-item.fm-exit:hover { background: #FFEBEE; }
-    .fm-divider { height: 1px; background: var(--gray-200); margin: 2px 6px; }
+    /* Floating menu CSS ย้ายไปอยู่ใน sidebar-scroll.js — shared ทุกหน้า */
 
     /* Toolbar — ช่วงอายุ + เพิ่ม milestone */
     .tl-toolbar {
@@ -703,24 +659,7 @@
   </main>
 </div>
 
-<!-- Floating right-side menu — Timeline / Pyramid / Exit
-     กด toggle ลูกศรเพื่อหลบไปขอบจอ -->
-<div class="fmenu" id="fmenu">
-  <button class="fmenu-toggle" id="fmenu-toggle" onclick="toggleFmenu()" title="ซ่อน/แสดง">‹</button>
-  <button class="fm-item active" onclick="location.href='timeline.html'" title="Timeline">
-    <span class="fm-ico">🗺️</span>
-    <span>Timeline</span>
-  </button>
-  <button class="fm-item" onclick="alert('Pyramid view — เปิดเร็วๆนี้')" title="Pyramid">
-    <span class="fm-ico">🔺</span>
-    <span>Pyramid</span>
-  </button>
-  <div class="fm-divider"></div>
-  <button class="fm-item fm-exit" onclick="location.href='dashboard.html'" title="Exit">
-    <span class="fm-ico">🚪</span>
-    <span>Exit</span>
-  </button>
-</div>
+<!-- Floating menu (Timeline/Pyramid/Exit) ถูก inject โดย sidebar-scroll.js ในทุกหน้า -->
 
 <!-- Add/Edit Milestone Modal -->
 <div class="ms-overlay" id="ms-modal" onclick="if(event.target===this)closeMsModal()">
@@ -1285,23 +1224,7 @@ function onRangeChange() {
   setRange(s, e);
 }
 
-/* ════════════════════════════════════════════
-   FLOATING MENU — toggle collapse to edge
-   เก็บ state ใน localStorage (per-user)
-═══════════════════════════════════════════ */
-function toggleFmenu() {
-  const m = document.getElementById('fmenu');
-  m.classList.toggle('collapsed');
-  try { localStorage.setItem('aia_fmenu_collapsed', m.classList.contains('collapsed') ? '1' : '0'); } catch(_){}
-}
-function initFmenu() {
-  try {
-    if (localStorage.getItem('aia_fmenu_collapsed') === '1') {
-      document.getElementById('fmenu').classList.add('collapsed');
-    }
-  } catch(_){}
-}
-window.toggleFmenu = toggleFmenu;
+/* Floating menu (toggleFmenu) — ย้ายไปจัดการใน sidebar-scroll.js */
 
 /* ════════════════════════════════════════════
    PLANISTA-STYLE COMPACT TIMELINE
@@ -1568,7 +1491,6 @@ fbAuth.onAuthStateChanged(user => {
 
 (function init() {
   initSidebar();
-  initFmenu();
   initClientSelect();
   render();
   window.addEventListener('storage', (e) => {
