@@ -273,6 +273,54 @@
       padding: 12px 14px; border-radius: 8px;
       font-size: .85rem; line-height: 1.5; text-align: center;
     }
+
+    /* ── Photo lightbox — กดรูปใน list แล้วซูมใหญ่ ── */
+    .photo-lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.85); z-index: 9999;
+      align-items: center; justify-content: center;
+      padding: 24px; backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: pl-fade-in .2s ease;
+    }
+    .photo-lightbox.open { display: flex; }
+    @keyframes pl-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .pl-wrap {
+      position: relative; max-width: 90vw; max-height: 85vh;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      animation: pl-pop-in .25s cubic-bezier(.2,.9,.3,1.2);
+    }
+    @keyframes pl-pop-in {
+      from { opacity: 0; transform: scale(.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .pl-img {
+      max-width: 90vw; max-height: 75vh;
+      border-radius: 16px; object-fit: contain;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      background: #1a1a1a;
+    }
+    .pl-name {
+      color: white; font-weight: 800; font-size: 1.1rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+    .pl-close {
+      position: absolute; top: -14px; right: -14px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: white; color: #1F2D4F; border: none;
+      font-size: 1.4rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .pl-close:hover { background: var(--red-primary); color: white; transform: scale(1.1); }
+    /* clickable avatar ใน list — cursor zoom-in เมื่อมีรูป */
+    .cc-avatar.has-photo { cursor: zoom-in; }
+    .cc-avatar.has-photo:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+
     .profile-hero-info { flex: 1; }
     .profile-hero-name { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
     .profile-hero-sub  { font-size: .88rem; opacity: .75; }
@@ -640,6 +688,15 @@
           </div>
         </div>
 
+        <!-- Photo lightbox — กดรูปใน list แล้วซูมใหญ่ -->
+        <div class="photo-lightbox" id="photo-lightbox" onclick="if(event.target===this)closePhotoLightbox()">
+          <div class="pl-wrap">
+            <button class="pl-close" onclick="closePhotoLightbox()" title="ปิด">✕</button>
+            <img class="pl-img" id="pl-img" src="" alt="">
+            <div class="pl-name" id="pl-name"></div>
+          </div>
+        </div>
+
         <!-- Edit form -->
         <div class="edit-client-form" id="edit-form">
           <div style="font-size:.95rem;font-weight:800;color:var(--gray-700);">✏️ แก้ไขข้อมูลลูกค้า</div>
@@ -937,8 +994,13 @@
     /* ใช้ <img> tag (robust กว่า inline background-image กับ dataUrl ที่มี ; )
        photo เป็น dataUrl ที่ generate เอง — แต่ใส่ esc เผื่อ ' หรือ " ใน URL */
     const avatarInner = c.photo ? `<img src="${esc(c.photo)}" alt="">` : initial;
+    const fullName    = esc(c.firstName) + (c.lastName ? ' ' + esc(c.lastName) : '');
+    /* ถ้ามีรูป → กดได้ ซูมใหญ่ (stopPropagation กัน trigger showProfile) */
+    const avatarClick = c.photo
+      ? ` class="cc-avatar has-photo" onclick="event.stopPropagation(); openPhotoLightbox('${esc(c.id)}')"`
+      : ` class="cc-avatar"`;
     return `<div class="client-card ${active}" onclick="showProfile('${esc(c.id)}')">
-      <div class="cc-avatar">${avatarInner}</div>
+      <div${avatarClick}>${avatarInner}</div>
       <div class="cc-info">
         <div class="cc-name">${esc(c.firstName)}${c.lastName ? ' ' + esc(c.lastName) : ''}</div>
         <div class="cc-sub">${pCount} กรมธรรม์</div>
@@ -1190,6 +1252,30 @@
     localStorage.setItem('aia_selectedClient', selectedClientId);
     window.location.href = feature === 'policies' ? 'policies.html' : 'financial.html';
   }
+
+  /* ════════════════════════════════════════════
+     PHOTO LIGHTBOX — กดรูปใน list แล้วซูมใหญ่
+  ═══════════════════════════════════════════ */
+  function openPhotoLightbox(clientId) {
+    const c = (getCurrentUser().data.clients || []).find(x => x.id === clientId);
+    if (!c || !c.photo) return;
+    const fullName = (c.firstName || '') + (c.lastName ? ' ' + c.lastName : '');
+    document.getElementById('pl-img').src = c.photo;
+    document.getElementById('pl-name').textContent = fullName;
+    document.getElementById('photo-lightbox').classList.add('open');
+    /* Esc to close */
+    document.addEventListener('keydown', _plEscHandler);
+  }
+  function closePhotoLightbox() {
+    document.getElementById('photo-lightbox').classList.remove('open');
+    document.getElementById('pl-img').src = '';
+    document.removeEventListener('keydown', _plEscHandler);
+  }
+  function _plEscHandler(e) {
+    if (e.key === 'Escape') closePhotoLightbox();
+  }
+  window.openPhotoLightbox  = openPhotoLightbox;
+  window.closePhotoLightbox = closePhotoLightbox;
 
   /* ════════════════════════════════════════════
      CLIENT PHOTO UPLOAD — popup menu + camera/gallery + ลบ
