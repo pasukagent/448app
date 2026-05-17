@@ -1269,80 +1269,8 @@ function render() {
       </div>
     </div>
 
-    <!-- Filter chips — toggle ซ่อน/แสดงแต่ละหมวด -->
-    <div class="tl-filter-bar">
-      <span class="filter-lbl">🔍 กรอง:</span>
-      <button class="tl-chip t-child ${tlFilter.child ? 'active':''}" onclick="toggleTlFilter('child')">👶 บุตร ${typeCounts.child > 0 ? '('+typeCounts.child+')' : ''}</button>
-      <button class="tl-chip t-goal ${tlFilter.goal ? 'active':''}" onclick="toggleTlFilter('goal')">🎯 เป้าหมาย ${typeCounts.goal > 0 ? '('+typeCounts.goal+')' : ''}</button>
-      <button class="tl-chip t-resp ${tlFilter.resp ? 'active':''}" onclick="toggleTlFilter('resp')">💸 หนี้สิน ${typeCounts.resp > 0 ? '('+typeCounts.resp+')' : ''}</button>
-      <button class="tl-chip t-retire ${tlFilter.retire ? 'active':''}" onclick="toggleTlFilter('retire')">🛋️ เกษียณ ${typeCounts.retire > 0 ? '('+typeCounts.retire+')' : ''}</button>
-      <button class="tl-chip t-custom ${tlFilter.custom ? 'active':''}" onclick="toggleTlFilter('custom')">🎯 Custom ${typeCounts.custom > 0 ? '('+typeCounts.custom+')' : ''}</button>
-    </div>
-
-    <!-- Compact node-circle timeline (Planista-style) -->
+    <!-- Compact node-circle timeline (Planista-style) — เป็นมุมมองเดียวที่แสดง -->
     ${renderPlanistaTimeline(currentAge, milestones, retireAge)}
-
-    <div class="timeline-card">
-      <h3>📍 Life Timeline (อายุ ${range.start} → ${range.end})</h3>
-      <p class="tc-sub">milestones ที่แสดง ${milestones.length} จาก ${allMilestones.length} จุด · เกษียณในอีก ${yearsToRetire.toFixed(0)} ปี</p>
-      ${renderTimeline(currentAge, milestones, range)}
-      <div class="tl-legend">
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1976D2;background:#1976D2;"></span> ปัจจุบัน</div>
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#F39C12;"></span> บุตร</div>
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1976D2;"></span> เป้าหมาย</div>
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#1F2D4F;"></span> หนี้สิน</div>
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#28a745;"></span> เกษียณ</div>
-        <div class="tl-leg-item"><span class="tl-leg-dot" style="border-color:#8E44AD;"></span> เพิ่มเอง</div>
-      </div>
-    </div>
-
-    <div class="ms-card">
-      <h3>📋 รายการ Milestones (จัดกลุ่มตามอายุ)</h3>
-      ${milestones.length === 0
-        ? '<p style="color:var(--gray-500);text-align:center;padding:20px;">ยังไม่มี milestones — ลองเพิ่มเป้าหมายชีวิต/บุตร หรือกด "➕ เพิ่ม Milestone"</p>'
-        : (() => {
-            /* Group by อายุ (rounded) — เรียงจากน้อย → มาก */
-            const ageGroupsMap = new Map();
-            milestones.forEach(m => {
-              const age = Math.round(m.parentAge);
-              if (!ageGroupsMap.has(age)) ageGroupsMap.set(age, []);
-              ageGroupsMap.get(age).push(m);
-            });
-            const sortedAgeGroups = Array.from(ageGroupsMap.entries())
-              .sort((a, b) => a[0] - b[0])
-              .map(([age, items]) => ({ age, items }));
-
-            return sortedAgeGroups.map(grp => `
-              <div class="ms-age-section">
-                <div class="ms-age-header">
-                  <div>
-                    <span class="ms-age-header-num">⏰ อายุ ${grp.age} ปี</span>
-                    ${grp.items.length > 1 ? `<span class="ms-age-header-count">${grp.items.length} รายการ</span>` : ''}
-                  </div>
-                  <button class="ms-age-header-add" onclick="openMsModal(null,${grp.age})">＋ เพิ่มที่อายุนี้</button>
-                </div>
-                <div class="ms-age-items">
-                  ${grp.items.map(m => `
-                    <div class="ms-item t-${m.type} ${m.isCustom?'is-custom':''}">
-                      <span class="ms-icon">${m.icon}</span>
-                      <div class="ms-info">
-                        <div class="ms-name">${m.name}</div>
-                        <div class="ms-meta">${m.meta}${m.amount ? ' · ' + fmt(m.amount) : ''}</div>
-                      </div>
-                      ${m.isCustom ? `
-                        <button class="ms-delete-btn" onclick="openMsModal('${m.customId}')" title="แก้ไข">✏️</button>
-                        <button class="ms-delete-btn" onclick="deleteCustomMs('${m.customId}')" title="ลบ">🗑️</button>
-                      ` : m.type === 'retire' ? `
-                        <button class="ms-delete-btn" onclick="editRetireAge()" title="แก้ไขอายุเกษียณ">✏️</button>
-                      ` : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('');
-          })()
-      }
-    </div>
   `;
 }
 
