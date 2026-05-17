@@ -199,52 +199,63 @@ if ('serviceWorker' in navigator
     style.id = 'fmenu-styles';
     style.textContent = `
       .fmenu {
-        position: fixed; right: 14px; bottom: 80px; z-index: 90;
+        position: fixed; right: 16px;
+        /* iOS PWA safe-area — กัน home indicator บัง */
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        z-index: 9000;
         background: white; border-radius: 14px;
-        box-shadow: 0 6px 20px rgba(0,0,0,.16);
-        padding: 6px 5px; display: flex; flex-direction: column; gap: 3px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.08);
+        padding: 7px 6px; display: flex; flex-direction: column; gap: 3px;
         transition: transform .35s cubic-bezier(.2,.9,.3,1.05);
-        border: 1.5px solid #E5E7EB;
+        border: 1.5px solid #D5DAE2;
         font-family: 'Sarabun', sans-serif;
+        /* fmenu จะอยู่บนเสมอ — ไม่ถูก clipping context อะไรบัง */
+        isolation: isolate;
       }
-      .fmenu.collapsed { transform: translateX(calc(100% - 18px)); }
+      .fmenu.collapsed { transform: translateX(calc(100% - 26px)); }
       .fmenu.collapsed .fm-item { opacity: 0; pointer-events: none; }
       .fmenu-toggle {
-        position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
-        width: 22px; height: 44px; border-radius: 11px 0 0 11px;
+        position: absolute; left: -16px; top: 50%; transform: translateY(-50%);
+        width: 26px; height: 52px; border-radius: 13px 0 0 13px;
         background: #1F2D4F; color: white; border: none;
-        font-size: .85rem; font-weight: 800; cursor: pointer;
+        font-size: 1rem; font-weight: 800; cursor: pointer;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: -2px 2px 8px rgba(0,0,0,.16);
+        box-shadow: -3px 3px 10px rgba(0,0,0,.20);
         transition: all .25s; line-height: 1; padding: 0;
         font-family: inherit;
       }
       .fmenu-toggle:hover { background: #2C3E61; }
       .fmenu.collapsed .fmenu-toggle { transform: translateY(-50%) rotate(180deg); }
+      /* Pulse animation ครั้งแรก เพื่อให้ user สังเกตเห็น (auto-stop) */
+      @keyframes fmenu-pulse {
+        0%, 100% { box-shadow: -3px 3px 10px rgba(0,0,0,.20); }
+        50%      { box-shadow: -3px 3px 18px rgba(25,118,210,.65), 0 0 0 4px rgba(25,118,210,.18); }
+      }
+      .fmenu.collapsed .fmenu-toggle { animation: fmenu-pulse 1.6s ease-in-out 2; }
       .fm-item {
         display: flex; flex-direction: column; align-items: center;
-        gap: 2px; padding: 6px 5px; border-radius: 9px;
+        gap: 3px; padding: 7px 6px; border-radius: 10px;
         background: white; border: none; cursor: pointer;
-        font-family: inherit; font-weight: 700; font-size: .62rem;
-        color: #374151; min-width: 52px;
+        font-family: inherit; font-weight: 700; font-size: .65rem;
+        color: #374151; min-width: 56px;
         transition: all .15s;
       }
       .fm-item:hover { background: #FDE8E8; color: #B02030; }
       .fm-item.active { background: #E3F2FD; color: #1976D2; }
       .fm-item .fm-ico {
-        width: 22px; height: 22px;
+        width: 24px; height: 24px;
         display: flex; align-items: center; justify-content: center;
       }
-      .fm-item .fm-ico svg { width: 20px; height: 20px; }
+      .fm-item .fm-ico svg { width: 22px; height: 22px; }
       .fm-item.fm-exit { color: #B02030; }
       .fm-item.fm-exit:hover { background: #FFEBEE; }
-      .fm-divider { height: 1px; background: #E5E7EB; margin: 1px 5px; }
-      /* on small screens (mobile) — ขนาดเล็กลงนิดหน่อย */
+      .fm-divider { height: 1px; background: #E5E7EB; margin: 2px 5px; }
+      /* mobile (< 600px) — ขนาดเล็กลงเฉพาะมือถือเล็ก iPad ยังคงไซส์ปกติ */
       @media (max-width: 600px) {
-        .fmenu { right: 8px; bottom: 64px; padding: 5px 4px; }
-        .fm-item { min-width: 46px; font-size: .58rem; padding: 5px 4px; }
-        .fm-item .fm-ico { width: 18px; height: 18px; }
-        .fm-item .fm-ico svg { width: 16px; height: 16px; }
+        .fmenu { right: 10px; padding: 5px 4px; }
+        .fm-item { min-width: 48px; font-size: .6rem; padding: 5px 4px; }
+        .fm-item .fm-ico { width: 20px; height: 20px; }
+        .fm-item .fm-ico svg { width: 18px; height: 18px; }
       }
     `;
     document.head.appendChild(style);
@@ -252,13 +263,22 @@ if ('serviceWorker' in navigator
 
   function injectFmenu() {
     if (document.getElementById('fmenu')) return;
+    /* One-time reset: ลบ state เก่าจากการทดสอบ v96/v97 (collapsed) — user จะเห็นเมนูแน่นอน
+       หลังจาก reset แล้ว user สามารถ collapse ได้เองตามต้องการ */
+    try {
+      const RESET_KEY = 'aia_fmenu_reset_v98';
+      if (!localStorage.getItem(RESET_KEY)) {
+        localStorage.removeItem(FMENU_KEY);
+        localStorage.setItem(RESET_KEY, '1');
+      }
+    } catch(_){}
     /* ตัดสินว่าหน้าไหน active — match path สุดท้าย */
     const path = (location.pathname || '').toLowerCase();
     const isTimeline = path.endsWith('timeline.html');
     /* ใช้ SVG icons จาก IconLib (line-style เหมือน sidebar) — fallback เป็น emoji ถ้ายังไม่โหลด */
     const ico = (name, emoji) => {
       if (window.IconLib && window.IconLib.getIcon) {
-        const svg = window.IconLib.getIcon(name, { size: 20 });
+        const svg = window.IconLib.getIcon(name, { size: 22 });
         if (svg) return svg;
       }
       return emoji;
@@ -286,6 +306,14 @@ if ('serviceWorker' in navigator
     try {
       if (localStorage.getItem(FMENU_KEY) === '1') wrap.classList.add('collapsed');
     } catch(_) {}
+    /* Entry animation — slide in from right ครั้งแรกที่โหลดหน้า เพื่อให้สังเกตเห็น */
+    if (!wrap.classList.contains('collapsed')) {
+      wrap.style.transform = 'translateX(120%)';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        wrap.style.transition = 'transform .45s cubic-bezier(.2,.9,.3,1.05)';
+        wrap.style.transform = '';
+      }));
+    }
   }
 
   function toggleFmenu() {
