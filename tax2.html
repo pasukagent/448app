@@ -473,6 +473,29 @@ function calcTax(netIncome) {
   return { tax, activeIdx };
 }
 
+/* คำนวณ breakdown ต่อขั้นภาษี
+   - portion = ส่วนของรายได้สุทธิที่ตกในขั้นนี้
+   - tax = ภาษีที่ต้องจ่ายในขั้นนั้น
+   - activeIdx = ขั้นบนสุดที่มี portion > 0 (ใช้ highlight) */
+function calcBracketBreakdown(netIncome) {
+  const rows = [];
+  let activeIdx = -1;
+  for (let i = 0; i < BRACKETS.length; i++) {
+    const b = BRACKETS[i];
+    if (netIncome <= 0 || netIncome < b.lo) {
+      rows.push({ portion: 0, tax: 0 });
+      continue;
+    }
+    const upper = Math.min(netIncome, b.hi);
+    /* ขั้นแรก (0-150,000) นับจาก 0 → portion = upper
+       ขั้นอื่น ๆ ใช้ upper - lo + 1 (lo เป็น 150,001 etc.) */
+    const portion = (i === 0) ? upper : (upper - b.lo + 1);
+    rows.push({ portion, tax: portion * b.rate });
+    activeIdx = i;
+  }
+  return { rows, activeIdx };
+}
+
 /* ════════════════════════════════════════════
    COMPUTE — scope: 'cur' or 'imp'
 ═══════════════════════════════════════════ */
@@ -680,18 +703,22 @@ function render() {
             </tr>
           </thead>
           <tbody>
-            ${BRACKETS.map((b, i) => {
-              const isActive = cur.activeIdx === i;
-              const range = (b.hi === Infinity)
-                ? b.lo.toLocaleString('th-TH')
-                : b.lo.toLocaleString('th-TH') + ' - ' + b.hi.toLocaleString('th-TH');
-              return `<tr class="${isActive ? 'active':''}">
-                <td>${range}</td>
-                <td class="col-num">${isActive ? fmt(cur.net) : '—'}</td>
-                <td class="col-num">${(b.rate*100).toFixed(0)}%</td>
-                <td class="col-num">${isActive ? fmt(cur.tax) : '—'}</td>
-              </tr>`;
-            }).join('')}
+            ${(() => {
+              const bb = calcBracketBreakdown(Math.max(cur.net, 0));
+              return BRACKETS.map((b, i) => {
+                const isActive = bb.activeIdx === i;
+                const range = (b.hi === Infinity)
+                  ? b.lo.toLocaleString('th-TH')
+                  : b.lo.toLocaleString('th-TH') + ' - ' + b.hi.toLocaleString('th-TH');
+                const row = bb.rows[i];
+                return `<tr class="${isActive ? 'active':''}">
+                  <td>${range}</td>
+                  <td class="col-num">${row.portion > 0 ? fmt(row.portion) : '—'}</td>
+                  <td class="col-num">${(b.rate*100).toFixed(0)}%</td>
+                  <td class="col-num">${row.tax > 0 ? fmt(row.tax) : '—'}</td>
+                </tr>`;
+              }).join('');
+            })()}
           </tbody>
         </table>
       </div>
@@ -703,20 +730,26 @@ function render() {
         <span class="em">เสียภาษี จำนวนแบบที่มากกว่า</span> ระหว่าง <span class="em">อัตราก้าวหน้า</span> หรือ <span class="em">อัตราคงที่</span>
       </div>
       ${(() => {
+        /* รายได้อื่นนอกจากเงินเดือน — 40(3)…40(8) + อื่น ๆ */
         const otherInc = Number(ti.inc403||0) + Number(ti.inc404||0) + Number(ti.inc405||0)
                       + Number(ti.inc406||0) + Number(ti.inc407||0) + Number(ti.inc408||0)
                       + Number(ti.other||0);
-        const flatTax = otherInc > 5000 ? otherInc * 0.005 : 0;
+        /* ใช้ net (ก่อนปรับปรุง) เป็น fallback เพื่อให้ผู้ใช้เห็น "ภาษีที่จะจ่ายถ้าใช้วิธี 0.5%"
+           กรณีไม่มี otherInc แยก → คำนวณบน annualIncome */
+        const baseIncome = otherInc > 0 ? otherInc : Math.max(cur.annualIncome || 0, 0);
+        const flatTax = baseIncome * 0.005;
+        /* แบบเหมา 0.5% applicable เมื่อ otherInc > 5,000 (ตามกฎหมายภาษี) */
+        const applicable = otherInc > 5000;
         return `
-          <div class="t3-flat-row">
+          <div class="t3-flat-row${applicable ? ' applicable' : ''}">
             <div class="t3-flat-h">
               <div>เงินได้พึงประเมิน</div>
               <div>อัตราคงที่</div>
               <div>ภาษีที่ต้องจ่าย</div>
             </div>
-            <div class="t3-flat-cell-income">${fmt(otherInc)}</div>
+            <div class="t3-flat-cell-income">${fmt(baseIncome)}</div>
             <div class="t3-flat-cell-rate">0.5%</div>
-            <div class="t3-flat-cell-tax">${flatTax > 5000 ? fmt(flatTax) : '—'}</div>
+            <div class="t3-flat-cell-tax">${flatTax > 0 ? fmt(flatTax) : '—'}</div>
           </div>
         `;
       })()}
