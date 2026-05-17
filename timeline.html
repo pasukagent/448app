@@ -239,6 +239,175 @@
     .no-data-tip b { color: #B7791F; }
     .no-data-tip a { color: var(--red-primary); font-weight: 700; }
 
+    /* ════════════════════════════════════════════
+       PLANISTA-STYLE COMPACT TIMELINE — node circles + side labels
+    ═══════════════════════════════════════════ */
+    .ptl-card {
+      background: white; border-radius: var(--radius);
+      padding: 28px 30px 24px; box-shadow: var(--shadow-sm);
+      margin-bottom: 22px; overflow-x: auto;
+    }
+    .ptl-card h3 {
+      font-size: 1.05rem; font-weight: 800; margin-bottom: 16px;
+      color: var(--gray-800);
+    }
+    .ptl-track {
+      position: relative;
+      display: flex; align-items: center; gap: 0;
+      min-width: 800px; padding: 130px 20px;
+    }
+    /* connector line: horizontal background รวมเป็นเส้นเดียว */
+    .ptl-track::before {
+      content: ''; position: absolute;
+      left: 50px; right: 50px;
+      top: 50%; transform: translateY(-50%);
+      height: 4px; background: #1F2D4F; border-radius: 2px; z-index: 0;
+    }
+    .ptl-node {
+      position: relative; flex: 1;
+      display: flex; flex-direction: column; align-items: center;
+      z-index: 1; min-width: 90px;
+    }
+    /* Circle */
+    .ptl-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: white; border: 3.5px solid #1F2D4F;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem; color: #1F2D4F;
+      box-shadow: 0 3px 10px rgba(31,45,79,.18);
+      position: relative; transition: all .2s;
+      cursor: pointer;
+    }
+    .ptl-circle.now { background: #F39C12; border-color: #F39C12; color: white; }
+    .ptl-circle.death { background: white; color: #1F2D4F; font-size: 1.4rem; }
+    .ptl-circle:hover { transform: scale(1.06); box-shadow: 0 6px 16px rgba(31,45,79,.28); }
+    /* small + button on circle */
+    .ptl-add-mini {
+      position: absolute; top: -4px; right: -4px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #1976D2; color: white; border: 2px solid white;
+      font-size: .9rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,.2);
+      z-index: 2;
+    }
+    .ptl-add-mini:hover { background: #1565C0; transform: scale(1.1); }
+    /* Labels above / below — stacked text with line connector */
+    .ptl-labels {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 4px; white-space: nowrap; font-size: .85rem;
+      color: var(--gray-700); font-weight: 700;
+    }
+    .ptl-labels.above {
+      bottom: calc(100% + 18px);
+      flex-direction: column-reverse;
+    }
+    .ptl-labels.below {
+      top: calc(100% + 18px);
+    }
+    /* Each label gets a small dot+line connector to the node */
+    .ptl-label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 2px 6px; border-radius: 6px;
+      cursor: pointer; transition: background .15s;
+    }
+    .ptl-label:hover { background: var(--red-soft); color: var(--red-primary); }
+    .ptl-label::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #1F2D4F; flex-shrink: 0;
+    }
+    /* Connector dotted line from node to labels — visual hint */
+    .ptl-node[data-has-above="1"]::before {
+      content: ''; position: absolute;
+      left: 50%; transform: translateX(-50%);
+      bottom: calc(50% + 32px); width: 2px; height: 26px;
+      background: linear-gradient(to bottom, transparent, #1F2D4F);
+      opacity: .35;
+    }
+    .ptl-node[data-has-below="1"]::after {
+      content: ''; position: absolute;
+      left: 50%; transform: translateX(-50%);
+      top: calc(50% + 32px); width: 2px; height: 26px;
+      background: linear-gradient(to top, transparent, #1F2D4F);
+      opacity: .35;
+    }
+    /* + and × buttons at the end of timeline */
+    .ptl-end-actions {
+      display: flex; gap: 8px; align-items: center; margin-left: 18px;
+      flex-shrink: 0; z-index: 1;
+    }
+    .ptl-end-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem; color: white;
+      transition: all .15s;
+      box-shadow: 0 3px 8px rgba(0,0,0,.18);
+    }
+    .ptl-end-btn.add { background: #1976D2; }
+    .ptl-end-btn.add:hover { background: #1565C0; transform: scale(1.08); }
+    .ptl-end-btn.del { background: #9E9E9E; }
+    .ptl-end-btn.del:hover { background: #757575; transform: scale(1.08); }
+    .ptl-empty {
+      padding: 30px; text-align: center; color: var(--gray-500); font-size: .9rem;
+    }
+    .ptl-empty .ptl-empty-add {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 10px; padding: 9px 18px;
+      background: var(--red-primary); color: white;
+      border: none; border-radius: 8px; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .9rem;
+    }
+    .ptl-empty .ptl-empty-add:hover { background: var(--red-dark); }
+
+    /* ════════════════════════════════════════════
+       FLOATING RIGHT-SIDE MENU — Timeline / Pyramid / Exit
+       slide to edge เมื่อกด toggle
+    ═══════════════════════════════════════════ */
+    .fmenu {
+      position: fixed; right: 18px; bottom: 96px; z-index: 90;
+      background: white; border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+      padding: 10px 8px; display: flex; flex-direction: column; gap: 6px;
+      transition: transform .35s cubic-bezier(.2,.9,.3,1.05), opacity .25s;
+      border: 1.5px solid var(--gray-200);
+    }
+    .fmenu.collapsed {
+      transform: translateX(calc(100% - 22px));
+    }
+    .fmenu.collapsed .fm-item { opacity: 0; pointer-events: none; }
+    .fmenu-toggle {
+      position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 56px; border-radius: 14px 0 0 14px;
+      background: #1F2D4F; color: white; border: none;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: -3px 3px 10px rgba(0,0,0,.18);
+      transition: all .25s;
+    }
+    .fmenu-toggle:hover { background: #2C3E61; }
+    .fmenu.collapsed .fmenu-toggle { transform: translateY(-50%) rotate(180deg); }
+    .fm-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 10px 8px; border-radius: 12px;
+      background: white; border: none; cursor: pointer;
+      font-family: var(--font); font-weight: 700; font-size: .72rem;
+      color: var(--gray-700); min-width: 64px;
+      transition: all .15s;
+    }
+    .fm-item:hover { background: var(--red-soft); color: var(--red-primary); }
+    .fm-item.active { background: #E3F2FD; color: #1976D2; }
+    .fm-item .fm-ico {
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .fm-item.fm-exit { color: #B02030; }
+    .fm-item.fm-exit:hover { background: #FFEBEE; }
+    .fm-divider { height: 1px; background: var(--gray-200); margin: 2px 6px; }
+
     /* Toolbar — ช่วงอายุ + เพิ่ม milestone */
     .tl-toolbar {
       display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -532,6 +701,25 @@
       <div id="content-wrap"></div>
     </div>
   </main>
+</div>
+
+<!-- Floating right-side menu — Timeline / Pyramid / Exit
+     กด toggle ลูกศรเพื่อหลบไปขอบจอ -->
+<div class="fmenu" id="fmenu">
+  <button class="fmenu-toggle" id="fmenu-toggle" onclick="toggleFmenu()" title="ซ่อน/แสดง">‹</button>
+  <button class="fm-item active" onclick="location.href='timeline.html'" title="Timeline">
+    <span class="fm-ico">🗺️</span>
+    <span>Timeline</span>
+  </button>
+  <button class="fm-item" onclick="alert('Pyramid view — เปิดเร็วๆนี้')" title="Pyramid">
+    <span class="fm-ico">🔺</span>
+    <span>Pyramid</span>
+  </button>
+  <div class="fm-divider"></div>
+  <button class="fm-item fm-exit" onclick="location.href='dashboard.html'" title="Exit">
+    <span class="fm-ico">🚪</span>
+    <span>Exit</span>
+  </button>
 </div>
 
 <!-- Add/Edit Milestone Modal -->
@@ -1091,6 +1279,9 @@ function render() {
       <button class="tl-chip t-custom ${tlFilter.custom ? 'active':''}" onclick="toggleTlFilter('custom')">🎯 Custom ${typeCounts.custom > 0 ? '('+typeCounts.custom+')' : ''}</button>
     </div>
 
+    <!-- Compact node-circle timeline (Planista-style) -->
+    ${renderPlanistaTimeline(currentAge, milestones, retireAge)}
+
     <div class="timeline-card">
       <h3>📍 Life Timeline (อายุ ${range.start} → ${range.end})</h3>
       <p class="tc-sub">milestones ที่แสดง ${milestones.length} จาก ${allMilestones.length} จุด · เกษียณในอีก ${yearsToRetire.toFixed(0)} ปี</p>
@@ -1164,6 +1355,112 @@ function onRangeChange() {
     return;
   }
   setRange(s, e);
+}
+
+/* ════════════════════════════════════════════
+   FLOATING MENU — toggle collapse to edge
+   เก็บ state ใน localStorage (per-user)
+═══════════════════════════════════════════ */
+function toggleFmenu() {
+  const m = document.getElementById('fmenu');
+  m.classList.toggle('collapsed');
+  try { localStorage.setItem('aia_fmenu_collapsed', m.classList.contains('collapsed') ? '1' : '0'); } catch(_){}
+}
+function initFmenu() {
+  try {
+    if (localStorage.getItem('aia_fmenu_collapsed') === '1') {
+      document.getElementById('fmenu').classList.add('collapsed');
+    }
+  } catch(_){}
+}
+window.toggleFmenu = toggleFmenu;
+
+/* ════════════════════════════════════════════
+   PLANISTA-STYLE COMPACT TIMELINE
+   - แต่ละขั้นอายุ = 1 node circle (ผ่าน age groups)
+   - labels above/below alternating
+   - + ปุ่มที่ปลายเส้นเพื่อเพิ่ม node ใหม่
+═══════════════════════════════════════════ */
+function renderPlanistaTimeline(currentAge, milestones, retireAge) {
+  /* Group milestones by อายุ (rounded) */
+  const ageMap = new Map();
+  milestones.forEach(m => {
+    const age = Math.round(m.parentAge);
+    if (!ageMap.has(age)) ageMap.set(age, []);
+    ageMap.get(age).push(m);
+  });
+  const ageGroups = Array.from(ageMap.entries())
+    .map(([age, items]) => ({ age: Number(age), items }))
+    .sort((a,b) => a.age - b.age);
+
+  /* Build node list — รวม current age (ถ้ายังไม่มี node), retirement age, และ death */
+  const curAgeRounded = Math.round(currentAge);
+  const nodeMap = new Map();
+  ageGroups.forEach(g => nodeMap.set(g.age, { age:g.age, items:g.items, type:'milestone' }));
+  if (!nodeMap.has(curAgeRounded)) {
+    nodeMap.set(curAgeRounded, { age: curAgeRounded, items: [], type: 'now' });
+  } else {
+    nodeMap.get(curAgeRounded).type = 'now';
+  }
+  /* Death node — อายุ LIFE_EXPECTANCY */
+  const deathAge = (typeof LIFE_EXPECTANCY !== 'undefined') ? LIFE_EXPECTANCY : 80;
+  nodeMap.set(deathAge, { age: deathAge, items: nodeMap.get(deathAge)?.items || [], type: 'death' });
+
+  const nodes = Array.from(nodeMap.values()).sort((a,b) => a.age - b.age);
+
+  if (nodes.length === 0) {
+    return `<div class="ptl-card">
+      <h3>📍 Life Timeline</h3>
+      <div class="ptl-empty">
+        ยังไม่มี milestones ในช่วงอายุนี้
+        <br><button class="ptl-empty-add" onclick="openMsModal()">＋ เพิ่ม Milestone</button>
+      </div>
+    </div>`;
+  }
+
+  /* Render each node — alternate labels above/below */
+  const nodesHtml = nodes.map((n, i) => {
+    const above = (i % 2 === 0);
+    const labelsHtml = n.items.length === 0 ? '' : `
+      <div class="ptl-labels ${above ? 'above' : 'below'}">
+        ${n.items.map(it => `
+          <div class="ptl-label" onclick="openMsDetailModal(${it._idx})" title="${(it.name||'').replace(/"/g,'&quot;')}">
+            ${it.name||''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+    const circleContent = n.type === 'death'
+      ? '⚰️'
+      : `<span>${n.age}</span>`;
+    const cls = n.type === 'now' ? 'now' : (n.type === 'death' ? 'death' : '');
+    const hasAbove = (above && n.items.length > 0) ? '1' : '0';
+    const hasBelow = (!above && n.items.length > 0) ? '1' : '0';
+    return `
+      <div class="ptl-node" data-has-above="${hasAbove}" data-has-below="${hasBelow}">
+        ${above ? labelsHtml : ''}
+        <div class="ptl-circle ${cls}" onclick="openMsModal(null,${n.age})" title="คลิกเพื่อเพิ่ม milestone ที่อายุ ${n.age}">
+          ${circleContent}
+          <button class="ptl-add-mini" onclick="event.stopPropagation();openMsModal(null,${n.age})" title="เพิ่ม milestone">+</button>
+        </div>
+        ${!above ? labelsHtml : ''}
+      </div>
+    `;
+  }).join('');
+
+  /* End actions — + เพิ่ม node ใหม่, × ลบ node ล่าสุด (ถ้ามี) */
+  return `
+    <div class="ptl-card">
+      <h3>📍 Life Timeline</h3>
+      <div class="ptl-track">
+        ${nodesHtml}
+        <div class="ptl-end-actions">
+          <button class="ptl-end-btn add" onclick="openMsModal()" title="เพิ่ม milestone ใหม่">+</button>
+          <button class="ptl-end-btn del" onclick="alert('เลือก milestone ในรายการด้านล่างเพื่อลบ')" title="ลบ">×</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderTimeline(currentAge, milestones, rangeOpt) {
@@ -1343,6 +1640,7 @@ fbAuth.onAuthStateChanged(user => {
 
 (function init() {
   initSidebar();
+  initFmenu();
   initClientSelect();
   render();
   window.addEventListener('storage', (e) => {
