@@ -266,9 +266,9 @@ p  { font-size: 1rem; line-height: 1.6; }
   background: white; border-radius: var(--radius-sm); padding: 20px;
   box-shadow: var(--shadow-sm); border-left: 4px solid var(--red-primary);
 }
-.stat-card .s-label { font-size: 0.82rem; color: var(--gray-600); margin-bottom: 6px; }
-.stat-card .s-value { font-size: 1.6rem; font-weight: 800; color: var(--gray-800); }
-.stat-card .s-change { font-size: 0.78rem; color: #28a745; margin-top: 4px; }
+.stat-card .s-label { font-size: 0.98rem; color: var(--gray-600); margin-bottom: 6px; }
+.stat-card .s-value { font-size: 1.92rem; font-weight: 800; color: var(--gray-800); }
+.stat-card .s-change { font-size: 0.94rem; color: #28a745; margin-top: 4px; }
 
 /* ─── ACCORDION ─── */
 .accordion { border-radius: var(--radius); overflow: hidden; }
@@ -671,8 +671,8 @@ footer span { color: var(--red-primary); font-weight: 700; }
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 10;
 }
-.app-topbar-left .tb-title { font-size: .98rem; font-weight: 800; color: #1a1a1a; }
-.app-topbar-left .tb-date  { font-size: .76rem; color: #bbb; margin-top: 1px; }
+.app-topbar-left .tb-title { font-size: 1.18rem; font-weight: 800; color: #1a1a1a; }
+.app-topbar-left .tb-date  { font-size: .92rem; color: #bbb; margin-top: 2px; }
 .app-topbar-right { display: flex; gap: 10px; }
 .btn-app-primary {
   padding: 8px 18px; border-radius: 8px;
@@ -689,8 +689,8 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 .btn-app-ghost:hover { background: var(--red-soft); }
 
-/* Scrollable content */
-.app-content { padding: 22px 30px; flex: 1; }
+/* Scrollable content — default font-size สำหรับ main content (อ่านง่ายบน iPad) */
+.app-content { padding: 22px 30px; flex: 1; font-size: 1.06rem; }
 
 /* Hide old navbar + reset page padding when app-layout is used */
 body:has(.app-layout) .navbar { display: none !important; }

@@ -26,8 +26,8 @@
       background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
       color: white; padding: 28px 30px 36px; margin-bottom: -20px;
     }
-    .feature-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .feature-hero p  { opacity: .85; font-size: .92rem; }
+    .feature-hero h2 { font-size: 1.78rem; font-weight: 800; margin-bottom: 5px; }
+    .feature-hero p  { opacity: .85; font-size: 1.08rem; }
     .feature-hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .client-pick {
       display: flex; align-items: center; gap: 10px;
@@ -47,9 +47,9 @@
       display: grid; grid-template-columns: 1fr; gap: 18px;
     }
     .pf-card {
-      background: white; border-radius: var(--radius); padding: 22px;
+      background: white; border-radius: var(--radius); padding: 26px;
       box-shadow: var(--shadow-sm);
-      display: grid; grid-template-columns: 180px 1fr auto; gap: 22px; align-items: center;
+      display: grid; grid-template-columns: 200px 1fr auto; gap: 26px; align-items: center;
       border-left: 5px solid var(--gray-200);
       transition: all .2s;
     }
@@ -61,7 +61,7 @@
 
     /* Donut chart container */
     .pf-donut-wrap {
-      position: relative; width: 160px; height: 160px;
+      position: relative; width: 180px; height: 180px;
       flex-shrink: 0; margin: 0 auto;
     }
     .pf-donut-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; }
@@ -71,43 +71,43 @@
       pointer-events: none;
     }
     .pf-donut-name {
-      font-weight: 800; font-size: .85rem; line-height: 1.15;
+      font-weight: 800; font-size: 1.02rem; line-height: 1.18;
       color: var(--gray-800); padding: 0 24px;
     }
     .pf-donut-tag {
-      font-size: .68rem; color: var(--gray-500); font-weight: 700;
-      margin-top: 2px; letter-spacing: .04em;
+      font-size: .82rem; color: var(--gray-500); font-weight: 700;
+      margin-top: 3px; letter-spacing: .04em;
     }
 
     /* Allocations + description */
     .pf-info { min-width: 0; }
     .pf-allocations {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 18px; margin-bottom: 12px;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 22px; margin-bottom: 14px;
     }
     .pf-alloc-item {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .85rem; color: var(--gray-700);
+      display: flex; align-items: center; gap: 9px;
+      font-size: 1.05rem; color: var(--gray-700);
     }
     .pf-alloc-dot {
-      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
     }
     .pf-alloc-name { flex: 1; }
     .pf-alloc-pct { font-weight: 800; color: var(--gray-800); margin-left: auto; }
     .pf-desc {
-      font-size: .85rem; color: var(--gray-600); line-height: 1.6;
-      padding: 12px 14px; background: var(--gray-50);
+      font-size: 1.02rem; color: var(--gray-600); line-height: 1.65;
+      padding: 14px 16px; background: var(--gray-50);
       border-radius: 8px; border-left: 3px solid var(--gray-200);
     }
 
     /* Action button */
     .pf-action {
-      display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 130px;
+      display: flex; flex-direction: column; gap: 10px; align-items: stretch; min-width: 150px;
     }
     .pf-select-btn {
-      padding: 12px 18px; border: 2px solid var(--red-primary);
+      padding: 14px 20px; border: 2px solid var(--red-primary);
       background: white; color: var(--red-primary);
       border-radius: 10px; cursor: pointer; font-family: var(--font);
-      font-weight: 800; font-size: .88rem; transition: all .15s;
+      font-weight: 800; font-size: 1.06rem; transition: all .15s;
       white-space: nowrap;
     }
     .pf-select-btn:hover { background: var(--red-soft); }
@@ -116,8 +116,8 @@
     }
     .pf-select-btn.active:hover { background: var(--red-dark); }
     .pf-tag {
-      display: inline-block; padding: 4px 10px; border-radius: 12px;
-      font-size: .72rem; font-weight: 800; text-align: center;
+      display: inline-block; padding: 5px 12px; border-radius: 12px;
+      font-size: .86rem; font-weight: 800; text-align: center;
       letter-spacing: .04em;
     }
     .pf-tag.passive    { background: #E8F5E9; color: #28a745; }
@@ -139,12 +139,12 @@
       padding: 14px 22px; margin-bottom: 18px;
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
     }
-    .selected-banner .sb-ico { font-size: 1.6rem; }
-    .selected-banner .sb-text { flex: 1; min-width: 200px; font-size: .9rem; color: var(--gray-700); }
+    .selected-banner .sb-ico { font-size: 1.9rem; }
+    .selected-banner .sb-text { flex: 1; min-width: 200px; font-size: 1.08rem; color: var(--gray-700); }
     .selected-banner .sb-text b { color: var(--red-primary); }
     .selected-banner .sb-clear {
-      padding: 6px 12px; border: 1.5px solid var(--gray-300); background: white;
-      color: var(--gray-600); border-radius: 6px; font-size: .82rem; cursor: pointer;
+      padding: 8px 14px; border: 1.5px solid var(--gray-300); background: white;
+      color: var(--gray-600); border-radius: 6px; font-size: 1rem; cursor: pointer;
       font-family: var(--font); font-weight: 700;
     }
     .selected-banner .sb-clear:hover { color: #1F2D4F; border-color: #1F2D4F; }
