@@ -412,31 +412,31 @@ footer span { color: var(--red-primary); font-weight: 700; }
   background: linear-gradient(90deg, var(--red-primary), #FF6B6B);
   flex-shrink: 0;
 }
-.sb-logo-area { padding: 14px 22px 10px; }
-.sb-brand { font-size: 1.35rem; font-weight: 800; color: var(--red-primary); }
+.sb-logo-area { padding: 16px 22px 12px; }
+.sb-brand { font-size: 1.45rem; font-weight: 800; color: var(--red-primary); }
 .sb-tagline {
-  font-size: .66rem; color: #bbb;
+  font-size: .72rem; color: #bbb;
   letter-spacing: .8px; text-transform: uppercase; margin-top: 2px;
 }
 .sb-divider { height: 1px; background: #F5F5F5; margin: 0 22px 8px; }
-.app-sb-section { padding: 0 12px; margin-bottom: 6px; }
+.app-sb-section { padding: 0 12px; margin-bottom: 8px; }
 .app-sb-lbl {
-  font-size: .62rem; color: #ccc; font-weight: 700;
+  font-size: .72rem; color: #ccc; font-weight: 700;
   letter-spacing: .9px; text-transform: uppercase;
-  padding: 0 10px; margin-bottom: 3px;
+  padding: 0 10px; margin-bottom: 4px;
 }
 .app-sb-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px 10px; border-radius: 8px;
-  font-size: .85rem; font-weight: 600; color: #888;
-  cursor: pointer; transition: all .15s; margin-bottom: 1px;
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px; border-radius: 8px;
+  font-size: .95rem; font-weight: 600; color: #888;
+  cursor: pointer; transition: all .15s; margin-bottom: 2px;
 }
 .app-sb-item:hover  { background: #FFF5F5; color: var(--red-primary); }
 .app-sb-item.active { background: #FFF0F0; color: var(--red-primary); font-weight: 700; }
-.app-sb-item .sb-ico { font-size: .95rem; width: 20px; text-align: center; flex-shrink: 0; }
+.app-sb-item .sb-ico { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
 .app-sb-item .sb-badge {
   margin-left: auto; background: var(--red-primary); color: #fff;
-  font-size: .63rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
 }
 .sb-bottom-area {
   margin-top: auto; padding: 10px 14px;
@@ -458,8 +458,8 @@ footer span { color: var(--red-primary); font-weight: 700; }
   background-size: cover; background-position: center;
   background-repeat: no-repeat; color: transparent; font-size: 0;
 }
-.sb-profile-name { font-size: .82rem; font-weight: 700; color: #333; }
-.sb-profile-role { font-size: .68rem; color: #bbb; }
+.sb-profile-name { font-size: .9rem; font-weight: 700; color: #333; }
+.sb-profile-role { font-size: .75rem; color: #bbb; }
 
 /* Main area */
 .app-main {
@@ -540,7 +540,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 /* sidebar icons — red filled, follows .app-sb-item color */
 .app-sb-item .sb-ico.has-svg-icon { color: inherit; }
-.app-sb-item .sb-ico .svg-icon { width: 18px; height: 18px; }
+.app-sb-item .sb-ico .svg-icon { width: 20px; height: 20px; }
 
 /* Circular badge version — สำหรับ page header icons */
 .svg-icon-circle {
