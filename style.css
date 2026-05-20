@@ -395,7 +395,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 
 /* Sidebar */
 .app-sidebar {
-  width: 280px; background: #fff;
+  width: 320px; background: #fff;
   display: flex; flex-direction: column;
   position: fixed; top: 0; left: 0; height: 100vh;
   border-right: 1px solid #EFEFEF; z-index: 50;
@@ -412,31 +412,31 @@ footer span { color: var(--red-primary); font-weight: 700; }
   background: linear-gradient(90deg, var(--red-primary), #FF6B6B);
   flex-shrink: 0;
 }
-.sb-logo-area { padding: 20px 26px 14px; }
-.sb-brand { font-size: 1.76rem; font-weight: 800; color: var(--red-primary); }
+.sb-logo-area { padding: 22px 28px 16px; }
+.sb-brand { font-size: 2.1rem; font-weight: 800; color: var(--red-primary); }
 .sb-tagline {
-  font-size: .88rem; color: #bbb;
-  letter-spacing: .8px; text-transform: uppercase; margin-top: 3px;
+  font-size: 1.05rem; color: #bbb;
+  letter-spacing: .8px; text-transform: uppercase; margin-top: 4px;
 }
-.sb-divider { height: 1px; background: #F5F5F5; margin: 0 22px 8px; }
-.app-sb-section { padding: 0 15px; margin-bottom: 11px; }
+.sb-divider { height: 1px; background: #F5F5F5; margin: 0 22px 10px; }
+.app-sb-section { padding: 0 16px; margin-bottom: 13px; }
 .app-sb-lbl {
-  font-size: .9rem; color: #ccc; font-weight: 700;
+  font-size: 1.05rem; color: #ccc; font-weight: 700;
   letter-spacing: .9px; text-transform: uppercase;
-  padding: 0 10px; margin-bottom: 6px;
+  padding: 0 10px; margin-bottom: 7px;
 }
 .app-sb-item {
-  display: flex; align-items: center; gap: 13px;
-  padding: 11px 15px; border-radius: 8px;
-  font-size: 1.15rem; font-weight: 600; color: #888;
-  cursor: pointer; transition: all .15s; margin-bottom: 2px;
+  display: flex; align-items: center; gap: 15px;
+  padding: 13px 18px; border-radius: 10px;
+  font-size: 1.38rem; font-weight: 600; color: #888;
+  cursor: pointer; transition: all .15s; margin-bottom: 3px;
 }
 .app-sb-item:hover  { background: #FFF5F5; color: var(--red-primary); }
 .app-sb-item.active { background: #FFF0F0; color: var(--red-primary); font-weight: 700; }
-.app-sb-item .sb-ico { font-size: 1.32rem; width: 26px; text-align: center; flex-shrink: 0; }
+.app-sb-item .sb-ico { font-size: 1.58rem; width: 30px; text-align: center; flex-shrink: 0; }
 .app-sb-item .sb-badge {
   margin-left: auto; background: var(--red-primary); color: #fff;
-  font-size: .86rem; font-weight: 700; padding: 3px 9px; border-radius: 10px;
+  font-size: 1rem; font-weight: 700; padding: 3px 10px; border-radius: 12px;
 }
 .sb-bottom-area {
   margin-top: auto; padding: 10px 14px;
@@ -449,23 +449,23 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 .sb-profile-row:hover { background: #FFF5F5; }
 .sb-avatar-box {
-  width: 36px; height: 36px; border-radius: 10px;
+  width: 44px; height: 44px; border-radius: 12px;
   background: var(--red-primary); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: .9rem; flex-shrink: 0;
+  font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
 }
 .sb-avatar-box.has-photo {
   background-size: cover; background-position: center;
   background-repeat: no-repeat; color: transparent; font-size: 0;
 }
-.sb-profile-name { font-size: 1.1rem; font-weight: 700; color: #333; }
-.sb-profile-role { font-size: .9rem; color: #bbb; }
+.sb-profile-name { font-size: 1.32rem; font-weight: 700; color: #333; }
+.sb-profile-role { font-size: 1.05rem; color: #bbb; }
 
 /* Main area */
 .app-main {
-  margin-left: 280px;
-  width: calc(100vw - 280px); /* ใช้ 100vw แทน 100% เพื่อ exact viewport (กัน parent padding คำนวณผิด) */
-  max-width: calc(100vw - 280px);
+  margin-left: 320px;
+  width: calc(100vw - 320px); /* ใช้ 100vw แทน 100% เพื่อ exact viewport (กัน parent padding คำนวณผิด) */
+  max-width: calc(100vw - 320px);
   display: flex; flex-direction: column; min-height: 100vh;
   min-width: 0; overflow-x: hidden; /* clip ทุกอย่างที่ล้น */
   /* transition moved to .anim-ready (กัน flicker ตอน initial load) */
@@ -540,7 +540,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 /* sidebar icons — red filled, follows .app-sb-item color */
 .app-sb-item .sb-ico.has-svg-icon { color: inherit; }
-.app-sb-item .sb-ico .svg-icon { width: 24px; height: 24px; }
+.app-sb-item .sb-ico .svg-icon { width: 28px; height: 28px; }
 
 /* Circular badge version — สำหรับ page header icons */
 .svg-icon-circle {
