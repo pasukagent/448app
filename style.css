@@ -395,7 +395,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 
 /* Sidebar */
 .app-sidebar {
-  width: 260px; background: #fff;
+  width: 280px; background: #fff;
   display: flex; flex-direction: column;
   position: fixed; top: 0; left: 0; height: 100vh;
   border-right: 1px solid #EFEFEF; z-index: 50;
@@ -412,31 +412,31 @@ footer span { color: var(--red-primary); font-weight: 700; }
   background: linear-gradient(90deg, var(--red-primary), #FF6B6B);
   flex-shrink: 0;
 }
-.sb-logo-area { padding: 18px 24px 14px; }
-.sb-brand { font-size: 1.6rem; font-weight: 800; color: var(--red-primary); }
+.sb-logo-area { padding: 20px 26px 14px; }
+.sb-brand { font-size: 1.76rem; font-weight: 800; color: var(--red-primary); }
 .sb-tagline {
-  font-size: .8rem; color: #bbb;
+  font-size: .88rem; color: #bbb;
   letter-spacing: .8px; text-transform: uppercase; margin-top: 3px;
 }
 .sb-divider { height: 1px; background: #F5F5F5; margin: 0 22px 8px; }
-.app-sb-section { padding: 0 14px; margin-bottom: 10px; }
+.app-sb-section { padding: 0 15px; margin-bottom: 11px; }
 .app-sb-lbl {
-  font-size: .82rem; color: #ccc; font-weight: 700;
+  font-size: .9rem; color: #ccc; font-weight: 700;
   letter-spacing: .9px; text-transform: uppercase;
-  padding: 0 10px; margin-bottom: 5px;
+  padding: 0 10px; margin-bottom: 6px;
 }
 .app-sb-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border-radius: 8px;
-  font-size: 1.05rem; font-weight: 600; color: #888;
+  display: flex; align-items: center; gap: 13px;
+  padding: 11px 15px; border-radius: 8px;
+  font-size: 1.15rem; font-weight: 600; color: #888;
   cursor: pointer; transition: all .15s; margin-bottom: 2px;
 }
 .app-sb-item:hover  { background: #FFF5F5; color: var(--red-primary); }
 .app-sb-item.active { background: #FFF0F0; color: var(--red-primary); font-weight: 700; }
-.app-sb-item .sb-ico { font-size: 1.2rem; width: 24px; text-align: center; flex-shrink: 0; }
+.app-sb-item .sb-ico { font-size: 1.32rem; width: 26px; text-align: center; flex-shrink: 0; }
 .app-sb-item .sb-badge {
   margin-left: auto; background: var(--red-primary); color: #fff;
-  font-size: .78rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  font-size: .86rem; font-weight: 700; padding: 3px 9px; border-radius: 10px;
 }
 .sb-bottom-area {
   margin-top: auto; padding: 10px 14px;
@@ -458,14 +458,14 @@ footer span { color: var(--red-primary); font-weight: 700; }
   background-size: cover; background-position: center;
   background-repeat: no-repeat; color: transparent; font-size: 0;
 }
-.sb-profile-name { font-size: 1rem; font-weight: 700; color: #333; }
-.sb-profile-role { font-size: .82rem; color: #bbb; }
+.sb-profile-name { font-size: 1.1rem; font-weight: 700; color: #333; }
+.sb-profile-role { font-size: .9rem; color: #bbb; }
 
 /* Main area */
 .app-main {
-  margin-left: 260px;
-  width: calc(100vw - 260px); /* ใช้ 100vw แทน 100% เพื่อ exact viewport (กัน parent padding คำนวณผิด) */
-  max-width: calc(100vw - 260px);
+  margin-left: 280px;
+  width: calc(100vw - 280px); /* ใช้ 100vw แทน 100% เพื่อ exact viewport (กัน parent padding คำนวณผิด) */
+  max-width: calc(100vw - 280px);
   display: flex; flex-direction: column; min-height: 100vh;
   min-width: 0; overflow-x: hidden; /* clip ทุกอย่างที่ล้น */
   /* transition moved to .anim-ready (กัน flicker ตอน initial load) */
@@ -540,7 +540,7 @@ footer span { color: var(--red-primary); font-weight: 700; }
 }
 /* sidebar icons — red filled, follows .app-sb-item color */
 .app-sb-item .sb-ico.has-svg-icon { color: inherit; }
-.app-sb-item .sb-ico .svg-icon { width: 22px; height: 22px; }
+.app-sb-item .sb-ico .svg-icon { width: 24px; height: 24px; }
 
 /* Circular badge version — สำหรับ page header icons */
 .svg-icon-circle {
